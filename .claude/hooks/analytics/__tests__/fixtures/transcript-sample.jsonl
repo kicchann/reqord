@@ -1,0 +1,8 @@
+{"id":"msg_1","type":"tool_use","tool_name":"Bash","tool_input":{"command":"node .claude/commands/list-issues.js","description":"List issues"},"timestamp":"2026-01-28T09:00:00Z"}
+{"id":"msg_2","type":"tool_result","content":"Issue list displayed","timestamp":"2026-01-28T09:00:05Z"}
+{"id":"msg_3","type":"tool_use","tool_name":"Bash","tool_input":{"command":"/show-issue 25","description":"Show issue"},"timestamp":"2026-01-28T09:01:00Z"}
+{"id":"msg_4","type":"tool_result","content":"Issue details shown","timestamp":"2026-01-28T09:01:05Z"}
+{"id":"msg_5","type":"tool_use","tool_name":"Bash","tool_input":{"command":"/check-ci","description":"Check CI"},"timestamp":"2026-01-28T09:02:00Z"}
+{"id":"msg_6","type":"tool_result","error":"gh: not found","content":"","timestamp":"2026-01-28T09:02:05Z"}
+{"id":"msg_7","type":"tool_use","tool_name":"Bash","tool_input":{"command":"ls -la","description":"List files"},"timestamp":"2026-01-28T09:03:00Z"}
+{"id":"msg_8","type":"tool_result","content":"Files listed","timestamp":"2026-01-28T09:03:05Z"}

@@ -1,0 +1,27 @@
+{
+  "version": "1.0",
+  "username": "testuser",
+  "lastUpdated": "2026-01-27T10:00:00Z",
+  "totalSessions": 5,
+  "commands": {
+    "list-issues": {
+      "count": 20,
+      "errorCount": 1,
+      "lastUsed": "2026-01-27T09:00:00Z",
+      "recentErrors": [
+        {
+          "timestamp": "2026-01-26T10:00:00Z",
+          "message": "Network error"
+        }
+      ],
+      "sessionCount": 5
+    },
+    "show-issue": {
+      "count": 10,
+      "errorCount": 0,
+      "lastUsed": "2026-01-27T09:30:00Z",
+      "recentErrors": [],
+      "sessionCount": 4
+    }
+  }
+}

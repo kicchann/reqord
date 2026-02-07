@@ -1,0 +1,42 @@
+{
+  "id": "req-000016",
+  "version": "1.0.0",
+  "title": "GitHub Issue生成・管理",
+  "status": "draft",
+  "priority": "high",
+  "createdAt": "2026-02-07T12:00:00Z",
+  "updatedAt": "2026-02-07T12:00:00Z",
+  "versionHistory": [],
+  "files": {
+    "description": "requirements/req-000016/description.md"
+  },
+  "successCriteria": [
+    "reqord issue create <spec-id> でSpecificationがGitHub Issueに分解される",
+    "並列グループ（P0/P1/P2）とクリティカルパスが自動計算される",
+    "GitHub Issue TemplateがIssue作成時に適用される",
+    "reqord issue sync <spec-id> でGitHub Issueの状態がSpecification JSONに同期される",
+    "reqord issue sync-all で全Specificationの同期が実行される",
+    "reqord issue validate <spec-id> でメタデータ整合性チェックが実行される",
+    "分解戦略（by-layer/by-feature/by-requirement/custom）が選択できる"
+  ],
+  "format": {
+    "type": "user-story",
+    "userStory": {
+      "as": "開発者",
+      "iWant": "仕様書からGitHub Issueを自動生成し進捗を追跡したい",
+      "soThat": "仕様から実装への追跡可能性を維持しつつ効率的にタスク管理できる"
+    }
+  },
+  "dependencies": {
+    "blockedBy": [
+      "req-000013",
+      "req-000015"
+    ],
+    "blocks": [
+      "req-000018"
+    ],
+    "relatedTo": []
+  },
+  "estimatedComplexity": "large",
+  "estimatedHours": 24
+}

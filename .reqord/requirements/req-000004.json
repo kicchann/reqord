@@ -1,0 +1,35 @@
+{
+  "id": "req-000004",
+  "version": "1.0.0",
+  "title": "共有型定義 (@reqord/shared)",
+  "status": "approved",
+  "priority": "high",
+  "createdAt": "2026-02-07T10:00:00Z",
+  "updatedAt": "2026-02-07T15:00:00Z",
+  "versionHistory": [],
+  "files": {
+    "description": "requirements/req-000004/description.md"
+  },
+  "successCriteria": [
+    "@reqord/shared パッケージがCLIとUIの両方から参照できる",
+    "Requirement, ProjectContext, Specification の型定義が含まれる",
+    "JSONスキーマバリデーション用のZodスキーマが含まれる",
+    "型定義の変更がCLI・UIの両方に反映される",
+    "パッケージが独立してビルド・テスト可能"
+  ],
+  "format": {
+    "type": "user-story",
+    "userStory": {
+      "as": "開発者",
+      "iWant": "CLIとUIで共通の型定義を使いたい",
+      "soThat": "データ構造の不整合を防ぎ、型安全に開発できる"
+    }
+  },
+  "dependencies": {
+    "blockedBy": [],
+    "blocks": ["req-000007", "req-000013"],
+    "relatedTo": ["req-000002", "req-000003"]
+  },
+  "estimatedComplexity": "medium",
+  "estimatedHours": 12
+}

@@ -1,0 +1,10 @@
+{
+  "hooks": {
+    "Statusline": [
+      {
+        "type": "command",
+        "command": "./.claude/hooks/statusline/statusline.js"
+      }
+    ]
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "repository": null,
+  "referenceBook": "Clean Architecture: A Craftsman's Guide to Software Structure and Design by Robert C. Martin",
+  "isbn": "978-0134494166",
+  "edition": "1st Edition (2017)",
+  "currentVersion": "1.0.0",
+  "lastChecked": "2026-01-24",
+  "note": "このスキルは Clean Architecture の原則を基にしたプロジェクト固有の実装です。外部GitHubリポジトリは追跡していません。"
+}

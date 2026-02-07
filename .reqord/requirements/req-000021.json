@@ -1,0 +1,39 @@
+{
+  "id": "req-000021",
+  "version": "1.0.0",
+  "title": "EARS形式変換",
+  "status": "draft",
+  "priority": "low",
+  "createdAt": "2026-02-07T12:00:00Z",
+  "updatedAt": "2026-02-07T12:00:00Z",
+  "versionHistory": [],
+  "files": {
+    "description": "requirements/req-000021/description.md"
+  },
+  "successCriteria": [
+    "reqord req format <id> ears で要件がEARS形式に変換される",
+    "reqord req format <id> user-story でユーザーストーリー形式に変換される",
+    "reqord req format <id> free-form で自由記述形式に変換される",
+    "変換後のformat情報がRequirement JSONに保存される",
+    "AI（Anthropic SDK）を使用して自然な変換が行われる"
+  ],
+  "format": {
+    "type": "user-story",
+    "userStory": {
+      "as": "開発者",
+      "iWant": "要件を異なるフォーマット（EARS/ユーザーストーリー/自由記述）に変換したい",
+      "soThat": "プロジェクトのニーズに合った要件記述形式を選択できる"
+    }
+  },
+  "dependencies": {
+    "blockedBy": [
+      "req-000002"
+    ],
+    "blocks": [],
+    "relatedTo": [
+      "req-000006"
+    ]
+  },
+  "estimatedComplexity": "small",
+  "estimatedHours": 8
+}

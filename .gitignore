@@ -1,0 +1,33 @@
+# Windows Zone.Identifier metadata files
+*:Zone.Identifier
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+.env
+.env.local
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Development
+apps/
+plans/
+
+# Node.js
+node_modules/
+dist/
+.next/
+*.tsbuildinfo
+
+# User-specific hook settings
+.claude/hooks/format-code/settings.json
+.claude/settings.local.json

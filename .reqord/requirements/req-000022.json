@@ -1,0 +1,40 @@
+{
+  "id": "req-000022",
+  "version": "1.0.0",
+  "title": "Web UI拡張 (Dashboard・依存グラフ・Gantt Chart)",
+  "status": "draft",
+  "priority": "medium",
+  "createdAt": "2026-02-07T12:00:00Z",
+  "updatedAt": "2026-02-07T12:00:00Z",
+  "versionHistory": [],
+  "files": {
+    "description": "requirements/req-000022/description.md"
+  },
+  "successCriteria": [
+    "Dashboardでプロジェクト全体のHealth（Requirements/Specs/Issues進捗）が表示される",
+    "インタラクティブな依存関係グラフ（Mermaid.js）が表示される",
+    "Gantt Chart（Recharts）でIssue進捗とクリティカルパスが可視化される",
+    "Specification詳細画面（Research/Design/Coverage/Issues/History タブ）が表示される",
+    "reqord previewコマンドでlocalhost:3000が起動する"
+  ],
+  "format": {
+    "type": "user-story",
+    "userStory": {
+      "as": "プロジェクトマネージャー",
+      "iWant": "要件・仕様・進捗を視覚的に把握したい",
+      "soThat": "テキストベースでは見えない全体像と問題点を素早く発見できる"
+    }
+  },
+  "dependencies": {
+    "blockedBy": [
+      "req-000007",
+      "req-000013"
+    ],
+    "blocks": [],
+    "relatedTo": [
+      "req-000016"
+    ]
+  },
+  "estimatedComplexity": "large",
+  "estimatedHours": 32
+}

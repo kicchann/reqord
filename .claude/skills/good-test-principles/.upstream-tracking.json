@@ -1,0 +1,10 @@
+{
+  "repository": null,
+  "referenceBook": "Unit Testing Principles, Practices, and Patterns by Vladimir Khorikov",
+  "isbn": "978-1617296277",
+  "edition": "1st Edition (2020)",
+  "publisher": "Manning Publications",
+  "currentVersion": "1.0.0",
+  "lastChecked": "2026-01-24",
+  "note": "このスキルは Vladimir Khorikov の書籍を基にしたプロジェクト固有の実装です。外部GitHubリポジトリは追跡していません。書籍の改訂版が出た場合は、このファイルを更新してください。"
+}

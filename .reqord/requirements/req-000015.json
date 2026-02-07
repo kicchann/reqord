@@ -1,0 +1,40 @@
+{
+  "id": "req-000015",
+  "version": "1.0.0",
+  "title": "Specification承認フロー",
+  "status": "draft",
+  "priority": "medium",
+  "createdAt": "2026-02-07T12:00:00Z",
+  "updatedAt": "2026-02-07T12:00:00Z",
+  "versionHistory": [],
+  "files": {
+    "description": "requirements/req-000015/description.md"
+  },
+  "successCriteria": [
+    "reqord spec approve <id> でGitブランチが作成される",
+    "承認依頼PRが自動生成される",
+    "CODEOWNERSからレビュアーが自動アサインされる",
+    "PRマージ時にSpecificationのstatusがapprovedに更新される",
+    "currentApproval情報が記録される"
+  ],
+  "format": {
+    "type": "user-story",
+    "userStory": {
+      "as": "テックリード",
+      "iWant": "仕様書の承認をGitHub PRベースで管理したい",
+      "soThat": "設計のレビューと承認がチームプロセスとして確立される"
+    }
+  },
+  "dependencies": {
+    "blockedBy": [
+      "req-000013",
+      "req-000011"
+    ],
+    "blocks": [
+      "req-000016"
+    ],
+    "relatedTo": []
+  },
+  "estimatedComplexity": "small",
+  "estimatedHours": 8
+}

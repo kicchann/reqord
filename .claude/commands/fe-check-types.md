@@ -1,0 +1,1 @@
+../../apps/frontend/.claude/commands/check-types.md

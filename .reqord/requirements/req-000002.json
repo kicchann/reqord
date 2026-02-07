@@ -1,0 +1,50 @@
+{
+  "id": "req-000002",
+  "version": "1.0.0",
+  "title": "Requirement CRUD",
+  "status": "approved",
+  "priority": "high",
+  "createdAt": "2026-02-07T10:00:00Z",
+  "updatedAt": "2026-02-07T03:35:00.000Z",
+  "versionHistory": [],
+  "files": {
+    "description": "requirements/req-000002/description.md"
+  },
+  "successCriteria": [
+    "reqord req create <title> でJSON+Markdownが生成される",
+    "IDが自動採番される（req-NNNNNN形式、6桁ゼロ埋め）",
+    "reqord req list で要件一覧がテーブル表示される",
+    "reqord req show <id> で要件詳細が表示される",
+    "reqord req update <id> で要件のフィールドを更新できる",
+    "reqord req delete <id> で要件を削除できる（確認プロンプト付き）"
+  ],
+  "format": {
+    "type": "user-story",
+    "userStory": {
+      "as": "開発者",
+      "iWant": "CLIで要件のCRUD操作をしたい",
+      "soThat": "要件を効率的に追加・閲覧・更新・削除できる"
+    }
+  },
+  "dependencies": {
+    "blockedBy": [
+      "req-000001"
+    ],
+    "blocks": [
+      "req-000005",
+      "req-000006",
+      "req-000007",
+      "req-000011",
+      "req-000013",
+      "req-000017",
+      "req-000019",
+      "req-000020",
+      "req-000021"
+    ],
+    "relatedTo": [
+      "req-000003"
+    ]
+  },
+  "estimatedComplexity": "medium",
+  "estimatedHours": 16
+}

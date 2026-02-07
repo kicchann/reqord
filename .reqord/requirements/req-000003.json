@@ -1,0 +1,42 @@
+{
+  "id": "req-000003",
+  "version": "1.0.0",
+  "title": "ProjectContext CRUD",
+  "status": "approved",
+  "priority": "high",
+  "createdAt": "2026-02-07T10:00:00Z",
+  "updatedAt": "2026-02-06T18:47:17.007Z",
+  "versionHistory": [],
+  "files": {
+    "description": "requirements/req-000003/description.md"
+  },
+  "successCriteria": [
+    "reqord context show でプロジェクトコンテキストを表示できる",
+    "reqord context update でコンテキスト情報を更新できる",
+    "product.json, technical.json, structure.json を個別に管理できる",
+    "コンテキスト情報がAI詳細化の入力として使用できる形式で保存される"
+  ],
+  "format": {
+    "type": "user-story",
+    "userStory": {
+      "as": "開発者",
+      "iWant": "プロジェクトのコンテキスト情報をCLIで管理したい",
+      "soThat": "AI要件詳細化に必要なプロジェクト情報を正確に維持できる"
+    }
+  },
+  "dependencies": {
+    "blockedBy": [
+      "req-000001"
+    ],
+    "blocks": [
+      "req-000006",
+      "req-000019",
+      "req-000020"
+    ],
+    "relatedTo": [
+      "req-000002"
+    ]
+  },
+  "estimatedComplexity": "small",
+  "estimatedHours": 8
+}

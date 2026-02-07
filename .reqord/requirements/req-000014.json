@@ -1,0 +1,39 @@
+{
+  "id": "req-000014",
+  "version": "1.0.0",
+  "title": "設計検証・要件カバレッジ",
+  "status": "draft",
+  "priority": "medium",
+  "createdAt": "2026-02-07T12:00:00Z",
+  "updatedAt": "2026-02-07T12:00:00Z",
+  "versionHistory": [],
+  "files": {
+    "description": "requirements/req-000014/description.md"
+  },
+  "successCriteria": [
+    "reqord spec validate <id> でアーキテクチャ整合性・命名規則チェックが実行される",
+    "reqord spec coverage <id> で要件カバレッジ状況がテーブル表示される",
+    "未カバーの要件が警告として表示される",
+    "designValidation結果がSpecification JSONに記録される",
+    "検証結果が--jsonオプションで構造化出力される"
+  ],
+  "format": {
+    "type": "user-story",
+    "userStory": {
+      "as": "アーキテクト",
+      "iWant": "仕様が設計原則に準拠しているか自動検証したい",
+      "soThat": "設計品質を承認前に保証できる"
+    }
+  },
+  "dependencies": {
+    "blockedBy": [
+      "req-000013"
+    ],
+    "blocks": [],
+    "relatedTo": [
+      "req-000003"
+    ]
+  },
+  "estimatedComplexity": "medium",
+  "estimatedHours": 12
+}

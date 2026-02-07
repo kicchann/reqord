@@ -1,0 +1,36 @@
+{
+  "id": "req-000008",
+  "version": "1.0.0",
+  "title": "Requirement Show/Update/Deleteコマンド",
+  "status": "draft",
+  "priority": "high",
+  "createdAt": "2026-02-06T16:34:43.541Z",
+  "updatedAt": "2026-02-07T15:00:00Z",
+  "versionHistory": [],
+  "files": {
+    "description": "requirements/req-000008/description.md"
+  },
+  "successCriteria": [
+    "reqord req show <id> で要件の全フィールドとdescription.mdが表示される",
+    "reqord req update <id> --status approved でステータスが変更される",
+    "reqord req update <id> --priority low で優先度が変更される",
+    "reqord req update <id> --title 'new title' でタイトルが変更される",
+    "update実行時にupdatedAtが自動更新される",
+    "reqord req delete <id> で確認後にJSONとdescriptionディレクトリが削除される"
+  ],
+  "format": {
+    "type": "user-story",
+    "userStory": {
+      "as": "開発者",
+      "iWant": "CLIから要件の詳細表示・更新・削除を行いたい",
+      "soThat": "JSON直接編集に頼らず安全に要件を管理できる"
+    }
+  },
+  "dependencies": {
+    "blockedBy": [],
+    "blocks": ["req-000009"],
+    "relatedTo": ["req-000002"]
+  },
+  "estimatedComplexity": "small",
+  "estimatedHours": 8
+}

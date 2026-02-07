@@ -1,0 +1,5 @@
+# Personal analytics data (never commit)
+personal/
+
+# Logs
+*.log

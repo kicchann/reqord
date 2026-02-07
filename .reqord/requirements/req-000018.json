@@ -1,0 +1,38 @@
+{
+  "id": "req-000018",
+  "version": "1.0.0",
+  "title": "実装検証",
+  "status": "draft",
+  "priority": "low",
+  "createdAt": "2026-02-07T12:00:00Z",
+  "updatedAt": "2026-02-07T12:00:00Z",
+  "versionHistory": [],
+  "files": {
+    "description": "requirements/req-000018/description.md"
+  },
+  "successCriteria": [
+    "reqord validate impl <spec-id> で実装完了度が検証される",
+    "全GitHub Issueの完了状態が確認される",
+    "Specificationのdesign.mdに記載されたコンポーネントの実装有無が検証される",
+    "テスト記述の有無が検証される",
+    "検証結果が--jsonオプションで構造化出力される"
+  ],
+  "format": {
+    "type": "user-story",
+    "userStory": {
+      "as": "テックリード",
+      "iWant": "仕様に対する実装の完了度を検証したい",
+      "soThat": "リリース前に実装漏れを防げる"
+    }
+  },
+  "dependencies": {
+    "blockedBy": [
+      "req-000016",
+      "req-000013"
+    ],
+    "blocks": [],
+    "relatedTo": []
+  },
+  "estimatedComplexity": "medium",
+  "estimatedHours": 12
+}

@@ -1,0 +1,38 @@
+{
+  "id": "req-000012",
+  "version": "1.0.0",
+  "title": "影響範囲分析",
+  "status": "draft",
+  "priority": "medium",
+  "createdAt": "2026-02-07T12:00:00Z",
+  "updatedAt": "2026-02-07T12:00:00Z",
+  "versionHistory": [],
+  "files": {
+    "description": "requirements/req-000012/description.md"
+  },
+  "successCriteria": [
+    "reqord impact analyze <id> で影響を受けるSpecification・Issue・Requirementが一覧表示される",
+    "reqord impact notify <id> で影響先に通知（Issue/PRコメント）が送信される",
+    "Requirement変更時にimpactフィールドが自動計算される",
+    "依存グラフに基づく波及分析が正確に動作する"
+  ],
+  "format": {
+    "type": "user-story",
+    "userStory": {
+      "as": "プロジェクトマネージャー",
+      "iWant": "要件変更時の影響範囲を自動で把握したい",
+      "soThat": "変更による意図しない副作用を防げる"
+    }
+  },
+  "dependencies": {
+    "blockedBy": [
+      "req-000011"
+    ],
+    "blocks": [],
+    "relatedTo": [
+      "req-000005"
+    ]
+  },
+  "estimatedComplexity": "medium",
+  "estimatedHours": 12
+}

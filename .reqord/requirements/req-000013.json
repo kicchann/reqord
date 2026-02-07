@@ -1,0 +1,46 @@
+{
+  "id": "req-000013",
+  "version": "1.0.0",
+  "title": "Specification CRUD",
+  "status": "approved",
+  "priority": "high",
+  "createdAt": "2026-02-07T12:00:00Z",
+  "updatedAt": "2026-02-06T23:57:29.568Z",
+  "versionHistory": [],
+  "files": {
+    "description": "requirements/req-000013/description.md"
+  },
+  "successCriteria": [
+    "reqord spec create <req-id> でSpecification JSON+ディレクトリが生成される",
+    "reqord spec list でSpecification一覧がテーブル表示される",
+    "reqord spec show <id> でSpecification詳細が表示される",
+    "reqord spec research <id> で調査フェーズのresearch.mdを編集できる",
+    "reqord spec design <id> で設計フェーズのdesign.mdを編集できる",
+    "Specification JSONがZodスキーマでバリデーションされる",
+    "research.md, design.md, architecture.mmd, examples/ が適切に管理される"
+  ],
+  "format": {
+    "type": "user-story",
+    "userStory": {
+      "as": "開発者",
+      "iWant": "要件に基づく仕様書をCLIで管理したい",
+      "soThat": "要件から設計への追跡可能性を確保できる"
+    }
+  },
+  "dependencies": {
+    "blockedBy": [
+      "req-000002",
+      "req-000004"
+    ],
+    "blocks": [
+      "req-000014",
+      "req-000015",
+      "req-000016",
+      "req-000018",
+      "req-000022"
+    ],
+    "relatedTo": []
+  },
+  "estimatedComplexity": "large",
+  "estimatedHours": 24
+}

@@ -1,0 +1,40 @@
+{
+  "id": "req-000019",
+  "version": "1.0.0",
+  "title": "ステータス表示コマンド",
+  "status": "draft",
+  "priority": "medium",
+  "createdAt": "2026-02-07T12:00:00Z",
+  "updatedAt": "2026-02-07T12:00:00Z",
+  "versionHistory": [],
+  "files": {
+    "description": "requirements/req-000019/description.md"
+  },
+  "successCriteria": [
+    "reqord status でプロジェクト全体のサマリーが表示される",
+    "reqord status <req-id> でRequirementの詳細ステータスが表示される",
+    "reqord status <spec-id> でSpecificationの詳細ステータスが表示される",
+    "Requirements/Specifications/Issues の進捗が数値とプログレスバーで表示される",
+    "--jsonオプションで構造化出力される"
+  ],
+  "format": {
+    "type": "user-story",
+    "userStory": {
+      "as": "プロジェクトマネージャー",
+      "iWant": "プロジェクト全体の要件・仕様・実装の進捗を一覧で把握したい",
+      "soThat": "プロジェクトの健全性を素早く判断できる"
+    }
+  },
+  "dependencies": {
+    "blockedBy": [
+      "req-000002",
+      "req-000003"
+    ],
+    "blocks": [],
+    "relatedTo": [
+      "req-000013"
+    ]
+  },
+  "estimatedComplexity": "small",
+  "estimatedHours": 8
+}

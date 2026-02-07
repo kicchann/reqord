@@ -1,0 +1,10 @@
+export const REQORD_DIR = ".reqord";
+export const CONTEXT_DIR = "context";
+export const REQUIREMENTS_DIR = "requirements";
+export const SPECIFICATIONS_DIR = "specifications";
+export const SETTINGS_DIR = "settings";
+export const TEMPLATES_DIR = "templates";
+export const RULES_DIR = "rules";
+export const ASSETS_DIR = "assets";
+export const DOMAIN_DIR = "domain";
+export const ISSUE_TEMPLATES_DIR = "issue-templates";

@@ -1,0 +1,40 @@
+{
+  "id": "req-000020",
+  "version": "1.0.0",
+  "title": "LLMコンテキスト出力",
+  "status": "draft",
+  "priority": "medium",
+  "createdAt": "2026-02-07T12:00:00Z",
+  "updatedAt": "2026-02-07T12:00:00Z",
+  "versionHistory": [],
+  "files": {
+    "description": "requirements/req-000020/description.md"
+  },
+  "successCriteria": [
+    "reqord context <req-id> でRequirementに関連する全コンテキストが構造化出力される",
+    "ProjectContext + Requirement + Specification + Gap Analysis が統合される",
+    "パイプでLLMツールに渡せるテキスト形式で出力される",
+    "出力サイズがLLMのコンテキストウィンドウに適したサイズに制御される"
+  ],
+  "format": {
+    "type": "user-story",
+    "userStory": {
+      "as": "AI駆動開発者",
+      "iWant": "要件に関連する全情報をLLMに渡せる形式で出力したい",
+      "soThat": "AIツールに正確なコンテキストを提供して高品質な出力を得られる"
+    }
+  },
+  "dependencies": {
+    "blockedBy": [
+      "req-000002",
+      "req-000003"
+    ],
+    "blocks": [],
+    "relatedTo": [
+      "req-000006",
+      "req-000013"
+    ]
+  },
+  "estimatedComplexity": "small",
+  "estimatedHours": 8
+}

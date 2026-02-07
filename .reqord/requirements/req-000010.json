@@ -1,0 +1,33 @@
+{
+  "id": "req-000010",
+  "version": "1.0.0",
+  "title": "Zodバリデーションエラー詳細表示",
+  "status": "draft",
+  "priority": "low",
+  "createdAt": "2026-02-06T16:34:52.890Z",
+  "updatedAt": "2026-02-07T15:00:00Z",
+  "versionHistory": [],
+  "files": {
+    "description": "requirements/req-000010/description.md"
+  },
+  "successCriteria": [
+    "Zodバリデーションエラー時にフィールドパスと期待値が表示される",
+    "ネストしたフィールドのエラーもパスが正しく表示される",
+    "複数フィールドのエラーが同時に全件表示される"
+  ],
+  "format": {
+    "type": "user-story",
+    "userStory": {
+      "as": "開発者",
+      "iWant": "バリデーションエラー時にどのフィールドが不正かを即座に把握したい",
+      "soThat": "手動でJSONを修正する際に原因特定に時間をかけずに済む"
+    }
+  },
+  "dependencies": {
+    "blockedBy": [],
+    "blocks": [],
+    "relatedTo": ["req-000009"]
+  },
+  "estimatedComplexity": "small",
+  "estimatedHours": 4
+}

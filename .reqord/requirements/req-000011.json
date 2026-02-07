@@ -1,0 +1,41 @@
+{
+  "id": "req-000011",
+  "version": "1.0.0",
+  "title": "Requirement承認フロー (GitHub PR連携)",
+  "status": "draft",
+  "priority": "high",
+  "createdAt": "2026-02-07T12:00:00Z",
+  "updatedAt": "2026-02-07T12:00:00Z",
+  "versionHistory": [],
+  "files": {
+    "description": "requirements/req-000011/description.md"
+  },
+  "successCriteria": [
+    "reqord req approve <id> でGitブランチが作成される",
+    "承認依頼PRが自動生成される",
+    "CODEOWNERSで指定されたレビュアーがPRに自動アサインされる",
+    "PRマージ時にRequirementのstatusがapprovedに更新される",
+    "currentApproval情報（version, phase, prNumber, approvedBy）が記録される"
+  ],
+  "format": {
+    "type": "user-story",
+    "userStory": {
+      "as": "開発チームリーダー",
+      "iWant": "要件の承認フローをGitHub PRベースで管理したい",
+      "soThat": "変更履歴が追跡可能でチーム合意の下で要件が承認される"
+    }
+  },
+  "dependencies": {
+    "blockedBy": [
+      "req-000002",
+      "req-000005"
+    ],
+    "blocks": [
+      "req-000012",
+      "req-000015"
+    ],
+    "relatedTo": []
+  },
+  "estimatedComplexity": "medium",
+  "estimatedHours": 12
+}

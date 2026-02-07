@@ -1,0 +1,74 @@
+import { Command } from "commander";
+import chalk from "chalk";
+import Table from "cli-table3";
+import { listSpecifications } from "../../services/specification-service.js";
+import type { Status } from "@reqord/shared";
+
+const STATUS_COLORS: Record<string, (s: string) => string> = {
+  draft: chalk.blue,
+  pending_approval: chalk.yellow,
+  approved: chalk.green,
+  deprecated: chalk.gray,
+};
+
+export const specListCommand = new Command("list")
+  .description("List specifications")
+  .option("-s, --status <status>", "Filter by status")
+  .option("-r, --requirement <req-id>", "Filter by requirement ID")
+  .option("--json", "Output as JSON")
+  .action(
+    async (options: {
+      status?: string;
+      requirement?: string;
+      json?: boolean;
+    }) => {
+      const cwd = process.cwd();
+
+      try {
+        const specifications = await listSpecifications(cwd, {
+          status: options.status as Status | undefined,
+          requirementId: options.requirement,
+        });
+
+        if (options.json) {
+          console.log(JSON.stringify(specifications, null, 2));
+          return;
+        }
+
+        if (specifications.length === 0) {
+          console.log(chalk.gray("No specifications found."));
+          return;
+        }
+
+        const table = new Table({
+          head: ["ID", "Requirement", "Status", "Complexity", "Hours"],
+          style: { head: ["cyan"] },
+        });
+
+        for (const spec of specifications) {
+          const statusColor =
+            STATUS_COLORS[spec.status] ?? ((s: string) => s);
+
+          table.push([
+            spec.id,
+            spec.requirementId,
+            statusColor(spec.status),
+            spec.complexity ?? "-",
+            spec.estimatedHours?.toString() ?? "-",
+          ]);
+        }
+
+        console.log(table.toString());
+        console.log(
+          chalk.gray(`\n${specifications.length} specification(s) found.`),
+        );
+      } catch (error) {
+        console.error(
+          chalk.red(
+            `Failed to list specifications: ${(error as Error).message}`,
+          ),
+        );
+        process.exitCode = 1;
+      }
+    },
+  );

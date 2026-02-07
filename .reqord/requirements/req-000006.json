@@ -1,0 +1,45 @@
+{
+  "id": "req-000006",
+  "version": "1.0.0",
+  "title": "AIエージェント向けCLI最適化",
+  "status": "draft",
+  "priority": "medium",
+  "createdAt": "2026-02-07T10:00:00Z",
+  "updatedAt": "2026-02-06T17:48:00.827Z",
+  "versionHistory": [],
+  "files": {
+    "description": "requirements/req-000006/description.md"
+  },
+  "successCriteria": [
+    "reqord req show <id> --json で要件データが構造化JSONとして出力される",
+    "reqord req list --json で要件一覧が構造化JSONとして出力される",
+    "reqord context show --json でProjectContextが実データ含む構造化JSONとして出力される",
+    "reqord req update <id> --patch-file でJSON一括更新に対応する",
+    "reqord req update <id> --description-file でdescription.md更新に対応する",
+    "reqord req validate <id> --json で品質基準チェック結果（SMARTスコア含む）が構造化JSONで返される",
+    "Claude Code用のreqord refineスラッシュコマンドが提供される",
+    "AIエージェントがreqord CLIのみで要件の読み取り・分析・更新の一連の操作を完結できる"
+  ],
+  "format": {
+    "type": "user-story",
+    "userStory": {
+      "as": "AIエージェント（Claude Code等）を利用する開発者",
+      "iWant": "AIエージェントがreqord CLIを使って要件を詳細化できるようにしたい",
+      "soThat": "reqordにAI機能を組み込まずに、任意のAIエージェントで要件品質を向上できる"
+    }
+  },
+  "dependencies": {
+    "blockedBy": [
+      "req-000002",
+      "req-000003"
+    ],
+    "blocks": [],
+    "relatedTo": [
+      "req-000003",
+      "req-000005",
+      "req-000007"
+    ]
+  },
+  "estimatedComplexity": "medium",
+  "estimatedHours": 16
+}
