@@ -8,7 +8,8 @@
   "updatedAt": "2026-02-07T15:00:00Z",
   "versionHistory": [],
   "files": {
-    "description": "requirements/req-000008/description.md"
+    "description": "requirements/req-000008/description.md",
+    "supplementary": []
   },
   "successCriteria": [
     "reqord req show <id> で要件の全フィールドとdescription.mdが表示される",
@@ -28,8 +29,12 @@
   },
   "dependencies": {
     "blockedBy": [],
-    "blocks": ["req-000009"],
-    "relatedTo": ["req-000002"]
+    "blocks": [
+      "req-000009"
+    ],
+    "relatedTo": [
+      "req-000002"
+    ]
   },
   "estimatedComplexity": "small",
   "estimatedHours": 8

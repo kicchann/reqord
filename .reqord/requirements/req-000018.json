@@ -8,7 +8,8 @@
   "updatedAt": "2026-02-07T12:00:00Z",
   "versionHistory": [],
   "files": {
-    "description": "requirements/req-000018/description.md"
+    "description": "requirements/req-000018/description.md",
+    "supplementary": []
   },
   "successCriteria": [
     "reqord validate impl <spec-id> で実装完了度が検証される",

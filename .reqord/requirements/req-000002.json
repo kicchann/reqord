@@ -8,7 +8,8 @@
   "updatedAt": "2026-02-07T03:35:00.000Z",
   "versionHistory": [],
   "files": {
-    "description": "requirements/req-000002/description.md"
+    "description": "requirements/req-000002/description.md",
+    "supplementary": []
   },
   "successCriteria": [
     "reqord req create <title> でJSON+Markdownが生成される",

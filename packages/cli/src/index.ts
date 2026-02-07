@@ -14,7 +14,6 @@ import { contextUpdateCommand } from "./commands/context/update.js";
 import { specCreateCommand } from "./commands/spec/create.js";
 import { specListCommand } from "./commands/spec/list.js";
 import { specShowCommand } from "./commands/spec/show.js";
-import { specResearchCommand } from "./commands/spec/research.js";
 import { specDesignCommand } from "./commands/spec/design.js";
 
 const program = new Command();
@@ -53,7 +52,6 @@ const specCommand = new Command("spec").description(
 specCommand.addCommand(specCreateCommand);
 specCommand.addCommand(specListCommand);
 specCommand.addCommand(specShowCommand);
-specCommand.addCommand(specResearchCommand);
 specCommand.addCommand(specDesignCommand);
 
 program.addCommand(specCommand);

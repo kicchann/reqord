@@ -22,9 +22,7 @@ vi.mock("../utils/spec-id-generator.js", () => ({
 
 vi.mock("../utils/templates.js", () => ({
   loadProjectTemplate: vi.fn(),
-  DEFAULT_SPECIFICATION_RESEARCH_TEMPLATE: "# {{id}} - Research\n\n## 対象要件: {{requirementId}}\n",
   DEFAULT_SPECIFICATION_DESIGN_TEMPLATE: "# {{id}} - Design\n\n## 対象要件: {{requirementId}}\n",
-  DEFAULT_SPECIFICATION_ARCHITECTURE_TEMPLATE: "graph TD\n    A[{{id}}]\n",
 }));
 
 import * as specRepo from "../repositories/specification.js";
@@ -35,7 +33,6 @@ import {
   createSpecification,
   listSpecifications,
   showSpecification,
-  updateSpecResearch,
   updateSpecDesign,
 } from "./specification-service.js";
 
@@ -54,7 +51,7 @@ function makeRequirement(overrides: Partial<Requirement> = {}): Requirement {
     createdAt: "2025-01-01T00:00:00.000Z",
     updatedAt: "2025-01-01T00:00:00.000Z",
     versionHistory: [],
-    files: { description: "requirements/req-000001/description.md" },
+    files: { description: "requirements/req-000001/description.md", supplementary: [] },
     successCriteria: [],
     format: { type: "free-form" },
     dependencies: { blockedBy: [], blocks: [], relatedTo: [] },
@@ -72,15 +69,9 @@ function makeSpecification(overrides: Partial<Specification> = {}): Specificatio
     updatedAt: "2025-01-01T00:00:00.000Z",
     versionHistory: [],
     files: {
-      research: "specifications/spec-000001/research.md",
       design: "specifications/spec-000001/design.md",
-      architecture: "specifications/spec-000001/architecture.mmd",
-      examples: [],
+      supplementary: [],
     },
-    requirementCoverage: {
-      "req-000001": { status: "not-covered" },
-    },
-    technicalDecisions: [],
     ...overrides,
   };
 }
@@ -104,18 +95,10 @@ describe("createSpecification", () => {
     expect(result.specification.requirementId).toBe("req-000001");
     expect(result.specification.status).toBe("draft");
     expect(result.specification.version).toBe("1.0.0");
-    expect(result.specification.files.research).toBe(
-      "specifications/spec-000001/research.md",
-    );
     expect(result.specification.files.design).toBe(
       "specifications/spec-000001/design.md",
     );
-    expect(result.specification.files.architecture).toBe(
-      "specifications/spec-000001/architecture.mmd",
-    );
-    expect(result.specification.requirementCoverage).toEqual({
-      "req-000001": { status: "not-covered" },
-    });
+    expect(result.specification.files.supplementary).toEqual([]);
   });
 
   it("存在しない要件IDでエラーを投げる", async () => {
@@ -126,22 +109,7 @@ describe("createSpecification", () => {
     ).rejects.toThrow("Requirement req-999999 not found.");
   });
 
-  it("complexityとestimatedHoursを指定して作成できる", async () => {
-    mockReqRepo.findById.mockResolvedValue(makeRequirement());
-    mockGenerateNextSpecId.mockResolvedValue("spec-000001");
-    mockLoadProjectTemplate.mockResolvedValue(null);
-
-    const result = await createSpecification("/cwd", {
-      requirementId: "req-000001",
-      complexity: "M",
-      estimatedHours: 8,
-    });
-
-    expect(result.specification.complexity).toBe("M");
-    expect(result.specification.estimatedHours).toBe(8);
-  });
-
-  it("テンプレートからresearch.md/design.md/architecture.mmdを生成する", async () => {
+  it("テンプレートからdesign.mdを生成する", async () => {
     mockReqRepo.findById.mockResolvedValue(makeRequirement());
     mockGenerateNextSpecId.mockResolvedValue("spec-000001");
     mockLoadProjectTemplate.mockResolvedValue(null);
@@ -152,19 +120,7 @@ describe("createSpecification", () => {
     expect(mockSpecRepo.saveFile).toHaveBeenCalledWith(
       "/cwd",
       "spec-000001",
-      "research.md",
-      expect.stringContaining("spec-000001"),
-    );
-    expect(mockSpecRepo.saveFile).toHaveBeenCalledWith(
-      "/cwd",
-      "spec-000001",
       "design.md",
-      expect.stringContaining("spec-000001"),
-    );
-    expect(mockSpecRepo.saveFile).toHaveBeenCalledWith(
-      "/cwd",
-      "spec-000001",
-      "architecture.mmd",
       expect.stringContaining("spec-000001"),
     );
   });
@@ -232,9 +188,7 @@ describe("showSpecification", () => {
     mockSpecRepo.findById.mockResolvedValue(spec);
     mockSpecRepo.loadFile.mockImplementation(
       async (_cwd: string, _id: string, filename: string) => {
-        if (filename === "research.md") return "# Research content";
         if (filename === "design.md") return "# Design content";
-        if (filename === "architecture.mmd") return "graph TD";
         return null;
       },
     );
@@ -242,9 +196,7 @@ describe("showSpecification", () => {
     const result = await showSpecification("/cwd", "spec-000001");
 
     expect(result.specification.id).toBe("spec-000001");
-    expect(result.research).toBe("# Research content");
     expect(result.design).toBe("# Design content");
-    expect(result.architecture).toBe("graph TD");
   });
 
   it("存在しない仕様でエラーを投げる", async () => {
@@ -256,55 +208,7 @@ describe("showSpecification", () => {
   });
 });
 
-// --- Cycle 4: updateSpecResearch ---
-
-describe("updateSpecResearch", () => {
-  it("コンテンツ未指定時はファイルパスを返す", async () => {
-    const spec = makeSpecification();
-    mockSpecRepo.findById.mockResolvedValue(spec);
-
-    const result = await updateSpecResearch("/cwd", "spec-000001");
-
-    expect(result.filePath).toBe("specifications/spec-000001/research.md");
-    expect(result.updated).toBe(false);
-  });
-
-  it("contentFileで内容を更新できる", async () => {
-    const spec = makeSpecification();
-    mockSpecRepo.findById.mockResolvedValue(spec);
-
-    const result = await updateSpecResearch("/cwd", "spec-000001", {
-      content: "# Updated research",
-    });
-
-    expect(result.updated).toBe(true);
-    // Communication-based: saveFile is a Command (external write)
-    expect(mockSpecRepo.saveFile).toHaveBeenCalledWith(
-      "/cwd",
-      "spec-000001",
-      "research.md",
-      "# Updated research",
-    );
-    // updatedAt should be updated
-    expect(mockSpecRepo.save).toHaveBeenCalledWith(
-      "/cwd",
-      expect.objectContaining({
-        id: "spec-000001",
-        updatedAt: expect.any(String),
-      }),
-    );
-  });
-
-  it("存在しない仕様でエラーを投げる", async () => {
-    mockSpecRepo.findById.mockResolvedValue(null);
-
-    await expect(
-      updateSpecResearch("/cwd", "spec-999999"),
-    ).rejects.toThrow("Specification spec-999999 not found.");
-  });
-});
-
-// --- Cycle 5: updateSpecDesign ---
+// --- Cycle 4: updateSpecDesign ---
 
 describe("updateSpecDesign", () => {
   it("コンテンツ未指定時はファイルパスを返す", async () => {

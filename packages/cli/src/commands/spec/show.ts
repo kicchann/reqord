@@ -18,9 +18,7 @@ export const specShowCommand = new Command("show")
           JSON.stringify(
             {
               ...spec,
-              research: result.research,
               design: result.design,
-              architecture: result.architecture,
             },
             null,
             2,
@@ -37,35 +35,12 @@ export const specShowCommand = new Command("show")
       console.log(`  Created:       ${spec.createdAt}`);
       console.log(`  Updated:       ${spec.updatedAt}`);
 
-      if (spec.complexity) {
-        console.log(`  Complexity:    ${spec.complexity}`);
-      }
-      if (spec.estimatedHours) {
-        console.log(`  Est. Hours:    ${spec.estimatedHours}`);
-      }
-
-      if (Object.keys(spec.requirementCoverage).length > 0) {
+      if (spec.files.supplementary.length > 0) {
         console.log("");
-        console.log(chalk.cyan("Requirement Coverage:"));
-        for (const [reqId, entry] of Object.entries(
-          spec.requirementCoverage,
-        )) {
-          console.log(`  ${reqId}: ${entry.status}`);
+        console.log(chalk.cyan("Supplementary Files:"));
+        for (const file of spec.files.supplementary) {
+          console.log(`  - ${file}`);
         }
-      }
-
-      if (spec.technicalDecisions.length > 0) {
-        console.log("");
-        console.log(chalk.cyan("Technical Decisions:"));
-        for (const decision of spec.technicalDecisions) {
-          console.log(`  - ${decision.title}: ${decision.decision}`);
-        }
-      }
-
-      if (result.research) {
-        console.log("");
-        console.log(chalk.cyan("Research:"));
-        console.log(result.research);
       }
 
       if (result.design) {

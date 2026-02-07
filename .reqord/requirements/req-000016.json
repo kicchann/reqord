@@ -8,7 +8,8 @@
   "updatedAt": "2026-02-07T12:00:00Z",
   "versionHistory": [],
   "files": {
-    "description": "requirements/req-000016/description.md"
+    "description": "requirements/req-000016/description.md",
+    "supplementary": []
   },
   "successCriteria": [
     "reqord issue create <spec-id> でSpecificationがGitHub Issueに分解される",

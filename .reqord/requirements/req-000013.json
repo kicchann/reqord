@@ -8,7 +8,8 @@
   "updatedAt": "2026-02-06T23:57:29.568Z",
   "versionHistory": [],
   "files": {
-    "description": "requirements/req-000013/description.md"
+    "description": "requirements/req-000013/description.md",
+    "supplementary": []
   },
   "successCriteria": [
     "reqord spec create <req-id> でSpecification JSON+ディレクトリが生成される",

@@ -19,12 +19,11 @@ Specificationの承認をGitHub PRベースで管理する機能。Requirement�
 4. Specification JSONの `status` を `pending_approval` に更新してコミット
 5. GitHub PRを作成:
    - タイトル: `[Reqord] Approve spec-<id>: <title> v<version>`
-   - designValidation結果をPRボディに含める
-   - requirementCoverageサマリーをPRボディに含める
+   - design.mdの概要をPRボディに含める
    - CODEOWNERSからレビュアーを自動アサイン
 6. PRマージ時:
    - `status` を `approved` に更新
-   - `currentApproval` を記録
+   - `versionHistory` に承認記録を追加（version, status, gitCommit, approvedAt, approvedBy）
 
 ## Requirement承認との共通化
 

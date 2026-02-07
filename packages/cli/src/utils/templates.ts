@@ -66,37 +66,6 @@ export const DEFAULT_REQUIREMENT_QUALITY_RULES = `# 要件品質ルール
 - [ ] フォーマット（user-story/ears/free-form）が適切
 `;
 
-export const DEFAULT_SPECIFICATION_RESEARCH_TEMPLATE = `# {{id}} - Research
-
-## 対象要件: {{requirementId}}
-
-## 調査概要
-
-{{調査の目的と範囲を記述}}
-
-## 技術調査
-
-### 既存実装の分析
-
-{{既存コードベースの関連部分を分析}}
-
-### 技術的選択肢
-
-| 選択肢 | メリット | デメリット | 備考 |
-|--------|---------|----------|------|
-| {{選択肢1}} | | | |
-| {{選択肢2}} | | | |
-
-## 制約事項
-
-- {{制約1}}
-- {{制約2}}
-
-## 参考資料
-
-- {{参考リンクや関連ドキュメント}}
-`;
-
 export const DEFAULT_SPECIFICATION_DESIGN_TEMPLATE = `# {{id}} - Design
 
 ## 対象要件: {{requirementId}}
@@ -135,20 +104,6 @@ export const DEFAULT_SPECIFICATION_DESIGN_TEMPLATE = `# {{id}} - Design
 
 - {{テスト観点1}}
 - {{テスト観点2}}
-`;
-
-export const DEFAULT_SPECIFICATION_ARCHITECTURE_TEMPLATE = `graph TD
-    A[{{id}}] --> B[対象要件: {{requirementId}}]
-
-    subgraph コンポーネント
-        C[コンポーネント1]
-        D[コンポーネント2]
-        E[コンポーネント3]
-    end
-
-    B --> C
-    C --> D
-    D --> E
 `;
 
 export async function loadProjectTemplate(

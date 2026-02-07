@@ -8,7 +8,8 @@
   "updatedAt": "2026-02-07T12:00:00Z",
   "versionHistory": [],
   "files": {
-    "description": "requirements/req-000021/description.md"
+    "description": "requirements/req-000021/description.md",
+    "supplementary": []
   },
   "successCriteria": [
     "reqord req format <id> ears で要件がEARS形式に変換される",

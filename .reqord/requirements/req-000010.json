@@ -8,7 +8,8 @@
   "updatedAt": "2026-02-07T15:00:00Z",
   "versionHistory": [],
   "files": {
-    "description": "requirements/req-000010/description.md"
+    "description": "requirements/req-000010/description.md",
+    "supplementary": []
   },
   "successCriteria": [
     "Zodバリデーションエラー時にフィールドパスと期待値が表示される",
@@ -26,7 +27,9 @@
   "dependencies": {
     "blockedBy": [],
     "blocks": [],
-    "relatedTo": ["req-000009"]
+    "relatedTo": [
+      "req-000009"
+    ]
   },
   "estimatedComplexity": "small",
   "estimatedHours": 4

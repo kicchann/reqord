@@ -3,10 +3,12 @@ export {
   PrioritySchema,
   ComplexitySchema,
   FormatTypeSchema,
+  VersionHistoryEntrySchema,
   type Status,
   type Priority,
   type Complexity,
   type FormatType,
+  type VersionHistoryEntry,
 } from "./common.js";
 
 export {
@@ -20,9 +22,7 @@ export {
 } from "./project-context.js";
 
 export {
-  SpecComplexitySchema,
   SpecificationSchema,
-  type SpecComplexity,
   type Specification,
 } from "./specification.js";
 
