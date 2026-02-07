@@ -4,6 +4,7 @@ import {
   PrioritySchema,
   ComplexitySchema,
   FormatTypeSchema,
+  VersionHistoryEntrySchema,
 } from "./common.js";
 
 const UserStorySchema = z.object({
@@ -32,12 +33,6 @@ const DependenciesSchema = z.object({
   relatedTo: z.array(z.string()).default([]),
 });
 
-const VersionHistoryEntrySchema = z.object({
-  version: z.string(),
-  changedAt: z.string(),
-  changes: z.string(),
-});
-
 export const RequirementSchema = z.object({
   id: z.string().regex(/^req-\d{6}$/),
   version: z.string().default("1.0.0"),
@@ -49,6 +44,7 @@ export const RequirementSchema = z.object({
   versionHistory: z.array(VersionHistoryEntrySchema).default([]),
   files: z.object({
     description: z.string(),
+    supplementary: z.array(z.string()).default([]),
   }),
   successCriteria: z.array(z.string()).default([]),
   format: FormatSchema,

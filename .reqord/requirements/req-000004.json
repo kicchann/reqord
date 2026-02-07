@@ -8,7 +8,8 @@
   "updatedAt": "2026-02-07T15:00:00Z",
   "versionHistory": [],
   "files": {
-    "description": "requirements/req-000004/description.md"
+    "description": "requirements/req-000004/description.md",
+    "supplementary": []
   },
   "successCriteria": [
     "@reqord/shared パッケージがCLIとUIの両方から参照できる",
@@ -27,8 +28,14 @@
   },
   "dependencies": {
     "blockedBy": [],
-    "blocks": ["req-000007", "req-000013"],
-    "relatedTo": ["req-000002", "req-000003"]
+    "blocks": [
+      "req-000007",
+      "req-000013"
+    ],
+    "relatedTo": [
+      "req-000002",
+      "req-000003"
+    ]
   },
   "estimatedComplexity": "medium",
   "estimatedHours": 12

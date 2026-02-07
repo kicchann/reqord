@@ -33,10 +33,9 @@ project-root/
 │   ├── requirements/                     # 要件
 │   │   ├── req-001.json                  # メタデータのみ
 │   │   ├── req-001/
-│   │   │   ├── description.md            # 詳細説明(Markdown)
-│   │   │   └── attachments/              # 添付ファイル
-│   │   │       ├── mockup.png
-│   │   │       └── diagram.mmd
+│   │   │   ├── description.md            # 詳細説明(Markdown、必須)
+│   │   │   ├── mockup.png               # 補助: 画像等
+│   │   │   └── diagram.mmd              # 補助: Mermaid図等
 │   │   ├── req-002.json
 │   │   └── req-002/
 │   │       └── description.md
@@ -44,13 +43,11 @@ project-root/
 │   ├── specifications/                   # 仕様
 │   │   ├── spec-001.json                 # メタデータのみ
 │   │   ├── spec-001/
-│   │   │   ├── research.md               # 調査ノート(オプション)
-│   │   │   ├── design.md                 # 設計書
-│   │   │   ├── architecture.mmd          # Mermaid図(オプション)
-│   │   │   └── examples/                 # コード例(オプション)
-│   │   │       ├── api-example.ts
-│   │   │       ├── test-example.ts
-│   │   │       └── schema.sql
+│   │   │   ├── design.md                 # 設計書（必須）
+│   │   │   ├── research.md               # 補助: 調査ノート
+│   │   │   ├── architecture.mmd          # 補助: Mermaid図
+│   │   │   └── examples/                 # 補助: コード例
+│   │   │       └── api-example.ts
 │   │   ├── spec-002.json
 │   │   └── spec-002/
 │   │       └── design.md
@@ -58,7 +55,6 @@ project-root/
 │   ├── settings/                         # テンプレート・ルール
 │   │   ├── templates/
 │   │   │   ├── requirement-description.md
-│   │   │   ├── specification-research.md
 │   │   │   ├── specification-design.md
 │   │   │   └── issue-body.md
 │   │   └── rules/
@@ -269,7 +265,7 @@ graph TB
   "createdAt": "2026-02-01T10:00:00Z",
   "updatedAt": "2026-02-05T15:30:00Z",
 
-  // バージョン履歴
+  // バージョン履歴（承認トラッキング）
   "versionHistory": [
     {
       "version": "1.0.0",
@@ -277,12 +273,6 @@ graph TB
       "gitCommit": "abc123def456",
       "approvedAt": "2026-02-05T10:00:00Z",
       "approvedBy": ["@tech-lead"]
-    },
-    {
-      "version": "1.0.0",
-      "status": "deprecated",
-      "deprecatedAt": "2026-02-10T09:00:00Z",
-      "deprecatedReason": "IFC version upgrade needed"
     },
     {
       "version": "1.1.0",
@@ -293,21 +283,12 @@ graph TB
     }
   ],
 
-  // 現在の承認情報
-  "currentApproval": {
-    "version": "1.1.0",
-    "phase": "requirements",
-    "status": "approved",
-    "prNumber": 123,
-    "approvedAt": "2026-02-10T15:00:00Z",
-    "approvedBy": ["@tech-lead", "@architect"]
-  },
-
   // 外部ファイル参照
   "files": {
     "description": "requirements/req-001/description.md",
-    "attachments": [
-      "requirements/req-001/attachments/mockup.png"
+    "supplementary": [
+      "requirements/req-001/mockup.png",
+      "requirements/req-001/diagram.mmd"
     ]
   },
 
@@ -418,11 +399,11 @@ preserving all structural attributes.
   "id": "spec-001",
   "requirementId": "req-001",
   "version": "1.0.0",
-  "status": "approved",  // draft | pending_approval | approved
+  "status": "approved",  // draft | pending_approval | approved | deprecated
   "createdAt": "2026-02-06T10:00:00Z",
   "updatedAt": "2026-02-06T16:00:00Z",
 
-  // バージョン履歴
+  // バージョン履歴（承認トラッキング）
   "versionHistory": [
     {
       "version": "1.0.0",
@@ -433,146 +414,16 @@ preserving all structural attributes.
     }
   ],
 
-  // 承認情報
-  "currentApproval": {
-    "version": "1.0.0",
-    "phase": "specification",
-    "status": "approved",
-    "prNumber": 125,
-    "approvedAt": "2026-02-06T16:00:00Z",
-    "approvedBy": ["@architect", "@tech-lead"]
-  },
-
   // 外部ファイル参照
   "files": {
-    "research": "specifications/spec-001/research.md",
     "design": "specifications/spec-001/design.md",
-    "architecture": "specifications/spec-001/architecture.mmd",
-    "examples": [
+    "supplementary": [
+      "specifications/spec-001/research.md",
+      "specifications/spec-001/architecture.mmd",
       "specifications/spec-001/examples/ifc-exporter.ts",
       "specifications/spec-001/examples/attribute-mapper.ts"
     ]
-  },
-
-  // 要件カバレッジ
-  "requirementCoverage": {
-    "req-001": {
-      "status": "covered",  // covered | partial | not-covered
-      "notes": "完全カバー",
-      "designSection": "3.1"
-    },
-    "req-002": {
-      "status": "partial",
-      "notes": "属性マッピングのみ",
-      "designSection": "3.2"
-    }
-  },
-
-  // 技術的決定
-  "technicalDecisions": [
-    {
-      "decision": "xBIM Toolkitを使用",
-      "rationale": "オープンソースで実績あり",
-      "alternatives": ["IfcOpenShell", "独自実装"],
-      "tradeoffs": "C#依存だがパフォーマンス良好"
-    }
-  ],
-
-  // Design Validation結果
-  "designValidation": {
-    "validatedAt": "2026-02-06T15:00:00Z",
-    "architectureAlignment": {
-      "patterns": [
-        { "pattern": "Repository Pattern", "status": "ok" },
-        { "pattern": "Factory Pattern", "status": "ok" }
-      ]
-    },
-    "namingConventions": [
-      {
-        "file": "ifc-exporter.ts",
-        "expected": "ifc-exporter.ts",
-        "status": "ok"
-      }
-    ],
-    "dependencyConflicts": []
-  },
-
-  // GitHub Issue実装管理
-  "implementation": {
-    // 分解戦略
-    "breakdown": {
-      "strategy": "by-layer",  // by-layer | by-feature | by-requirement | custom
-      "parallelAnalysis": {
-        "sequentialDuration": 11,
-        "parallelDuration": 9,
-        "criticalPath": [123, 124, 128],
-        "parallelGroups": {
-          "P0": [123],
-          "P1": [124, 125, 126],
-          "P2": [127, 128]
-        }
-      }
-    },
-
-    // 生成されたIssue
-    "issues": [
-      {
-        "number": 123,
-        "url": "https://github.com/user/repo/issues/123",
-        "title": "Setup IFC4 schema support",
-        "body": "...",
-        "state": "closed",
-        "assignees": ["@bob"],
-        "labels": ["reqord-generated", "spec:spec-001", "req:req-001", "P0", "critical-path"],
-        "metadata": {
-          "specificationId": "spec-001",
-          "requirementIds": ["req-001"],
-          "parallelGroup": 0,
-          "isCriticalPath": true,
-          "estimatedHours": 2,
-          "dependencies": [],
-          "generatedAt": "2026-02-07T10:00:00Z",
-          "reqordVersion": "2.0.0"
-        },
-        "createdAt": "2026-02-07T10:00:00Z",
-        "updatedAt": "2026-02-08T15:00:00Z",
-        "closedAt": "2026-02-08T15:00:00Z"
-      },
-      {
-        "number": 124,
-        "url": "https://github.com/user/repo/issues/124",
-        "title": "Implement attribute mapper",
-        "body": "...",
-        "state": "open",
-        "assignees": ["@alice"],
-        "labels": ["reqord-generated", "spec:spec-001", "req:req-001", "P1", "critical-path"],
-        "metadata": {
-          "specificationId": "spec-001",
-          "requirementIds": ["req-001"],
-          "parallelGroup": 1,
-          "isCriticalPath": true,
-          "estimatedHours": 4,
-          "dependencies": [123],
-          "generatedAt": "2026-02-07T10:00:00Z",
-          "reqordVersion": "2.0.0"
-        },
-        "createdAt": "2026-02-07T10:01:00Z",
-        "updatedAt": "2026-02-09T09:00:00Z"
-      }
-    ],
-
-    // 進捗
-    "progress": {
-      "total": 6,
-      "completed": 1,
-      "inProgress": 2,
-      "blocked": 0
-    }
-  },
-
-  // 見積もり
-  "complexity": "M",  // S | M | L | XL
-  "estimatedHours": 16
+  }
 }
 ```
 
@@ -581,12 +432,9 @@ preserving all structural attributes.
 ````markdown
 # IFC Exporter - Technical Design
 
-## 1. Requirements Coverage
+## 1. 設計概要
 
-| Req ID  | Title            | Status     | Design Section |
-| ------- | ---------------- | ---------- | -------------- |
-| req-001 | IFC4エクスポート | ✅ Covered | Section 3.1    |
-| req-002 | 属性マッピング   | ⚠️ Partial | Section 3.2    |
+Revit APIを使用してモデルデータをIFC4形式でエクスポートする機能の設計。
 
 ## 2. Architecture
 
@@ -605,7 +453,6 @@ interface IFCExporter {
   export(model: RevitModel, options: ExportOptions): Promise<IFCFile>;
 }
 ```
-````
 
 **実装:** See [examples/ifc-exporter.ts](./examples/ifc-exporter.ts)
 
@@ -651,8 +498,7 @@ interface AttributeMapper {
 **Rationale:** オープンソース、実績あり、C#ネイティブ
 **Alternatives:** IfcOpenShell (Python), 独自実装
 **Tradeoffs:** C#依存だがパフォーマンス良好
-
-```
+````
 
 ---
 
@@ -679,8 +525,7 @@ interface AttributeMapper {
    - Merge → Approved
      ↓
 7. Specification作成 (Draft)
-   - Research (調査フェーズ)
-   - Design (設計フェーズ)
+   - Design (設計書作成)
      ↓
 8. Design Validation
    ↓
@@ -749,10 +594,8 @@ reqord req version list req-001                # バージョン一覧
 
 # Specification管理
 reqord spec create req-001
-reqord spec research spec-001                  # 調査フェーズ
-reqord spec design spec-001                    # 設計フェーズ
+reqord spec design spec-001                    # 設計書の閲覧・更新
 reqord spec validate spec-001                  # 設計検証
-reqord spec coverage spec-001                  # 要件カバレッジ表示
 reqord spec approve spec-001                   # 承認依頼(PR作成)
 
 # Issue管理
@@ -764,7 +607,7 @@ reqord issue validate spec-001                 # メタデータ整合性チェ�
 
 # 検証
 reqord validate gap req-001                    # Gap Analysis
-reqord validate design spec-001                # Design Validation
+reqord validate design spec-001                # 設計検証
 reqord validate impl spec-001                  # 実装検証
 
 # 影響分析
@@ -849,7 +692,7 @@ reqord status spec-001                         # Specification詳細
 ```
 ┌─────────────────────────────────────────────────┐
 │ spec-001: IFC Exporter              v1.0.0 ✅   │
-│ [Research] [Design] [Coverage] [Issues] [History]│
+│ [Design] [Files] [Issues] [History]              │
 ├─────────────────────────────────────────────────┤
 │ === Issues Tab ===                               │
 │                                                  │
@@ -993,7 +836,7 @@ body:
 ### 5. 設計生成
 
 - 入力: Requirement + ProjectContext
-- 出力: design.md + architecture.mmd + コード例
+- 出力: design.md + 補助資料（architecture図、コード例等）
 
 ### 6. Issue分解 + 並列分析
 
@@ -1057,7 +900,7 @@ body:
 ### Phase 3: Specification + Issue (2週間)
 
 - ✅ Specification CRUD
-- ✅ Research/Design分離
+- ✅ Design + Supplementary構成
 - ✅ GitHub Issue Template
 - ✅ AI Issue分解 + 並列分析
 - ✅ Issue同期
@@ -1068,7 +911,6 @@ body:
 
 - ✅ Gap Analysis
 - ✅ Design Validation
-- ✅ 要件カバレッジ
 
 **リリース: v0.4.0**
 

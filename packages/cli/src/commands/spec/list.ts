@@ -41,7 +41,7 @@ export const specListCommand = new Command("list")
         }
 
         const table = new Table({
-          head: ["ID", "Requirement", "Status", "Complexity", "Hours"],
+          head: ["ID", "Requirement", "Status", "Version"],
           style: { head: ["cyan"] },
         });
 
@@ -53,8 +53,7 @@ export const specListCommand = new Command("list")
             spec.id,
             spec.requirementId,
             statusColor(spec.status),
-            spec.complexity ?? "-",
-            spec.estimatedHours?.toString() ?? "-",
+            spec.version,
           ]);
         }
 

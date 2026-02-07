@@ -16,3 +16,12 @@ export type Complexity = z.infer<typeof ComplexitySchema>;
 
 export const FormatTypeSchema = z.enum(["user-story", "ears", "free-form"]);
 export type FormatType = z.infer<typeof FormatTypeSchema>;
+
+export const VersionHistoryEntrySchema = z.object({
+  version: z.string(),
+  status: StatusSchema,
+  gitCommit: z.string(),
+  approvedAt: z.string(),
+  approvedBy: z.array(z.string()),
+});
+export type VersionHistoryEntry = z.infer<typeof VersionHistoryEntrySchema>;

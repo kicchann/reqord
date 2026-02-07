@@ -21,7 +21,7 @@ function makeRequirement(overrides: Partial<Requirement> = {}): Requirement {
     createdAt: "2026-01-01T00:00:00Z",
     updatedAt: "2026-01-01T00:00:00Z",
     versionHistory: [],
-    files: { description: "requirements/req-000001/description.md" },
+    files: { description: "requirements/req-000001/description.md", supplementary: [] },
     successCriteria: [
       "基準1: ユーザーがログインできる",
       "基準2: セッションが24時間有効である",

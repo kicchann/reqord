@@ -8,7 +8,8 @@
   "updatedAt": "2026-02-07T10:00:00Z",
   "versionHistory": [],
   "files": {
-    "description": "requirements/req-000005/description.md"
+    "description": "requirements/req-000005/description.md",
+    "supplementary": []
   },
   "successCriteria": [
     "要件更新時にバージョンが自動インクリメントされる",
@@ -28,9 +29,15 @@
     }
   },
   "dependencies": {
-    "blockedBy": ["req-000002"],
-    "blocks": ["req-000011"],
-    "relatedTo": ["req-000006"]
+    "blockedBy": [
+      "req-000002"
+    ],
+    "blocks": [
+      "req-000011"
+    ],
+    "relatedTo": [
+      "req-000006"
+    ]
   },
   "estimatedComplexity": "medium",
   "estimatedHours": 12

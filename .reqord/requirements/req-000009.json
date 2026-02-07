@@ -8,7 +8,8 @@
   "updatedAt": "2026-02-07T15:00:00Z",
   "versionHistory": [],
   "files": {
-    "description": "requirements/req-000009/description.md"
+    "description": "requirements/req-000009/description.md",
+    "supplementary": []
   },
   "successCriteria": [
     ".reqord/ 未初期化時に共通エラーメッセージが表示され reqord init を促す",
@@ -24,7 +25,9 @@
     }
   },
   "dependencies": {
-    "blockedBy": ["req-000008"],
+    "blockedBy": [
+      "req-000008"
+    ],
     "blocks": [],
     "relatedTo": []
   },

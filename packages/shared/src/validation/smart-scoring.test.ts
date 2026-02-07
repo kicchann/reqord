@@ -13,7 +13,7 @@ function makeRequirement(overrides: Partial<Requirement> = {}): Requirement {
     createdAt: "2026-01-01T00:00:00Z",
     updatedAt: "2026-01-01T00:00:00Z",
     versionHistory: [],
-    files: { description: "requirements/req-000001/description.md" },
+    files: { description: "requirements/req-000001/description.md", supplementary: [] },
     successCriteria: [],
     format: { type: "user-story", userStory: { as: "", iWant: "", soThat: "" } },
     dependencies: { blockedBy: [], blocks: [], relatedTo: [] },

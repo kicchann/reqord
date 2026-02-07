@@ -8,7 +8,8 @@
   "updatedAt": "2026-02-06T17:48:00.827Z",
   "versionHistory": [],
   "files": {
-    "description": "requirements/req-000006/description.md"
+    "description": "requirements/req-000006/description.md",
+    "supplementary": []
   },
   "successCriteria": [
     "reqord req show <id> --json で要件データが構造化JSONとして出力される",

@@ -14,11 +14,11 @@ Requirementが変更・バージョンアップされた際に、関連するSpe
 ### reqord impact analyze \<id\>
 
 - 対象Requirementの依存関係（blockedBy, blocks, relatedTo）を走査
-- 関連Specificationの `requirementCoverage` を検索
+- `requirementId` で紐づく関連Specificationを検索
 - 生成済みGitHub Issueを検索
 - 出力:
   - 直接影響: blocks先のRequirement
-  - Spec影響: カバレッジ対象のSpecification（outdatedフラグ）
+  - Spec影響: 紐づくSpecification（outdatedフラグ）
   - Issue影響: 関連する未完了Issue
   - `--json` オプションで構造化出力
 

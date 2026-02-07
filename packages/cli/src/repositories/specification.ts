@@ -12,7 +12,6 @@ function getSpecificationsDir(cwd: string): string {
 export async function ensureSpecDir(cwd: string, id: string): Promise<void> {
   const specDir = fs.joinPath(getSpecificationsDir(cwd), id);
   await fs.mkdirp(specDir);
-  await fs.mkdirp(fs.joinPath(specDir, "examples"));
 }
 
 export async function save(cwd: string, spec: Specification): Promise<void> {

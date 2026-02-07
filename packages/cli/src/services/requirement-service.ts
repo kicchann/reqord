@@ -40,6 +40,7 @@ export async function createRequirement(
     versionHistory: [],
     files: {
       description: `${REQUIREMENTS_DIR}/${id}/description.md`,
+      supplementary: [],
     },
     successCriteria: [],
     format,

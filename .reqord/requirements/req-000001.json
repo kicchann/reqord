@@ -8,7 +8,8 @@
   "updatedAt": "2026-02-07T15:00:00Z",
   "versionHistory": [],
   "files": {
-    "description": "requirements/req-000001/description.md"
+    "description": "requirements/req-000001/description.md",
+    "supplementary": []
   },
   "successCriteria": [
     "reqord init で .reqord/ ディレクトリ構造が作成される",
@@ -27,7 +28,10 @@
   },
   "dependencies": {
     "blockedBy": [],
-    "blocks": ["req-000002", "req-000003"],
+    "blocks": [
+      "req-000002",
+      "req-000003"
+    ],
     "relatedTo": []
   },
   "estimatedComplexity": "small",

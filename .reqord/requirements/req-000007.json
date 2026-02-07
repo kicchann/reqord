@@ -8,7 +8,8 @@
   "updatedAt": "2026-02-06T21:51:29.691Z",
   "versionHistory": [],
   "files": {
-    "description": "requirements/req-000007/description.md"
+    "description": "requirements/req-000007/description.md",
+    "supplementary": []
   },
   "successCriteria": [
     "reqord ui でローカルWebサーバーが起動する",

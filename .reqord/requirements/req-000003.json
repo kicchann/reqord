@@ -8,7 +8,8 @@
   "updatedAt": "2026-02-06T18:47:17.007Z",
   "versionHistory": [],
   "files": {
-    "description": "requirements/req-000003/description.md"
+    "description": "requirements/req-000003/description.md",
+    "supplementary": []
   },
   "successCriteria": [
     "reqord context show でプロジェクトコンテキストを表示できる",
