@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { updateContext, showContext, initContext } from "./context-service.js";
+import { updateContext } from "./context-service.js";
 import type { ProjectContext } from "@reqord/shared";
 
 // Mock repositories
@@ -21,7 +21,7 @@ vi.mock("../repositories/file-system.js", () => ({
 }));
 
 import * as contextRepo from "../repositories/project-context.js";
-import * as fs from "../repositories/file-system.js";
+import "../repositories/file-system.js";
 
 function makeContext(overrides: Partial<ProjectContext> = {}): ProjectContext {
   return {

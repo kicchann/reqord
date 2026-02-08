@@ -128,7 +128,7 @@ export async function updateRequirement(
   }
 
   // Start with existing data
-  let merged: Record<string, unknown> = { ...before };
+  const merged: Record<string, unknown> = { ...before };
 
   // Apply patch-file data (replace semantics for top-level fields)
   if (options.patchData) {

@@ -86,10 +86,11 @@ export function RequirementTable({ requirements }: { requirements: Requirement[]
     }
   }
 
-  function SortHeader({ column, label }: { column: SortKey; label: string }) {
+  function renderSortHeader(column: SortKey, label: string) {
     const arrow = sortKey === column ? (sortDir === "asc" ? " ↑" : " ↓") : "";
     return (
       <th
+        key={column}
         className="cursor-pointer px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 hover:text-gray-900"
         onClick={() => handleSort(column)}
       >
@@ -139,14 +140,14 @@ export function RequirementTable({ requirements }: { requirements: Requirement[]
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <SortHeader column="id" label="ID" />
-              <SortHeader column="title" label="Title" />
-              <SortHeader column="status" label="Status" />
-              <SortHeader column="priority" label="Priority" />
+              {renderSortHeader("id", "ID")}
+              {renderSortHeader("title", "Title")}
+              {renderSortHeader("status", "Status")}
+              {renderSortHeader("priority", "Priority")}
               <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                 Complexity
               </th>
-              <SortHeader column="updatedAt" label="Updated" />
+              {renderSortHeader("updatedAt", "Updated")}
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">

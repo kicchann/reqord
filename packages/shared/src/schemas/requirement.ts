@@ -3,7 +3,6 @@ import {
   StatusSchema,
   PrioritySchema,
   ComplexitySchema,
-  FormatTypeSchema,
   VersionHistoryEntrySchema,
 } from "./common.js";
 
