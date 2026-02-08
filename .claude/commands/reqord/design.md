@@ -1,7 +1,7 @@
 ---
 description: Specification設計書作成コマンド
 argument-hint: <spec-id...|req-id...|--all> (スペース区切りで複数指定可)
-model: opus
+model: sonnet
 ---
 
 # Specification設計書作成コマンド
@@ -16,7 +16,7 @@ Requirementの内容・ProjectContext・既存コード実装状況を基に、S
 
 ### $ARGUMENTSが空の場合
 
-1. `node packages/cli/dist/index.js spec list` を実行してspecification一覧を取得
+1. `reqord spec list` を実行してspecification一覧を取得
 2. 各specのdesign.mdを読み取り、デフォルトテンプレートのままかどうかを判定
    - 判定基準: design.mdに「Phase 3で実装予定」または「Specification Design Template」のみが含まれている場合は「未記述」
 3. 一覧をテーブル形式で表示:
@@ -54,17 +54,19 @@ Requirementの内容・ProjectContext・既存コード実装状況を基に、S
 - 対象specの紐づくrequirement情報:
   - `.reqord/requirements/<req-id>.json` をReadツールで読み取り
   - `.reqord/requirements/<req-id>/description.md` をReadツールで読み取り
-- ProjectContext情報:
-  - `.reqord/context/product.json` をReadツールで読み取り
-  - `.reqord/context/technical.json` をReadツールで読み取り
-  - `.reqord/context/structure.json` をReadツールで読み取り
-- 仕様書全体:
-  - `docs/main.md` をReadツールで読み取り
+- ProjectContext情報（context.jsonの`files`フィールドが参照するファイルを読み取り）:
+  - `.reqord/context/context.json` をReadツールで読み取り
+  - context.jsonの`files.product`が示すファイル（例: `product.json`）をReadツールで読み取り
+  - context.jsonの`files.technical`が示すファイル（例: `technical.json`）をReadツールで読み取り
+  - context.jsonの`files.structure`が示すファイル（例: `structure.json`）をReadツールで読み取り
+  - context.jsonの`files.domain`が示すファイル群をReadツールで読み取り（存在する場合のみ）
 
 **グループB（グループA完了後）:**
 
 - 全requirements一覧（依存関係の全体像把握）:
   - `.reqord/requirements/req-NNNNNN.json` を全件Readツールで読み取り
+- 他の既存specificationのdesign.md（関連specが実装済みの場合、設計パターンの一貫性のために参照）:
+  - 対象specと同じrequirementに紐づく他specのdesign.mdを読み取り（存在する場合のみ）
 
 ---
 
@@ -84,7 +86,7 @@ Requirementの内容・ProjectContext・既存コード実装状況を基に、S
 
 - 1要件 = 1〜3 spec（最大3件）
 - 分割する場合は各specのスコープ（何を含み、何を含まないか）を明確に定義する
-- 分割が必要な場合: `node packages/cli/dist/index.js spec create <req-id>` で追加specを作成
+- 分割が必要な場合: `reqord spec create <req-id>` で追加specを作成
 
 ### 判断結果の提示
 
@@ -109,22 +111,21 @@ Requirementの内容・ProjectContext・既存コード実装状況を基に、S
 
 ### 調査対象
 
-- `packages/cli/src/` — コマンド・サービス・リポジトリの実装
-- `packages/shared/src/` — スキーマ・型定義・バリデーション
-- `packages/web/src/` — Web UIコンポーネント・ページ・サーバーアクション
+ProjectContextの`technical`ファイルに記載された技術スタック・アーキテクチャ情報を参考に、プロジェクトのソースコードディレクトリを特定する。
 
 ### 調査観点
 
 - 対象要件の機能がすでに実装されているか（全部/一部/未着手）
 - 関連するスキーマ・型定義の現状
-- 関連するコマンド・サービス・リポジトリの実装ファイルと構造
+- 関連するモジュール（コマンド・サービス・リポジトリ等）の実装ファイルと構造
 - 実装済みの場合: 使用しているデザインパターン、レイヤー構成、インターフェース定義
+- プロジェクトで確立されている実装パターン・命名規則
 
 ### エージェントプロンプト
 
 > "対象要件 [タイトル一覧] に関連する既存コードを調査してください。
-> packages/cli/src/、packages/shared/src/、packages/web/src/ を中心に、
-> コマンド・サービス・リポジトリ・スキーマ・UIコンポーネントの実装状況を報告してください。
+> プロジェクトのソースコードディレクトリを中心に、
+> 対象機能に関連するモジュール・サービス・データアクセス層・UI等の実装状況を報告してください。
 > 実装済みの場合はファイルパス・主要インターフェース・処理パターンを具体的に記載してください。
 > コードは書かず、調査結果のみ報告してください。"
 
@@ -136,7 +137,7 @@ Requirementの内容・ProjectContext・既存コード実装状況を基に、S
 |------|----------|-------------------|
 | **実装済み** | コマンド・サービス・リポジトリが揃っている | 既存コードを参照して文書化 |
 | **一部実装** | スキーマは定義済みだがコマンド未実装等 | 既存部分を文書化 + 未実装部分を設計 |
-| **未実装** | 関連コードがない | docs/main.mdとrequirementから設計を導出 |
+| **未実装** | 関連コードがない | ProjectContextとrequirementから設計を導出 |
 
 ---
 
@@ -153,8 +154,8 @@ Requirementの内容・ProjectContext・既存コード実装状況を基に、S
 要件の技術的なアプローチの概要。実装済みの場合は「本機能は実装済みであり〜」と明記。
 
 ## 2. アーキテクチャ
-コンポーネント構成図（テキストベース）。レイヤー配置:
-Command → Service → Repository → File System
+コンポーネント構成図（テキストベース）。
+ProjectContextのtechnicalファイルに記載のアーキテクチャ・設計パターンに従う。
 
 ## 3. コンポーネント設計
 主要モジュールごとに:
@@ -190,17 +191,20 @@ Command → Service → Repository → File System
 |------|------|
 | requirement.json | successCriteria, format, dependencies, complexity |
 | description.md | 詳細要件、ユースケース、技術的制約 |
-| docs/main.md | アーキテクチャ全体像、データ構造定義、技術スタック |
-| ProjectContext | 技術スタック、設計パターン、命名規則 |
+| ProjectContext (technical) | 技術スタック、アーキテクチャ、設計パターン |
+| ProjectContext (structure) | コード構造、命名規則、インポートルール |
+| ProjectContext (product) | プロダクトビジョン、スコープ |
+| ProjectContext (domain) | ドメイン固有の知識・ルール |
 | 既存コード（Step 4） | 実装済み部分の実際の構造・パターン |
+| 関連specのdesign.md | 設計パターンの一貫性維持 |
 
 ### 書き方の注意
 
-- **日本語**で記述する
+- ProjectContextの`language`フィールドの言語で記述する（未設定の場合は日本語）
 - **実装済みの要件**: 既存コードの実際の構造・インターフェースに忠実に文書化する。推測ではなくコードから読み取った事実を書く
-- **未実装の要件**: 既存の実装パターン（Command → Service → Repository）に従って設計を導出する
+- **未実装の要件**: 既存コードから読み取れる実装パターン・アーキテクチャに従って設計を導出する
 - **分割specの場合**: 各specのスコープ境界を冒頭で明記し、他specとの関係を記載する
-- **TypeScript型定義**: 主要インターフェースはTypeScript形式で記載する
+- 主要インターフェースはプロジェクトの言語に応じた型定義形式で記載する
 
 ### 生成の並列化
 
@@ -251,10 +255,10 @@ AskUserQuestionで承認を求める:
 
 ```bash
 # 一覧確認
-node packages/cli/dist/index.js spec list
+reqord spec list
 
 # 各specの内容確認（代表的なものをいくつか）
-node packages/cli/dist/index.js spec show <spec-id>
+reqord spec show <spec-id>
 ```
 
 ### 7.2 検証結果テーブル
