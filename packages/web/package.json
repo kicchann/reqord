@@ -11,7 +11,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@reqord/shared": "*",
+    "@reqord/shared": "workspace:*",
     "@tailwindcss/typography": "^0.5.19",
     "@xyflow/react": "^12.6.0",
     "next": "^15.3.0",

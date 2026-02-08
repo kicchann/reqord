@@ -16,7 +16,7 @@ function makeReq(
     createdAt: "2025-01-01T00:00:00Z",
     updatedAt: "2025-01-01T00:00:00Z",
     versionHistory: [],
-    files: { description: `${id}/description.md` },
+    files: { description: `${id}/description.md`, supplementary: [] },
     successCriteria: [],
     format: { type: "free-form" },
     dependencies: { blockedBy, blocks, relatedTo: [] },
