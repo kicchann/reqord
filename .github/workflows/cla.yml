@@ -25,4 +25,4 @@ jobs:
           path-to-signatures: 'signatures/cla.json'
           path-to-document: 'https://github.com/kicchann/reqord/blob/main/CLA.md'
           branch: 'main'
-          allowlist: 'kicchann,dependabot[bot],github-actions[bot]'
+          allowlist: 'kicchann,dependabot[bot],github-actions[bot],claude'
