@@ -1,0 +1,105 @@
+name: Chore
+description: リファクタ、依存更新、開発環境整備、テスト追加など
+title: "[Chore] "
+labels: ["chore"]
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        技術的なメンテナンス作業の登録です。
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: カテゴリ
+      description: 作業の種類
+      options:
+        - リファクタリング
+        - 依存関係の更新
+        - 開発環境の整備
+        - テスト追加/修正
+        - CI/CD改善
+        - ドキュメント更新
+        - パフォーマンス改善
+        - セキュリティ対応
+        - その他
+    validations:
+      required: true
+
+  - type: textarea
+    id: purpose
+    attributes:
+      label: 目的
+      description: このChoreを行う理由
+      placeholder: "例: 技術的負債解消、CI改善、テストカバレッジ向上など"
+    validations:
+      required: true
+
+  - type: textarea
+    id: tasks
+    attributes:
+      label: 作業内容
+      description: 実施するタスク一覧
+      placeholder: |
+        - [ ] 作業1
+        - [ ] 作業2
+    validations:
+      required: true
+
+  - type: textarea
+    id: done-criteria
+    attributes:
+      label: 完了条件
+      description: 何をもって完了とするか
+      placeholder: |
+        - [ ] 実装が反映されている
+        - [ ] CIで緑になること
+        - [ ] 関連ドキュメント更新済み（必要な場合）
+    validations:
+      required: false
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: 実装メモ
+      description: 関連ファイル/パッケージ、注意点など
+      placeholder: 技術的な詳細や注意事項
+    validations:
+      required: false
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: 優先度
+      description: 作業の重要度
+      options:
+        - P0 (クリティカル - 即時対応)
+        - P1 (高 - 今週中)
+        - P2 (中 - 次スプリント)
+        - P3 (低 - バックログ)
+      default: 2
+    validations:
+      required: false
+
+  - type: dropdown
+    id: size
+    attributes:
+      label: 見積りサイズ
+      description: 作業量の見積り
+      options:
+        - XS (15–30分)
+        - S (30–60分)
+        - M (60–90分)
+        - L (2時間超)
+    validations:
+      required: false
+
+  - type: textarea
+    id: related
+    attributes:
+      label: 関連Issue/PR
+      description: 関連する Issue や PR があればリンク
+      placeholder: "#123, #456"
+    validations:
+      required: false
