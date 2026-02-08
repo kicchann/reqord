@@ -1,0 +1,13 @@
+{
+  "id": "spec-000004",
+  "requirementId": "req-000004",
+  "version": "1.0.0",
+  "status": "draft",
+  "createdAt": "2026-02-08T14:08:06.872Z",
+  "updatedAt": "2026-02-08T14:08:06.872Z",
+  "versionHistory": [],
+  "files": {
+    "design": "specifications/spec-000004/design.md",
+    "supplementary": []
+  }
+}
