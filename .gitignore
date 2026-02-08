@@ -17,6 +17,12 @@ venv/
 # OS
 .DS_Store
 Thumbs.db
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
 
 # Development
 apps/
@@ -25,6 +31,7 @@ plans/
 # Node.js
 node_modules/
 dist/
+build/
 .next/
 *.tsbuildinfo
 
