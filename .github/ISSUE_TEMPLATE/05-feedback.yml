@@ -1,0 +1,109 @@
+name: Feedback
+description: 要件・仕様へのフィードバック（不足、矛盾、改善提案など）
+title: "[Feedback] "
+labels: ["feedback"]
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        要件や仕様に対するフィードバックの報告です。
+        まずはシンプルに報告してください。調査・構造化は後から行えます。
+
+  - type: textarea
+    id: description
+    attributes:
+      label: 何が起きた？ / 何に気づいた？
+      description: 発見した問題や気づきを説明してください
+      placeholder: |
+        例: ログイン後1時間でトークンが切れるが、リフレッシュの仕組みがない
+    validations:
+      required: true
+
+  - type: dropdown
+    id: feedback-type
+    attributes:
+      label: フィードバックの種類
+      description: 不明な場合は「不明/未分類」を選択してください。後から変更可能です
+      options:
+        - 不明/未分類
+        - requirement-gap (要件の不足)
+        - spec-mismatch (仕様と実装の不一致)
+        - implementation-bug (実装のバグ)
+        - improvement (改善提案)
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: 再現手順 / 発見の経緯
+      description: どのように発見したか
+      placeholder: |
+        1. ...
+        2. ...
+    validations:
+      required: false
+
+  - type: textarea
+    id: error
+    attributes:
+      label: エラーメッセージ / ログ
+      description: 関連するエラーやログがあれば
+      render: shell
+    validations:
+      required: false
+
+  - type: input
+    id: related-req
+    attributes:
+      label: 関連する要件 (Requirement)
+      description: 分かっていれば。不明なら空欄でOK（後から追加可能）
+      placeholder: "例: req-005"
+    validations:
+      required: false
+
+  - type: input
+    id: related-spec
+    attributes:
+      label: 関連する仕様 (Specification)
+      description: 分かっていれば。不明なら空欄でOK（後から追加可能）
+      placeholder: "例: spec-005"
+    validations:
+      required: false
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: 深刻度
+      description: 影響範囲が不明な場合は未選択でOK
+      options:
+        - critical (全ユーザーに影響)
+        - high (多数のユーザーに影響)
+        - medium (一部のユーザーに影響)
+        - low (軽微な問題)
+    validations:
+      required: false
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: 優先度
+      description: 対応の緊急度
+      options:
+        - P0 (クリティカル - 即時対応)
+        - P1 (高 - 今週中)
+        - P2 (中 - 次スプリント)
+        - P3 (低 - バックログ)
+      default: 2
+    validations:
+      required: false
+
+  - type: textarea
+    id: related
+    attributes:
+      label: 関連Issue/PR
+      description: 関連する Issue や PR があればリンク
+      placeholder: "#123, #456"
+    validations:
+      required: false
