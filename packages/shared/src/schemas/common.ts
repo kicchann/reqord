@@ -20,8 +20,11 @@ export type FormatType = z.infer<typeof FormatTypeSchema>;
 
 export const VersionHistoryEntrySchema = z.object({
   version: z.string(),
+  status: StatusSchema,
+  gitCommit: z.string(),
   changedAt: z.string(),
-  changeType: z.string(),
   summary: z.string(),
+  approvedAt: z.string().optional(),
+  approvedBy: z.array(z.string()).optional(),
 });
 export type VersionHistoryEntry = z.infer<typeof VersionHistoryEntrySchema>;

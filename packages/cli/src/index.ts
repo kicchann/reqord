@@ -8,6 +8,7 @@ import { showCommand } from "./commands/req/show.js";
 import { updateCommand } from "./commands/req/update.js";
 import { deleteCommand } from "./commands/req/delete.js";
 import { validateCommand } from "./commands/req/validate.js";
+import { historyCommand } from "./commands/req/history.js";
 import { contextInitCommand } from "./commands/context/init.js";
 import { contextShowCommand } from "./commands/context/show.js";
 import { contextUpdateCommand } from "./commands/context/update.js";
@@ -35,6 +36,7 @@ reqCommand.addCommand(showCommand);
 reqCommand.addCommand(updateCommand);
 reqCommand.addCommand(deleteCommand);
 reqCommand.addCommand(validateCommand);
+reqCommand.addCommand(historyCommand);
 
 program.addCommand(reqCommand);
 

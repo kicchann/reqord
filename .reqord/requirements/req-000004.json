@@ -10,8 +10,9 @@
     {
       "version": "1.0.0",
       "changedAt": "2026-02-07T10:00:00Z",
-      "changeType": "created",
-      "summary": "初版作成"
+      "summary": "初版作成",
+      "status": "implemented",
+      "gitCommit": "legacy"
     }
   ],
   "files": {
