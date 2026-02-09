@@ -1,4 +1,4 @@
-import type { FeedbackEntry, FeedbackType, FeedbackSeverity, FeedbackIndex } from "@reqord/shared";
+import type { FeedbackEntry, FeedbackType, FeedbackSeverity } from "@reqord/shared";
 import * as feedbackRepo from "../repositories/feedback.js";
 import * as reqRepo from "../repositories/requirement.js";
 import * as specRepo from "../repositories/specification.js";

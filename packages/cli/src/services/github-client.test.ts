@@ -21,7 +21,6 @@ import {
   addLabelsToIssue,
   closeIssue,
 } from "./github-client.js";
-import type { GitHubIssue } from "./github-client.js";
 import * as util from "node:util";
 
 const mockExecAsync = (util as unknown as { mockExecAsync: ReturnType<typeof vi.fn> }).mockExecAsync;
