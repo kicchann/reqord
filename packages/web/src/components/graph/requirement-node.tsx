@@ -15,6 +15,7 @@ type RequirementNodeData = {
   label: string;
   status: string;
   priority: string;
+  specCount?: number;
 };
 
 function RequirementNodeComponent({ data, id }: NodeProps) {
@@ -33,6 +34,11 @@ function RequirementNodeComponent({ data, id }: NodeProps) {
           {nodeData.label}
         </p>
       </Link>
+      {nodeData.specCount && nodeData.specCount > 0 ? (
+        <p className="mt-1 text-xs text-gray-400">
+          📄 {nodeData.specCount} spec{nodeData.specCount > 1 ? "s" : ""}
+        </p>
+      ) : null}
       <Handle type="source" position={Position.Right} className="!bg-gray-400" />
     </div>
   );

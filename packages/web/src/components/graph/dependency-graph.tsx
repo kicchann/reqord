@@ -18,7 +18,13 @@ import { RequirementNode } from "./requirement-node";
 
 const nodeTypes = { requirement: RequirementNode };
 
-export function DependencyGraph({ requirements }: { requirements: Requirement[] }) {
+export function DependencyGraph({
+  requirements,
+  specCountMap = {},
+}: {
+  requirements: Requirement[];
+  specCountMap?: Record<string, number>;
+}) {
   const { initialNodes, initialEdges } = useMemo(() => {
     const { nodes: layoutNodes, edges: layoutEdges } = computeDagLayout(requirements);
 
@@ -26,7 +32,12 @@ export function DependencyGraph({ requirements }: { requirements: Requirement[] 
       id: n.id,
       type: "requirement",
       position: { x: n.x, y: n.y },
-      data: { label: n.title, status: n.status, priority: n.priority },
+      data: {
+        label: n.title,
+        status: n.status,
+        priority: n.priority,
+        specCount: specCountMap[n.id] ?? 0,
+      },
     }));
 
     const rfEdges: Edge[] = layoutEdges.map((e) => ({
@@ -39,7 +50,7 @@ export function DependencyGraph({ requirements }: { requirements: Requirement[] 
     }));
 
     return { initialNodes: rfNodes, initialEdges: rfEdges };
-  }, [requirements]);
+  }, [requirements, specCountMap]);
 
   const [nodes, , onNodesChange] = useNodesState(initialNodes);
   const [edges, , onEdgesChange] = useEdgesState(initialEdges);
