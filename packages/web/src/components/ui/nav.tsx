@@ -17,6 +17,12 @@ export function Nav() {
                 Requirements
               </Link>
               <Link
+                href="/specifications"
+                className="text-sm font-medium text-gray-600 hover:text-gray-900"
+              >
+                Specifications
+              </Link>
+              <Link
                 href="/graph"
                 className="text-sm font-medium text-gray-600 hover:text-gray-900"
               >

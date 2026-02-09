@@ -14,6 +14,12 @@ const DependencyGraph = dynamic(
   },
 );
 
-export function GraphLoader({ requirements }: { requirements: Requirement[] }) {
-  return <DependencyGraph requirements={requirements} />;
+export function GraphLoader({
+  requirements,
+  specCountMap = {},
+}: {
+  requirements: Requirement[];
+  specCountMap?: Record<string, number>;
+}) {
+  return <DependencyGraph requirements={requirements} specCountMap={specCountMap} />;
 }

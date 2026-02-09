@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { Requirement } from "@reqord/shared";
+import type { Requirement, Specification } from "@reqord/shared";
 import { StatusBadge, PriorityBadge, ComplexityBadge } from "@/components/ui/badge";
 import { MarkdownRenderer } from "./markdown-renderer";
 import { DeleteButton } from "./delete-button";
@@ -7,9 +7,11 @@ import { DeleteButton } from "./delete-button";
 export function RequirementDetail({
   requirement,
   description,
+  specifications = [],
 }: {
   requirement: Requirement;
   description: string | null;
+  specifications?: Specification[];
 }) {
   const { dependencies } = requirement;
   const hasDeps =
@@ -197,6 +199,28 @@ export function RequirementDetail({
           </div>
         </div>
       ) : null}
+
+      {/* Specifications */}
+      <div className="rounded-lg border border-gray-200 bg-white p-4">
+        <h2 className="mb-2 text-sm font-semibold text-gray-700">Specifications</h2>
+        {specifications.length > 0 ? (
+          <div className="space-y-1 text-sm">
+            {specifications.map((spec) => (
+              <div key={spec.id} className="flex items-center gap-2">
+                <Link
+                  href={`/specifications/${spec.id}`}
+                  className="font-mono text-blue-600 hover:underline"
+                >
+                  {spec.id}
+                </Link>
+                <StatusBadge status={spec.status} />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-sm text-gray-500">No specifications</p>
+        )}
+      </div>
 
       {/* Description (Markdown) */}
       {description ? (

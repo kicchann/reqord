@@ -1,4 +1,4 @@
-import { REQORD_DIR } from "@reqord/shared";
+import { REQORD_DIR, SPECIFICATIONS_DIR } from "@reqord/shared";
 import * as fs from "./file-system";
 
 let cachedRoot: string | null = null;
@@ -22,4 +22,8 @@ export function getReqordRoot(): string {
 
 export function getRequirementsDir(): string {
   return fs.joinPath(getReqordRoot(), REQORD_DIR, "requirements");
+}
+
+export function getSpecificationsDir(): string {
+  return fs.joinPath(getReqordRoot(), REQORD_DIR, SPECIFICATIONS_DIR);
 }
