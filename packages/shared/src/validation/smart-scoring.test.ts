@@ -17,6 +17,7 @@ function makeRequirement(overrides: Partial<Requirement> = {}): Requirement {
     successCriteria: [],
     format: { type: "user-story", userStory: { as: "", iWant: "", soThat: "" } },
     dependencies: { blockedBy: [], blocks: [], relatedTo: [] },
+    flags: [],
     ...overrides,
   };
 }

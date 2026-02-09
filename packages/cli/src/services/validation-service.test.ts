@@ -31,6 +31,7 @@ function makeRequirement(overrides: Partial<Requirement> = {}): Requirement {
     dependencies: { blockedBy: [], blocks: [], relatedTo: [] },
     estimatedComplexity: "medium",
     estimatedHours: 16,
+    flags: [],
     ...overrides,
   };
 }
