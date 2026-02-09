@@ -15,6 +15,9 @@ export const updateCommand = new Command("update")
   .option("-p, --priority <priority>", "New priority (low, medium, high)")
   .option("--patch-file <path>", "JSON file with partial update data")
   .option("--description-file <path>", "Markdown file to replace description.md")
+  .option("--major", "Force major version increment (X.0.0)")
+  .option("--minor", "Force minor version increment (0.X.0)")
+  .option("--patch", "Force patch version increment (0.0.X)")
   .option("--json", "Output updated requirement as JSON")
   .action(
     async (
@@ -25,22 +28,40 @@ export const updateCommand = new Command("update")
         priority?: string;
         patchFile?: string;
         descriptionFile?: string;
+        major?: boolean;
+        minor?: boolean;
+        patch?: boolean;
         json?: boolean;
       },
     ) => {
       const cwd = process.cwd();
+
+      // Check for mutually exclusive version bump options
+      const versionBumpCount = [options.major, options.minor, options.patch].filter(Boolean).length;
+      if (versionBumpCount > 1) {
+        console.error(
+          chalk.red(
+            "Error: Only one of --major, --minor, or --patch can be specified.",
+          ),
+        );
+        process.exitCode = 1;
+        return;
+      }
 
       const hasAnyOption =
         options.title !== undefined ||
         options.status !== undefined ||
         options.priority !== undefined ||
         options.patchFile !== undefined ||
-        options.descriptionFile !== undefined;
+        options.descriptionFile !== undefined ||
+        options.major ||
+        options.minor ||
+        options.patch;
 
       if (!hasAnyOption) {
         console.error(
           chalk.red(
-            "Error: At least one option (--title, --status, --priority, --patch-file, --description-file) is required.",
+            "Error: At least one option (--title, --status, --priority, --patch-file, --description-file, --major, --minor, --patch) is required.",
           ),
         );
         process.exitCode = 1;
@@ -76,7 +97,12 @@ export const updateCommand = new Command("update")
           updateOpts.descriptionContent = await fs.readText(options.descriptionFile);
         }
 
-        const { before, after, descriptionUpdated } = await updateRequirement(cwd, id, updateOpts);
+        // Version bump override
+        if (options.major) updateOpts.versionBump = "major";
+        if (options.minor) updateOpts.versionBump = "minor";
+        if (options.patch) updateOpts.versionBump = "patch";
+
+        const { before, after, descriptionUpdated, versionChanged } = await updateRequirement(cwd, id, updateOpts);
 
         if (options.json) {
           console.log(JSON.stringify(after, null, 2));
@@ -92,6 +118,13 @@ export const updateCommand = new Command("update")
         }
         if (before.priority !== after.priority) {
           console.log(`  priority: ${before.priority} → ${after.priority}`);
+        }
+        if (before.version !== after.version) {
+          console.log(`  version: ${before.version} → ${after.version}`);
+        }
+        if (after.versionHistory.length > before.versionHistory.length) {
+          const latestEntry = after.versionHistory[after.versionHistory.length - 1];
+          console.log(`  history: ${latestEntry.summary}`);
         }
         if (JSON.stringify(before.successCriteria) !== JSON.stringify(after.successCriteria)) {
           console.log(`  successCriteria: ${before.successCriteria.length} → ${after.successCriteria.length} items`);

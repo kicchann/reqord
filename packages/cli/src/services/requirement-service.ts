@@ -6,6 +6,7 @@ import {
   loadProjectTemplate,
   DEFAULT_REQUIREMENT_DESCRIPTION_TEMPLATE,
 } from "../utils/templates.js";
+import * as versionService from "./version-service.js";
 
 export interface CreateOptions {
   title: string;
@@ -110,12 +111,14 @@ export interface UpdateOptions {
   priority?: Priority;
   patchData?: Record<string, unknown>;
   descriptionContent?: string;
+  versionBump?: "major" | "minor" | "patch";
 }
 
 export interface UpdateResult {
   before: Requirement;
   after: Requirement;
   descriptionUpdated?: boolean;
+  versionChanged?: boolean;
 }
 
 export async function updateRequirement(
@@ -153,18 +156,85 @@ export async function updateRequirement(
 
   merged.updatedAt = new Date().toISOString();
 
-  // Preserve immutable fields
+  // 4. Detect content changes
+  const hasContentChanges =
+    merged.title !== before.title ||
+    JSON.stringify(merged.format) !== JSON.stringify(before.format) ||
+    JSON.stringify(merged.dependencies) !== JSON.stringify(before.dependencies) ||
+    JSON.stringify(merged.successCriteria) !== JSON.stringify(before.successCriteria);
+
+  // 5. Auto-revert (only when status is NOT explicitly changed by user)
+  const statusExplicitlyChanged =
+    options.status !== undefined || (options.patchData != null && "status" in options.patchData);
+  if (!statusExplicitlyChanged) {
+    const shouldRevert = versionService.shouldRevertToPendingApproval(
+      before.status as Status,
+      hasContentChanges,
+    );
+    if (shouldRevert) {
+      merged.status = "pending_approval";
+    }
+  }
+
+  // 6. Validate status transition (after auto-revert applied)
+  if (merged.status !== before.status) {
+    const isValid = versionService.isValidTransition(before.status, merged.status as Status);
+    if (!isValid) {
+      const transitions = versionService.getStateTransitions();
+      const allowedList = (transitions.get(before.status) ?? []).join(", ");
+      throw new Error(
+        `Invalid status transition: ${before.status} → ${merged.status}. Allowed transitions from ${before.status}: ${allowedList}`,
+      );
+    }
+  }
+
+  // 7. Determine version
+  let nextVersion = versionService.determineNextVersion(before, merged as Requirement);
+
+  // Override with explicit version bump if specified
+  if (options.versionBump) {
+    const { major, minor, patch } = versionService.parseVersion(before.version);
+    switch (options.versionBump) {
+      case "major":
+        nextVersion = versionService.formatVersion(major + 1, 0, 0);
+        break;
+      case "minor":
+        nextVersion = versionService.formatVersion(major, minor + 1, 0);
+        break;
+      case "patch":
+        nextVersion = versionService.formatVersion(major, minor, patch + 1);
+        break;
+    }
+  }
+
+  merged.version = nextVersion;
+  const versionChanged = nextVersion !== before.version;
+
+  // 8. Preserve immutable fields
   merged.id = before.id;
   merged.createdAt = before.createdAt;
   merged.files = before.files;
+  merged.versionHistory = before.versionHistory;
 
-  // Validate merged result through Zod
+  // 9. Validate merged result through Zod
   const parseResult = RequirementSchema.safeParse(merged);
   if (!parseResult.success) {
     throw new Error(`Validation failed: ${parseResult.error.message}`);
   }
 
-  const after = parseResult.data;
+  let after = parseResult.data;
+
+  // 10. Append history entry
+  if (versionChanged) {
+    const summary = versionService.generateChangeSummary(before, after);
+    const historyEntry = versionService.createHistoryEntry(after, { summary });
+    after = {
+      ...after,
+      versionHistory: [...after.versionHistory, historyEntry],
+    };
+  }
+
+  // 11. Save
   await reqRepo.save(cwd, after);
 
   // Update description.md if provided
@@ -174,7 +244,7 @@ export async function updateRequirement(
     descriptionUpdated = true;
   }
 
-  return { before, after, descriptionUpdated };
+  return { before, after, descriptionUpdated, versionChanged };
 }
 
 // --- Delete ---
