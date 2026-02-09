@@ -3,6 +3,7 @@ import chalk from "chalk";
 import { REQORD_DIR } from "@reqord/shared";
 import { showContext, resolveFilePath } from "../../services/context-service.js";
 import * as fs from "../../repositories/file-system.js";
+import { handleError } from "../../utils/error-handler.js";
 
 export const contextShowCommand = new Command("show")
   .description("Show project context summary")
@@ -60,12 +61,7 @@ export const contextShowCommand = new Command("show")
         await showFileDetail(cwd, "structure", result.structureExists, ctx);
       }
     } catch (error) {
-      console.error(
-        chalk.red(
-          `Failed to show context: ${(error as Error).message}`,
-        ),
-      );
-      process.exitCode = 1;
+      handleError(error, { json: options.json });
     }
   });
 

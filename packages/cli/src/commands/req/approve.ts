@@ -6,6 +6,7 @@ import {
   startApproval,
   type ApprovalTarget,
 } from "../../services/approval-service.js";
+import { handleError } from "../../utils/error-handler.js";
 
 export const approveCommand = new Command("approve")
   .description("Start approval flow for a requirement via GitHub PR")
@@ -38,9 +39,6 @@ export const approveCommand = new Command("approve")
       console.log(`  Branch: ${result.branchName}`);
       console.log(`  PR: ${result.prUrl}`);
     } catch (error) {
-      console.error(
-        chalk.red(`Failed to start approval: ${(error as Error).message}`)
-      );
-      process.exitCode = 1;
+      handleError(error);
     }
   });

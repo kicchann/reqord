@@ -3,6 +3,7 @@ import chalk from "chalk";
 import Table from "cli-table3";
 import { listSpecifications } from "../../services/specification-service.js";
 import type { Status } from "@reqord/shared";
+import { handleError } from "../../utils/error-handler.js";
 
 const STATUS_COLORS: Record<string, (s: string) => string> = {
   draft: chalk.blue,
@@ -62,12 +63,7 @@ export const specListCommand = new Command("list")
           chalk.gray(`\n${specifications.length} specification(s) found.`),
         );
       } catch (error) {
-        console.error(
-          chalk.red(
-            `Failed to list specifications: ${(error as Error).message}`,
-          ),
-        );
-        process.exitCode = 1;
+        handleError(error, { json: options.json });
       }
     },
   );

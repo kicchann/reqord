@@ -1,6 +1,7 @@
 import { Command } from "commander";
 import chalk from "chalk";
 import { syncFromGitHub, syncToGitHub } from "../../services/feedback-sync-service.js";
+import { handleError } from "../../utils/error-handler.js";
 
 export const syncCommand = new Command("sync")
   .description("Sync GitHub Issues with feedback label to index.json")
@@ -22,7 +23,6 @@ export const syncCommand = new Command("sync")
         console.log(chalk.green(`✓ Synced ${count} feedbacks (${direction})`));
       }
     } catch (error) {
-      console.error(chalk.red(`Error: ${(error as Error).message}`));
-      process.exitCode = 1;
+      handleError(error, { json: options.json });
     }
   });

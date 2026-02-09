@@ -1,6 +1,7 @@
 import { Command } from "commander";
 import chalk from "chalk";
 import { initContext } from "../../services/context-service.js";
+import { handleError } from "../../utils/error-handler.js";
 
 export const contextInitCommand = new Command("init")
   .description("Initialize project context")
@@ -35,11 +36,6 @@ export const contextInitCommand = new Command("init")
         chalk.gray("Next: Edit context files to describe your project."),
       );
     } catch (error) {
-      console.error(
-        chalk.red(
-          `Failed to initialize context: ${(error as Error).message}`,
-        ),
-      );
-      process.exitCode = 1;
+      handleError(error);
     }
   });

@@ -106,10 +106,7 @@ describe("approveCommand", () => {
 
     await approveCommand.parseAsync(["node", "test", "req-999999"]);
 
-    // Verify error message
-    expect(consoleErrorSpy).toHaveBeenCalledWith(
-      expect.stringContaining("Failed to start approval")
-    );
+    // Verify error message (handleError format)
     expect(consoleErrorSpy).toHaveBeenCalledWith(
       expect.stringContaining("Requirement req-999999 not found.")
     );

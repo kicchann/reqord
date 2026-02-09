@@ -1,6 +1,7 @@
 import { Command } from "commander";
 import chalk from "chalk";
 import { createSpecification } from "../../services/specification-service.js";
+import { handleError } from "../../utils/error-handler.js";
 
 export const specCreateCommand = new Command("create")
   .description("Create a new specification for a requirement")
@@ -22,11 +23,6 @@ export const specCreateCommand = new Command("create")
       console.log("");
       console.log(chalk.gray(`Design: .reqord/${spec.files.design}`));
     } catch (error) {
-      console.error(
-        chalk.red(
-          `Failed to create specification: ${(error as Error).message}`,
-        ),
-      );
-      process.exitCode = 1;
+      handleError(error);
     }
   });

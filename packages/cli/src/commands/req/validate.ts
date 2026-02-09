@@ -1,6 +1,7 @@
 import { Command } from "commander";
 import chalk from "chalk";
 import { validateRequirement } from "../../services/validation-service.js";
+import { handleError } from "../../utils/error-handler.js";
 
 export const validateCommand = new Command("validate")
   .description("Validate a requirement against quality criteria")
@@ -62,12 +63,7 @@ export const validateCommand = new Command("validate")
         process.exitCode = 1;
       }
     } catch (error) {
-      console.error(
-        chalk.red(
-          `Failed to validate requirement: ${(error as Error).message}`,
-        ),
-      );
-      process.exitCode = 1;
+      handleError(error, { json: options.json });
     }
   });
 

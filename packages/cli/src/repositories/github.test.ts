@@ -1,15 +1,20 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import { EventEmitter } from "node:events";
+import { PassThrough } from "node:stream";
+
+let mockSpawnInstance: EventEmitter & { stdin: PassThrough; stderr: PassThrough };
 
 vi.mock("node:child_process", () => {
-  const mockExec = Object.assign(vi.fn(), { __type: "exec" });
-  return { exec: mockExec };
+  const mockExecFile = Object.assign(vi.fn(), { __type: "execFile" });
+  const mockSpawn = vi.fn(() => mockSpawnInstance);
+  return { execFile: mockExecFile, spawn: mockSpawn };
 });
 
 vi.mock("node:util", () => {
-  const mockExecAsync = vi.fn();
+  const mockExecFileAsync = vi.fn();
   return {
-    promisify: () => mockExecAsync,
-    mockExecAsync,
+    promisify: () => mockExecFileAsync,
+    mockExecFileAsync,
   };
 });
 
@@ -18,24 +23,33 @@ import {
   getPullRequest,
 } from "./github.js";
 import * as util from "node:util";
+import * as childProcess from "node:child_process";
 
-const mockExecAsync = (util as unknown as { mockExecAsync: ReturnType<typeof vi.fn> }).mockExecAsync;
+const mockExecFileAsync = (util as unknown as { mockExecFileAsync: ReturnType<typeof vi.fn> }).mockExecFileAsync;
+const mockSpawn = vi.mocked(childProcess.spawn);
+
+function createMockSpawnInstance(exitCode = 0) {
+  const instance = new EventEmitter() as EventEmitter & { stdin: PassThrough; stderr: PassThrough };
+  instance.stdin = new PassThrough();
+  instance.stderr = new PassThrough();
+  mockSpawnInstance = instance;
+
+  process.nextTick(() => {
+    instance.emit("close", exitCode);
+  });
+}
 
 beforeEach(() => {
   vi.clearAllMocks();
 });
 
 describe("createPullRequest", () => {
-  it("gh pr createコマンドを実行してPR情報を取得する", async () => {
-    mockExecAsync
-      .mockResolvedValueOnce({
-        stdout: "",
-        stderr: "",
-      })
-      .mockResolvedValueOnce({
-        stdout: JSON.stringify({ number: 42, url: "https://github.com/owner/repo/pull/42" }),
-        stderr: "",
-      });
+  it("spawnでgh pr createを実行しexecFileでPR情報を取得する", async () => {
+    createMockSpawnInstance(0);
+    mockExecFileAsync.mockResolvedValue({
+      stdout: JSON.stringify({ number: 42, url: "https://github.com/owner/repo/pull/42" }),
+      stderr: "",
+    });
 
     const result = await createPullRequest({
       title: "Add new feature",
@@ -43,27 +57,28 @@ describe("createPullRequest", () => {
       head: "feature-branch",
     });
 
-    expect(mockExecAsync).toHaveBeenNthCalledWith(
-      1,
-      "gh pr create --title \"Add new feature\" --body \"This is a description\" --head feature-branch",
-    );
-    expect(mockExecAsync).toHaveBeenNthCalledWith(
-      2,
-      "gh pr view feature-branch --json number,url",
-    );
+    // Verify spawn called with argv array (no shell interpolation)
+    expect(mockSpawn).toHaveBeenCalledWith("gh", [
+      "pr", "create",
+      "--title", "Add new feature",
+      "--body-file", "-",
+      "--head", "feature-branch",
+    ]);
+
+    // Verify PR info fetched via execFile
+    expect(mockExecFileAsync).toHaveBeenCalledWith("gh", [
+      "pr", "view", "feature-branch",
+      "--json", "number,url",
+    ]);
     expect(result).toEqual({ number: 42, url: "https://github.com/owner/repo/pull/42" });
   });
 
   it("baseブランチを指定してPRを作成する", async () => {
-    mockExecAsync
-      .mockResolvedValueOnce({
-        stdout: "",
-        stderr: "",
-      })
-      .mockResolvedValueOnce({
-        stdout: JSON.stringify({ number: 43, url: "https://github.com/owner/repo/pull/43" }),
-        stderr: "",
-      });
+    createMockSpawnInstance(0);
+    mockExecFileAsync.mockResolvedValue({
+      stdout: JSON.stringify({ number: 43, url: "https://github.com/owner/repo/pull/43" }),
+      stderr: "",
+    });
 
     await createPullRequest({
       title: "Fix bug",
@@ -72,22 +87,21 @@ describe("createPullRequest", () => {
       base: "develop",
     });
 
-    expect(mockExecAsync).toHaveBeenNthCalledWith(
-      1,
-      "gh pr create --title \"Fix bug\" --body \"Bug fix description\" --head fix-branch --base develop",
-    );
+    expect(mockSpawn).toHaveBeenCalledWith("gh", [
+      "pr", "create",
+      "--title", "Fix bug",
+      "--body-file", "-",
+      "--head", "fix-branch",
+      "--base", "develop",
+    ]);
   });
 
   it("ドラフトPRを作成する", async () => {
-    mockExecAsync
-      .mockResolvedValueOnce({
-        stdout: "",
-        stderr: "",
-      })
-      .mockResolvedValueOnce({
-        stdout: JSON.stringify({ number: 44, url: "https://github.com/owner/repo/pull/44" }),
-        stderr: "",
-      });
+    createMockSpawnInstance(0);
+    mockExecFileAsync.mockResolvedValue({
+      stdout: JSON.stringify({ number: 44, url: "https://github.com/owner/repo/pull/44" }),
+      stderr: "",
+    });
 
     await createPullRequest({
       title: "Draft PR",
@@ -96,37 +110,39 @@ describe("createPullRequest", () => {
       draft: true,
     });
 
-    expect(mockExecAsync).toHaveBeenNthCalledWith(
-      1,
-      "gh pr create --title \"Draft PR\" --body \"WIP\" --head wip-branch --draft",
-    );
+    expect(mockSpawn).toHaveBeenCalledWith("gh", [
+      "pr", "create",
+      "--title", "Draft PR",
+      "--body-file", "-",
+      "--head", "wip-branch",
+      "--draft",
+    ]);
   });
 
-  it("タイトルとボディ内のダブルクォートをエスケープする", async () => {
-    mockExecAsync
-      .mockResolvedValueOnce({
-        stdout: "",
-        stderr: "",
-      })
-      .mockResolvedValueOnce({
-        stdout: JSON.stringify({ number: 45, url: "https://github.com/owner/repo/pull/45" }),
-        stderr: "",
-      });
+  it("特殊文字を含むタイトル・ボディがそのまま渡される", async () => {
+    createMockSpawnInstance(0);
+    mockExecFileAsync.mockResolvedValue({
+      stdout: JSON.stringify({ number: 45, url: "https://github.com/owner/repo/pull/45" }),
+      stderr: "",
+    });
 
     await createPullRequest({
-      title: 'Add "new" feature',
-      body: 'This is a "quoted" description',
+      title: 'Add "new" feature $(echo injection)',
+      body: 'Body with `backticks` and $variable',
       head: "feature-branch",
     });
 
-    expect(mockExecAsync).toHaveBeenNthCalledWith(
-      1,
-      'gh pr create --title "Add \\"new\\" feature" --body "This is a \\"quoted\\" description" --head feature-branch',
-    );
+    // With spawn + argv, special chars are passed safely without escaping
+    expect(mockSpawn).toHaveBeenCalledWith("gh", [
+      "pr", "create",
+      "--title", 'Add "new" feature $(echo injection)',
+      "--body-file", "-",
+      "--head", "feature-branch",
+    ]);
   });
 
   it("ghコマンド失敗時にエラーを投げる", async () => {
-    mockExecAsync.mockRejectedValue(new Error("gh pr create failed"));
+    createMockSpawnInstance(1);
 
     await expect(
       createPullRequest({
@@ -139,8 +155,8 @@ describe("createPullRequest", () => {
 });
 
 describe("getPullRequest", () => {
-  it("PR番号を指定してgh pr viewを実行する", async () => {
-    mockExecAsync.mockResolvedValue({
+  it("PR番号を指定してexecFileでgh pr viewを実行する", async () => {
+    mockExecFileAsync.mockResolvedValue({
       stdout: JSON.stringify({
         number: 42,
         url: "https://github.com/owner/repo/pull/42",
@@ -151,9 +167,10 @@ describe("getPullRequest", () => {
 
     const result = await getPullRequest(42);
 
-    expect(mockExecAsync).toHaveBeenCalledWith(
-      "gh pr view 42 --json number,url,state",
-    );
+    expect(mockExecFileAsync).toHaveBeenCalledWith("gh", [
+      "pr", "view", "42",
+      "--json", "number,url,state",
+    ]);
     expect(result).toEqual({
       number: 42,
       url: "https://github.com/owner/repo/pull/42",
@@ -162,7 +179,7 @@ describe("getPullRequest", () => {
   });
 
   it("ghコマンド失敗時にエラーを投げる", async () => {
-    mockExecAsync.mockRejectedValue(new Error("PR not found"));
+    mockExecFileAsync.mockRejectedValue(new Error("PR not found"));
 
     await expect(getPullRequest(999)).rejects.toThrow("PR not found");
   });

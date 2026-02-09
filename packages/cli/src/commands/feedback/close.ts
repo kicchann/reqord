@@ -1,6 +1,7 @@
 import { Command } from "commander";
 import chalk from "chalk";
 import { closeFeedback } from "../../services/feedback-service.js";
+import { handleError } from "../../utils/error-handler.js";
 
 export const feedbackCloseCommand = new Command("close")
   .description("Close feedback (updates index.json and closes GitHub Issue)")
@@ -19,7 +20,6 @@ export const feedbackCloseCommand = new Command("close")
       console.log(chalk.green(`✓ Closed Feedback #${issueNumber}`));
       console.log(chalk.gray("  Flags remain on linked requirements"));
     } catch (error) {
-      console.error(chalk.red(`Error: ${(error as Error).message}`));
-      process.exitCode = 1;
+      handleError(error);
     }
   });
