@@ -1,0 +1,24 @@
+{
+  "feedbacks": [
+    {
+      "githubIssue": 21,
+      "type": "improvement",
+      "linkedTo": {
+        "requirements": ["req-000022"],
+        "specifications": []
+      },
+      "structuredAt": "2026-02-09T15:00:00Z",
+      "status": "open"
+    },
+    {
+      "githubIssue": 23,
+      "type": "requirement-gap",
+      "linkedTo": {
+        "requirements": ["req-000023"],
+        "specifications": []
+      },
+      "structuredAt": "2026-02-09T15:00:00Z",
+      "status": "open"
+    }
+  ]
+}
