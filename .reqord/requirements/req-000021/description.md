@@ -1,5 +1,7 @@
 # EARS形式変換
 
+> **DEPRECATED (v1.1.0)**: Anthropic SDKを使用したAI変換機能はreqord CLIの責務外。Claude Codeエコシステム（/reqord:refineコマンド等）で実現する。formatフィールドの保存はreq-000002が担当。詳細は Feedback #17 を参照。
+
 ## 概要
 
 Requirementの記述形式をEARS（Easy Approach to Requirements Syntax）、ユーザーストーリー、自由記述の間で相互変換する機能。AIを活用して自然な変換を実現する。

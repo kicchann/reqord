@@ -1,30 +1,36 @@
 {
   "id": "req-000016",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "title": "GitHub Issue生成・管理",
   "status": "draft",
   "priority": "high",
   "createdAt": "2026-02-07T12:00:00Z",
-  "updatedAt": "2026-02-07T12:00:00Z",
-  "versionHistory": [],
+  "updatedAt": "2026-02-09T10:00:00Z",
+  "versionHistory": [
+    {
+      "version": "1.0.0",
+      "changedAt": "2026-02-07T12:00:00Z",
+      "changeType": "created",
+      "summary": "初版作成（AI駆動タスク分解を含む）"
+    }
+  ],
   "files": {
     "description": "requirements/req-000016/description.md",
     "supplementary": []
   },
   "successCriteria": [
-    "reqord issue create <spec-id> でSpecificationがGitHub Issueに分解される",
-    "並列グループ（P0/P1/P2）とクリティカルパスが自動計算される",
+    "reqord issue create <spec-id> --tasks-file <path> で構造化タスク定義からGitHub Issueが作成される",
     "GitHub Issue TemplateがIssue作成時に適用される",
     "reqord issue sync <spec-id> でGitHub Issueの状態がSpecification JSONに同期される",
     "reqord issue sync-all で全Specificationの同期が実行される",
     "reqord issue validate <spec-id> でメタデータ整合性チェックが実行される",
-    "分解戦略（by-layer/by-feature/by-requirement/custom）が選択できる"
+    "Reqordメタデータ（spec-id, req-id）がIssueラベル・コメントに埋め込まれる"
   ],
   "format": {
     "type": "user-story",
     "userStory": {
       "as": "開発者",
-      "iWant": "仕様書からGitHub Issueを自動生成し進捗を追跡したい",
+      "iWant": "構造化されたタスク定義からGitHub Issueを作成し進捗を追跡したい",
       "soThat": "仕様から実装への追跡可能性を維持しつつ効率的にタスク管理できる"
     }
   },
@@ -38,6 +44,15 @@
     ],
     "relatedTo": []
   },
-  "estimatedComplexity": "large",
-  "estimatedHours": 24
+  "estimatedComplexity": "medium",
+  "estimatedHours": 16,
+  "flags": [
+    {
+      "type": "feedback-review",
+      "reason": "AI駆動タスク分解（Anthropic SDK）をClaude Codeエコシステムに移管。reqordは構造化タスク定義(--tasks-file)からのIssue作成・同期・検証に集中",
+      "createdAt": "2026-02-09T10:00:00Z",
+      "relatedIssues": [17],
+      "severity": "high"
+    }
+  ]
 }

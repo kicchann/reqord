@@ -1,12 +1,19 @@
 {
   "id": "req-000006",
-  "version": "1.0.0",
-  "title": "AIエージェント向けCLI最適化",
-  "status": "draft",
+  "version": "1.1.0",
+  "title": "構造化出力・バッチ更新",
+  "status": "approved",
   "priority": "medium",
   "createdAt": "2026-02-07T10:00:00Z",
-  "updatedAt": "2026-02-06T17:48:00.827Z",
-  "versionHistory": [],
+  "updatedAt": "2026-02-09T12:00:00Z",
+  "versionHistory": [
+    {
+      "version": "1.0.0",
+      "changedAt": "2026-02-07T10:00:00Z",
+      "changeType": "created",
+      "summary": "AIエージェント向けCLI最適化として初版作成"
+    }
+  ],
   "files": {
     "description": "requirements/req-000006/description.md",
     "supplementary": []
@@ -17,16 +24,15 @@
     "reqord context show --json でProjectContextが実データ含む構造化JSONとして出力される",
     "reqord req update <id> --patch-file でJSON一括更新に対応する",
     "reqord req update <id> --description-file でdescription.md更新に対応する",
-    "reqord req validate <id> --json で品質基準チェック結果（SMARTスコア含む）が構造化JSONで返される",
-    "Claude Code用のreqord refineスラッシュコマンドが提供される",
-    "AIエージェントがreqord CLIのみで要件の読み取り・分析・更新の一連の操作を完結できる"
+    "reqord req validate <id> でルールベースの品質チェック（依存関係整合性・循環依存・フィールド完全性・曖昧表現検出）が実行される",
+    "外部ツール（AIエージェント・CI・スクリプト等）がreqord CLIのみで要件の読み取り・更新・検証を完結できる"
   ],
   "format": {
     "type": "user-story",
     "userStory": {
-      "as": "AIエージェント（Claude Code等）を利用する開発者",
-      "iWant": "AIエージェントがreqord CLIを使って要件を詳細化できるようにしたい",
-      "soThat": "reqordにAI機能を組み込まずに、任意のAIエージェントで要件品質を向上できる"
+      "as": "外部ツール連携を行う開発者",
+      "iWant": "reqord CLIの全操作を構造化データで行えるようにしたい",
+      "soThat": "AIエージェント・CI・スクリプト等の外部ツールからreqordを操作できる"
     }
   },
   "dependencies": {
@@ -42,5 +48,14 @@
     ]
   },
   "estimatedComplexity": "medium",
-  "estimatedHours": 16
+  "estimatedHours": 12,
+  "flags": [
+    {
+      "type": "feedback-review",
+      "reason": "AI補助機能を分離: SMARTスコアリング削除、Claude Codeスラッシュコマンド参照削除、ルールベースvalidateに限定",
+      "createdAt": "2026-02-09T10:00:00Z",
+      "relatedIssues": [17],
+      "severity": "high"
+    }
+  ]
 }

@@ -2,10 +2,10 @@
   "id": "req-000010",
   "version": "1.0.0",
   "title": "Zodバリデーションエラー詳細表示",
-  "status": "draft",
+  "status": "approved",
   "priority": "low",
   "createdAt": "2026-02-06T16:34:52.890Z",
-  "updatedAt": "2026-02-07T15:00:00Z",
+  "updatedAt": "2026-02-09T12:00:00Z",
   "versionHistory": [],
   "files": {
     "description": "requirements/req-000010/description.md",

@@ -1,12 +1,19 @@
 {
   "id": "req-000004",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "title": "共有型定義 (@reqord/shared)",
   "status": "approved",
   "priority": "high",
   "createdAt": "2026-02-07T10:00:00Z",
-  "updatedAt": "2026-02-07T15:00:00Z",
-  "versionHistory": [],
+  "updatedAt": "2026-02-09T11:00:00Z",
+  "versionHistory": [
+    {
+      "version": "1.0.0",
+      "changedAt": "2026-02-07T10:00:00Z",
+      "changeType": "created",
+      "summary": "初版作成"
+    }
+  ],
   "files": {
     "description": "requirements/req-000004/description.md",
     "supplementary": []
@@ -16,7 +23,8 @@
     "Requirement, ProjectContext, Specification の型定義が含まれる",
     "JSONスキーマバリデーション用のZodスキーマが含まれる",
     "型定義の変更がCLI・UIの両方に反映される",
-    "パッケージが独立してビルド・テスト可能"
+    "パッケージが独立してビルド・テスト可能",
+    "Requirement/Specificationのステータス遷移ルールと整合性ルールが型レベルで定義される"
   ],
   "format": {
     "type": "user-story",
@@ -38,5 +46,14 @@
     ]
   },
   "estimatedComplexity": "medium",
-  "estimatedHours": 12
+  "estimatedHours": 12,
+  "flags": [
+    {
+      "type": "feedback-review",
+      "reason": "Requirement/Specificationのステータス遷移ルール・整合性ルールを型定義に追加（成功基準6）",
+      "createdAt": "2026-02-09T11:00:00Z",
+      "relatedIssues": [16],
+      "severity": "medium"
+    }
+  ]
 }

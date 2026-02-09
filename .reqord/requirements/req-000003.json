@@ -1,12 +1,19 @@
 {
   "id": "req-000003",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "title": "ProjectContext CRUD",
   "status": "approved",
   "priority": "high",
   "createdAt": "2026-02-07T10:00:00Z",
-  "updatedAt": "2026-02-06T18:47:17.007Z",
-  "versionHistory": [],
+  "updatedAt": "2026-02-09T10:00:00Z",
+  "versionHistory": [
+    {
+      "version": "1.0.0",
+      "changedAt": "2026-02-07T10:00:00Z",
+      "changeType": "created",
+      "summary": "初版作成"
+    }
+  ],
   "files": {
     "description": "requirements/req-000003/description.md",
     "supplementary": []
@@ -15,14 +22,14 @@
     "reqord context show でプロジェクトコンテキストを表示できる",
     "reqord context update でコンテキスト情報を更新できる",
     "product.json, technical.json, structure.json を個別に管理できる",
-    "コンテキスト情報がAI詳細化の入力として使用できる形式で保存される"
+    "コンテキスト情報が外部ツール連携に適した構造化形式で保存される"
   ],
   "format": {
     "type": "user-story",
     "userStory": {
       "as": "開発者",
       "iWant": "プロジェクトのコンテキスト情報をCLIで管理したい",
-      "soThat": "AI要件詳細化に必要なプロジェクト情報を正確に維持できる"
+      "soThat": "プロジェクト情報を正確に維持し、外部ツールとの連携に活用できる"
     }
   },
   "dependencies": {
@@ -39,5 +46,14 @@
     ]
   },
   "estimatedComplexity": "small",
-  "estimatedHours": 8
+  "estimatedHours": 8,
+  "flags": [
+    {
+      "type": "feedback-review",
+      "reason": "AI詳細化への言及を外部ツール連携に汎用化（成功基準4、ユーザーストーリー）",
+      "createdAt": "2026-02-09T10:00:00Z",
+      "relatedIssues": [17],
+      "severity": "low"
+    }
+  ]
 }
