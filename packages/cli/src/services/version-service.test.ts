@@ -1,12 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
 // Mock declarations BEFORE imports
-vi.mock("node:child_process", () => ({
-  execSync: vi.fn(),
+const { mockExecSync } = vi.hoisted(() => ({
+  mockExecSync: vi.fn(),
 }));
-
-// Then import
-import { execSync } from "node:child_process";
+vi.mock("node:child_process", () => ({
+  execSync: mockExecSync,
+}));
 import {
   parseVersion,
   formatVersion,
@@ -201,8 +201,7 @@ describe("createHistoryEntry", () => {
   });
 
   it("gitCommitが渡されなかった場合にexecSyncで自動取得", () => {
-    // @ts-ignore -- execSync returns string when encoding: "utf-8" is specified
-    vi.mocked(execSync).mockReturnValue("def5678\n");
+    mockExecSync.mockReturnValue("def5678\n");
 
     const req = makeRequirement();
     const entry = createHistoryEntry(req);
@@ -211,7 +210,7 @@ describe("createHistoryEntry", () => {
   });
 
   it("execSyncが失敗した場合に空文字列", () => {
-    vi.mocked(execSync).mockImplementation(() => {
+    mockExecSync.mockImplementation(() => {
       throw new Error("not a git repo");
     });
 
@@ -239,13 +238,12 @@ describe("createHistoryEntry", () => {
 
 describe("getCurrentGitCommit", () => {
   it("execSyncの結果を返す", () => {
-    // @ts-ignore -- execSync returns string when encoding: "utf-8" is specified
-    vi.mocked(execSync).mockReturnValue("abc1234\n");
+    mockExecSync.mockReturnValue("abc1234\n");
     expect(getCurrentGitCommit()).toBe("abc1234");
   });
 
   it("失敗時に空文字列を返す", () => {
-    vi.mocked(execSync).mockImplementation(() => {
+    mockExecSync.mockImplementation(() => {
       throw new Error("not a git repo");
     });
     expect(getCurrentGitCommit()).toBe("");
