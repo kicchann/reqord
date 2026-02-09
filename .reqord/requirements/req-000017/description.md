@@ -1,5 +1,7 @@
 # Gap Analysis (既存コード差分分析)
 
+> **DEPRECATED (v1.1.0)**: AI駆動のコード分析機能はreqord CLIの責務外。Claude Codeエコシステム（code-explorerエージェント等）で実現する。詳細は Feedback #17 を参照。
+
 ## 概要
 
 新規・変更Requirementと既存コードベースとのギャップを分析する機能。既存実装のカバレッジ評価、不足機能の特定、コード矛盾の検出を行い、実装計画の精度を向上させる。

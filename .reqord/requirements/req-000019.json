@@ -1,12 +1,19 @@
 {
   "id": "req-000019",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "title": "ステータス表示コマンド",
-  "status": "draft",
+  "status": "approved",
   "priority": "medium",
   "createdAt": "2026-02-07T12:00:00Z",
-  "updatedAt": "2026-02-07T12:00:00Z",
-  "versionHistory": [],
+  "updatedAt": "2026-02-09T12:00:00Z",
+  "versionHistory": [
+    {
+      "version": "1.0.0",
+      "changedAt": "2026-02-07T12:00:00Z",
+      "changeType": "created",
+      "summary": "初版作成"
+    }
+  ],
   "files": {
     "description": "requirements/req-000019/description.md",
     "supplementary": []
@@ -16,6 +23,7 @@
     "reqord status <req-id> でRequirementの詳細ステータスが表示される",
     "reqord status <spec-id> でSpecificationの詳細ステータスが表示される",
     "Requirements/Specifications/Issues の進捗が数値とプログレスバーで表示される",
+    "Requirement/Specification間のステータス整合性チェックが実行され、不整合が警告表示される",
     "--jsonオプションで構造化出力される"
   ],
   "format": {
@@ -23,7 +31,7 @@
     "userStory": {
       "as": "プロジェクトマネージャー",
       "iWant": "プロジェクト全体の要件・仕様・実装の進捗を一覧で把握したい",
-      "soThat": "プロジェクトの健全性を素早く判断できる"
+      "soThat": "プロジェクトの健全性とステータス不整合を素早く判断できる"
     }
   },
   "dependencies": {
@@ -33,9 +41,19 @@
     ],
     "blocks": [],
     "relatedTo": [
+      "req-000004",
       "req-000013"
     ]
   },
   "estimatedComplexity": "small",
-  "estimatedHours": 8
+  "estimatedHours": 10,
+  "flags": [
+    {
+      "type": "feedback-review",
+      "reason": "Req/Specステータス整合性チェック・警告表示を追加（成功基準5）。遷移ルールはreq-000004で定義",
+      "createdAt": "2026-02-09T11:00:00Z",
+      "relatedIssues": [16],
+      "severity": "medium"
+    }
+  ]
 }

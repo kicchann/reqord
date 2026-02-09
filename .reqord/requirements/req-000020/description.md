@@ -1,41 +1,39 @@
-# LLMコンテキスト出力
+# コンテキスト統合出力
 
 ## 概要
 
-Requirementに関連する全情報（ProjectContext、Requirement詳細、Specification、Gap Analysis結果）を統合し、LLMツール（Claude Code等）に渡せる構造化テキストとして出力する機能。
+Requirementに関連する全情報（ProjectContext、Requirement詳細、Specification）を統合し、外部ツールに渡せる構造化テキストとして出力する機能。
+
+> **v1.1.0変更点**: タイトルを「LLMコンテキスト出力」から変更。LLM特化の表現を汎用化し、トークン最適化はClaude Code側の責務に。Gap Analysis統合を削除（req-000017 deprecated）。Feedback #17 参照。
 
 ## ユーザーストーリー
 
-AI駆動開発者として、要件に関連する全情報をLLMに渡せる形式で出力したい。
-なぜなら、AIツールに正確なコンテキストを提供して高品質な出力を得られるから。
+開発者として、要件に関連する全情報を統合して出力したい。
+なぜなら、外部ツール（AIエージェント・レビューツール等）に正確なコンテキストを提供できるから。
 
 ## CLIコマンド仕様
 
-### reqord context \<req-id\>
+### reqord context export \<req-id\>
 
 指定Requirementに関連する全コンテキストを統合出力:
 
-1. **ProjectContext** (product.md, technical.md, structure.md の要約)
+1. **ProjectContext** (product.json, technical.json, structure.json の要約)
 2. **Requirement詳細** (JSON + description.md)
-3. **Gap Analysis結果** (存在する場合)
-4. **関連Specification** (存在する場合、design.md含む)
-5. **依存Requirement** (blockedBy, blocks の概要)
+3. **関連Specification** (存在する場合、design.md含む)
+4. **依存Requirement** (blockedBy, blocks の概要)
 
 出力形式:
 ```
 # Project Context
-[product.mdの要約]
-[technical.mdの要約]
+[product.jsonの要約]
+[technical.jsonの要約]
 
-# Requirement: req-001 - IFCエクスポート機能
+# Requirement: req-001 - タイトル
 [description.mdの全文]
 
 ## Success Criteria
-- IFC4形式で出力される
+- 基準1
 - ...
-
-## Gap Analysis
-[gapAnalysis結果のサマリー]
 
 # Related Specification: spec-001
 [design.mdの要約]
@@ -43,19 +41,19 @@ AI駆動開発者として、要件に関連する全情報をLLMに渡せる形
 
 使用例:
 ```bash
-reqord context req-001 | claude code
-reqord context req-001 | pbcopy  # クリップボードにコピー
+reqord context export req-001 | pbcopy       # クリップボードにコピー
+reqord context export req-001 --format json  # JSON形式で出力
 ```
 
 ## オプション
 
 - `--full` : 全情報を省略なしで出力
-- `--compact` : トークン節約のため最小限の情報のみ
+- `--compact` : 最小限の情報のみ（デフォルト）
 - `--format markdown` : Markdown形式（デフォルト）
 - `--format json` : JSON形式
 
 ## 技術的制約
 
-- 出力サイズの目安: compact=2000トークン程度、full=10000トークン程度
-- Specification/Gap Analysis が未作成の場合はスキップ
+- Specification が未作成の場合はスキップ
 - stdoutに出力（パイプ対応）
+- reqord自体にはAI SDK依存を追加しない

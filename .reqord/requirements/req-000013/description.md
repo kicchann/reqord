@@ -2,7 +2,9 @@
 
 ## 概要
 
-Requirementに基づくSpecification（仕様）の作成・管理機能。設計書（design.md）をメインドキュメントとし、補助資料（research、architecture図、コード例等）はsupplementaryとして自由に追加できる。
+Requirementに基づくSpecification（仕様）の作成・管理機能。設計書（design.md）をメインドキュメントとし、補助資料はsupplementary/として自由に追加できる。
+
+> **v1.1.0変更点**: spec design/researchコマンドをファイル管理（表示・更新）に限定。AI駆動の設計書コンテンツ生成は `/reqord:design` コマンド（Claude Codeエコシステム）の責務。Feedback #17 参照。
 
 ## ユーザーストーリー
 
@@ -29,21 +31,32 @@ Requirementに基づくSpecification（仕様）の作成・管理機能。設�
 - JSON + design.md の内容を整形表示
 - supplementaryファイル一覧表示
 
-### reqord spec design \<id\>
+### reqord spec edit \<id\> --file \<filename\>
 
-- 設計書の閲覧・更新
-- design.mdの編集（テンプレート付き）
+- 指定ファイル（design, research等）の表示・更新
+- ファイル管理のみ（データの表示・ファイルパス解決・更新日時記録）
+- コンテンツ生成はスコープ外（Claude Code `/reqord:design` が担当）
 
 ## データ構造
 
-仕様書のJSONフォーマットはdocs/main.mdの `Specification` 定義に準拠。主要フィールド:
+仕様書のJSONフォーマット。主要フィールド:
 
 - `requirementId`: 紐づくRequirement ID
 - `files`: 外部ファイル参照（design + supplementary）
 - `versionHistory`: 承認トラッキング（version, status, gitCommit, approvedAt, approvedBy）
+
+## 責務分離
+
+| 責務 | 担当 |
+|------|------|
+| Specification JSON/ファイルのCRUD | reqord CLI（本要件） |
+| design.mdテンプレート生成 | reqord CLI（本要件） |
+| AI駆動の設計書コンテンツ生成 | Claude Code `/reqord:design` |
+| AI駆動の調査レポート生成 | Claude Code エコシステム |
 
 ## 技術的制約
 
 - @reqord/shared にSpecification Zodスキーマを追加
 - テンプレートは `settings/templates/specification-design.md` を使用
 - Requirement→Specification の1:N関係をサポート
+- reqord自体にはAI SDK依存を追加しない

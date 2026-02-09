@@ -1,12 +1,25 @@
 {
   "id": "req-000002",
-  "version": "1.0.0",
+  "version": "1.2.0",
   "title": "Requirement CRUD",
   "status": "approved",
   "priority": "high",
   "createdAt": "2026-02-07T10:00:00Z",
-  "updatedAt": "2026-02-07T03:35:00.000Z",
-  "versionHistory": [],
+  "updatedAt": "2026-02-09T12:00:00Z",
+  "versionHistory": [
+    {
+      "version": "1.0.0",
+      "changedAt": "2026-02-07T10:00:00Z",
+      "changeType": "created",
+      "summary": "初版作成"
+    },
+    {
+      "version": "1.1.0",
+      "changedAt": "2026-02-09T10:00:00Z",
+      "changeType": "modified",
+      "summary": "Feedback #17: blocksからdeprecated要件を除去"
+    }
+  ],
   "files": {
     "description": "requirements/req-000002/description.md",
     "supplementary": []
@@ -15,9 +28,9 @@
     "reqord req create <title> でJSON+Markdownが生成される",
     "IDが自動採番される（req-NNNNNN形式、6桁ゼロ埋め）",
     "reqord req list で要件一覧がテーブル表示される",
-    "reqord req show <id> で要件詳細が表示される",
-    "reqord req update <id> で要件のフィールドを更新できる",
-    "reqord req delete <id> で要件を削除できる（確認プロンプト付き）"
+    "reqord req show <id> で要件の全フィールドとdescription.mdが表示される",
+    "reqord req update <id> --status/--priority/--title等でフィールド更新、updatedAt自動更新",
+    "reqord req delete <id> で確認後にJSONとdescriptionディレクトリが削除される"
   ],
   "format": {
     "type": "user-story",
@@ -35,17 +48,26 @@
       "req-000005",
       "req-000006",
       "req-000007",
+      "req-000009",
       "req-000011",
       "req-000013",
-      "req-000017",
       "req-000019",
       "req-000020",
-      "req-000021"
+      "req-000023"
     ],
     "relatedTo": [
       "req-000003"
     ]
   },
   "estimatedComplexity": "medium",
-  "estimatedHours": 16
+  "estimatedHours": 16,
+  "flags": [
+    {
+      "type": "feedback-review",
+      "reason": "v1.1.0: blocksからdeprecated要件を除去。v1.2.0: req-000008（Show/Update/Delete）を吸収、成功基準を詳細化",
+      "createdAt": "2026-02-09T10:00:00Z",
+      "relatedIssues": [17],
+      "severity": "low"
+    }
+  ]
 }

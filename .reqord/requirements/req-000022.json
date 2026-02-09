@@ -2,10 +2,10 @@
   "id": "req-000022",
   "version": "1.0.0",
   "title": "Web UI拡張 (Dashboard・依存グラフ・Gantt Chart)",
-  "status": "draft",
+  "status": "approved",
   "priority": "medium",
   "createdAt": "2026-02-07T12:00:00Z",
-  "updatedAt": "2026-02-07T12:00:00Z",
+  "updatedAt": "2026-02-09T12:00:00Z",
   "versionHistory": [],
   "files": {
     "description": "requirements/req-000022/description.md",
@@ -37,5 +37,14 @@
     ]
   },
   "estimatedComplexity": "large",
-  "estimatedHours": 32
+  "estimatedHours": 32,
+  "flags": [
+    {
+      "type": "feedback-review",
+      "reason": "Req→Spec→Issueトレーサビリティグラフのビュー切り替えUX（ノード内ボタン・滑らかなトランジション）の仕様レベル明確化が必要",
+      "createdAt": "2026-02-09T15:00:00Z",
+      "relatedIssues": [21],
+      "severity": "low"
+    }
+  ]
 }

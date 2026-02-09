@@ -1,12 +1,19 @@
 {
   "id": "req-000013",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "title": "Specification CRUD",
   "status": "approved",
   "priority": "high",
   "createdAt": "2026-02-07T12:00:00Z",
-  "updatedAt": "2026-02-06T23:57:29.568Z",
-  "versionHistory": [],
+  "updatedAt": "2026-02-09T10:00:00Z",
+  "versionHistory": [
+    {
+      "version": "1.0.0",
+      "changedAt": "2026-02-07T12:00:00Z",
+      "changeType": "created",
+      "summary": "初版作成"
+    }
+  ],
   "files": {
     "description": "requirements/req-000013/description.md",
     "supplementary": []
@@ -15,10 +22,10 @@
     "reqord spec create <req-id> でSpecification JSON+ディレクトリが生成される",
     "reqord spec list でSpecification一覧がテーブル表示される",
     "reqord spec show <id> でSpecification詳細が表示される",
-    "reqord spec research <id> で調査フェーズのresearch.mdを編集できる",
-    "reqord spec design <id> で設計フェーズのdesign.mdを編集できる",
+    "reqord spec edit <id> --file research でresearch.mdの内容を表示・更新できる",
+    "reqord spec edit <id> --file design でdesign.mdの内容を表示・更新できる",
     "Specification JSONがZodスキーマでバリデーションされる",
-    "research.md, design.md, architecture.mmd, examples/ が適切に管理される"
+    "design.md, supplementary/ が適切に管理される"
   ],
   "format": {
     "type": "user-story",
@@ -43,5 +50,14 @@
     "relatedTo": []
   },
   "estimatedComplexity": "large",
-  "estimatedHours": 24
+  "estimatedHours": 20,
+  "flags": [
+    {
+      "type": "feedback-review",
+      "reason": "spec design/researchコマンドをファイル管理（表示・更新）に限定。AI駆動の設計書生成は/reqord:designコマンド（Claude Code）の責務",
+      "createdAt": "2026-02-09T10:00:00Z",
+      "relatedIssues": [17],
+      "severity": "medium"
+    }
+  ]
 }

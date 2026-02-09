@@ -2,10 +2,10 @@
   "id": "req-000005",
   "version": "1.0.0",
   "title": "Requirementバージョン管理",
-  "status": "draft",
+  "status": "approved",
   "priority": "medium",
   "createdAt": "2026-02-07T10:00:00Z",
-  "updatedAt": "2026-02-07T10:00:00Z",
+  "updatedAt": "2026-02-09T12:00:00Z",
   "versionHistory": [],
   "files": {
     "description": "requirements/req-000005/description.md",

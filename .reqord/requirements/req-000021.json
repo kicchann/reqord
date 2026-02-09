@@ -1,12 +1,19 @@
 {
   "id": "req-000021",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "title": "EARS形式変換",
-  "status": "draft",
+  "status": "deprecated",
   "priority": "low",
   "createdAt": "2026-02-07T12:00:00Z",
-  "updatedAt": "2026-02-07T12:00:00Z",
-  "versionHistory": [],
+  "updatedAt": "2026-02-09T10:00:00Z",
+  "versionHistory": [
+    {
+      "version": "1.0.0",
+      "changedAt": "2026-02-07T12:00:00Z",
+      "changeType": "created",
+      "summary": "初版作成"
+    }
+  ],
   "files": {
     "description": "requirements/req-000021/description.md",
     "supplementary": []
@@ -36,5 +43,15 @@
     ]
   },
   "estimatedComplexity": "small",
-  "estimatedHours": 8
+  "estimatedHours": 8,
+  "deprecatedReason": "Anthropic SDKを使用したAI変換機能はreqord CLIの責務外。Claude Codeエコシステム（/reqord:refineコマンド等）で実現する。formatフィールドの保存はreq-000002（Requirement CRUD）が担当（Feedback #17）",
+  "flags": [
+    {
+      "type": "feedback-review",
+      "reason": "AI補助機能のreqord CLI/SDKからClaude Codeエコシステムへの分離",
+      "createdAt": "2026-02-09T10:00:00Z",
+      "relatedIssues": [17],
+      "severity": "high"
+    }
+  ]
 }
