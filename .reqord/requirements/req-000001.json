@@ -2,10 +2,10 @@
   "id": "req-000001",
   "version": "1.0.0",
   "title": "CLI初期化コマンド",
-  "status": "approved",
+  "status": "implemented",
   "priority": "high",
   "createdAt": "2026-02-07T10:00:00Z",
-  "updatedAt": "2026-02-07T15:00:00Z",
+  "updatedAt": "2026-02-09T11:57:46Z",
   "versionHistory": [],
   "files": {
     "description": "requirements/req-000001/description.md",

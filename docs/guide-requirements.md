@@ -24,17 +24,18 @@ reqordで要件（Requirement）を作成・管理する際のガイドライン
 
 ## Status
 
-要件のstatusは **要件定義の承認ライフサイクル** を表します。実装の進捗ではありません。
+要件のstatusは **要件定義の承認ライフサイクルと実装状態** を表します。
 
 | Status | 意味 | 遷移条件 |
 |--------|------|---------|
 | `draft` | 作成中・編集中 | 初期状態 |
 | `pending_approval` | レビュー待ち | `reqord req approve` でPR作成時 |
-| `approved` | 承認済み | PRマージ時 |
+| `approved` | 承認済み・実装可能 | PRマージ時 |
+| `implemented` | 実装完了 | 実装が完了した場合 |
 | `deprecated` | 廃止 | 要件が不要になった場合 |
 
 - `approved` は「この要件は正しく定義され、実装してよい」という意味です
-- 実装が完了したかどうかは、紐づくSpecificationとGitHub Issueの状態で判断します
+- `implemented` は実装が完了したことを示します。GitHub Issueの有無に関わらず設定できます
 
 ---
 

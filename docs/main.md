@@ -260,7 +260,7 @@ graph TB
   "id": "req-001",
   "version": "1.1.0",
   "title": "IFCエクスポート機能",
-  "status": "approved",  // draft | pending_approval | approved | deprecated
+  "status": "approved",  // draft | pending_approval | approved | implemented | deprecated
   "priority": "high",    // low | medium | high
   "createdAt": "2026-02-01T10:00:00Z",
   "updatedAt": "2026-02-05T15:30:00Z",
@@ -399,7 +399,7 @@ preserving all structural attributes.
   "id": "spec-001",
   "requirementId": "req-001",
   "version": "1.0.0",
-  "status": "approved",  // draft | pending_approval | approved | deprecated
+  "status": "approved",  // draft | pending_approval | approved | implemented | deprecated
   "createdAt": "2026-02-06T10:00:00Z",
   "updatedAt": "2026-02-06T16:00:00Z",
 

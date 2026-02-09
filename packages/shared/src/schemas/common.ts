@@ -4,6 +4,7 @@ export const StatusSchema = z.enum([
   "draft",
   "pending_approval",
   "approved",
+  "implemented",
   "deprecated",
 ]);
 export type Status = z.infer<typeof StatusSchema>;

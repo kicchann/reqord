@@ -2,10 +2,10 @@
   "id": "req-000002",
   "version": "1.2.0",
   "title": "Requirement CRUD",
-  "status": "approved",
+  "status": "implemented",
   "priority": "high",
   "createdAt": "2026-02-07T10:00:00Z",
-  "updatedAt": "2026-02-09T12:00:00Z",
+  "updatedAt": "2026-02-09T11:57:46Z",
   "versionHistory": [
     {
       "version": "1.0.0",
@@ -66,7 +66,9 @@
       "type": "feedback-review",
       "reason": "v1.1.0: blocksからdeprecated要件を除去。v1.2.0: req-000008（Show/Update/Delete）を吸収、成功基準を詳細化",
       "createdAt": "2026-02-09T10:00:00Z",
-      "relatedIssues": [17],
+      "relatedIssues": [
+        17
+      ],
       "severity": "low"
     }
   ]

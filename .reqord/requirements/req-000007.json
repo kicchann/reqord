@@ -2,10 +2,10 @@
   "id": "req-000007",
   "version": "1.0.0",
   "title": "ローカルUI基本機能",
-  "status": "approved",
+  "status": "implemented",
   "priority": "medium",
   "createdAt": "2026-02-07T10:00:00Z",
-  "updatedAt": "2026-02-06T21:51:29.691Z",
+  "updatedAt": "2026-02-09T11:57:46Z",
   "versionHistory": [],
   "files": {
     "description": "requirements/req-000007/description.md",

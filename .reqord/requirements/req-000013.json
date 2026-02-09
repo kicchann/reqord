@@ -2,10 +2,10 @@
   "id": "req-000013",
   "version": "1.1.0",
   "title": "Specification CRUD",
-  "status": "approved",
+  "status": "implemented",
   "priority": "high",
   "createdAt": "2026-02-07T12:00:00Z",
-  "updatedAt": "2026-02-09T10:00:00Z",
+  "updatedAt": "2026-02-09T11:57:46Z",
   "versionHistory": [
     {
       "version": "1.0.0",
@@ -56,7 +56,9 @@
       "type": "feedback-review",
       "reason": "spec design/researchコマンドをファイル管理（表示・更新）に限定。AI駆動の設計書生成は/reqord:designコマンド（Claude Code）の責務",
       "createdAt": "2026-02-09T10:00:00Z",
-      "relatedIssues": [17],
+      "relatedIssues": [
+        17
+      ],
       "severity": "medium"
     }
   ]
