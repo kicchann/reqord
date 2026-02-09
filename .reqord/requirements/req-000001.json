@@ -35,5 +35,16 @@
     "relatedTo": []
   },
   "estimatedComplexity": "small",
-  "estimatedHours": 8
+  "estimatedHours": 8,
+  "flags": [
+    {
+      "type": "feedback-review",
+      "reason": "Feedback from issue #19",
+      "createdAt": "2026-02-09T07:44:24.565Z",
+      "relatedIssues": [
+        19
+      ],
+      "severity": "medium"
+    }
+  ]
 }

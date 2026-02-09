@@ -138,11 +138,7 @@ After logging in, I get 401 error after about 1 hour.
 **Estimated effort:** 8 hours
 ```
 
-**Labels追加:**
-- `feedback`
-- `requirement-gap`
-- `req-005`
-- `spec-005`
+**メタデータ伝達**: Issue body内のHTMLコメントタグ (`<!-- reqord:feedback {...} -->`) が唯一のメタデータ伝達方式です。GitHubラベルはメタデータ管理には使用しません。
 
 ---
 

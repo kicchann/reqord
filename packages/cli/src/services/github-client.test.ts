@@ -1,9 +1,15 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import { EventEmitter } from "node:events";
+import { PassThrough } from "node:stream";
 
-// Create mock inside the factory to avoid hoisting issues
+let mockSpawnInstance: EventEmitter & { stdin: PassThrough; stderr: PassThrough };
+
 vi.mock("node:child_process", () => {
+  const mockExec = Object.assign(vi.fn(), { __type: "exec" });
+  const mockSpawn = vi.fn(() => mockSpawnInstance);
   return {
-    exec: vi.fn(),
+    exec: mockExec,
+    spawn: mockSpawn,
   };
 });
 
@@ -11,26 +17,40 @@ vi.mock("node:util", () => {
   const mockExecAsync = vi.fn();
   return {
     promisify: () => mockExecAsync,
-    mockExecAsync, // Export for test access
+    mockExecAsync,
   };
 });
 
 import {
   listFeedbackIssues,
   getIssue,
-  addLabelsToIssue,
+  updateIssueBody,
   closeIssue,
 } from "./github-client.js";
 import * as util from "node:util";
+import * as childProcess from "node:child_process";
 
 const mockExecAsync = (util as unknown as { mockExecAsync: ReturnType<typeof vi.fn> }).mockExecAsync;
+const mockSpawn = vi.mocked(childProcess.spawn);
+
+function createMockSpawnInstance(exitCode = 0) {
+  const instance = new EventEmitter() as EventEmitter & { stdin: PassThrough; stderr: PassThrough };
+  instance.stdin = new PassThrough();
+  instance.stderr = new PassThrough();
+  mockSpawnInstance = instance;
+
+  // Emit close on next tick to allow stdin.write/end to complete
+  process.nextTick(() => {
+    instance.emit("close", exitCode);
+  });
+}
 
 beforeEach(() => {
   vi.clearAllMocks();
 });
 
 describe("listFeedbackIssues", () => {
-  it("gh issueコマンドを正しく実行する", async () => {
+  it("gh issueコマンドにbodyフィールドとmaxBufferを含めて実行する", async () => {
     mockExecAsync.mockResolvedValue({
       stdout: "[]",
       stderr: "",
@@ -39,7 +59,8 @@ describe("listFeedbackIssues", () => {
     await listFeedbackIssues();
 
     expect(mockExecAsync).toHaveBeenCalledWith(
-      "gh issue list --label feedback --json number,title,state,labels,createdAt --limit 1000",
+      "gh issue list --label feedback --json number,title,state,labels,createdAt,body --limit 1000",
+      { maxBuffer: 10 * 1024 * 1024 },
     );
   });
 
@@ -51,6 +72,7 @@ describe("listFeedbackIssues", () => {
         state: "OPEN",
         labels: [{ name: "feedback" }, { name: "bug" }],
         createdAt: "2026-01-01T00:00:00Z",
+        body: "Issue body",
       },
       {
         number: 18,
@@ -58,6 +80,7 @@ describe("listFeedbackIssues", () => {
         state: "CLOSED",
         labels: [{ name: "feedback" }],
         createdAt: "2026-01-02T00:00:00Z",
+        body: "Another body",
       },
     ];
 
@@ -75,6 +98,7 @@ describe("listFeedbackIssues", () => {
       state: "open",
       labels: ["feedback", "bug"],
       createdAt: "2026-01-01T00:00:00Z",
+      body: "Issue body",
     });
     expect(result[1]).toEqual({
       number: 18,
@@ -82,6 +106,7 @@ describe("listFeedbackIssues", () => {
       state: "closed",
       labels: ["feedback"],
       createdAt: "2026-01-02T00:00:00Z",
+      body: "Another body",
     });
   });
 
@@ -94,9 +119,9 @@ describe("listFeedbackIssues", () => {
         labels: [
           { name: "feedback" },
           { name: "bug" },
-          { name: "req:000001" },
         ],
         createdAt: "2026-01-01T00:00:00Z",
+        body: "",
       },
     ];
 
@@ -107,7 +132,7 @@ describe("listFeedbackIssues", () => {
 
     const result = await listFeedbackIssues();
 
-    expect(result[0].labels).toEqual(["feedback", "bug", "req:000001"]);
+    expect(result[0].labels).toEqual(["feedback", "bug"]);
   });
 
   it("ghコマンド失敗時にエラーを投げる", async () => {
@@ -174,45 +199,34 @@ describe("getIssue", () => {
   });
 });
 
-describe("addLabelsToIssue", () => {
-  it("issue番号とラベルを指定してgh issue editを実行する", async () => {
-    mockExecAsync.mockResolvedValue({
-      stdout: "",
-      stderr: "",
-    });
+describe("updateIssueBody", () => {
+  it("spawnで--body-file -を使いstdin経由でbodyを渡す", async () => {
+    createMockSpawnInstance(0);
 
-    await addLabelsToIssue(17, ["bug", "priority:high"]);
+    await updateIssueBody(17, "New body content");
 
-    expect(mockExecAsync).toHaveBeenCalledWith(
-      'gh issue edit 17 --add-label "bug,priority:high"',
+    expect(mockSpawn).toHaveBeenCalledWith(
+      "gh",
+      ["issue", "edit", "17", "--body-file", "-"],
     );
   });
 
-  it("ラベルが1つの場合も正しく実行する", async () => {
-    mockExecAsync.mockResolvedValue({
-      stdout: "",
-      stderr: "",
-    });
+  it("HTMLコメント付きのbodyをstdin経由で安全に渡す", async () => {
+    createMockSpawnInstance(0);
 
-    await addLabelsToIssue(17, ["bug"]);
+    const body = 'Issue text\n<!-- reqord:feedback {"type":"bug"} -->';
+    await updateIssueBody(17, body);
 
-    expect(mockExecAsync).toHaveBeenCalledWith(
-      'gh issue edit 17 --add-label "bug"',
+    expect(mockSpawn).toHaveBeenCalledWith(
+      "gh",
+      ["issue", "edit", "17", "--body-file", "-"],
     );
-  });
-
-  it("不正な文字を含むラベルはエラーを投げる", async () => {
-    await expect(
-      addLabelsToIssue(17, ['bug"; rm -rf /']),
-    ).rejects.toThrow("Invalid label format");
   });
 
   it("ghコマンド失敗時にエラーを投げる", async () => {
-    mockExecAsync.mockRejectedValue(new Error("Failed to add labels"));
+    createMockSpawnInstance(1);
 
-    await expect(addLabelsToIssue(17, ["bug"])).rejects.toThrow(
-      "Failed to add labels",
-    );
+    await expect(updateIssueBody(17, "body")).rejects.toThrow("gh issue edit failed");
   });
 });
 

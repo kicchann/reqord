@@ -1,7 +1,8 @@
-import type { FeedbackEntry, FeedbackType } from "@reqord/shared";
+import type { FeedbackEntry } from "@reqord/shared";
 import * as githubClient from "./github-client.js";
 import type { GitHubIssue } from "./github-client.js";
 import * as feedbackRepo from "../repositories/feedback.js";
+import { parseReqordComment, upsertReqordComment } from "./reqord-comment.js";
 
 export async function syncFromGitHub(cwd: string): Promise<number> {
   const issues = await githubClient.listFeedbackIssues();
@@ -18,9 +19,15 @@ export async function syncToGitHub(cwd: string): Promise<number> {
   const index = await feedbackRepo.loadIndex(cwd);
   let count = 0;
   for (const feedback of index.feedbacks) {
-    const labels = buildLabelsFromFeedback(feedback);
-    if (labels.length > 0) {
-      await githubClient.addLabelsToIssue(feedback.githubIssue, labels);
+    const issue = await githubClient.getIssue(feedback.githubIssue);
+    const metadata = {
+      type: feedback.type,
+      severity: feedback.severity,
+      linkedTo: feedback.linkedTo,
+    };
+    const newBody = upsertReqordComment(issue.body ?? "", metadata);
+    if (newBody !== issue.body) {
+      await githubClient.updateIssueBody(feedback.githubIssue, newBody);
       count++;
     }
   }
@@ -28,57 +35,18 @@ export async function syncToGitHub(cwd: string): Promise<number> {
 }
 
 export function parseGitHubIssue(issue: GitHubIssue): FeedbackEntry {
-  const type = parseTypeFromLabels(issue.labels);
-  const linkedTo = parseLinkedToFromLabels(issue.labels);
+  const comment = parseReqordComment(issue.body ?? "");
 
   return {
     githubIssue: issue.number,
-    type,
-    linkedTo,
+    type: comment?.type,
+    severity: comment?.severity,
+    linkedTo: comment?.linkedTo ?? {
+      requirements: [],
+      createdRequirements: [],
+      specifications: [],
+    },
     syncedAt: new Date().toISOString(),
     status: issue.state === "closed" ? "closed" : "open",
-  };
-}
-
-export function buildLabelsFromFeedback(feedback: FeedbackEntry): string[] {
-  const labels: string[] = [];
-  if (feedback.type) {
-    labels.push(feedback.type);
-  }
-  for (const reqId of feedback.linkedTo.requirements) {
-    labels.push(`req:${reqId.replace("req-", "")}`);
-  }
-  for (const specId of feedback.linkedTo.specifications) {
-    labels.push(`spec:${specId.replace("spec-", "")}`);
-  }
-  return labels;
-}
-
-function parseTypeFromLabels(labels: string[]): FeedbackType | undefined {
-  const typeLabels: FeedbackType[] = [
-    "bug",
-    "improvement",
-    "requirement-gap",
-    "spec-mismatch",
-    "security",
-  ];
-  return typeLabels.find((t) => labels.includes(t));
-}
-
-function parseLinkedToFromLabels(labels: string[]): {
-  requirements: string[];
-  createdRequirements: string[];
-  specifications: string[];
-} {
-  const requirements = labels
-    .filter((l) => /^req:\d{6}$/.test(l))
-    .map((l) => `req-${l.slice(4)}`);
-  const specifications = labels
-    .filter((l) => /^spec:\d{6}$/.test(l))
-    .map((l) => `spec-${l.slice(5)}`);
-  return {
-    requirements,
-    createdRequirements: [],
-    specifications,
   };
 }

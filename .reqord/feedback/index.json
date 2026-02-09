@@ -4,20 +4,67 @@
       "githubIssue": 21,
       "type": "improvement",
       "linkedTo": {
-        "requirements": ["req-000022"],
+        "requirements": [
+          "req-000022"
+        ],
+        "createdRequirements": [],
         "specifications": []
       },
-      "structuredAt": "2026-02-09T15:00:00Z",
+      "syncedAt": "2026-02-09T07:40:21.232Z",
       "status": "open"
     },
     {
       "githubIssue": 23,
       "type": "requirement-gap",
+      "severity": "low",
       "linkedTo": {
-        "requirements": ["req-000023"],
+        "requirements": [
+          "req-000023"
+        ],
+        "createdRequirements": [],
         "specifications": []
       },
-      "syncedAt": "2026-02-09T15:00:00Z",
+      "syncedAt": "2026-02-09T07:40:21.214Z",
+      "status": "closed"
+    },
+    {
+      "githubIssue": 30,
+      "type": "improvement",
+      "severity": "low",
+      "linkedTo": {
+        "requirements": [
+          "req-000016"
+        ],
+        "createdRequirements": [],
+        "specifications": []
+      },
+      "syncedAt": "2026-02-09T07:40:21.206Z",
+      "status": "open"
+    },
+    {
+      "githubIssue": 22,
+      "type": "spec-mismatch",
+      "linkedTo": {
+        "requirements": [
+          "req-000023"
+        ],
+        "createdRequirements": [],
+        "specifications": []
+      },
+      "syncedAt": "2026-02-09T07:40:21.228Z",
+      "status": "closed"
+    },
+    {
+      "githubIssue": 19,
+      "type": "improvement",
+      "linkedTo": {
+        "requirements": [
+          "req-000001"
+        ],
+        "createdRequirements": [],
+        "specifications": []
+      },
+      "syncedAt": "2026-02-09T07:40:21.235Z",
       "status": "open"
     }
   ]

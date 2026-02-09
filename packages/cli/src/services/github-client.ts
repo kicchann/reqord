@@ -1,4 +1,4 @@
-import { exec } from "node:child_process";
+import { exec, spawn } from "node:child_process";
 import { promisify } from "node:util";
 
 const execAsync = promisify(exec);
@@ -38,7 +38,8 @@ function normalizeIssue(raw: GitHubIssueRaw): GitHubIssue {
 
 export async function listFeedbackIssues(): Promise<GitHubIssue[]> {
   const { stdout } = await execAsync(
-    "gh issue list --label feedback --json number,title,state,labels,createdAt --limit 1000",
+    "gh issue list --label feedback --json number,title,state,labels,createdAt,body --limit 1000",
+    { maxBuffer: 10 * 1024 * 1024 },
   );
   const raw: GitHubIssueRaw[] = JSON.parse(stdout);
   return raw.map(normalizeIssue);
@@ -52,21 +53,22 @@ export async function getIssue(issueNumber: number): Promise<GitHubIssue> {
   return normalizeIssue(raw);
 }
 
-const SAFE_LABEL_PATTERN = /^[a-zA-Z0-9_:\-./]+$/;
-
-export async function addLabelsToIssue(
+export async function updateIssueBody(
   issueNumber: number,
-  labels: string[],
+  newBody: string,
 ): Promise<void> {
-  for (const label of labels) {
-    if (!SAFE_LABEL_PATTERN.test(label)) {
-      throw new Error(`Invalid label format: ${label}`);
-    }
-  }
-  const labelStr = labels.join(",");
-  await execAsync(
-    `gh issue edit ${issueNumber} --add-label "${labelStr}"`,
-  );
+  return new Promise((resolve, reject) => {
+    const proc = spawn("gh", ["issue", "edit", String(issueNumber), "--body-file", "-"]);
+    proc.stdin.write(newBody);
+    proc.stdin.end();
+    let stderr = "";
+    proc.stderr.on("data", (chunk: Buffer) => { stderr += chunk.toString(); });
+    proc.on("close", (code) => {
+      if (code === 0) resolve();
+      else reject(new Error(`gh issue edit failed (code ${code}): ${stderr}`));
+    });
+    proc.on("error", reject);
+  });
 }
 
 export async function closeIssue(
