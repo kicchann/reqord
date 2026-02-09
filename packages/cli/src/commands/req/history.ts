@@ -2,6 +2,7 @@ import { Command } from "commander";
 import chalk from "chalk";
 import Table from "cli-table3";
 import { showRequirement } from "../../services/requirement-service.js";
+import { handleError } from "../../utils/error-handler.js";
 
 const STATUS_COLORS: Record<string, (s: string) => string> = {
   draft: chalk.blue,
@@ -57,11 +58,6 @@ export const historyCommand = new Command("history")
         chalk.gray(`\n${versionHistory.length} version(s) found.`),
       );
     } catch (error) {
-      console.error(
-        chalk.red(
-          `Failed to show history: ${(error as Error).message}`,
-        ),
-      );
-      process.exitCode = 1;
+      handleError(error, { json: options.json });
     }
   });

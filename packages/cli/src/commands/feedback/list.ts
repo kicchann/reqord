@@ -3,6 +3,7 @@ import chalk from "chalk";
 import Table from "cli-table3";
 import { listFeedbacks } from "../../services/feedback-service.js";
 import type { FeedbackType } from "@reqord/shared";
+import { handleError } from "../../utils/error-handler.js";
 
 const STATUS_COLORS: Record<string, (s: string) => string> = {
   open: chalk.green,
@@ -52,7 +53,6 @@ export const feedbackListCommand = new Command("list")
       console.log(table.toString());
       console.log(chalk.gray(`\n${feedbacks.length} feedback(s) found.`));
     } catch (error) {
-      console.error(chalk.red(`Error: ${(error as Error).message}`));
-      process.exitCode = 1;
+      handleError(error, { json: options.json });
     }
   });

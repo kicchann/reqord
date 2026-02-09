@@ -1,6 +1,8 @@
 import { Command } from "commander";
 import chalk from "chalk";
 import { initProject } from "../services/init-service.js";
+import { handleError } from "../utils/error-handler.js";
+import { AppError, ErrorCode } from "../utils/errors.js";
 
 export const initCommand = new Command("init")
   .description("Initialize .reqord/ directory structure")
@@ -11,14 +13,10 @@ export const initCommand = new Command("init")
       const result = await initProject(cwd);
 
       if (result.alreadyExists) {
-        console.error(
-          chalk.red("Error: .reqord/ already exists in the current directory."),
+        throw new AppError(
+          ".reqord/ already exists in the current directory.",
+          ErrorCode.ALREADY_EXISTS,
         );
-        console.error(
-          chalk.yellow("Use --force to reinitialize (not yet implemented)."),
-        );
-        process.exitCode = 1;
-        return;
       }
 
       console.log(chalk.green("Initialized .reqord/ directory structure:"));
@@ -35,9 +33,6 @@ export const initCommand = new Command("init")
         chalk.gray("Next: reqord req create <title> to create a requirement"),
       );
     } catch (error) {
-      console.error(
-        chalk.red(`Failed to initialize: ${(error as Error).message}`),
-      );
-      process.exitCode = 1;
+      handleError(error);
     }
   });

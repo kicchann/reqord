@@ -3,6 +3,7 @@ import chalk from "chalk";
 import Table from "cli-table3";
 import { listRequirements } from "../../services/requirement-service.js";
 import type { Status, Priority } from "@reqord/shared";
+import { handleError } from "../../utils/error-handler.js";
 
 const PRIORITY_COLORS: Record<string, (s: string) => string> = {
   high: chalk.red,
@@ -71,10 +72,7 @@ export const listCommand = new Command("list")
           chalk.gray(`\n${requirements.length} requirement(s) found.`),
         );
       } catch (error) {
-        console.error(
-          chalk.red(`Failed to list requirements: ${(error as Error).message}`),
-        );
-        process.exitCode = 1;
+        handleError(error, { json: options.json });
       }
     },
   );

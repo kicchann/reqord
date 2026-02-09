@@ -6,6 +6,7 @@ import {
   linkToSpecification,
 } from "../../services/feedback-service.js";
 import type { FeedbackType, FeedbackSeverity } from "@reqord/shared";
+import { handleError } from "../../utils/error-handler.js";
 
 export const feedbackLinkCommand = new Command("link")
   .description("Link feedback to requirement or specification")
@@ -63,7 +64,6 @@ export const feedbackLinkCommand = new Command("link")
         console.log(chalk.gray(`  Added feedback-review flag to ${options.spec}`));
       }
     } catch (error) {
-      console.error(chalk.red(`Error: ${(error as Error).message}`));
-      process.exitCode = 1;
+      handleError(error);
     }
   });

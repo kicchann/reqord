@@ -2,7 +2,7 @@
   "id": "req-000005",
   "version": "1.0.0",
   "title": "Requirementバージョン管理",
-  "status": "approved",
+  "status": "implemented",
   "priority": "medium",
   "createdAt": "2026-02-07T10:00:00Z",
   "updatedAt": "2026-02-09T12:00:00Z",
@@ -29,15 +29,9 @@
     }
   },
   "dependencies": {
-    "blockedBy": [
-      "req-000002"
-    ],
-    "blocks": [
-      "req-000011"
-    ],
-    "relatedTo": [
-      "req-000006"
-    ]
+    "blockedBy": ["req-000002"],
+    "blocks": ["req-000011"],
+    "relatedTo": ["req-000006"]
   },
   "estimatedComplexity": "medium",
   "estimatedHours": 12

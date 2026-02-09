@@ -9,6 +9,7 @@ import { updateCommand } from "./commands/req/update.js";
 import { deleteCommand } from "./commands/req/delete.js";
 import { validateCommand } from "./commands/req/validate.js";
 import { historyCommand } from "./commands/req/history.js";
+import { approveCommand } from "./commands/req/approve.js";
 import { contextInitCommand } from "./commands/context/init.js";
 import { contextShowCommand } from "./commands/context/show.js";
 import { contextUpdateCommand } from "./commands/context/update.js";
@@ -17,6 +18,7 @@ import { specListCommand } from "./commands/spec/list.js";
 import { specShowCommand } from "./commands/spec/show.js";
 import { specDesignCommand } from "./commands/spec/design.js";
 import { feedbackCommand } from "./commands/feedback/index.js";
+import { ensureReqordInitialized } from "./middleware/reqord-check.js";
 
 const program = new Command();
 
@@ -37,6 +39,11 @@ reqCommand.addCommand(updateCommand);
 reqCommand.addCommand(deleteCommand);
 reqCommand.addCommand(validateCommand);
 reqCommand.addCommand(historyCommand);
+reqCommand.addCommand(approveCommand);
+
+reqCommand.hook("preAction", async () => {
+  await ensureReqordInitialized(process.cwd());
+});
 
 program.addCommand(reqCommand);
 
@@ -46,6 +53,10 @@ const contextCommand = new Command("context").description(
 contextCommand.addCommand(contextInitCommand);
 contextCommand.addCommand(contextShowCommand);
 contextCommand.addCommand(contextUpdateCommand);
+
+contextCommand.hook("preAction", async () => {
+  await ensureReqordInitialized(process.cwd());
+});
 
 program.addCommand(contextCommand);
 
@@ -57,7 +68,15 @@ specCommand.addCommand(specListCommand);
 specCommand.addCommand(specShowCommand);
 specCommand.addCommand(specDesignCommand);
 
+specCommand.hook("preAction", async () => {
+  await ensureReqordInitialized(process.cwd());
+});
+
 program.addCommand(specCommand);
+
+feedbackCommand.hook("preAction", async () => {
+  await ensureReqordInitialized(process.cwd());
+});
 
 program.addCommand(feedbackCommand);
 

@@ -5,6 +5,8 @@ import {
   type UpdateContextOptions,
 } from "../../services/context-service.js";
 import * as fs from "../../repositories/file-system.js";
+import { handleError } from "../../utils/error-handler.js";
+import { AppError, ErrorCode } from "../../utils/errors.js";
 
 export const contextUpdateCommand = new Command("update")
   .description("Update project context")
@@ -26,17 +28,13 @@ export const contextUpdateCommand = new Command("update")
       const { name, version, product, technical, structure } = options;
       const cwd = process.cwd();
 
-      if (!name && !version && !product && !technical && !structure) {
-        console.error(
-          chalk.red(
-            "Error: At least one option (--name, --version, --product, --technical, --structure) is required.",
-          ),
-        );
-        process.exitCode = 1;
-        return;
-      }
-
       try {
+        if (!name && !version && !product && !technical && !structure) {
+          throw new AppError(
+            "At least one option (--name, --version, --product, --technical, --structure) is required.",
+            ErrorCode.INVALID_ARGUMENT,
+          );
+        }
         const updateOpts: UpdateContextOptions = {
           name,
           version,
@@ -67,12 +65,7 @@ export const contextUpdateCommand = new Command("update")
           );
         }
       } catch (error) {
-        console.error(
-          chalk.red(
-            `Failed to update context: ${(error as Error).message}`,
-          ),
-        );
-        process.exitCode = 1;
+        handleError(error, { json: options.json });
       }
     },
   );

@@ -2,6 +2,7 @@ import { Command } from "commander";
 import chalk from "chalk";
 import { readFile } from "node:fs/promises";
 import { updateSpecDesign } from "../../services/specification-service.js";
+import { handleError } from "../../utils/error-handler.js";
 
 export const specDesignCommand = new Command("design")
   .description("View or update specification design document")
@@ -29,11 +30,6 @@ export const specDesignCommand = new Command("design")
         );
       }
     } catch (error) {
-      console.error(
-        chalk.red(
-          `Failed to update design: ${(error as Error).message}`,
-        ),
-      );
-      process.exitCode = 1;
+      handleError(error);
     }
   });

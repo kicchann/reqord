@@ -6,6 +6,8 @@ import {
   type UpdateOptions,
 } from "../../services/requirement-service.js";
 import * as fs from "../../repositories/file-system.js";
+import { handleError } from "../../utils/error-handler.js";
+import { AppError, ErrorCode } from "../../utils/errors.js";
 
 export const updateCommand = new Command("update")
   .description("Update a requirement")
@@ -36,39 +38,33 @@ export const updateCommand = new Command("update")
     ) => {
       const cwd = process.cwd();
 
-      // Check for mutually exclusive version bump options
-      const versionBumpCount = [options.major, options.minor, options.patch].filter(Boolean).length;
-      if (versionBumpCount > 1) {
-        console.error(
-          chalk.red(
-            "Error: Only one of --major, --minor, or --patch can be specified.",
-          ),
-        );
-        process.exitCode = 1;
-        return;
-      }
-
-      const hasAnyOption =
-        options.title !== undefined ||
-        options.status !== undefined ||
-        options.priority !== undefined ||
-        options.patchFile !== undefined ||
-        options.descriptionFile !== undefined ||
-        options.major ||
-        options.minor ||
-        options.patch;
-
-      if (!hasAnyOption) {
-        console.error(
-          chalk.red(
-            "Error: At least one option (--title, --status, --priority, --patch-file, --description-file, --major, --minor, --patch) is required.",
-          ),
-        );
-        process.exitCode = 1;
-        return;
-      }
-
       try {
+        // Check for mutually exclusive version bump options
+        const versionBumpCount = [options.major, options.minor, options.patch].filter(Boolean).length;
+        if (versionBumpCount > 1) {
+          throw new AppError(
+            "Only one of --major, --minor, or --patch can be specified.",
+            ErrorCode.INVALID_ARGUMENT,
+          );
+        }
+
+        const hasAnyOption =
+          options.title !== undefined ||
+          options.status !== undefined ||
+          options.priority !== undefined ||
+          options.patchFile !== undefined ||
+          options.descriptionFile !== undefined ||
+          options.major ||
+          options.minor ||
+          options.patch;
+
+        if (!hasAnyOption) {
+          throw new AppError(
+            "At least one option (--title, --status, --priority, --patch-file, --description-file, --major, --minor, --patch) is required.",
+            ErrorCode.INVALID_ARGUMENT,
+          );
+        }
+
         const updateOpts: UpdateOptions = {};
 
         // Individual flags
@@ -84,11 +80,10 @@ export const updateCommand = new Command("update")
           try {
             updateOpts.patchData = JSON.parse(patchContent) as Record<string, unknown>;
           } catch {
-            console.error(
-              chalk.red(`Error: Invalid JSON in patch file: ${options.patchFile}`),
+            throw new AppError(
+              `Invalid JSON in patch file: ${options.patchFile}`,
+              ErrorCode.VALIDATION_ERROR,
             );
-            process.exitCode = 1;
-            return;
           }
         }
 
@@ -145,12 +140,7 @@ export const updateCommand = new Command("update")
           console.log(`  description.md: updated`);
         }
       } catch (error) {
-        console.error(
-          chalk.red(
-            `Failed to update requirement: ${(error as Error).message}`,
-          ),
-        );
-        process.exitCode = 1;
+        handleError(error, { json: options.json });
       }
     },
   );

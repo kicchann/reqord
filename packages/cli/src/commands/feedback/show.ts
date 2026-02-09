@@ -1,6 +1,7 @@
 import { Command } from "commander";
 import chalk from "chalk";
 import { showFeedback } from "../../services/feedback-service.js";
+import { handleError } from "../../utils/error-handler.js";
 
 export const feedbackShowCommand = new Command("show")
   .description("Show feedback details (GitHub Issue + index.json)")
@@ -34,7 +35,6 @@ export const feedbackShowCommand = new Command("show")
       console.log(chalk.gray("--- Issue Body ---"));
       console.log(result.issue.body ?? "(empty)");
     } catch (error) {
-      console.error(chalk.red(`Error: ${(error as Error).message}`));
-      process.exitCode = 1;
+      handleError(error, { json: options.json });
     }
   });

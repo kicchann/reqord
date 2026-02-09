@@ -2,6 +2,7 @@ import { Command } from "commander";
 import chalk from "chalk";
 import { createInterface } from "node:readline/promises";
 import { deleteRequirement } from "../../services/requirement-service.js";
+import { handleError } from "../../utils/error-handler.js";
 
 async function confirm(message: string): Promise<boolean> {
   const rl = createInterface({ input: process.stdin, output: process.stdout });
@@ -34,11 +35,6 @@ export const deleteCommand = new Command("delete")
       await deleteRequirement(cwd, id);
       console.log(chalk.green(`Deleted requirement: ${id}`));
     } catch (error) {
-      console.error(
-        chalk.red(
-          `Failed to delete requirement: ${(error as Error).message}`,
-        ),
-      );
-      process.exitCode = 1;
+      handleError(error);
     }
   });
