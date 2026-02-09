@@ -117,12 +117,15 @@ export async function linkToRequirement(
 
   // Update GitHub Issue body with HTML comment
   const issue = await githubClient.getIssue(options.issueNumber);
-  const newBody = upsertReqordComment(issue.body ?? "", {
+  const currentBody = issue.body ?? "";
+  const newBody = upsertReqordComment(currentBody, {
     type: feedback.type,
     severity: feedback.severity,
     linkedTo: feedback.linkedTo,
   });
-  await githubClient.updateIssueBody(options.issueNumber, newBody);
+  if (newBody !== currentBody) {
+    await githubClient.updateIssueBody(options.issueNumber, newBody);
+  }
 }
 
 export async function linkWithNewRequirement(
@@ -161,12 +164,15 @@ export async function linkWithNewRequirement(
   await feedbackRepo.saveIndex(cwd, index);
 
   // Update GitHub Issue body with HTML comment
-  const newBody = upsertReqordComment(issue.body ?? "", {
+  const currentBody = issue.body ?? "";
+  const newBody = upsertReqordComment(currentBody, {
     type: feedback.type,
     severity: feedback.severity,
     linkedTo: feedback.linkedTo,
   });
-  await githubClient.updateIssueBody(options.issueNumber, newBody);
+  if (newBody !== currentBody) {
+    await githubClient.updateIssueBody(options.issueNumber, newBody);
+  }
 
   return newId;
 }
@@ -217,12 +223,15 @@ export async function linkToSpecification(
 
   // Update GitHub Issue body with HTML comment
   const issue = await githubClient.getIssue(options.issueNumber);
-  const newBody = upsertReqordComment(issue.body ?? "", {
+  const currentBody = issue.body ?? "";
+  const newBody = upsertReqordComment(currentBody, {
     type: feedback.type,
     severity: feedback.severity,
     linkedTo: feedback.linkedTo,
   });
-  await githubClient.updateIssueBody(options.issueNumber, newBody);
+  if (newBody !== currentBody) {
+    await githubClient.updateIssueBody(options.issueNumber, newBody);
+  }
 }
 
 export async function closeFeedback(

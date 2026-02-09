@@ -216,7 +216,10 @@ export async function updateIssueBody(
   issueNumber: number,
   newBody: string
 ): Promise<void> {
-  await execAsync(`gh issue edit ${issueNumber} --body-file -`, { input: newBody });
+  // spawn で --body-file - に stdin 経由で渡す（argv サイズ制限回避）
+  const proc = spawn("gh", ["issue", "edit", String(issueNumber), "--body-file", "-"]);
+  proc.stdin.write(newBody);
+  proc.stdin.end();
 }
 
 export async function closeIssue(

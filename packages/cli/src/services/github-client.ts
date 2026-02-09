@@ -1,8 +1,7 @@
-import { exec, execFile } from "node:child_process";
+import { exec, spawn } from "node:child_process";
 import { promisify } from "node:util";
 
 const execAsync = promisify(exec);
-const execFileAsync = promisify(execFile);
 
 export interface GitHubIssueLabel {
   name: string;
@@ -40,6 +39,7 @@ function normalizeIssue(raw: GitHubIssueRaw): GitHubIssue {
 export async function listFeedbackIssues(): Promise<GitHubIssue[]> {
   const { stdout } = await execAsync(
     "gh issue list --label feedback --json number,title,state,labels,createdAt,body --limit 1000",
+    { maxBuffer: 10 * 1024 * 1024 },
   );
   const raw: GitHubIssueRaw[] = JSON.parse(stdout);
   return raw.map(normalizeIssue);
@@ -57,7 +57,18 @@ export async function updateIssueBody(
   issueNumber: number,
   newBody: string,
 ): Promise<void> {
-  await execFileAsync("gh", ["issue", "edit", String(issueNumber), "--body", newBody]);
+  return new Promise((resolve, reject) => {
+    const proc = spawn("gh", ["issue", "edit", String(issueNumber), "--body-file", "-"]);
+    proc.stdin.write(newBody);
+    proc.stdin.end();
+    let stderr = "";
+    proc.stderr.on("data", (chunk: Buffer) => { stderr += chunk.toString(); });
+    proc.on("close", (code) => {
+      if (code === 0) resolve();
+      else reject(new Error(`gh issue edit failed (code ${code}): ${stderr}`));
+    });
+    proc.on("error", reject);
+  });
 }
 
 export async function closeIssue(

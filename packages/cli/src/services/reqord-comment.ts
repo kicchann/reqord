@@ -19,11 +19,12 @@ export function parseReqordComment(body: string): ReqordFeedbackComment | null {
   try {
     const json = match[1].trim();
     const data = JSON.parse(json);
+    const raw = data.linkedTo ?? {};
     const result: ReqordFeedbackComment = {
-      linkedTo: data.linkedTo ?? {
-        requirements: [],
-        createdRequirements: [],
-        specifications: [],
+      linkedTo: {
+        requirements: Array.isArray(raw.requirements) ? raw.requirements : [],
+        createdRequirements: Array.isArray(raw.createdRequirements) ? raw.createdRequirements : [],
+        specifications: Array.isArray(raw.specifications) ? raw.specifications : [],
       },
     };
     if (data.type) result.type = data.type;

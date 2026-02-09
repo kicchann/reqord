@@ -1,26 +1,23 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import { EventEmitter } from "node:events";
+import { PassThrough } from "node:stream";
 
-// Create mock inside the factory to avoid hoisting issues
+let mockSpawnInstance: EventEmitter & { stdin: PassThrough; stderr: PassThrough };
+
 vi.mock("node:child_process", () => {
   const mockExec = Object.assign(vi.fn(), { __type: "exec" });
-  const mockExecFile = Object.assign(vi.fn(), { __type: "execFile" });
+  const mockSpawn = vi.fn(() => mockSpawnInstance);
   return {
     exec: mockExec,
-    execFile: mockExecFile,
+    spawn: mockSpawn,
   };
 });
 
 vi.mock("node:util", () => {
   const mockExecAsync = vi.fn();
-  const mockExecFileAsync = vi.fn();
   return {
-    promisify: (fn: unknown) => {
-      const tagged = fn as { __type?: string };
-      if (tagged.__type === "execFile") return mockExecFileAsync;
-      return mockExecAsync;
-    },
+    promisify: () => mockExecAsync,
     mockExecAsync,
-    mockExecFileAsync,
   };
 });
 
@@ -31,16 +28,29 @@ import {
   closeIssue,
 } from "./github-client.js";
 import * as util from "node:util";
+import * as childProcess from "node:child_process";
 
 const mockExecAsync = (util as unknown as { mockExecAsync: ReturnType<typeof vi.fn> }).mockExecAsync;
-const mockExecFileAsync = (util as unknown as { mockExecFileAsync: ReturnType<typeof vi.fn> }).mockExecFileAsync;
+const mockSpawn = vi.mocked(childProcess.spawn);
+
+function createMockSpawnInstance(exitCode = 0) {
+  const instance = new EventEmitter() as EventEmitter & { stdin: PassThrough; stderr: PassThrough };
+  instance.stdin = new PassThrough();
+  instance.stderr = new PassThrough();
+  mockSpawnInstance = instance;
+
+  // Emit close on next tick to allow stdin.write/end to complete
+  process.nextTick(() => {
+    instance.emit("close", exitCode);
+  });
+}
 
 beforeEach(() => {
   vi.clearAllMocks();
 });
 
 describe("listFeedbackIssues", () => {
-  it("gh issueコマンドにbodyフィールドを含めて実行する", async () => {
+  it("gh issueコマンドにbodyフィールドとmaxBufferを含めて実行する", async () => {
     mockExecAsync.mockResolvedValue({
       stdout: "[]",
       stderr: "",
@@ -50,6 +60,7 @@ describe("listFeedbackIssues", () => {
 
     expect(mockExecAsync).toHaveBeenCalledWith(
       "gh issue list --label feedback --json number,title,state,labels,createdAt,body --limit 1000",
+      { maxBuffer: 10 * 1024 * 1024 },
     );
   });
 
@@ -189,39 +200,33 @@ describe("getIssue", () => {
 });
 
 describe("updateIssueBody", () => {
-  it("execFileを使ってIssue bodyを安全に更新する", async () => {
-    mockExecFileAsync.mockResolvedValue({
-      stdout: "",
-      stderr: "",
-    });
+  it("spawnで--body-file -を使いstdin経由でbodyを渡す", async () => {
+    createMockSpawnInstance(0);
 
     await updateIssueBody(17, "New body content");
 
-    expect(mockExecFileAsync).toHaveBeenCalledWith(
+    expect(mockSpawn).toHaveBeenCalledWith(
       "gh",
-      ["issue", "edit", "17", "--body", "New body content"],
+      ["issue", "edit", "17", "--body-file", "-"],
     );
   });
 
-  it("HTMLコメント付きのbodyを安全に更新する", async () => {
-    mockExecFileAsync.mockResolvedValue({
-      stdout: "",
-      stderr: "",
-    });
+  it("HTMLコメント付きのbodyをstdin経由で安全に渡す", async () => {
+    createMockSpawnInstance(0);
 
     const body = 'Issue text\n<!-- reqord:feedback {"type":"bug"} -->';
     await updateIssueBody(17, body);
 
-    expect(mockExecFileAsync).toHaveBeenCalledWith(
+    expect(mockSpawn).toHaveBeenCalledWith(
       "gh",
-      ["issue", "edit", "17", "--body", body],
+      ["issue", "edit", "17", "--body-file", "-"],
     );
   });
 
   it("ghコマンド失敗時にエラーを投げる", async () => {
-    mockExecFileAsync.mockRejectedValue(new Error("Failed to update issue"));
+    createMockSpawnInstance(1);
 
-    await expect(updateIssueBody(17, "body")).rejects.toThrow("Failed to update issue");
+    await expect(updateIssueBody(17, "body")).rejects.toThrow("gh issue edit failed");
   });
 });
 

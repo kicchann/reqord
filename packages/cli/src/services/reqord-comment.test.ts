@@ -96,6 +96,36 @@ More text`;
     });
   });
 
+  it("linkedToが部分的なJSONでもデフォルト値で補完する", () => {
+    const body = `<!-- reqord:feedback {"type":"bug","linkedTo":{"requirements":["req-000001"]}} -->`;
+
+    const result = parseReqordComment(body);
+
+    expect(result).toEqual({
+      type: "bug",
+      linkedTo: {
+        requirements: ["req-000001"],
+        createdRequirements: [],
+        specifications: [],
+      },
+    });
+  });
+
+  it("linkedToが空オブジェクトでもデフォルト値で補完する", () => {
+    const body = `<!-- reqord:feedback {"type":"bug","linkedTo":{}} -->`;
+
+    const result = parseReqordComment(body);
+
+    expect(result).toEqual({
+      type: "bug",
+      linkedTo: {
+        requirements: [],
+        createdRequirements: [],
+        specifications: [],
+      },
+    });
+  });
+
   it("不正なJSONの場合はnullを返す", () => {
     const body = `<!-- reqord:feedback {invalid json} -->`;
 
