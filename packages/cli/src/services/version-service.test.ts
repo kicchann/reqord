@@ -201,7 +201,8 @@ describe("createHistoryEntry", () => {
   });
 
   it("gitCommitが渡されなかった場合にexecSyncで自動取得", () => {
-    vi.mocked(execSync).mockReturnValue("def5678\n" as any);
+    // execSync returns string when encoding is specified
+    vi.mocked(execSync).mockReturnValue("def5678\n" as unknown as Buffer);
 
     const req = makeRequirement();
     const entry = createHistoryEntry(req);
@@ -238,7 +239,8 @@ describe("createHistoryEntry", () => {
 
 describe("getCurrentGitCommit", () => {
   it("execSyncの結果を返す", () => {
-    vi.mocked(execSync).mockReturnValue("abc1234\n" as any);
+    // execSync returns string when encoding is specified
+    vi.mocked(execSync).mockReturnValue("abc1234\n" as unknown as Buffer);
     expect(getCurrentGitCommit()).toBe("abc1234");
   });
 

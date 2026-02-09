@@ -102,7 +102,7 @@ export const updateCommand = new Command("update")
         if (options.minor) updateOpts.versionBump = "minor";
         if (options.patch) updateOpts.versionBump = "patch";
 
-        const { before, after, descriptionUpdated, versionChanged } = await updateRequirement(cwd, id, updateOpts);
+        const { before, after, descriptionUpdated } = await updateRequirement(cwd, id, updateOpts);
 
         if (options.json) {
           console.log(JSON.stringify(after, null, 2));
