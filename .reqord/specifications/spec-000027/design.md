@@ -200,7 +200,7 @@ export interface GitHubIssue {
 
 export async function listFeedbackIssues(): Promise<GitHubIssue[]> {
   const { stdout } = await execAsync(
-    'gh issue list --label feedback --json number,title,state,labels,createdAt --limit 1000'
+    'gh issue list --label feedback --json number,title,state,labels,createdAt,body --limit 1000'
   );
   return JSON.parse(stdout);
 }
@@ -212,11 +212,11 @@ export async function getIssue(issueNumber: number): Promise<GitHubIssue> {
   return JSON.parse(stdout);
 }
 
-export async function addLabelsToIssue(
+export async function updateIssueBody(
   issueNumber: number,
-  labels: string[]
+  newBody: string
 ): Promise<void> {
-  await execAsync(`gh issue edit ${issueNumber} --add-label "${labels.join(",")}"`);
+  await execAsync(`gh issue edit ${issueNumber} --body-file -`, { input: newBody });
 }
 
 export async function closeIssue(
@@ -237,12 +237,15 @@ export async function closeIssue(
 
 **責務**: 同期ロジックの実装
 
+**依存**: `reqord-comment.ts` のHTMLコメントパーサーを使用
+
 **インターフェース**:
 
 ```typescript
-import type { FeedbackEntry, FeedbackType } from "@reqord/shared";
-import { listFeedbackIssues, addLabelsToIssue, type GitHubIssue } from "./github-client";
-import { loadIndex, saveIndex, upsertFeedback } from "../repositories/feedback";
+import type { FeedbackEntry } from "@reqord/shared";
+import { listFeedbackIssues, getIssue, updateIssueBody, type GitHubIssue } from "./github-client";
+import { loadIndex, upsertFeedback } from "../repositories/feedback";
+import { parseReqordComment, buildReqordComment, upsertReqordComment } from "./reqord-comment";
 
 // GitHub → index.json 同期
 export async function syncFromGitHub(cwd: string): Promise<number> {
@@ -258,80 +261,44 @@ export async function syncFromGitHub(cwd: string): Promise<number> {
   return updatedCount;
 }
 
-// index.json → GitHub 同期
+// index.json → GitHub 同期（HTMLコメントをIssue bodyに挿入/更新）
 export async function syncToGitHub(cwd: string): Promise<number> {
   const index = await loadIndex(cwd);
   let updatedCount = 0;
 
   for (const feedback of index.feedbacks) {
-    const labels = buildLabelsFromFeedback(feedback);
-    await addLabelsToIssue(feedback.githubIssue, labels);
-    updatedCount++;
+    const issue = await getIssue(feedback.githubIssue);
+    const metadata = {
+      type: feedback.type,
+      severity: feedback.severity,
+      linkedTo: feedback.linkedTo,
+    };
+    const newBody = upsertReqordComment(issue.body ?? "", metadata);
+    if (newBody !== issue.body) {
+      await updateIssueBody(feedback.githubIssue, newBody);
+      updatedCount++;
+    }
   }
 
   return updatedCount;
 }
 
-function parseGitHubIssue(issue: GitHubIssue): FeedbackEntry {
-  // ラベルからメタデータをパース
-  const type = parseTypeFromLabels(issue.labels);
-  const linkedTo = parseLinkedToFromLabels(issue.labels);
+// Issue bodyのHTMLコメントからFeedbackEntryを構築
+export function parseGitHubIssue(issue: GitHubIssue): FeedbackEntry {
+  const comment = parseReqordComment(issue.body ?? "");
 
   return {
     githubIssue: issue.number,
-    type,
-    linkedTo,
+    type: comment?.type,
+    severity: comment?.severity,
+    linkedTo: comment?.linkedTo ?? {
+      requirements: [],
+      createdRequirements: [],
+      specifications: [],
+    },
     syncedAt: new Date().toISOString(),
     status: issue.state === "closed" ? "closed" : "open",
   };
-}
-
-function parseTypeFromLabels(labels: string[]): FeedbackType | undefined {
-  const typeLabels: FeedbackType[] = [
-    "bug",
-    "improvement",
-    "requirement-gap",
-    "spec-mismatch",
-    "security",
-  ];
-  return typeLabels.find((t) => labels.includes(t));
-}
-
-function parseLinkedToFromLabels(labels: string[]): {
-  requirements: string[];
-  createdRequirements: string[];
-  specifications: string[];
-} {
-  const requirements = labels
-    .filter((l) => l.startsWith("req:"))
-    .map((l) => `req-${l.slice(4)}`);
-  const specifications = labels
-    .filter((l) => l.startsWith("spec:"))
-    .map((l) => `spec-${l.slice(5)}`);
-
-  return {
-    requirements,
-    createdRequirements: [],
-    specifications,
-  };
-}
-
-function buildLabelsFromFeedback(feedback: FeedbackEntry): string[] {
-  const labels: string[] = [];
-
-  if (feedback.type) {
-    labels.push(feedback.type);
-  }
-
-  feedback.linkedTo.requirements.forEach((reqId) => {
-    labels.push(`req:${reqId.replace("req-", "")}`);
-  });
-
-  feedback.linkedTo.specifications.forEach((specId) => {
-    labels.push(`spec:${specId.replace("spec-", "")}`);
-  });
-
-  return labels;
 }
 ```
 
@@ -384,11 +351,11 @@ export const syncCommand = new Command("sync")
    $ reqord feedback sync
 
 2. syncFromGitHub()
-   ├─ gh issue list --label feedback でGitHub Issueを取得
-   ├─ 各IssueのラベルからFeedbackEntryを構築
-   │  ├─ "bug", "improvement"等 → type
-   │  ├─ "req:000006" → linkedTo.requirements
-   │  └─ "spec:000001" → linkedTo.specifications
+   ├─ gh issue list --label feedback でGitHub Issueを取得（bodyフィールド含む）
+   ├─ 各Issue bodyのHTMLコメントからFeedbackEntryを構築
+   │  ├─ <!-- reqord:feedback {...} --> をパース
+   │  ├─ type, severity を抽出
+   │  └─ linkedTo (requirements, specifications) を抽出
    └─ upsertFeedback() でindex.jsonに保存/更新
 
 3. 結果表示
@@ -403,11 +370,11 @@ export const syncCommand = new Command("sync")
 
 2. syncToGitHub()
    ├─ loadIndex() でindex.jsonを読み込み
-   ├─ 各FeedbackEntryからラベル文字列を構築
-   │  ├─ type → ラベル名
-   │  ├─ requirements → "req:NNNNNN"
-   │  └─ specifications → "spec:NNNNNN"
-   └─ gh issue edit でラベル追加
+   ├─ 各feedbackのGitHub Issue bodyを取得
+   ├─ FeedbackEntryからHTMLコメントを構築
+   │  └─ <!-- reqord:feedback {"type":"...","linkedTo":{...}} -->
+   ├─ upsertReqordComment() でbodyに挿入/更新
+   └─ gh issue edit --body-file でIssue body更新
 
 3. 結果表示
    ✓ Synced 3 feedbacks (index.json → GitHub)
@@ -428,9 +395,14 @@ export const syncCommand = new Command("sync")
 - upsertFeedback(): 既存エントリの更新/新規追加
 
 **packages/cli/src/services/feedback-sync-service.test.ts**
-- parseGitHubIssue(): ラベルからメタデータ抽出
-- buildLabelsFromFeedback(): FeedbackEntryからラベル構築
+- parseGitHubIssue(): HTMLコメントからメタデータ抽出
 - syncFromGitHub(): GitHubClientのモック化
+- syncToGitHub(): HTMLコメント挿入/更新の検証
+
+**packages/cli/src/services/reqord-comment.test.ts**
+- parseReqordComment(): HTMLコメントからメタデータ抽出
+- buildReqordComment(): メタデータからHTMLコメント構築
+- upsertReqordComment(): Issue bodyへの挿入/更新
 
 ### 5.2 統合テスト
 

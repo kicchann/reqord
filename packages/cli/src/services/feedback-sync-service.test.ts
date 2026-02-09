@@ -9,7 +9,8 @@ vi.mock("../repositories/feedback.js", () => ({
 
 vi.mock("./github-client.js", () => ({
   listFeedbackIssues: vi.fn(),
-  addLabelsToIssue: vi.fn(),
+  getIssue: vi.fn(),
+  updateIssueBody: vi.fn(),
 }));
 
 import * as feedbackRepo from "../repositories/feedback.js";
@@ -19,7 +20,6 @@ import {
   syncFromGitHub,
   syncToGitHub,
   parseGitHubIssue,
-  buildLabelsFromFeedback,
 } from "./feedback-sync-service.js";
 
 const mockFeedbackRepo = vi.mocked(feedbackRepo);
@@ -32,6 +32,7 @@ function makeGitHubIssue(overrides: Partial<GitHubIssue> = {}): GitHubIssue {
     state: "open",
     labels: ["feedback"],
     createdAt: "2026-01-01T00:00:00Z",
+    body: "",
     ...overrides,
   };
 }
@@ -58,9 +59,9 @@ beforeEach(() => {
 // --- parseGitHubIssue (output-based) ---
 
 describe("parseGitHubIssue", () => {
-  it("ラベルからtypeを抽出する", () => {
+  it("HTMLコメントからtypeを抽出する", () => {
     const issue = makeGitHubIssue({
-      labels: ["feedback", "bug"],
+      body: '<!-- reqord:feedback {"type":"bug","linkedTo":{"requirements":[],"createdRequirements":[],"specifications":[]}} -->',
     });
 
     const result = parseGitHubIssue(issue);
@@ -68,9 +69,9 @@ describe("parseGitHubIssue", () => {
     expect(result.type).toBe("bug");
   });
 
-  it("type候補がない場合はundefinedを返す", () => {
+  it("HTMLコメントがない場合はtypeがundefinedになる", () => {
     const issue = makeGitHubIssue({
-      labels: ["feedback", "priority:high"],
+      body: "Normal issue body without reqord comment",
     });
 
     const result = parseGitHubIssue(issue);
@@ -78,9 +79,9 @@ describe("parseGitHubIssue", () => {
     expect(result.type).toBeUndefined();
   });
 
-  it("req:NNNNNNラベルをlinkedTo.requirementsに抽出する", () => {
+  it("HTMLコメントからlinkedTo.requirementsを抽出する", () => {
     const issue = makeGitHubIssue({
-      labels: ["feedback", "req:000006", "req:000023"],
+      body: '<!-- reqord:feedback {"linkedTo":{"requirements":["req-000006","req-000023"],"createdRequirements":[],"specifications":[]}} -->',
     });
 
     const result = parseGitHubIssue(issue);
@@ -88,9 +89,9 @@ describe("parseGitHubIssue", () => {
     expect(result.linkedTo.requirements).toEqual(["req-000006", "req-000023"]);
   });
 
-  it("spec:NNNNNNラベルをlinkedTo.specificationsに抽出する", () => {
+  it("HTMLコメントからlinkedTo.specificationsを抽出する", () => {
     const issue = makeGitHubIssue({
-      labels: ["feedback", "spec:000001", "spec:000002"],
+      body: '<!-- reqord:feedback {"linkedTo":{"requirements":[],"createdRequirements":[],"specifications":["spec-000001","spec-000002"]}} -->',
     });
 
     const result = parseGitHubIssue(issue);
@@ -118,18 +119,20 @@ describe("parseGitHubIssue", () => {
     expect(result.status).toBe("closed");
   });
 
-  it("createdRequirementsを空配列で初期化する", () => {
-    const issue = makeGitHubIssue();
+  it("HTMLコメントがない場合はlinkedToを空で初期化する", () => {
+    const issue = makeGitHubIssue({ body: "No comment" });
 
     const result = parseGitHubIssue(issue);
 
+    expect(result.linkedTo.requirements).toEqual([]);
     expect(result.linkedTo.createdRequirements).toEqual([]);
+    expect(result.linkedTo.specifications).toEqual([]);
   });
 
   it("複数のメタデータを同時に抽出する", () => {
     const issue = makeGitHubIssue({
       number: 42,
-      labels: ["feedback", "improvement", "req:000006", "spec:000027"],
+      body: '<!-- reqord:feedback {"type":"improvement","severity":"high","linkedTo":{"requirements":["req-000006"],"createdRequirements":[],"specifications":["spec-000027"]}} -->',
       state: "open",
     });
 
@@ -137,93 +140,19 @@ describe("parseGitHubIssue", () => {
 
     expect(result.githubIssue).toBe(42);
     expect(result.type).toBe("improvement");
+    expect(result.severity).toBe("high");
     expect(result.linkedTo.requirements).toEqual(["req-000006"]);
     expect(result.linkedTo.specifications).toEqual(["spec-000027"]);
     expect(result.status).toBe("open");
   });
-});
 
-// --- buildLabelsFromFeedback (output-based) ---
+  it("bodyがundefinedの場合は空のlinkedToを返す", () => {
+    const issue = makeGitHubIssue({ body: undefined });
 
-describe("buildLabelsFromFeedback", () => {
-  it("typeをラベルとして含める", () => {
-    const feedback = makeFeedbackEntry({
-      type: "bug",
-    });
+    const result = parseGitHubIssue(issue);
 
-    const result = buildLabelsFromFeedback(feedback);
-
-    expect(result).toContain("bug");
-  });
-
-  it("typeがundefinedの場合は含めない", () => {
-    const feedback = makeFeedbackEntry({
-      type: undefined,
-    });
-
-    const result = buildLabelsFromFeedback(feedback);
-
-    expect(result).not.toContain(undefined);
-  });
-
-  it("linkedTo.requirementsをreq:NNNNNN形式で含める", () => {
-    const feedback = makeFeedbackEntry({
-      linkedTo: {
-        requirements: ["req-000006", "req-000023"],
-        createdRequirements: [],
-        specifications: [],
-      },
-    });
-
-    const result = buildLabelsFromFeedback(feedback);
-
-    expect(result).toContain("req:000006");
-    expect(result).toContain("req:000023");
-  });
-
-  it("linkedTo.specificationsをspec:NNNNNN形式で含める", () => {
-    const feedback = makeFeedbackEntry({
-      linkedTo: {
-        requirements: [],
-        createdRequirements: [],
-        specifications: ["spec-000001", "spec-000002"],
-      },
-    });
-
-    const result = buildLabelsFromFeedback(feedback);
-
-    expect(result).toContain("spec:000001");
-    expect(result).toContain("spec:000002");
-  });
-
-  it("メタデータがない場合は空配列を返す", () => {
-    const feedback = makeFeedbackEntry({
-      type: undefined,
-      linkedTo: {
-        requirements: [],
-        createdRequirements: [],
-        specifications: [],
-      },
-    });
-
-    const result = buildLabelsFromFeedback(feedback);
-
-    expect(result).toEqual([]);
-  });
-
-  it("全てのメタデータをラベルに変換する", () => {
-    const feedback = makeFeedbackEntry({
-      type: "improvement",
-      linkedTo: {
-        requirements: ["req-000006"],
-        createdRequirements: [],
-        specifications: ["spec-000027"],
-      },
-    });
-
-    const result = buildLabelsFromFeedback(feedback);
-
-    expect(result).toEqual(["improvement", "req:000006", "spec:000027"]);
+    expect(result.type).toBeUndefined();
+    expect(result.linkedTo.requirements).toEqual([]);
   });
 });
 
@@ -296,47 +225,35 @@ describe("syncToGitHub", () => {
     expect(mockFeedbackRepo.loadIndex).toHaveBeenCalledWith("/cwd");
   });
 
-  it("ラベルが空でない各feedbackに対してaddLabelsToIssueを呼び出す", async () => {
+  it("メタデータのあるfeedbackに対してupdateIssueBodyを呼び出す", async () => {
     const index: FeedbackIndex = {
       feedbacks: [
         makeFeedbackEntry({
           githubIssue: 17,
           type: "bug",
         }),
-        makeFeedbackEntry({
-          githubIssue: 18,
-          type: "improvement",
-          linkedTo: {
-            requirements: ["req-000006"],
-            createdRequirements: [],
-            specifications: [],
-          },
-        }),
       ],
     };
     mockFeedbackRepo.loadIndex.mockResolvedValue(index);
+    mockGithubClient.getIssue.mockResolvedValue(
+      makeGitHubIssue({ number: 17, body: "Issue body" }),
+    );
 
     await syncToGitHub("/cwd");
 
-    expect(mockGithubClient.addLabelsToIssue).toHaveBeenCalledTimes(2);
-    expect(mockGithubClient.addLabelsToIssue).toHaveBeenNthCalledWith(
-      1,
+    expect(mockGithubClient.updateIssueBody).toHaveBeenCalledWith(
       17,
-      ["bug"],
-    );
-    expect(mockGithubClient.addLabelsToIssue).toHaveBeenNthCalledWith(
-      2,
-      18,
-      ["improvement", "req:000006"],
+      expect.stringContaining("<!-- reqord:feedback"),
     );
   });
 
-  it("ラベルが空の場合はaddLabelsToIssueを呼び出さない", async () => {
+  it("bodyが既にHTMLコメントを含み変更がない場合はupdateIssueBodyを呼び出さない", async () => {
+    const existingBody = '<!-- reqord:feedback {"type":"bug","linkedTo":{"requirements":[],"createdRequirements":[],"specifications":[]}} -->';
     const index: FeedbackIndex = {
       feedbacks: [
         makeFeedbackEntry({
           githubIssue: 17,
-          type: undefined,
+          type: "bug",
           linkedTo: {
             requirements: [],
             createdRequirements: [],
@@ -346,14 +263,17 @@ describe("syncToGitHub", () => {
       ],
     };
     mockFeedbackRepo.loadIndex.mockResolvedValue(index);
+    mockGithubClient.getIssue.mockResolvedValue(
+      makeGitHubIssue({ number: 17, body: existingBody }),
+    );
 
     const result = await syncToGitHub("/cwd");
 
-    expect(mockGithubClient.addLabelsToIssue).not.toHaveBeenCalled();
+    expect(mockGithubClient.updateIssueBody).not.toHaveBeenCalled();
     expect(result).toBe(0);
   });
 
-  it("同期したfeedback数を返す", async () => {
+  it("更新したfeedback数を返す", async () => {
     const index: FeedbackIndex = {
       feedbacks: [
         makeFeedbackEntry({ githubIssue: 17 }),
@@ -361,6 +281,12 @@ describe("syncToGitHub", () => {
       ],
     };
     mockFeedbackRepo.loadIndex.mockResolvedValue(index);
+    mockGithubClient.getIssue.mockResolvedValueOnce(
+      makeGitHubIssue({ number: 17, body: "Body 1" }),
+    );
+    mockGithubClient.getIssue.mockResolvedValueOnce(
+      makeGitHubIssue({ number: 18, body: "Body 2" }),
+    );
 
     const result = await syncToGitHub("/cwd");
 

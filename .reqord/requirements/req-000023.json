@@ -6,6 +6,7 @@
   "priority": "medium",
   "createdAt": "2026-02-09T10:00:00Z",
   "updatedAt": "2026-02-09T18:00:00Z",
+  "versionHistory": [],
   "files": {
     "description": "requirements/req-000023/description.md",
     "supplementary": []
@@ -44,5 +45,33 @@
   },
   "estimatedComplexity": "medium",
   "estimatedHours": 20,
-  "versionHistory": []
+  "flags": [
+    {
+      "type": "feedback-review",
+      "reason": "Feedback from issue #23",
+      "createdAt": "2026-02-09T07:45:11.891Z",
+      "relatedIssues": [
+        23
+      ],
+      "severity": "low"
+    },
+    {
+      "type": "feedback-review",
+      "reason": "Feedback from issue #30",
+      "createdAt": "2026-02-09T07:45:15.197Z",
+      "relatedIssues": [
+        30
+      ],
+      "severity": "low"
+    },
+    {
+      "type": "feedback-review",
+      "reason": "Feedback from issue #22",
+      "createdAt": "2026-02-09T07:48:28.635Z",
+      "relatedIssues": [
+        22
+      ],
+      "severity": "medium"
+    }
+  ]
 }

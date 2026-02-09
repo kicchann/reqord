@@ -5,6 +5,7 @@ import * as specRepo from "../repositories/specification.js";
 import * as githubClient from "./github-client.js";
 import type { GitHubIssue } from "./github-client.js";
 import { createRequirement } from "./requirement-service.js";
+import { upsertReqordComment } from "./reqord-comment.js";
 
 export interface ListFeedbacksOptions {
   state?: "open" | "closed" | "all";
@@ -114,10 +115,14 @@ export async function linkToRequirement(
     await reqRepo.save(cwd, requirement);
   }
 
-  // Add labels to GitHub Issue
-  const labels = [`req:${options.requirementId.replace("req-", "")}`];
-  if (options.type) labels.push(options.type);
-  await githubClient.addLabelsToIssue(options.issueNumber, labels);
+  // Update GitHub Issue body with HTML comment
+  const issue = await githubClient.getIssue(options.issueNumber);
+  const newBody = upsertReqordComment(issue.body ?? "", {
+    type: feedback.type,
+    severity: feedback.severity,
+    linkedTo: feedback.linkedTo,
+  });
+  await githubClient.updateIssueBody(options.issueNumber, newBody);
 }
 
 export async function linkWithNewRequirement(
@@ -155,10 +160,13 @@ export async function linkWithNewRequirement(
 
   await feedbackRepo.saveIndex(cwd, index);
 
-  // Add labels to GitHub Issue
-  const labels = [`req:${newId.replace("req-", "")}`];
-  if (options.type) labels.push(options.type);
-  await githubClient.addLabelsToIssue(options.issueNumber, labels);
+  // Update GitHub Issue body with HTML comment
+  const newBody = upsertReqordComment(issue.body ?? "", {
+    type: feedback.type,
+    severity: feedback.severity,
+    linkedTo: feedback.linkedTo,
+  });
+  await githubClient.updateIssueBody(options.issueNumber, newBody);
 
   return newId;
 }
@@ -207,10 +215,14 @@ export async function linkToSpecification(
     await specRepo.save(cwd, specification);
   }
 
-  // Add labels to GitHub Issue
-  const labels = [`spec:${options.specificationId.replace("spec-", "")}`];
-  if (options.type) labels.push(options.type);
-  await githubClient.addLabelsToIssue(options.issueNumber, labels);
+  // Update GitHub Issue body with HTML comment
+  const issue = await githubClient.getIssue(options.issueNumber);
+  const newBody = upsertReqordComment(issue.body ?? "", {
+    type: feedback.type,
+    severity: feedback.severity,
+    linkedTo: feedback.linkedTo,
+  });
+  await githubClient.updateIssueBody(options.issueNumber, newBody);
 }
 
 export async function closeFeedback(

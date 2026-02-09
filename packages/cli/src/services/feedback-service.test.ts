@@ -19,7 +19,7 @@ vi.mock("../repositories/specification.js", () => ({
 vi.mock("./github-client.js", () => ({
   getIssue: vi.fn(),
   closeIssue: vi.fn(),
-  addLabelsToIssue: vi.fn(),
+  updateIssueBody: vi.fn(),
 }));
 
 vi.mock("./requirement-service.js", () => ({
@@ -274,11 +274,13 @@ describe("linkToRequirement", () => {
     );
   });
 
-  it("GitHub Issueにラベルを追加する", async () => {
+  it("GitHub Issue bodyにHTMLコメントを挿入する", async () => {
     const feedback = makeFeedbackEntry({ githubIssue: 17 });
     mockFeedbackRepo.loadIndex.mockResolvedValue(makeFeedbackIndex([feedback]));
     const requirement = makeRequirement({ id: "req-000001" });
     mockReqRepo.findById.mockResolvedValue(requirement);
+    const issue = makeGitHubIssue({ number: 17, body: "Issue body" });
+    mockGithubClient.getIssue.mockResolvedValue(issue);
 
     await linkToRequirement("/test/cwd", {
       issueNumber: 17,
@@ -286,7 +288,14 @@ describe("linkToRequirement", () => {
       type: "bug",
     });
 
-    expect(mockGithubClient.addLabelsToIssue).toHaveBeenCalledWith(17, ["req:000001", "bug"]);
+    expect(mockGithubClient.updateIssueBody).toHaveBeenCalledWith(
+      17,
+      expect.stringContaining("<!-- reqord:feedback"),
+    );
+    expect(mockGithubClient.updateIssueBody).toHaveBeenCalledWith(
+      17,
+      expect.stringContaining("req-000001"),
+    );
   });
 
   it("重複するrequirementIdを追加しない", async () => {
@@ -420,9 +429,9 @@ describe("linkWithNewRequirement", () => {
     expect(savedIndex.feedbacks[0].linkedTo.createdRequirements).toEqual(["req-000002"]);
   });
 
-  it("GitHub Issueにラベルを追加する", async () => {
+  it("GitHub Issue bodyにHTMLコメントを挿入する", async () => {
     mockFeedbackRepo.loadIndex.mockResolvedValue(makeFeedbackIndex([]));
-    const issue = makeGitHubIssue({ number: 17, title: "Test" });
+    const issue = makeGitHubIssue({ number: 17, title: "Test", body: "Issue body" });
     mockGithubClient.getIssue.mockResolvedValue(issue);
     const newReq = makeRequirement({ id: "req-000002" });
     mockReqService.createRequirement.mockResolvedValue({
@@ -433,7 +442,10 @@ describe("linkWithNewRequirement", () => {
 
     await linkWithNewRequirement("/test/cwd", { issueNumber: 17, type: "bug" });
 
-    expect(mockGithubClient.addLabelsToIssue).toHaveBeenCalledWith(17, ["req:000002", "bug"]);
+    expect(mockGithubClient.updateIssueBody).toHaveBeenCalledWith(
+      17,
+      expect.stringContaining("<!-- reqord:feedback"),
+    );
   });
 });
 
@@ -493,11 +505,13 @@ describe("linkToSpecification", () => {
     );
   });
 
-  it("GitHub Issueにラベルを追加する", async () => {
+  it("GitHub Issue bodyにHTMLコメントを挿入する", async () => {
     const feedback = makeFeedbackEntry({ githubIssue: 17 });
     mockFeedbackRepo.loadIndex.mockResolvedValue(makeFeedbackIndex([feedback]));
     const specification = makeSpecification({ id: "spec-000001" });
     mockSpecRepo.findById.mockResolvedValue(specification);
+    const issue = makeGitHubIssue({ number: 17, body: "Issue body" });
+    mockGithubClient.getIssue.mockResolvedValue(issue);
 
     await linkToSpecification("/test/cwd", {
       issueNumber: 17,
@@ -505,7 +519,14 @@ describe("linkToSpecification", () => {
       type: "spec-mismatch",
     });
 
-    expect(mockGithubClient.addLabelsToIssue).toHaveBeenCalledWith(17, ["spec:000001", "spec-mismatch"]);
+    expect(mockGithubClient.updateIssueBody).toHaveBeenCalledWith(
+      17,
+      expect.stringContaining("<!-- reqord:feedback"),
+    );
+    expect(mockGithubClient.updateIssueBody).toHaveBeenCalledWith(
+      17,
+      expect.stringContaining("spec-000001"),
+    );
   });
 
   it("存在しないSpecificationでエラーを投げる", async () => {

@@ -61,10 +61,11 @@ Feedback一覧表示・詳細表示・紐付け・クローズの4つのCLIコ�
 ```typescript
 import type { FeedbackEntry, FeedbackType, FeedbackSeverity } from "@reqord/shared";
 import { loadIndex, saveIndex } from "../repositories/feedback";
-import { getIssue, closeIssue, addLabelsToIssue, type GitHubIssue } from "./github-client";
+import { getIssue, closeIssue, updateIssueBody, type GitHubIssue } from "./github-client";
 import { findById as findRequirementById, save as saveRequirement } from "../repositories/requirement";
 import { createRequirement } from "./requirement-service";
 import { generateNextId } from "../utils/id-generator";
+import { upsertReqordComment } from "./reqord-comment";
 
 export interface ListFeedbacksOptions {
   state?: "open" | "closed" | "all";
@@ -193,12 +194,14 @@ export async function linkToRequirement(
     await saveRequirement(cwd, requirement);
   }
 
-  // GitHub Issueにラベル追加
-  const labels = [
-    `req:${options.requirementId.replace("req-", "")}`,
-  ];
-  if (options.type) labels.push(options.type);
-  await addLabelsToIssue(options.issueNumber, labels);
+  // GitHub Issue bodyにHTMLコメントを挿入/更新
+  const issue = await getIssue(options.issueNumber);
+  const newBody = upsertReqordComment(issue.body ?? "", {
+    type: feedback.type,
+    severity: feedback.severity,
+    linkedTo: feedback.linkedTo,
+  });
+  await updateIssueBody(options.issueNumber, newBody);
 }
 
 // 新Requirement作成 + 紐付け
@@ -243,10 +246,13 @@ export async function linkWithNewRequirement(
 
   await saveIndex(cwd, index);
 
-  // GitHub Issueにラベル追加
-  const labels = [`req:${nextId.replace("req-", "")}`];
-  if (options.type) labels.push(options.type);
-  await addLabelsToIssue(options.issueNumber, labels);
+  // GitHub Issue bodyにHTMLコメントを挿入/更新
+  const newBody = upsertReqordComment(issue.body ?? "", {
+    type: feedback.type,
+    severity: feedback.severity,
+    linkedTo: feedback.linkedTo,
+  });
+  await updateIssueBody(options.issueNumber, newBody);
 
   return nextId;
 }
@@ -282,12 +288,14 @@ export async function linkToSpecification(
 
   await saveIndex(cwd, index);
 
-  // GitHub Issueにラベル追加
-  const labels = [
-    `spec:${options.specificationId.replace("spec-", "")}`,
-  ];
-  if (options.type) labels.push(options.type);
-  await addLabelsToIssue(options.issueNumber, labels);
+  // GitHub Issue bodyにHTMLコメントを挿入/更新
+  const issue = await getIssue(options.issueNumber);
+  const newBody = upsertReqordComment(issue.body ?? "", {
+    type: feedback.type,
+    severity: feedback.severity,
+    linkedTo: feedback.linkedTo,
+  });
+  await updateIssueBody(options.issueNumber, newBody);
 }
 
 // Feedbackクローズ
@@ -607,7 +615,8 @@ program.addCommand(feedbackCommand);
    ├─ Requirement JSON読み込み
    │  ├─ feedback-reviewフラグ追加
    │  └─ 保存
-   └─ gh issue edit でラベル追加
+   └─ Issue bodyにHTMLコメント挿入/更新
+      └─ <!-- reqord:feedback {"type":"improvement","linkedTo":{"requirements":["req-000006"]}} -->
 
 3. 出力
    ✓ Linked Feedback #17 to req-000006
@@ -626,7 +635,7 @@ program.addCommand(feedbackCommand);
    ├─ createRequirement() で新Requirement作成
    ├─ origin: { feedbackIssue: 13 } を記録
    ├─ index.json更新（linkedTo.createdRequirements）
-   └─ gh issue edit でラベル追加
+   └─ Issue bodyにHTMLコメント挿入/更新
 
 3. 出力
    ✓ Created req-000024 from Feedback #13
