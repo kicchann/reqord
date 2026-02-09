@@ -15,6 +15,7 @@ import { specCreateCommand } from "./commands/spec/create.js";
 import { specListCommand } from "./commands/spec/list.js";
 import { specShowCommand } from "./commands/spec/show.js";
 import { specDesignCommand } from "./commands/spec/design.js";
+import { feedbackCommand } from "./commands/feedback/index.js";
 
 const program = new Command();
 
@@ -55,5 +56,7 @@ specCommand.addCommand(specShowCommand);
 specCommand.addCommand(specDesignCommand);
 
 program.addCommand(specCommand);
+
+program.addCommand(feedbackCommand);
 
 program.parse();

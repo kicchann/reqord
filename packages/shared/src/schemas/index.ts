@@ -13,7 +13,9 @@ export {
 
 export {
   RequirementSchema,
+  FeedbackFlagSchema,
   type Requirement,
+  type FeedbackFlag,
 } from "./requirement.js";
 
 export {
@@ -38,3 +40,16 @@ export {
   type ValidationMetadata,
   type ValidationResult,
 } from "./validation.js";
+
+export {
+  FeedbackTypeSchema,
+  FeedbackSeveritySchema,
+  FeedbackStatusSchema,
+  FeedbackEntrySchema,
+  FeedbackIndexSchema,
+  type FeedbackType,
+  type FeedbackSeverity,
+  type FeedbackStatus,
+  type FeedbackEntry,
+  type FeedbackIndex,
+} from "./feedback.js";

@@ -42,6 +42,7 @@ export async function createSpecification(
       design: `${SPECIFICATIONS_DIR}/${id}/design.md`,
       supplementary: [],
     },
+    flags: [],
   };
 
   await specRepo.ensureSpecDir(cwd, id);

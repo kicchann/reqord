@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { StatusSchema, VersionHistoryEntrySchema } from "./common.js";
+import { FeedbackFlagSchema } from "./requirement.js";
 
 export const SpecificationSchema = z.object({
   id: z.string().regex(/^spec-\d{6}$/),
@@ -13,6 +14,7 @@ export const SpecificationSchema = z.object({
     design: z.string(),
     supplementary: z.array(z.string()).default([]),
   }),
+  flags: z.array(FeedbackFlagSchema).default([]),
 });
 
 export type Specification = z.infer<typeof SpecificationSchema>;

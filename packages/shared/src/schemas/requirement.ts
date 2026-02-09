@@ -5,6 +5,7 @@ import {
   ComplexitySchema,
   VersionHistoryEntrySchema,
 } from "./common.js";
+import { FeedbackSeveritySchema } from "./feedback.js";
 
 const UserStorySchema = z.object({
   as: z.string(),
@@ -32,6 +33,18 @@ const DependenciesSchema = z.object({
   relatedTo: z.array(z.string()).default([]),
 });
 
+const FeedbackFlagSchema = z.object({
+  type: z.literal("feedback-review"),
+  reason: z.string(),
+  createdAt: z.string(),
+  relatedIssues: z.array(z.number()),
+  severity: FeedbackSeveritySchema,
+});
+
+const RequirementOriginSchema = z.object({
+  feedbackIssue: z.number(),
+});
+
 export const RequirementSchema = z.object({
   id: z.string().regex(/^req-\d{6}$/),
   version: z.string().default("1.0.0"),
@@ -54,6 +67,10 @@ export const RequirementSchema = z.object({
   }),
   estimatedComplexity: ComplexitySchema.optional(),
   estimatedHours: z.number().positive().optional(),
+  flags: z.array(FeedbackFlagSchema).default([]),
+  origin: RequirementOriginSchema.optional(),
 });
 
+export { FeedbackFlagSchema };
+export type FeedbackFlag = z.infer<typeof FeedbackFlagSchema>;
 export type Requirement = z.infer<typeof RequirementSchema>;

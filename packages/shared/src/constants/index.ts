@@ -9,4 +9,5 @@ export {
   ASSETS_DIR,
   DOMAIN_DIR,
   ISSUE_TEMPLATES_DIR,
+  FEEDBACK_DIR,
 } from "./paths.js";
