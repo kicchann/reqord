@@ -14,8 +14,10 @@ export {
 export {
   RequirementSchema,
   FeedbackFlagSchema,
+  CurrentApprovalSchema,
   type Requirement,
   type FeedbackFlag,
+  type CurrentApproval,
 } from "./requirement.js";
 
 export {

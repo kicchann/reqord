@@ -45,6 +45,15 @@ const RequirementOriginSchema = z.object({
   feedbackIssue: z.number(),
 });
 
+const CurrentApprovalSchema = z.object({
+  version: z.string(),
+  phase: z.enum(["requirement", "specification"]),
+  prNumber: z.number(),
+  prUrl: z.string(),
+  approvedBy: z.array(z.string()),
+  approvedAt: z.string().optional(),
+});
+
 export const RequirementSchema = z.object({
   id: z.string().regex(/^req-\d{6}$/),
   version: z.string().default("1.0.0"),
@@ -67,10 +76,12 @@ export const RequirementSchema = z.object({
   }),
   estimatedComplexity: ComplexitySchema.optional(),
   estimatedHours: z.number().positive().optional(),
+  currentApproval: CurrentApprovalSchema.optional(),
   flags: z.array(FeedbackFlagSchema).default([]),
   origin: RequirementOriginSchema.optional(),
 });
 
-export { FeedbackFlagSchema };
+export { FeedbackFlagSchema, CurrentApprovalSchema };
 export type FeedbackFlag = z.infer<typeof FeedbackFlagSchema>;
+export type CurrentApproval = z.infer<typeof CurrentApprovalSchema>;
 export type Requirement = z.infer<typeof RequirementSchema>;
