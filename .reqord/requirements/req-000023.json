@@ -44,17 +44,5 @@
   },
   "estimatedComplexity": "medium",
   "estimatedHours": 20,
-  "flags": [],
-  "versionHistory": [
-    {
-      "version": "1.0.0",
-      "summary": "初版: structure含む6コマンド構成",
-      "changedAt": "2026-02-09T10:00:00Z"
-    },
-    {
-      "version": "1.1.0",
-      "summary": "sync中心設計へ再構成。structureコマンド廃止、syncコマンド追加。Zodスキーマバリデーション成功基準を追加",
-      "changedAt": "2026-02-09T18:00:00Z"
-    }
-  ]
+  "versionHistory": []
 }
