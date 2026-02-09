@@ -2,7 +2,7 @@
 
 ## 1. 設計概要
 
-GitHub Issueの状態をローカルのSpecification JSONに同期し、実装進捗を追跡する機能を提供する。spec-000016で作成されたIssueの最新状態をGitHub APIから取得し、`implementation.issues[].state` および `implementation.progress` フィールドを更新する。`gh` CLIを通じたGitHub API呼び出しにより、追加の認証設定なしでIssue情報を取得する。メタデータの整合性検証（Issue存在確認、ラベル一致、循環依存チェック）も提供する。
+GitHub Issueの状態をローカルのSpecification JSONに同期し、実装進捗を追跡する機能を提供する。spec-000016で作成されたIssueの最新状態をGitHub APIから取得し、`implementation.issues[].state` および `implementation.progress` フィールドを更新する。`gh` CLIを通じたGitHub API呼び出しにより、追加の認証設定なしでIssue情報を取得する。メタデータの整合性検証（Issue存在確認、HTMLコメントタグ一致、循環依存チェック）も提供する。
 
 ## 2. アーキテクチャ
 
@@ -90,7 +90,7 @@ reqord issue validate --all
 |---------|------|--------|
 | Issue存在確認 | 記録されたIssue番号がGitHub上に存在するか | error |
 | ラベル一致 | `reqord-generated` ラベルが付与されているか | warning |
-| spec-idラベル | `spec:<spec-id>` ラベルが正しいか | warning |
+| specificationコメント一致 | Issue本文に `<!-- reqord:specification {"specificationId":"<spec-id>"} -->` が存在するか | warning |
 | 循環依存 | Issue間の依存関係に循環がないか | error |
 | 重複Issue | 同一タスクに対する重複Issueがないか | warning |
 | Issueオープン状態 | 全Issueクローズ済みならprogress=100%か | info |
@@ -181,6 +181,7 @@ async function syncSpecification(cwd: string, specId: string): Promise<SyncResul
 export interface GitHubIssue {
   number: number;
   title: string;
+  body: string;
   state: "open" | "closed";
   labels: string[];
   assignees: string[];
@@ -210,13 +211,13 @@ import { execFile } from "node:child_process";
 async function getIssue(cwd: string, issueNumber: number): Promise<GitHubIssue> {
   const result = await execGh(cwd, [
     "issue", "view", String(issueNumber),
-    "--json", "number,title,state,labels,assignees,createdAt,updatedAt,closedAt",
+    "--json", "number,title,body,state,labels,assignees,createdAt,updatedAt,closedAt",
   ]);
   return parseGitHubIssue(JSON.parse(result));
 }
 
 async function listIssues(cwd: string, options: ListOptions): Promise<GitHubIssue[]> {
-  const args = ["issue", "list", "--json", "number,title,state,labels,assignees,createdAt,updatedAt,closedAt"];
+  const args = ["issue", "list", "--json", "number,title,body,state,labels,assignees,createdAt,updatedAt,closedAt"];
   if (options.labels?.length) {
     args.push("--label", options.labels.join(","));
   }
@@ -335,7 +336,8 @@ function mapGitHubState(ghState: "open" | "closed"): "open" | "in_progress" | "c
       → specRepo.findById(cwd, "spec-000016") → Specification取得
       → 各Issueについて:
         → githubRepo.getIssue(cwd, issue.number) → Issue存在確認
-        → ラベル確認: "reqord-generated", "spec:spec-000016" が存在するか
+        → ラベル確認: "reqord-generated" が存在するか
+        → HTMLコメントタグ確認: <!-- reqord:specification {"specificationId":"spec-000016"} --> がbodyに存在するか
       → 循環依存チェック:
         → Issue間のblockedBy関係をグラフとして構築
         → トポロジカルソートで循環検出
@@ -345,7 +347,7 @@ function mapGitHubState(ghState: "open" | "closed"): "open" | "in_progress" | "c
   → 検証結果表示:
     ✓ Issue #42 exists
     ✓ Issue #43 exists
-    ⚠ Issue #43 missing label "spec:spec-000016"
+    ⚠ Issue #43 missing specification comment tag
     ✓ No circular dependencies
 ```
 
@@ -362,7 +364,8 @@ function mapGitHubState(ghState: "open" | "closed"): "open" | "in_progress" | "c
 - **issueSyncService.validateSpecification**:
   - 全チェック正常: ValidationResult.errors = []
   - Issue不存在: error severity
-  - ラベル不一致: warning severity
+  - ラベル不一致（reqord-generated欠落）: warning severity
+  - HTMLコメントタグ不一致（specificationコメント欠落）: warning severity
   - 循環依存検出: error severity
 - **calculateProgress**:
   - 0件: percentage = 0

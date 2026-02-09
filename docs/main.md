@@ -798,15 +798,7 @@ body:
       value: |
         ---
         ### 🔗 Reqord Metadata
-        <!-- reqord:metadata
-        {
-          "specificationId": "spec-001",
-          "requirementIds": ["req-001"],
-          "parallelGroup": 1,
-          "isCriticalPath": true,
-          "estimatedHours": 4
-        }
-        -->
+        <!-- reqord:specification {"specificationId":"spec-001"} -->
 ```
 
 ---
