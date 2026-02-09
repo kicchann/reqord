@@ -2,7 +2,7 @@
 
 ## 1. 設計概要
 
-SpecificationからGitHub Issueを自動生成する機能を提供する。Anthropic SDK（Claude API）を使用してSpecificationのdesign.mdを解析し、実装タスクに分解する。分解戦略（by-layer, by-feature, by-requirement, custom）を選択可能にし、並列グループ（P0/P1/P2）とクリティカルパスを自動計算する。GitHub Issue Templateの適用、ラベル自動付与、`--dry-run`によるプレビューをサポートする。本specでは分解とIssue作成（書き込み操作）を扱い、Issue同期・追跡（spec-000024）は対象外とする。
+SpecificationからGitHub Issueを自動生成する機能を提供する。Anthropic SDK（Claude API）を使用してSpecificationのdesign.mdを解析し、実装タスクに分解する。分解戦略（by-layer, by-feature, by-requirement, custom）を選択可能にし、並列グループ（P0/P1/P2）とクリティカルパスを自動計算する。GitHub Issue Templateの適用、HTMLコメントタグによるメタデータ埋め込み、`--dry-run`によるプレビューをサポートする。本specでは分解とIssue作成（書き込み操作）を扱い、Issue同期・追跡（spec-000024）は対象外とする。
 
 ## 2. アーキテクチャ
 
@@ -200,12 +200,26 @@ body:
       label: 優先度
 ```
 
-### 3.7 ラベル自動付与
+### 3.7 メタデータ付与
 
-各Issueに以下のラベルを自動付与:
+各Issueに以下のメタデータを付与する。
+
+#### 3.7.1 HTMLコメントタグ
+
+Issue本文にHTMLコメントタグを埋め込み、Specification IDを記録する:
+
+```html
+<!-- reqord:specification {"specificationId":"spec-NNNNNN"} -->
+```
+
+| フィールド | 型 | 必須 | 説明 |
+|-----------|------|------|------|
+| `specificationId` | string | Yes | 対象Specification ID |
+
+#### 3.7.2 ラベル
+
+有限集合のラベルのみをGitHub UIフィルタ用に付与:
 - `reqord-generated`: reqordから生成されたIssue
-- `spec:<spec-id>`: 対象Specification（例: `spec:spec-000016`）
-- `req:<req-id>`: 関連Requirement（例: `req:req-000016`）
 - `P<n>`: 優先度（例: `P0`, `P1`, `P2`）
 
 ### 3.8 SpecificationSchema拡張
@@ -259,8 +273,9 @@ function calculateCriticalPath(tasks: DecomposedTask[]): string[] {
         → DecompositionResult返却
       → Issue Template読み込み
       → 各タスクに対して:
-        → ラベル生成: ["reqord-generated", "spec:spec-000016", "req:req-000016", "P0"]
         → Issue本文生成（テンプレート適用）
+        → HTMLコメントタグ埋め込み: <!-- reqord:specification {"specificationId":"spec-000016"} -->
+        → ラベル生成: ["reqord-generated", "P0"]
         → githubRepo.createIssue({ title, body, labels })
           → gh issue create --title "..." --body "..." --label "..."
       → Specification JSONにimplementationフィールド記録
@@ -299,7 +314,8 @@ function calculateCriticalPath(tasks: DecomposedTask[]): string[] {
   - 並列グループ計算: P0/P1/P2への正しい分類
   - クリティカルパス計算: 線形依存、分岐依存、独立タスク
 - **issue-service**:
-  - ラベル生成ロジック
+  - HTMLコメントタグ埋め込みロジック
+  - ラベル生成ロジック（`reqord-generated`, `P<n>`）
   - Issue本文テンプレート適用
   - dry-runモード: GitHub API呼び出しなし
   - maxIssues制限の動作
