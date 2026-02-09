@@ -41,22 +41,23 @@ ProjectContext + Requirement + Specificationを結合し、外部ツール向け
 | `reqord req create` | 新規要件を作成（user-story / ears / free-form形式） | 実装済み |
 | `reqord req list` | 要件一覧を表示（priority・statusフィルタ対応） | 実装済み |
 | `reqord req show <id>` | 要件の詳細を表示（JSON出力対応） | 実装済み |
-| `reqord req update <id>` | 要件メタデータを更新（title, status, priority） | 実装済み |
+| `reqord req update <id>` | 要件メタデータを更新（title, status, priority, --major/--minor/--patch） | 実装済み |
 | `reqord req delete <id>` | 要件を削除（確認プロンプト付き） | 実装済み |
 | `reqord req validate <id>` | 要件の品質をSMARTスコアリングで検証 | 実装済み |
-| `reqord req history <id>` | 要件のバージョン履歴を表示 | 🔴 未実装 |
+| `reqord req history <id>` | 要件のバージョン履歴を表示 | 実装済み |
 | `reqord req approve <id>` | 要件の承認PRを作成（GitHub PR連携） | 🔴 未実装 |
 
 - 要件ID形式: `req-NNNNNN`（6桁ゼロ埋め）
 - 保存先: `.reqord/requirements/`
 
-### req history（未実装）
+### req history
 
 **出典**: req-000005「Requirementバージョン管理」(approved)
 
-要件のバージョン履歴をタイムライン形式で表示する。バージョン番号、ステータス遷移、承認情報、関連Gitコミットを確認できる。
+要件のバージョン履歴をテーブル形式で表示する。バージョン番号、ステータス、日時、サマリーを確認できる。
 
-- `reqord req update` に `--major` / `--minor` / `--patch` フラグを追加予定
+- `--json` フラグでJSON出力に対応
+- `reqord req update` で `--major` / `--minor` / `--patch` フラグによるバージョン上書きに対応
 
 ### req approve（未実装）
 

@@ -256,8 +256,8 @@ describe("getStateTransitions", () => {
 
     expect(transitions.get("draft")).toEqual(["pending_approval"]);
     expect(transitions.get("pending_approval")).toEqual(["approved", "draft"]);
-    expect(transitions.get("approved")).toEqual(["implemented", "deprecated"]);
-    expect(transitions.get("implemented")).toEqual([]);
+    expect(transitions.get("approved")).toEqual(["implemented", "deprecated", "pending_approval"]);
+    expect(transitions.get("implemented")).toEqual(["pending_approval"]);
     expect(transitions.get("deprecated")).toEqual([]);
   });
 });
@@ -292,8 +292,19 @@ describe("isValidTransition", () => {
     expect(isValidTransition("deprecated", "approved")).toBe(false);
   });
 
-  it("implemented→任意が無効（明示的遷移なし）", () => {
+  it("approved→pending_approvalが有効（auto-revert）", () => {
+    expect(isValidTransition("approved", "pending_approval")).toBe(true);
+  });
+
+  it("implemented→pending_approvalが有効（auto-revert）", () => {
+    expect(isValidTransition("implemented", "pending_approval")).toBe(true);
+  });
+
+  it("implemented→deprecatedが無効", () => {
     expect(isValidTransition("implemented", "deprecated")).toBe(false);
+  });
+
+  it("implemented→draftが無効", () => {
     expect(isValidTransition("implemented", "draft")).toBe(false);
   });
 });

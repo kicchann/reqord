@@ -10,8 +10,9 @@
     {
       "version": "1.0.0",
       "changedAt": "2026-02-07T12:00:00Z",
-      "changeType": "created",
-      "summary": "LLMコンテキスト出力として初版作成"
+      "summary": "LLMコンテキスト出力として初版作成",
+      "status": "approved",
+      "gitCommit": "legacy"
     }
   ],
   "files": {
@@ -50,7 +51,9 @@
       "type": "feedback-review",
       "reason": "LLM特化の表現を汎用化: コマンド名変更（context → context export）、トークン最適化をClaude Code側に、Gap Analysis統合を削除（deprecated）",
       "createdAt": "2026-02-09T10:00:00Z",
-      "relatedIssues": [17],
+      "relatedIssues": [
+        17
+      ],
       "severity": "medium"
     }
   ]

@@ -120,8 +120,8 @@ export function getStateTransitions(): Map<Status, Status[]> {
   return new Map([
     ["draft", ["pending_approval"]],
     ["pending_approval", ["approved", "draft"]],
-    ["approved", ["implemented", "deprecated"]],
-    ["implemented", []],
+    ["approved", ["implemented", "deprecated", "pending_approval"]],
+    ["implemented", ["pending_approval"]],
     ["deprecated", []],
   ]);
 }

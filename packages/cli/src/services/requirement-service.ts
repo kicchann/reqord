@@ -157,11 +157,13 @@ export async function updateRequirement(
   merged.updatedAt = new Date().toISOString();
 
   // 4. Detect content changes
+  const hasDescriptionChange = options.descriptionContent !== undefined;
   const hasContentChanges =
     merged.title !== before.title ||
     JSON.stringify(merged.format) !== JSON.stringify(before.format) ||
     JSON.stringify(merged.dependencies) !== JSON.stringify(before.dependencies) ||
-    JSON.stringify(merged.successCriteria) !== JSON.stringify(before.successCriteria);
+    JSON.stringify(merged.successCriteria) !== JSON.stringify(before.successCriteria) ||
+    hasDescriptionChange;
 
   // 5. Auto-revert (only when status is NOT explicitly changed by user)
   const statusExplicitlyChanged =
@@ -190,6 +192,12 @@ export async function updateRequirement(
 
   // 7. Determine version
   let nextVersion = versionService.determineNextVersion(before, merged as Requirement);
+
+  // Ensure at least patch bump for description-only changes (outside draft)
+  if (hasDescriptionChange && nextVersion === before.version && before.status !== "draft") {
+    const { major, minor, patch } = versionService.parseVersion(before.version);
+    nextVersion = versionService.formatVersion(major, minor, patch + 1);
+  }
 
   // Override with explicit version bump if specified
   if (options.versionBump) {

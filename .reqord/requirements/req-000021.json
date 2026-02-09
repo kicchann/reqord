@@ -10,8 +10,9 @@
     {
       "version": "1.0.0",
       "changedAt": "2026-02-07T12:00:00Z",
-      "changeType": "created",
-      "summary": "初版作成"
+      "summary": "初版作成",
+      "status": "deprecated",
+      "gitCommit": "legacy"
     }
   ],
   "files": {
@@ -50,7 +51,9 @@
       "type": "feedback-review",
       "reason": "AI補助機能のreqord CLI/SDKからClaude Codeエコシステムへの分離",
       "createdAt": "2026-02-09T10:00:00Z",
-      "relatedIssues": [17],
+      "relatedIssues": [
+        17
+      ],
       "severity": "high"
     }
   ]

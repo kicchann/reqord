@@ -429,3 +429,73 @@ describe("updateRequirement - バージョン明示的指定", () => {
     expect(result.after.version).toBe("2.0.0");
   });
 });
+
+describe("updateRequirement - description変更のバージョニング", () => {
+  beforeEach(() => {
+    vi.resetAllMocks();
+    vi.mocked(versionService.isValidTransition).mockReturnValue(true);
+    vi.mocked(versionService.shouldRevertToPendingApproval).mockReturnValue(false);
+    vi.mocked(reqRepo.save).mockResolvedValue(undefined);
+    vi.mocked(reqRepo.saveDescription).mockResolvedValue(undefined);
+  });
+
+  it("description変更のみでpatch bumpが発生する（非draft）", async () => {
+    const before = makeRequirement({ version: "1.0.0", status: "approved" });
+    vi.mocked(reqRepo.findById).mockResolvedValue(before);
+    vi.mocked(versionService.determineNextVersion).mockReturnValue("1.0.0");
+    vi.mocked(versionService.parseVersion).mockReturnValue({ major: 1, minor: 0, patch: 0 });
+    vi.mocked(versionService.formatVersion).mockReturnValue("1.0.1");
+    vi.mocked(versionService.generateChangeSummary).mockReturnValue("Description updated");
+    vi.mocked(versionService.createHistoryEntry).mockReturnValue({
+      version: "1.0.1",
+      status: "pending_approval",
+      gitCommit: "abc123",
+      changedAt: "2026-01-02T00:00:00Z",
+      summary: "Description updated",
+    });
+
+    const result = await updateRequirement("/test/cwd", "req-000001", {
+      descriptionContent: "新しい説明文",
+    });
+
+    expect(versionService.parseVersion).toHaveBeenCalledWith("1.0.0");
+    expect(versionService.formatVersion).toHaveBeenCalledWith(1, 0, 1);
+    expect(result.after.version).toBe("1.0.1");
+    expect(result.descriptionUpdated).toBe(true);
+  });
+
+  it("description変更はdraft状態ではpatch bumpしない", async () => {
+    const before = makeRequirement({ version: "1.0.0", status: "draft" });
+    vi.mocked(reqRepo.findById).mockResolvedValue(before);
+    vi.mocked(versionService.determineNextVersion).mockReturnValue("1.0.0");
+
+    const result = await updateRequirement("/test/cwd", "req-000001", {
+      descriptionContent: "新しい説明文",
+    });
+
+    expect(versionService.parseVersion).not.toHaveBeenCalled();
+    expect(result.after.version).toBe("1.0.0");
+  });
+
+  it("description変更がauto-revertをトリガーする", async () => {
+    const before = makeRequirement({ version: "1.0.0", status: "approved" });
+    vi.mocked(reqRepo.findById).mockResolvedValue(before);
+    vi.mocked(versionService.shouldRevertToPendingApproval).mockReturnValue(true);
+    vi.mocked(versionService.determineNextVersion).mockReturnValue("2.0.0");
+    vi.mocked(versionService.generateChangeSummary).mockReturnValue("Status changed");
+    vi.mocked(versionService.createHistoryEntry).mockReturnValue({
+      version: "2.0.0",
+      status: "pending_approval",
+      gitCommit: "abc123",
+      changedAt: "2026-01-02T00:00:00Z",
+      summary: "Status changed",
+    });
+
+    const result = await updateRequirement("/test/cwd", "req-000001", {
+      descriptionContent: "変更された説明文",
+    });
+
+    expect(versionService.shouldRevertToPendingApproval).toHaveBeenCalledWith("approved", true);
+    expect(result.after.status).toBe("pending_approval");
+  });
+});
