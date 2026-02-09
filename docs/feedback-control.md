@@ -393,12 +393,13 @@ body:
 ### オプション1: Statusに `under-review` を追加
 
 ```typescript
-type RequirementStatus = 
-  | "draft"           // 作成中
-  | "approved"        // 承認済み
-  | "under-review"    // Feedback受けて再検討中 ⭐ NEW
-  | "deprecated"      // 廃止
-  | "implemented"     // 実装完了
+type RequirementStatus =
+  | "draft"              // 作成中
+  | "pending_approval"   // レビュー待ち
+  | "approved"           // 承認済み
+  | "under-review"       // Feedback受けて再検討中 ⭐ NEW
+  | "implemented"        // 実装完了
+  | "deprecated"         // 廃止
 ```
 
 **問題点:**
@@ -413,7 +414,7 @@ type RequirementStatus =
 ```typescript
 type Requirement = {
   id: string;
-  status: "draft" | "approved" | "deprecated" | "implemented";
+  status: "draft" | "pending_approval" | "approved" | "implemented" | "deprecated";
   
   // Feedback専用ステータス（オプショナル）
   feedbackStatus?: {
@@ -460,7 +461,7 @@ type Requirement = {
 ```typescript
 type Requirement = {
   id: string;
-  status: "draft" | "approved" | "deprecated" | "implemented";
+  status: "draft" | "pending_approval" | "approved" | "implemented" | "deprecated";
   
   // フラグ方式（複数状態を保持可能）
   flags?: {
@@ -669,7 +670,7 @@ type Requirement = {
   title: string;
   
   // メインステータス（変更しない）
-  status: "draft" | "approved" | "deprecated" | "implemented";
+  status: "draft" | "pending_approval" | "approved" | "implemented" | "deprecated";
   
   // バージョン履歴
   versionHistory: {
@@ -771,7 +772,7 @@ type Requirement = {
 
 ### `status` を使う場合
 - ライフサイクルの本質的な状態
-- 例: draft → approved → deprecated → implemented
+- 例: draft → pending_approval → approved → implemented / deprecated
 
 ### `flags` を使う場合
 - 一時的な注意事項
@@ -795,7 +796,7 @@ type Requirement = {
 ### 実装
 ```typescript
 type Requirement = {
-  status: "draft" | "approved" | "deprecated" | "implemented";
+  status: "draft" | "pending_approval" | "approved" | "implemented" | "deprecated";
   flags?: {
     type: "feedback-review" | "security-review" | "breaking-change";
     reason: string;
