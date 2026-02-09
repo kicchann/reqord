@@ -144,3 +144,43 @@ export async function updateSpecDesign(
 
   return { filePath, updated: true };
 }
+
+// --- Approval Prerequisites ---
+
+export interface PrerequisiteResult {
+  ok: boolean;
+  errors: string[];
+}
+
+export async function checkSpecApprovalPrerequisites(
+  cwd: string,
+  specId: string,
+): Promise<PrerequisiteResult> {
+  const spec = await specRepo.findById(cwd, specId);
+  if (!spec) {
+    throw new Error(`Specification ${specId} not found.`);
+  }
+
+  const errors: string[] = [];
+
+  // 1. Status check
+  if (spec.status !== "draft") {
+    errors.push(`Specificationのステータスが draft ではありません（現在: ${spec.status}）`);
+  }
+
+  // 2. Related requirement status check
+  const req = await reqRepo.findById(cwd, spec.requirementId);
+  if (!req) {
+    errors.push(`関連要件 ${spec.requirementId} が見つかりません`);
+  } else if (req.status !== "approved" && req.status !== "pending_approval") {
+    errors.push(`関連要件 ${spec.requirementId} が未承認です（現在: ${req.status}）`);
+  }
+
+  // 3. design.md content check
+  const design = await specRepo.loadFile(cwd, specId, "design.md");
+  if (!design || design.includes("{{")) {
+    errors.push("design.mdがテンプレートのままです。設計内容を記述してください。");
+  }
+
+  return { ok: errors.length === 0, errors };
+}
