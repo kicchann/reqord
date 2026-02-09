@@ -1,4 +1,4 @@
-import type { Specification, Status } from "@reqord/shared";
+import type { Specification, Status, VersionHistoryEntry } from "@reqord/shared";
 import { SPECIFICATIONS_DIR } from "@reqord/shared";
 import * as specRepo from "../repositories/specification.js";
 import * as reqRepo from "../repositories/requirement.js";
@@ -7,6 +7,7 @@ import {
   loadProjectTemplate,
   DEFAULT_SPECIFICATION_DESIGN_TEMPLATE,
 } from "../utils/templates.js";
+import * as versionService from "./version-service.js";
 
 // --- Create ---
 
@@ -183,4 +184,56 @@ export async function checkSpecApprovalPrerequisites(
   }
 
   return { ok: errors.length === 0, errors };
+}
+
+// --- Update Specification Status ---
+
+export interface UpdateSpecStatusResult {
+  before: Specification;
+  after: Specification;
+}
+
+export async function updateSpecificationStatus(
+  cwd: string,
+  id: string,
+  newStatus: Status,
+): Promise<UpdateSpecStatusResult> {
+  const before = await specRepo.findById(cwd, id);
+  if (!before) {
+    throw new Error(`Specification ${id} not found.`);
+  }
+
+  // Validate status transition
+  if (!versionService.isValidTransition(before.status, newStatus)) {
+    const transitions = versionService.getStateTransitions();
+    const allowed = (transitions.get(before.status) ?? []).join(", ");
+    throw new Error(
+      `Invalid status transition: ${before.status} → ${newStatus}. Allowed: ${allowed}`
+    );
+  }
+
+  // Version bump: status change = major bump
+  const { major } = versionService.parseVersion(before.version);
+  const nextVersion = versionService.formatVersion(major + 1, 0, 0);
+
+  const now = new Date().toISOString();
+  const summary = `Status changed from ${before.status} to ${newStatus}`;
+  const historyEntry: VersionHistoryEntry = {
+    version: nextVersion,
+    status: newStatus,
+    gitCommit: versionService.getCurrentGitCommit(),
+    changedAt: now,
+    summary,
+  };
+
+  const after: Specification = {
+    ...before,
+    status: newStatus,
+    version: nextVersion,
+    updatedAt: now,
+    versionHistory: [...before.versionHistory, historyEntry],
+  };
+
+  await specRepo.save(cwd, after);
+  return { before, after };
 }

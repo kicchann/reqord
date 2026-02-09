@@ -6,6 +6,7 @@ import {
   startApproval,
   type ApprovalTarget,
 } from "../../services/approval-service.js";
+import { requirementHandler } from "../../services/requirement-approval-handler.js";
 import { handleError } from "../../utils/error-handler.js";
 
 export const approveCommand = new Command("approve")
@@ -24,10 +25,10 @@ export const approveCommand = new Command("approve")
         version: requirement.version,
         status: requirement.status,
         title: requirement.title,
-        jsonPath: `${REQORD_DIR}/${REQUIREMENTS_DIR}/${requirement.id}.json`,
+        files: [`${REQORD_DIR}/${REQUIREMENTS_DIR}/${requirement.id}.json`],
       };
 
-      const result = await startApproval(cwd, target, {
+      const result = await startApproval(cwd, target, requirementHandler, {
         dryRun: options.dryRun,
       });
 
