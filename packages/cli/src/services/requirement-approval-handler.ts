@@ -1,6 +1,6 @@
 import * as reqRepo from "../repositories/requirement.js";
 import { updateRequirement } from "./requirement-service.js";
-import type { ApprovalHandler, ApprovalTarget } from "./approval-service.js";
+import type { ApprovalHandler } from "./approval-service.js";
 
 export const requirementHandler: ApprovalHandler = {
   async revalidate(cwd, target) {

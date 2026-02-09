@@ -41,7 +41,6 @@ import {
   startApproval,
   type ApprovalResult,
 } from "../../services/approval-service.js";
-import { specificationHandler } from "../../services/specification-approval-handler.js";
 import {
   extractDesignSummary,
   buildSpecApprovalPrBody,

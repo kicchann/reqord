@@ -1,5 +1,4 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import type { Requirement } from "@reqord/shared";
 
 // Mock dependencies BEFORE imports
 vi.mock("../repositories/git.js", () => ({
@@ -18,25 +17,6 @@ vi.mock("../repositories/github.js", () => ({
 import * as gitRepo from "../repositories/git.js";
 import * as githubRepo from "../repositories/github.js";
 import { startApproval, type ApprovalTarget, type ApprovalHandler } from "./approval-service.js";
-
-function makeRequirement(overrides: Partial<Requirement> = {}): Requirement {
-  return {
-    id: "req-000011",
-    version: "1.0.0",
-    title: "Test Requirement",
-    status: "draft",
-    priority: "medium",
-    createdAt: "2026-01-01T00:00:00Z",
-    updatedAt: "2026-01-01T00:00:00Z",
-    versionHistory: [],
-    files: { description: "requirements/req-000011/description.md", supplementary: [] },
-    successCriteria: ["Criterion 1"],
-    format: { type: "free-form" },
-    dependencies: { blockedBy: [], blocks: [], relatedTo: [] },
-    flags: [],
-    ...overrides,
-  };
-}
 
 function makeApprovalTarget(overrides: Partial<ApprovalTarget> = {}): ApprovalTarget {
   return {

@@ -1,7 +1,7 @@
 import * as specRepo from "../repositories/specification.js";
 import { updateSpecificationStatus } from "./specification-service.js";
 import { buildSpecApprovalPrBody } from "./spec-approval-helpers.js";
-import type { ApprovalHandler, ApprovalTarget } from "./approval-service.js";
+import type { ApprovalHandler } from "./approval-service.js";
 
 export const specificationHandler: ApprovalHandler = {
   async revalidate(cwd, target) {
