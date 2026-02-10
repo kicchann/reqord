@@ -329,6 +329,26 @@ describe("checkSpecApprovalPrerequisites", () => {
     expect(result.errors).toContainEqual(expect.stringContaining("テンプレートのまま"));
   });
 
+  it("design.mdが空文字の場合はエラー", async () => {
+    mockSpecRepo.findById.mockResolvedValue(makeSpecification({ status: "draft" }));
+    mockReqRepo.findById.mockResolvedValue(makeRequirement({ status: "approved" }));
+    mockSpecRepo.loadFile.mockResolvedValue("");
+
+    const result = await checkSpecApprovalPrerequisites("/cwd", "spec-000001");
+    expect(result.ok).toBe(false);
+    expect(result.errors).toContainEqual(expect.stringContaining("テンプレートのまま"));
+  });
+
+  it("design.mdが空白のみの場合はエラー", async () => {
+    mockSpecRepo.findById.mockResolvedValue(makeSpecification({ status: "draft" }));
+    mockReqRepo.findById.mockResolvedValue(makeRequirement({ status: "approved" }));
+    mockSpecRepo.loadFile.mockResolvedValue("   \n\t  ");
+
+    const result = await checkSpecApprovalPrerequisites("/cwd", "spec-000001");
+    expect(result.ok).toBe(false);
+    expect(result.errors).toContainEqual(expect.stringContaining("テンプレートのまま"));
+  });
+
   it("Specificationが存在しない場合はエラーをthrow", async () => {
     mockSpecRepo.findById.mockResolvedValue(null);
 

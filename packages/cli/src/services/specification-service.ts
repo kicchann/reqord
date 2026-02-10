@@ -178,7 +178,7 @@ export async function checkSpecApprovalPrerequisites(
 
   // 3. design.md content check
   const design = await specRepo.loadFile(cwd, specId, "design.md");
-  if (!design || design.includes("{{")) {
+  if (design == null || design.trim().length === 0 || design.includes("{{")) {
     errors.push("design.mdがテンプレートのままです。設計内容を記述してください。");
   }
 
