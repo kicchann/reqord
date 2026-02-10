@@ -7,7 +7,7 @@ export function handleError(
 ): void {
   const isAppError = error instanceof AppError;
   const code = isAppError ? error.code : "UNKNOWN";
-  const message = (error as Error).message;
+  const message = error instanceof Error ? error.message : String(error);
   const exitCode = isAppError ? error.exitCode : 1;
   const prefix = isAppError ? "エラー" : "予期しないエラーが発生しました";
 
