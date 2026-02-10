@@ -114,6 +114,6 @@ describe("buildSpecApprovalPrBody", () => {
       designSummary: "概要",
     });
 
-    expect(result).toContain("このPRをマージすると、仕様のステータスが `approved` に更新されます。");
+    expect(result).toContain("マージ後、`reqord spec update spec-000001 --status approved` でステータスを更新してください。");
   });
 });

@@ -49,5 +49,5 @@ status: draft → pending_approval
 ### 設計ファイル
 - \`specifications/${params.specId}/design.md\`
 
-> このPRをマージすると、仕様のステータスが \`approved\` に更新されます。`;
+> マージ後、\`reqord spec update ${params.specId} --status approved\` でステータスを更新してください。`;
 }
