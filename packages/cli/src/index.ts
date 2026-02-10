@@ -19,6 +19,7 @@ import { specShowCommand } from "./commands/spec/show.js";
 import { specDesignCommand } from "./commands/spec/design.js";
 import { specApproveCommand } from "./commands/spec/approve.js";
 import { feedbackCommand } from "./commands/feedback/index.js";
+import { issueCommand } from "./commands/issue/index.js";
 import { ensureReqordInitialized } from "./middleware/reqord-check.js";
 
 const program = new Command();
@@ -81,5 +82,11 @@ feedbackCommand.hook("preAction", async () => {
 });
 
 program.addCommand(feedbackCommand);
+
+issueCommand.hook("preAction", async () => {
+  await ensureReqordInitialized(process.cwd());
+});
+
+program.addCommand(issueCommand);
 
 program.parse();

@@ -27,7 +27,13 @@ export {
 
 export {
   SpecificationSchema,
+  ImplementationIssueSchema,
+  ImplementationSchema,
+  ProgressSchema,
   type Specification,
+  type ImplementationIssue,
+  type Implementation,
+  type Progress,
 } from "./specification.js";
 
 export {
@@ -55,3 +61,10 @@ export {
   type FeedbackEntry,
   type FeedbackIndex,
 } from "./feedback.js";
+
+export {
+  TaskDefinitionSchema,
+  TaskDefinitionFileSchema,
+  type TaskDefinition,
+  type TaskDefinitionFile,
+} from "./task.js";

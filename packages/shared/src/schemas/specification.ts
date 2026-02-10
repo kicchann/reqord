@@ -11,6 +11,28 @@ const SpecCurrentApprovalSchema = z.object({
   approvedAt: z.string().optional(),
 });
 
+export const ImplementationIssueSchema = z.object({
+  number: z.number(),
+  title: z.string(),
+  url: z.string(),
+  priority: z.string(),
+  status: z.enum(["open", "in_progress", "closed"]).default("open"),
+});
+
+export const ProgressSchema = z.object({
+  total: z.number(),
+  completed: z.number(),
+  percentage: z.number(),
+  lastSyncedAt: z.string(),
+});
+
+export const ImplementationSchema = z.object({
+  issues: z.array(ImplementationIssueSchema),
+  totalEstimatedHours: z.number(),
+  createdAt: z.string(),
+  progress: ProgressSchema.optional(),
+});
+
 export const SpecificationSchema = z.object({
   id: z.string().regex(/^spec-\d{6}$/),
   requirementId: z.string().regex(/^req-\d{6}$/),
@@ -25,6 +47,10 @@ export const SpecificationSchema = z.object({
   }),
   flags: z.array(FeedbackFlagSchema).default([]),
   currentApproval: SpecCurrentApprovalSchema.optional(),
+  implementation: ImplementationSchema.optional(),
 });
 
 export type Specification = z.infer<typeof SpecificationSchema>;
+export type ImplementationIssue = z.infer<typeof ImplementationIssueSchema>;
+export type Implementation = z.infer<typeof ImplementationSchema>;
+export type Progress = z.infer<typeof ProgressSchema>;
