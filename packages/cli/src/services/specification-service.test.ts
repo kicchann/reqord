@@ -309,6 +309,16 @@ describe("checkSpecApprovalPrerequisites", () => {
     expect(result.errors).toContainEqual(expect.stringContaining("未承認"));
   });
 
+  it("関連Requirementが見つからない場合はエラー", async () => {
+    mockSpecRepo.findById.mockResolvedValue(makeSpecification({ status: "draft", requirementId: "req-999999" }));
+    mockReqRepo.findById.mockResolvedValue(null);
+    mockSpecRepo.loadFile.mockResolvedValue("# 設計内容");
+
+    const result = await checkSpecApprovalPrerequisites("/cwd", "spec-000001");
+    expect(result.ok).toBe(false);
+    expect(result.errors).toContainEqual(expect.stringContaining("req-999999 が見つかりません"));
+  });
+
   it("design.mdがテンプレートのままの場合はエラー", async () => {
     mockSpecRepo.findById.mockResolvedValue(makeSpecification({ status: "draft" }));
     mockReqRepo.findById.mockResolvedValue(makeRequirement({ status: "approved" }));
