@@ -7,12 +7,12 @@ vi.mock("../repositories/feedback.js", () => ({
 }));
 
 vi.mock("../repositories/requirement.js", () => ({
-  findById: vi.fn(),
+  findByIdOrThrow: vi.fn(),
   save: vi.fn(),
 }));
 
 vi.mock("../repositories/specification.js", () => ({
-  findById: vi.fn(),
+  findByIdOrThrow: vi.fn(),
   save: vi.fn(),
 }));
 
@@ -227,7 +227,7 @@ describe("linkToRequirement", () => {
     const feedback = makeFeedbackEntry({ githubIssue: 17 });
     mockFeedbackRepo.loadIndex.mockResolvedValue(makeFeedbackIndex([feedback]));
     const requirement = makeRequirement({ id: "req-000001" });
-    mockReqRepo.findById.mockResolvedValue(requirement);
+    mockReqRepo.findByIdOrThrow.mockResolvedValue(requirement);
 
     await linkToRequirement("/test/cwd", {
       issueNumber: 17,
@@ -252,7 +252,7 @@ describe("linkToRequirement", () => {
     const feedback = makeFeedbackEntry({ githubIssue: 17 });
     mockFeedbackRepo.loadIndex.mockResolvedValue(makeFeedbackIndex([feedback]));
     const requirement = makeRequirement({ id: "req-000001" });
-    mockReqRepo.findById.mockResolvedValue(requirement);
+    mockReqRepo.findByIdOrThrow.mockResolvedValue(requirement);
 
     await linkToRequirement("/test/cwd", {
       issueNumber: 17,
@@ -278,7 +278,7 @@ describe("linkToRequirement", () => {
     const feedback = makeFeedbackEntry({ githubIssue: 17 });
     mockFeedbackRepo.loadIndex.mockResolvedValue(makeFeedbackIndex([feedback]));
     const requirement = makeRequirement({ id: "req-000001" });
-    mockReqRepo.findById.mockResolvedValue(requirement);
+    mockReqRepo.findByIdOrThrow.mockResolvedValue(requirement);
     const issue = makeGitHubIssue({ number: 17, body: "Issue body" });
     mockGithubClient.getIssue.mockResolvedValue(issue);
 
@@ -309,7 +309,7 @@ describe("linkToRequirement", () => {
     });
     mockFeedbackRepo.loadIndex.mockResolvedValue(makeFeedbackIndex([feedback]));
     const requirement = makeRequirement({ id: "req-000001" });
-    mockReqRepo.findById.mockResolvedValue(requirement);
+    mockReqRepo.findByIdOrThrow.mockResolvedValue(requirement);
 
     await linkToRequirement("/test/cwd", {
       issueNumber: 17,
@@ -335,7 +335,7 @@ describe("linkToRequirement", () => {
         },
       ],
     });
-    mockReqRepo.findById.mockResolvedValue(requirement);
+    mockReqRepo.findByIdOrThrow.mockResolvedValue(requirement);
 
     await linkToRequirement("/test/cwd", {
       issueNumber: 17,
@@ -349,7 +349,7 @@ describe("linkToRequirement", () => {
   it("index.jsonにfeedbackがない場合は新規作成する", async () => {
     mockFeedbackRepo.loadIndex.mockResolvedValue(makeFeedbackIndex([]));
     const requirement = makeRequirement({ id: "req-000001" });
-    mockReqRepo.findById.mockResolvedValue(requirement);
+    mockReqRepo.findByIdOrThrow.mockResolvedValue(requirement);
 
     await linkToRequirement("/test/cwd", {
       issueNumber: 17,
@@ -458,7 +458,7 @@ describe("linkToSpecification", () => {
     const feedback = makeFeedbackEntry({ githubIssue: 17 });
     mockFeedbackRepo.loadIndex.mockResolvedValue(makeFeedbackIndex([feedback]));
     const specification = makeSpecification({ id: "spec-000001" });
-    mockSpecRepo.findById.mockResolvedValue(specification);
+    mockSpecRepo.findByIdOrThrow.mockResolvedValue(specification);
 
     await linkToSpecification("/test/cwd", {
       issueNumber: 17,
@@ -483,7 +483,7 @@ describe("linkToSpecification", () => {
     const feedback = makeFeedbackEntry({ githubIssue: 17 });
     mockFeedbackRepo.loadIndex.mockResolvedValue(makeFeedbackIndex([feedback]));
     const specification = makeSpecification({ id: "spec-000001" });
-    mockSpecRepo.findById.mockResolvedValue(specification);
+    mockSpecRepo.findByIdOrThrow.mockResolvedValue(specification);
 
     await linkToSpecification("/test/cwd", {
       issueNumber: 17,
@@ -509,7 +509,7 @@ describe("linkToSpecification", () => {
     const feedback = makeFeedbackEntry({ githubIssue: 17 });
     mockFeedbackRepo.loadIndex.mockResolvedValue(makeFeedbackIndex([feedback]));
     const specification = makeSpecification({ id: "spec-000001" });
-    mockSpecRepo.findById.mockResolvedValue(specification);
+    mockSpecRepo.findByIdOrThrow.mockResolvedValue(specification);
     const issue = makeGitHubIssue({ number: 17, body: "Issue body" });
     mockGithubClient.getIssue.mockResolvedValue(issue);
 
@@ -532,7 +532,9 @@ describe("linkToSpecification", () => {
   it("存在しないSpecificationでエラーを投げる", async () => {
     const feedback = makeFeedbackEntry({ githubIssue: 17 });
     mockFeedbackRepo.loadIndex.mockResolvedValue(makeFeedbackIndex([feedback]));
-    mockSpecRepo.findById.mockResolvedValue(null);
+    mockSpecRepo.findByIdOrThrow.mockRejectedValue(
+      new Error("Specification spec-999999 not found.")
+    );
 
     await expect(
       linkToSpecification("/test/cwd", {

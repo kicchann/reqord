@@ -59,3 +59,7 @@ export async function remove(path: string): Promise<void> {
 export function joinPath(...segments: string[]): string {
   return join(...segments);
 }
+
+export function getReqordDir(cwd: string, ...subPaths: string[]): string {
+  return join(cwd, ".reqord", ...subPaths);
+}

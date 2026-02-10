@@ -2,6 +2,7 @@ import { Command } from "commander";
 import chalk from "chalk";
 import { closeFeedback } from "../../services/feedback-service.js";
 import { handleError } from "../../utils/error-handler.js";
+import { parseIssueNumber } from "../../utils/display.js";
 
 export const feedbackCloseCommand = new Command("close")
   .description("Close feedback (updates index.json and closes GitHub Issue)")
@@ -9,11 +10,7 @@ export const feedbackCloseCommand = new Command("close")
   .action(async (issueNumberStr: string) => {
     try {
       const cwd = process.cwd();
-      const issueNumber = parseInt(issueNumberStr, 10);
-
-      if (isNaN(issueNumber)) {
-        throw new Error("Invalid issue number");
-      }
+      const issueNumber = parseIssueNumber(issueNumberStr);
 
       await closeFeedback(cwd, issueNumber);
 

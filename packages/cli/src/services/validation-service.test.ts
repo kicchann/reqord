@@ -5,6 +5,7 @@ import type { Requirement } from "@reqord/shared";
 // Mock the repository module
 vi.mock("../repositories/requirement.js", () => ({
   findById: vi.fn(),
+  findByIdOrThrow: vi.fn(),
   loadDescription: vi.fn(),
   findAll: vi.fn(),
 }));
@@ -42,7 +43,9 @@ beforeEach(() => {
 
 describe("validateRequirement", () => {
   it("存在しない要件でエラーを投げる", async () => {
-    vi.mocked(reqRepo.findById).mockResolvedValue(null);
+    vi.mocked(reqRepo.findByIdOrThrow).mockRejectedValue(
+      new Error("Requirement req-999999 not found."),
+    );
 
     await expect(validateRequirement("/cwd", "req-999999")).rejects.toThrow(
       "Requirement req-999999 not found.",
@@ -51,7 +54,7 @@ describe("validateRequirement", () => {
 
   it("有効な要件でvalid=trueを返す", async () => {
     const req = makeRequirement();
-    vi.mocked(reqRepo.findById).mockResolvedValue(req);
+    vi.mocked(reqRepo.findByIdOrThrow).mockResolvedValue(req);
     vi.mocked(reqRepo.loadDescription).mockResolvedValue("## 概要\n\n詳細な説明文です。");
     vi.mocked(reqRepo.findAll).mockResolvedValue([req]);
 
@@ -67,7 +70,7 @@ describe("validateRequirement", () => {
 
   it("成功基準が0件の場合、error issueが含まれvalid=false", async () => {
     const req = makeRequirement({ successCriteria: [] });
-    vi.mocked(reqRepo.findById).mockResolvedValue(req);
+    vi.mocked(reqRepo.findByIdOrThrow).mockResolvedValue(req);
     vi.mocked(reqRepo.loadDescription).mockResolvedValue(null);
     vi.mocked(reqRepo.findAll).mockResolvedValue([req]);
 
@@ -81,7 +84,7 @@ describe("validateRequirement", () => {
     const req = makeRequirement({
       successCriteria: ["基準1", "基準2"],
     });
-    vi.mocked(reqRepo.findById).mockResolvedValue(req);
+    vi.mocked(reqRepo.findByIdOrThrow).mockResolvedValue(req);
     vi.mocked(reqRepo.loadDescription).mockResolvedValue(null);
     vi.mocked(reqRepo.findAll).mockResolvedValue([req]);
 
@@ -94,7 +97,7 @@ describe("validateRequirement", () => {
     const req = makeRequirement({
       successCriteria: ["1", "2", "3", "4", "5", "6", "7", "8"],
     });
-    vi.mocked(reqRepo.findById).mockResolvedValue(req);
+    vi.mocked(reqRepo.findByIdOrThrow).mockResolvedValue(req);
     vi.mocked(reqRepo.loadDescription).mockResolvedValue(null);
     vi.mocked(reqRepo.findAll).mockResolvedValue([req]);
 
@@ -108,7 +111,7 @@ describe("validateRequirement", () => {
       title: "適切にデータを処理する",
       successCriteria: ["なるべく高速に処理される"],
     });
-    vi.mocked(reqRepo.findById).mockResolvedValue(req);
+    vi.mocked(reqRepo.findByIdOrThrow).mockResolvedValue(req);
     vi.mocked(reqRepo.loadDescription).mockResolvedValue(null);
     vi.mocked(reqRepo.findAll).mockResolvedValue([req]);
 
@@ -122,7 +125,7 @@ describe("validateRequirement", () => {
     const req = makeRequirement({
       dependencies: { blockedBy: ["req-999999"], blocks: [], relatedTo: [] },
     });
-    vi.mocked(reqRepo.findById).mockResolvedValue(req);
+    vi.mocked(reqRepo.findByIdOrThrow).mockResolvedValue(req);
     vi.mocked(reqRepo.loadDescription).mockResolvedValue(null);
     vi.mocked(reqRepo.findAll).mockResolvedValue([req]);
 
@@ -142,7 +145,7 @@ describe("validateRequirement", () => {
       id: "req-000002",
       dependencies: { blockedBy: ["req-000001"], blocks: [], relatedTo: [] },
     });
-    vi.mocked(reqRepo.findById).mockResolvedValue(req1);
+    vi.mocked(reqRepo.findByIdOrThrow).mockResolvedValue(req1);
     vi.mocked(reqRepo.loadDescription).mockResolvedValue(null);
     vi.mocked(reqRepo.findAll).mockResolvedValue([req1, req2]);
 
@@ -157,7 +160,7 @@ describe("validateRequirement", () => {
       estimatedComplexity: "small",
       estimatedHours: 100,
     });
-    vi.mocked(reqRepo.findById).mockResolvedValue(req);
+    vi.mocked(reqRepo.findByIdOrThrow).mockResolvedValue(req);
     vi.mocked(reqRepo.loadDescription).mockResolvedValue(null);
     vi.mocked(reqRepo.findAll).mockResolvedValue([req]);
 

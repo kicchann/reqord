@@ -76,22 +76,11 @@ export async function linkToRequirement(
   options: LinkToRequirementOptions,
 ): Promise<void> {
   // Verify requirement exists
-  const requirement = await reqRepo.findById(cwd, options.requirementId);
-  if (!requirement) {
-    throw new Error(`Requirement ${options.requirementId} not found`);
-  }
+  const requirement = await reqRepo.findByIdOrThrow(cwd, options.requirementId);
 
   // Update index.json
   const index = await feedbackRepo.loadIndex(cwd);
-  let feedback = index.feedbacks.find((f) => f.githubIssue === options.issueNumber);
-
-  if (!feedback) {
-    feedback = createEmptyFeedbackEntry(options.issueNumber);
-    index.feedbacks.push(feedback);
-  }
-
-  if (options.type) feedback.type = options.type;
-  if (options.severity) feedback.severity = options.severity;
+  const feedback = getOrCreateFeedback(index, options.issueNumber, options);
 
   if (!feedback.linkedTo.requirements.includes(options.requirementId)) {
     feedback.linkedTo.requirements.push(options.requirementId);
@@ -150,15 +139,7 @@ export async function linkWithNewRequirement(
 
   // Update index.json
   const index = await feedbackRepo.loadIndex(cwd);
-  let feedback = index.feedbacks.find((f) => f.githubIssue === options.issueNumber);
-
-  if (!feedback) {
-    feedback = createEmptyFeedbackEntry(options.issueNumber);
-    index.feedbacks.push(feedback);
-  }
-
-  if (options.type) feedback.type = options.type;
-  if (options.severity) feedback.severity = options.severity;
+  const feedback = getOrCreateFeedback(index, options.issueNumber, options);
   feedback.linkedTo.createdRequirements.push(newId);
 
   await feedbackRepo.saveIndex(cwd, index);
@@ -182,22 +163,11 @@ export async function linkToSpecification(
   options: LinkToSpecificationOptions,
 ): Promise<void> {
   // Verify specification exists
-  const specification = await specRepo.findById(cwd, options.specificationId);
-  if (!specification) {
-    throw new Error(`Specification ${options.specificationId} not found`);
-  }
+  const specification = await specRepo.findByIdOrThrow(cwd, options.specificationId);
 
   // Update index.json
   const index = await feedbackRepo.loadIndex(cwd);
-  let feedback = index.feedbacks.find((f) => f.githubIssue === options.issueNumber);
-
-  if (!feedback) {
-    feedback = createEmptyFeedbackEntry(options.issueNumber);
-    index.feedbacks.push(feedback);
-  }
-
-  if (options.type) feedback.type = options.type;
-  if (options.severity) feedback.severity = options.severity;
+  const feedback = getOrCreateFeedback(index, options.issueNumber, options);
 
   if (!feedback.linkedTo.specifications.includes(options.specificationId)) {
     feedback.linkedTo.specifications.push(options.specificationId);
@@ -263,6 +233,21 @@ function createEmptyFeedbackEntry(issueNumber: number): FeedbackEntry {
     syncedAt: new Date().toISOString(),
     status: "open",
   };
+}
+
+function getOrCreateFeedback(
+  index: { feedbacks: FeedbackEntry[] },
+  issueNumber: number,
+  options: { type?: FeedbackType; severity?: FeedbackSeverity },
+): FeedbackEntry {
+  let feedback = index.feedbacks.find((f) => f.githubIssue === issueNumber);
+  if (!feedback) {
+    feedback = createEmptyFeedbackEntry(issueNumber);
+    index.feedbacks.push(feedback);
+  }
+  if (options.type) feedback.type = options.type;
+  if (options.severity) feedback.severity = options.severity;
+  return feedback;
 }
 
 function buildImpactSummary(feedback: FeedbackEntry): string {

@@ -1,12 +1,8 @@
-import { SpecificationSchema, type Specification, REQORD_DIR, SPECIFICATIONS_DIR } from "@reqord/shared";
+import { SpecificationSchema, type Specification, SPECIFICATIONS_DIR } from "@reqord/shared";
 import * as fs from "../repositories/file-system.js";
 
-function getReqordRoot(cwd: string): string {
-  return fs.joinPath(cwd, REQORD_DIR);
-}
-
 function getSpecificationsDir(cwd: string): string {
-  return fs.joinPath(getReqordRoot(cwd), SPECIFICATIONS_DIR);
+  return fs.getReqordDir(cwd, SPECIFICATIONS_DIR);
 }
 
 export async function ensureSpecDir(cwd: string, id: string): Promise<void> {
@@ -43,6 +39,14 @@ export async function loadFile(
   }
 
   return fs.readText(filePath);
+}
+
+export async function findByIdOrThrow(cwd: string, id: string): Promise<Specification> {
+  const specification = await findById(cwd, id);
+  if (!specification) {
+    throw new Error(`Specification ${id} not found.`);
+  }
+  return specification;
 }
 
 export async function findById(cwd: string, id: string): Promise<Specification | null> {

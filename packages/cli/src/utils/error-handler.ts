@@ -5,32 +5,16 @@ export function handleError(
   error: unknown,
   options?: { json?: boolean },
 ): void {
-  if (error instanceof AppError) {
-    if (options?.json) {
-      console.error(
-        JSON.stringify({
-          error: true,
-          code: error.code,
-          message: error.message,
-        }),
-      );
-    } else {
-      console.error(chalk.red(`エラー: ${error.message}`));
-    }
-    process.exitCode = error.exitCode;
+  const isAppError = error instanceof AppError;
+  const code = isAppError ? error.code : "UNKNOWN";
+  const message = (error as Error).message;
+  const exitCode = isAppError ? error.exitCode : 1;
+  const prefix = isAppError ? "エラー" : "予期しないエラーが発生しました";
+
+  if (options?.json) {
+    console.error(JSON.stringify({ error: true, code, message }));
   } else {
-    const errorMessage = (error as Error).message;
-    if (options?.json) {
-      console.error(
-        JSON.stringify({
-          error: true,
-          code: "UNKNOWN",
-          message: errorMessage,
-        }),
-      );
-    } else {
-      console.error(chalk.red(`予期しないエラーが発生しました: ${errorMessage}`));
-    }
-    process.exitCode = 1;
+    console.error(chalk.red(`${prefix}: ${message}`));
   }
+  process.exitCode = exitCode;
 }

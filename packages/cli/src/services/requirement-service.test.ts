@@ -5,6 +5,7 @@ import { updateRequirement } from "./requirement-service.js";
 // Mock dependencies BEFORE imports
 vi.mock("../repositories/requirement.js", () => ({
   findById: vi.fn(),
+  findByIdOrThrow: vi.fn(),
   save: vi.fn(),
   saveDescription: vi.fn(),
 }));
@@ -58,7 +59,7 @@ describe("updateRequirement - 状態遷移バリデーション", () => {
 
   it("不正な状態遷移でエラーを投げる", async () => {
     const before = makeRequirement({ status: "draft" });
-    vi.mocked(reqRepo.findById).mockResolvedValue(before);
+    vi.mocked(reqRepo.findByIdOrThrow).mockResolvedValue(before);
     vi.mocked(versionService.isValidTransition).mockReturnValue(false);
     vi.mocked(versionService.getStateTransitions).mockReturnValue(
       new Map([["draft", ["pending_approval"]]]),
@@ -71,7 +72,7 @@ describe("updateRequirement - 状態遷移バリデーション", () => {
 
   it("有効な状態遷移を受け入れる", async () => {
     const before = makeRequirement({ status: "draft" });
-    vi.mocked(reqRepo.findById).mockResolvedValue(before);
+    vi.mocked(reqRepo.findByIdOrThrow).mockResolvedValue(before);
     vi.mocked(versionService.isValidTransition).mockReturnValue(true);
     vi.mocked(versionService.determineNextVersion).mockReturnValue("2.0.0");
 
@@ -85,7 +86,7 @@ describe("updateRequirement - 状態遷移バリデーション", () => {
 
   it("同じstatusへの更新はバリデーションをスキップする", async () => {
     const before = makeRequirement({ status: "draft" });
-    vi.mocked(reqRepo.findById).mockResolvedValue(before);
+    vi.mocked(reqRepo.findByIdOrThrow).mockResolvedValue(before);
 
     await updateRequirement("/test/cwd", "req-000001", { status: "draft" });
 
@@ -104,7 +105,7 @@ describe("updateRequirement - 自動リバートロジック", () => {
 
   it("approved状態でtitle変更時にpending_approvalに戻す", async () => {
     const before = makeRequirement({ status: "approved", version: "2.0.0" });
-    vi.mocked(reqRepo.findById).mockResolvedValue(before);
+    vi.mocked(reqRepo.findByIdOrThrow).mockResolvedValue(before);
     vi.mocked(versionService.shouldRevertToPendingApproval).mockReturnValue(true);
     vi.mocked(versionService.determineNextVersion).mockReturnValue("3.0.0");
 
@@ -118,7 +119,7 @@ describe("updateRequirement - 自動リバートロジック", () => {
 
   it("draft状態では内容変更時もリバートしない", async () => {
     const before = makeRequirement({ status: "draft" });
-    vi.mocked(reqRepo.findById).mockResolvedValue(before);
+    vi.mocked(reqRepo.findByIdOrThrow).mockResolvedValue(before);
     vi.mocked(versionService.shouldRevertToPendingApproval).mockReturnValue(false);
 
     const result = await updateRequirement("/test/cwd", "req-000001", {
@@ -131,7 +132,7 @@ describe("updateRequirement - 自動リバートロジック", () => {
 
   it("明示的なstatus指定時はauto-revertをスキップする", async () => {
     const before = makeRequirement({ status: "approved", version: "2.0.0" });
-    vi.mocked(reqRepo.findById).mockResolvedValue(before);
+    vi.mocked(reqRepo.findByIdOrThrow).mockResolvedValue(before);
     vi.mocked(versionService.isValidTransition).mockReturnValue(true);
     vi.mocked(versionService.determineNextVersion).mockReturnValue("3.0.0");
     vi.mocked(versionService.createHistoryEntry).mockReturnValue({
@@ -165,7 +166,7 @@ describe("updateRequirement - バージョンインクリメント", () => {
 
   it("draft→draft変更ではバージョン据え置き", async () => {
     const before = makeRequirement({ status: "draft", version: "1.0.0" });
-    vi.mocked(reqRepo.findById).mockResolvedValue(before);
+    vi.mocked(reqRepo.findByIdOrThrow).mockResolvedValue(before);
     vi.mocked(versionService.determineNextVersion).mockReturnValue("1.0.0");
 
     const result = await updateRequirement("/test/cwd", "req-000001", {
@@ -178,7 +179,7 @@ describe("updateRequirement - バージョンインクリメント", () => {
 
   it("status変更でバージョンが更新される", async () => {
     const before = makeRequirement({ status: "draft", version: "1.0.0" });
-    vi.mocked(reqRepo.findById).mockResolvedValue(before);
+    vi.mocked(reqRepo.findByIdOrThrow).mockResolvedValue(before);
     vi.mocked(versionService.determineNextVersion).mockReturnValue("2.0.0");
     vi.mocked(versionService.createHistoryEntry).mockReturnValue({
       version: "2.0.0",
@@ -201,7 +202,7 @@ describe("updateRequirement - バージョンインクリメント", () => {
 
   it("versionChanged=trueがresultに含まれる", async () => {
     const before = makeRequirement({ status: "draft", version: "1.0.0" });
-    vi.mocked(reqRepo.findById).mockResolvedValue(before);
+    vi.mocked(reqRepo.findByIdOrThrow).mockResolvedValue(before);
     vi.mocked(versionService.determineNextVersion).mockReturnValue("2.0.0");
     vi.mocked(versionService.createHistoryEntry).mockReturnValue({
       version: "2.0.0",
@@ -230,7 +231,7 @@ describe("updateRequirement - バージョン履歴", () => {
 
   it("バージョン変更時に履歴エントリが追加される", async () => {
     const before = makeRequirement({ status: "draft", version: "1.0.0", versionHistory: [] });
-    vi.mocked(reqRepo.findById).mockResolvedValue(before);
+    vi.mocked(reqRepo.findByIdOrThrow).mockResolvedValue(before);
     vi.mocked(versionService.determineNextVersion).mockReturnValue("2.0.0");
     vi.mocked(versionService.generateChangeSummary).mockReturnValue("Status changed");
     vi.mocked(versionService.createHistoryEntry).mockReturnValue({
@@ -255,7 +256,7 @@ describe("updateRequirement - バージョン履歴", () => {
 
   it("バージョン据え置き時は履歴エントリが追加されない", async () => {
     const before = makeRequirement({ status: "draft", version: "1.0.0", versionHistory: [] });
-    vi.mocked(reqRepo.findById).mockResolvedValue(before);
+    vi.mocked(reqRepo.findByIdOrThrow).mockResolvedValue(before);
     vi.mocked(versionService.determineNextVersion).mockReturnValue("1.0.0");
 
     const result = await updateRequirement("/test/cwd", "req-000001", {
@@ -281,7 +282,7 @@ describe("updateRequirement - バージョン履歴", () => {
       version: "1.0.0",
       versionHistory: existingHistory,
     });
-    vi.mocked(reqRepo.findById).mockResolvedValue(before);
+    vi.mocked(reqRepo.findByIdOrThrow).mockResolvedValue(before);
     vi.mocked(versionService.determineNextVersion).mockReturnValue("2.0.0");
     vi.mocked(versionService.generateChangeSummary).mockReturnValue("Status changed");
     vi.mocked(versionService.createHistoryEntry).mockReturnValue({
@@ -320,7 +321,7 @@ describe("updateRequirement - 統合シナリオ", () => {
       version: "1.0.0",
       versionHistory: [],
     });
-    vi.mocked(reqRepo.findById).mockResolvedValue(before);
+    vi.mocked(reqRepo.findByIdOrThrow).mockResolvedValue(before);
     vi.mocked(versionService.determineNextVersion).mockReturnValue("1.1.0");
     vi.mocked(versionService.generateChangeSummary).mockReturnValue("Title updated");
     vi.mocked(versionService.createHistoryEntry).mockReturnValue({
@@ -342,7 +343,9 @@ describe("updateRequirement - 統合シナリオ", () => {
   });
 
   it("存在しない要件でエラーを投げる", async () => {
-    vi.mocked(reqRepo.findById).mockResolvedValue(null);
+    vi.mocked(reqRepo.findByIdOrThrow).mockRejectedValue(
+      new Error("Requirement req-999999 not found."),
+    );
 
     await expect(
       updateRequirement("/test/cwd", "req-999999", { title: "test" }),
@@ -373,7 +376,7 @@ describe("updateRequirement - バージョン明示的指定", () => {
 
   it("--major指定でメジャーバージョンが上がる", async () => {
     const before = makeRequirement({ version: "1.0.0", status: "draft" });
-    vi.mocked(reqRepo.findById).mockResolvedValue(before);
+    vi.mocked(reqRepo.findByIdOrThrow).mockResolvedValue(before);
 
     const result = await updateRequirement("/test/cwd", "req-000001", {
       title: "新しいタイトル",
@@ -387,7 +390,7 @@ describe("updateRequirement - バージョン明示的指定", () => {
 
   it("--minor指定でマイナーバージョンが上がる", async () => {
     const before = makeRequirement({ version: "1.0.0", status: "draft" });
-    vi.mocked(reqRepo.findById).mockResolvedValue(before);
+    vi.mocked(reqRepo.findByIdOrThrow).mockResolvedValue(before);
 
     const result = await updateRequirement("/test/cwd", "req-000001", {
       title: "新しいタイトル",
@@ -401,7 +404,7 @@ describe("updateRequirement - バージョン明示的指定", () => {
 
   it("--patch指定でパッチバージョンが上がる", async () => {
     const before = makeRequirement({ version: "1.0.0", status: "draft" });
-    vi.mocked(reqRepo.findById).mockResolvedValue(before);
+    vi.mocked(reqRepo.findByIdOrThrow).mockResolvedValue(before);
 
     const result = await updateRequirement("/test/cwd", "req-000001", {
       priority: "high",
@@ -415,7 +418,7 @@ describe("updateRequirement - バージョン明示的指定", () => {
 
   it("明示的指定が自動判定を上書きする", async () => {
     const before = makeRequirement({ version: "1.2.3", status: "approved" });
-    vi.mocked(reqRepo.findById).mockResolvedValue(before);
+    vi.mocked(reqRepo.findByIdOrThrow).mockResolvedValue(before);
     vi.mocked(versionService.determineNextVersion).mockReturnValue("1.3.0");
     vi.mocked(versionService.parseVersion).mockReturnValue({ major: 1, minor: 2, patch: 3 });
 
@@ -441,7 +444,7 @@ describe("updateRequirement - description変更のバージョニング", () => 
 
   it("description変更のみでpatch bumpが発生する（非draft）", async () => {
     const before = makeRequirement({ version: "1.0.0", status: "approved" });
-    vi.mocked(reqRepo.findById).mockResolvedValue(before);
+    vi.mocked(reqRepo.findByIdOrThrow).mockResolvedValue(before);
     vi.mocked(versionService.determineNextVersion).mockReturnValue("1.0.0");
     vi.mocked(versionService.parseVersion).mockReturnValue({ major: 1, minor: 0, patch: 0 });
     vi.mocked(versionService.formatVersion).mockReturnValue("1.0.1");
@@ -466,7 +469,7 @@ describe("updateRequirement - description変更のバージョニング", () => 
 
   it("description変更はdraft状態ではpatch bumpしない", async () => {
     const before = makeRequirement({ version: "1.0.0", status: "draft" });
-    vi.mocked(reqRepo.findById).mockResolvedValue(before);
+    vi.mocked(reqRepo.findByIdOrThrow).mockResolvedValue(before);
     vi.mocked(versionService.determineNextVersion).mockReturnValue("1.0.0");
 
     const result = await updateRequirement("/test/cwd", "req-000001", {
@@ -479,7 +482,7 @@ describe("updateRequirement - description変更のバージョニング", () => 
 
   it("description変更がauto-revertをトリガーする", async () => {
     const before = makeRequirement({ version: "1.0.0", status: "approved" });
-    vi.mocked(reqRepo.findById).mockResolvedValue(before);
+    vi.mocked(reqRepo.findByIdOrThrow).mockResolvedValue(before);
     vi.mocked(versionService.shouldRevertToPendingApproval).mockReturnValue(true);
     vi.mocked(versionService.determineNextVersion).mockReturnValue("2.0.0");
     vi.mocked(versionService.generateChangeSummary).mockReturnValue("Status changed");

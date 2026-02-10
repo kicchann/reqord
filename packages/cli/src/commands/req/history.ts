@@ -3,14 +3,7 @@ import chalk from "chalk";
 import Table from "cli-table3";
 import { showRequirement } from "../../services/requirement-service.js";
 import { handleError } from "../../utils/error-handler.js";
-
-const STATUS_COLORS: Record<string, (s: string) => string> = {
-  draft: chalk.blue,
-  pending_approval: chalk.yellow,
-  approved: chalk.green,
-  implemented: chalk.cyan,
-  deprecated: chalk.gray,
-};
+import { STATUS_COLORS, identityColor } from "../../utils/display.js";
 
 export const historyCommand = new Command("history")
   .description("Show requirement version history")
@@ -42,7 +35,7 @@ export const historyCommand = new Command("history")
       });
 
       for (const entry of versionHistory) {
-        const statusColor = STATUS_COLORS[entry.status] ?? ((s: string) => s);
+        const statusColor = STATUS_COLORS[entry.status] ?? identityColor;
         table.push([
           entry.version,
           statusColor(entry.status),

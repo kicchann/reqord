@@ -4,19 +4,7 @@ import Table from "cli-table3";
 import { listRequirements } from "../../services/requirement-service.js";
 import type { Status, Priority } from "@reqord/shared";
 import { handleError } from "../../utils/error-handler.js";
-
-const PRIORITY_COLORS: Record<string, (s: string) => string> = {
-  high: chalk.red,
-  medium: chalk.yellow,
-  low: chalk.gray,
-};
-
-const STATUS_COLORS: Record<string, (s: string) => string> = {
-  draft: chalk.blue,
-  pending_approval: chalk.yellow,
-  approved: chalk.green,
-  deprecated: chalk.gray,
-};
+import { STATUS_COLORS, PRIORITY_COLORS, identityColor } from "../../utils/display.js";
 
 export const listCommand = new Command("list")
   .description("List requirements")
@@ -53,9 +41,9 @@ export const listCommand = new Command("list")
         });
 
         for (const req of requirements) {
-          const statusColor = STATUS_COLORS[req.status] ?? ((s: string) => s);
+          const statusColor = STATUS_COLORS[req.status] ?? identityColor;
           const priorityColor =
-            PRIORITY_COLORS[req.priority] ?? ((s: string) => s);
+            PRIORITY_COLORS[req.priority] ?? identityColor;
 
           table.push([
             req.id,

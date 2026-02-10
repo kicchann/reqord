@@ -24,16 +24,8 @@ export interface SyncError {
 
 export { type ProgressInfo };
 
-export function mapGitHubState(state: "open" | "closed"): "open" | "closed" {
-  return state;
-}
-
 export async function syncSpecification(cwd: string, specId: string): Promise<SyncResult> {
-  const spec = await specRepo.findById(cwd, specId);
-
-  if (!spec) {
-    throw new Error(`Specification not found: ${specId}`);
-  }
+  const spec = await specRepo.findByIdOrThrow(cwd, specId);
 
   if (!spec.implementation) {
     throw new Error(`No implementation found for ${specId}`);
@@ -49,7 +41,7 @@ export async function syncSpecification(cwd: string, specId: string): Promise<Sy
   for (const issue of spec.implementation.issues) {
     try {
       const ghIssue = await githubClient.getIssueDetail(issue.number);
-      const currentStatus = mapGitHubState(ghIssue.state);
+      const currentStatus = ghIssue.state;
       const previousStatus = issue.status;
 
       synced.push({

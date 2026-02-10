@@ -4,13 +4,7 @@ import Table from "cli-table3";
 import { listSpecifications } from "../../services/specification-service.js";
 import type { Status } from "@reqord/shared";
 import { handleError } from "../../utils/error-handler.js";
-
-const STATUS_COLORS: Record<string, (s: string) => string> = {
-  draft: chalk.blue,
-  pending_approval: chalk.yellow,
-  approved: chalk.green,
-  deprecated: chalk.gray,
-};
+import { STATUS_COLORS, identityColor } from "../../utils/display.js";
 
 export const specListCommand = new Command("list")
   .description("List specifications")
@@ -48,7 +42,7 @@ export const specListCommand = new Command("list")
 
         for (const spec of specifications) {
           const statusColor =
-            STATUS_COLORS[spec.status] ?? ((s: string) => s);
+            STATUS_COLORS[spec.status] ?? identityColor;
 
           table.push([
             spec.id,

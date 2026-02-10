@@ -1,23 +1,31 @@
-import { REQORD_DIR, REQUIREMENTS_DIR } from "@reqord/shared";
+import { REQUIREMENTS_DIR, SPECIFICATIONS_DIR } from "@reqord/shared";
 import * as fs from "../repositories/file-system.js";
 
-export async function generateNextId(cwd: string): Promise<string> {
-  const reqDir = fs.joinPath(cwd, REQORD_DIR, REQUIREMENTS_DIR);
-  const files = await fs.readdirFiles(reqDir, (name) =>
-    /^req-\d{6}\.json$/.test(name),
-  );
+async function generateNextPrefixedId(
+  cwd: string,
+  dir: string,
+  prefix: string,
+): Promise<string> {
+  const pattern = new RegExp(`^${prefix}-(\\d{6})\\.json$`);
+  const targetDir = fs.getReqordDir(cwd, dir);
+  const files = await fs.readdirFiles(targetDir, (name) => pattern.test(name));
 
   let maxNum = 0;
   for (const file of files) {
-    const match = file.match(/^req-(\d{6})\.json$/);
+    const match = file.match(pattern);
     if (match) {
       const num = parseInt(match[1], 10);
-      if (num > maxNum) {
-        maxNum = num;
-      }
+      if (num > maxNum) maxNum = num;
     }
   }
 
-  const nextNum = maxNum + 1;
-  return `req-${String(nextNum).padStart(6, "0")}`;
+  return `${prefix}-${String(maxNum + 1).padStart(6, "0")}`;
+}
+
+export function generateNextId(cwd: string): Promise<string> {
+  return generateNextPrefixedId(cwd, REQUIREMENTS_DIR, "req");
+}
+
+export function generateNextSpecId(cwd: string): Promise<string> {
+  return generateNextPrefixedId(cwd, SPECIFICATIONS_DIR, "spec");
 }

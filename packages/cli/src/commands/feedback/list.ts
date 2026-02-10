@@ -4,11 +4,7 @@ import Table from "cli-table3";
 import { listFeedbacks } from "../../services/feedback-service.js";
 import type { FeedbackType } from "@reqord/shared";
 import { handleError } from "../../utils/error-handler.js";
-
-const STATUS_COLORS: Record<string, (s: string) => string> = {
-  open: chalk.green,
-  closed: chalk.gray,
-};
+import { FEEDBACK_STATUS_COLORS, identityColor } from "../../utils/display.js";
 
 export const feedbackListCommand = new Command("list")
   .description("List feedback issues from index.json")
@@ -39,7 +35,7 @@ export const feedbackListCommand = new Command("list")
       });
 
       for (const f of feedbacks) {
-        const statusColor = STATUS_COLORS[f.status] ?? ((s: string) => s);
+        const statusColor = FEEDBACK_STATUS_COLORS[f.status] ?? identityColor;
         table.push([
           `#${f.githubIssue}`,
           statusColor(f.status),

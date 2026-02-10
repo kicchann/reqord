@@ -4,10 +4,7 @@ import type { ApprovalHandler } from "./approval-service.js";
 
 export const requirementHandler: ApprovalHandler = {
   async revalidate(cwd, target) {
-    const requirement = await reqRepo.findById(cwd, target.id);
-    if (!requirement) {
-      throw new Error(`${target.id} not found.`);
-    }
+    const requirement = await reqRepo.findByIdOrThrow(cwd, target.id);
     if (requirement.status !== "draft") {
       throw new Error(
         `Cannot start approval: ${target.id} current status is "${requirement.status}", expected "draft".`
@@ -26,10 +23,7 @@ export const requirementHandler: ApprovalHandler = {
   },
 
   async saveCurrentApproval(cwd, target, newVersion) {
-    const req = await reqRepo.findById(cwd, target.id);
-    if (!req) {
-      throw new Error(`${target.id} not found.`);
-    }
+    const req = await reqRepo.findByIdOrThrow(cwd, target.id);
     await reqRepo.save(cwd, {
       ...req,
       currentApproval: {
@@ -43,10 +37,7 @@ export const requirementHandler: ApprovalHandler = {
   },
 
   async updatePrInfo(cwd, target, prNumber, prUrl) {
-    const req = await reqRepo.findById(cwd, target.id);
-    if (!req) {
-      throw new Error(`${target.id} not found.`);
-    }
+    const req = await reqRepo.findByIdOrThrow(cwd, target.id);
     if (!req.currentApproval) {
       throw new Error(`Cannot update PR info: ${target.id} has no current approval.`);
     }

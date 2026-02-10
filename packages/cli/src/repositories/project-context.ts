@@ -1,8 +1,8 @@
-import { ProjectContextSchema, type ProjectContext, REQORD_DIR, CONTEXT_DIR } from "@reqord/shared";
+import { ProjectContextSchema, type ProjectContext, CONTEXT_DIR } from "@reqord/shared";
 import * as fs from "../repositories/file-system.js";
 
 function getContextDir(cwd: string): string {
-  return fs.joinPath(cwd, REQORD_DIR, CONTEXT_DIR);
+  return fs.getReqordDir(cwd, CONTEXT_DIR);
 }
 
 function getContextJsonPath(cwd: string): string {

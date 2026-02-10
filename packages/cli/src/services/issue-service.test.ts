@@ -4,6 +4,7 @@ import type { Specification } from "@reqord/shared";
 // Mock repositories and services
 vi.mock("../repositories/specification.js", () => ({
   findById: vi.fn(),
+  findByIdOrThrow: vi.fn(),
   save: vi.fn(),
 }));
 
@@ -49,7 +50,7 @@ beforeEach(() => {
 
 describe("createIssuesFromSpec", () => {
   it("Specification not found → throws error", async () => {
-    mockSpecRepo.findById.mockResolvedValue(null);
+    mockSpecRepo.findByIdOrThrow.mockRejectedValue(new Error("Specification spec-999999 not found"));
 
     await expect(
       createIssuesFromSpec("/cwd", {
@@ -60,7 +61,7 @@ describe("createIssuesFromSpec", () => {
   });
 
   it("Specification not approved → throws error", async () => {
-    mockSpecRepo.findById.mockResolvedValue(makeSpecification({ status: "draft" }));
+    mockSpecRepo.findByIdOrThrow.mockResolvedValue(makeSpecification({ status: "draft" }));
 
     await expect(
       createIssuesFromSpec("/cwd", {
@@ -71,7 +72,7 @@ describe("createIssuesFromSpec", () => {
   });
 
   it("Tasks file not found → throws error", async () => {
-    mockSpecRepo.findById.mockResolvedValue(makeSpecification());
+    mockSpecRepo.findByIdOrThrow.mockResolvedValue(makeSpecification());
     mockFs.exists.mockResolvedValue(false);
 
     await expect(
@@ -83,7 +84,7 @@ describe("createIssuesFromSpec", () => {
   });
 
   it("Tasks file with invalid JSON → throws error", async () => {
-    mockSpecRepo.findById.mockResolvedValue(makeSpecification());
+    mockSpecRepo.findByIdOrThrow.mockResolvedValue(makeSpecification());
     mockFs.exists.mockResolvedValue(true);
     mockFs.readText.mockResolvedValue("invalid json");
 
@@ -96,7 +97,7 @@ describe("createIssuesFromSpec", () => {
   });
 
   it("Tasks count exceeds maxIssues → throws error", async () => {
-    mockSpecRepo.findById.mockResolvedValue(makeSpecification());
+    mockSpecRepo.findByIdOrThrow.mockResolvedValue(makeSpecification());
     mockFs.exists.mockResolvedValue(true);
     mockFs.readText.mockResolvedValue(JSON.stringify({
       tasks: [
@@ -116,7 +117,7 @@ describe("createIssuesFromSpec", () => {
   });
 
   it("Successful issue creation (2 tasks) → creates 2 issues and returns result", async () => {
-    mockSpecRepo.findById.mockResolvedValue(makeSpecification());
+    mockSpecRepo.findByIdOrThrow.mockResolvedValue(makeSpecification());
     mockFs.exists.mockResolvedValue(true);
     mockFs.readText.mockResolvedValue(JSON.stringify({
       tasks: [
@@ -155,7 +156,7 @@ describe("createIssuesFromSpec", () => {
   });
 
   it("Dry-run mode → no GitHub API calls, no spec update, returns result without numbers/URLs", async () => {
-    mockSpecRepo.findById.mockResolvedValue(makeSpecification());
+    mockSpecRepo.findByIdOrThrow.mockResolvedValue(makeSpecification());
     mockFs.exists.mockResolvedValue(true);
     mockFs.readText.mockResolvedValue(JSON.stringify({
       tasks: [
@@ -186,7 +187,7 @@ describe("createIssuesFromSpec", () => {
 
   it("Updates specification JSON with implementation after creation", async () => {
     const spec = makeSpecification();
-    mockSpecRepo.findById.mockResolvedValue(spec);
+    mockSpecRepo.findByIdOrThrow.mockResolvedValue(spec);
     mockFs.exists.mockResolvedValue(true);
     mockFs.readText.mockResolvedValue(JSON.stringify({
       tasks: [

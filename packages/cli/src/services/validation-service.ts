@@ -19,11 +19,7 @@ export async function validateRequirement(
   id: string,
   options: ValidateOptions = {},
 ): Promise<ValidationResult> {
-  const requirement = await reqRepo.findById(cwd, id);
-  if (!requirement) {
-    throw new Error(`Requirement ${id} not found.`);
-  }
-
+  const requirement = await reqRepo.findByIdOrThrow(cwd, id);
   const description = await reqRepo.loadDescription(cwd, id);
   const allRequirements = await reqRepo.findAll(cwd);
 
