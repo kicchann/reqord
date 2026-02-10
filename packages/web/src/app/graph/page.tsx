@@ -1,6 +1,6 @@
 import { getAllRequirements } from "@/lib/data";
 import { getAllSpecifications } from "@/lib/specification-data";
-import { GraphLoader } from "@/components/graph/graph-loader";
+import { GraphPageClient } from "@/components/graph/graph-page-client";
 
 export const metadata = {
   title: "Dependency Graph - Reqord",
@@ -20,9 +20,10 @@ export default async function GraphPage() {
   }
 
   return (
-    <div>
-      <h1 className="mb-6 text-2xl font-bold">Dependency Graph</h1>
-      <GraphLoader requirements={requirements} specCountMap={specCountMap} />
-    </div>
+    <GraphPageClient
+      requirements={requirements}
+      specifications={specifications}
+      specCountMap={specCountMap}
+    />
   );
 }
