@@ -1,6 +1,6 @@
 import type { Requirement, Specification } from "@reqord/shared";
-import { getAllRequirements } from "./data.js";
-import { getAllSpecifications } from "./specification-data.js";
+import { getAllRequirements } from "./data";
+import { getAllSpecifications } from "./specification-data";
 
 export type Warning = {
   type:
