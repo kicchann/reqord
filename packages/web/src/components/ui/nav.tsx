@@ -11,6 +11,12 @@ export function Nav() {
             </Link>
             <div className="flex gap-4">
               <Link
+                href="/dashboard"
+                className="text-sm font-medium text-gray-600 hover:text-gray-900"
+              >
+                Dashboard
+              </Link>
+              <Link
                 href="/requirements"
                 className="text-sm font-medium text-gray-600 hover:text-gray-900"
               >
