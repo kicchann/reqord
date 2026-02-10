@@ -1,11 +1,11 @@
 {
   "id": "req-000016",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "title": "GitHub Issue生成・管理",
-  "status": "draft",
+  "status": "implemented",
   "priority": "high",
   "createdAt": "2026-02-07T12:00:00Z",
-  "updatedAt": "2026-02-09T10:00:00Z",
+  "updatedAt": "2026-02-10T12:00:00Z",
   "versionHistory": [
     {
       "version": "1.0.0",
@@ -13,6 +13,20 @@
       "summary": "初版作成（AI駆動タスク分解を含む）",
       "status": "draft",
       "gitCommit": "legacy"
+    },
+    {
+      "version": "1.1.0",
+      "changedAt": "2026-02-09T10:00:00Z",
+      "summary": "AI駆動タスク分解をClaude Codeエコシステムに移管。構造化タスク定義からのIssue作成に集中",
+      "status": "draft",
+      "gitCommit": "legacy"
+    },
+    {
+      "version": "1.2.0",
+      "changedAt": "2026-02-10T12:00:00Z",
+      "summary": "実装完了。SC2（テンプレート）とSC6（メタデータ）を実装に合わせて修正",
+      "status": "implemented",
+      "gitCommit": "pending"
     }
   ],
   "files": {
@@ -21,11 +35,11 @@
   },
   "successCriteria": [
     "reqord issue create <spec-id> --tasks-file <path> で構造化タスク定義からGitHub Issueが作成される",
-    "GitHub Issue TemplateがIssue作成時に適用される",
+    "構造化Markdownテンプレートで本文が生成され、メタデータがHTMLコメントタグとして埋め込まれる",
     "reqord issue sync <spec-id> でGitHub Issueの状態がSpecification JSONに同期される",
     "reqord issue sync-all で全Specificationの同期が実行される",
     "reqord issue validate <spec-id> でメタデータ整合性チェックが実行される",
-    "Reqordメタデータ（spec-id, req-id）がIssueラベル・コメントに埋め込まれる"
+    "Reqordメタデータ（spec-id）がHTMLコメントタグに、reqord-generatedと優先度がラベルに付与される"
   ],
   "format": {
     "type": "user-story",

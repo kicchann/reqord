@@ -2,9 +2,9 @@
 
 ## 1. 設計概要
 
-構造化されたタスク定義ファイル（JSON）からGitHub Issueを作成する機能を提供する。`reqord issue create <spec-id> --tasks-file <path>` コマンドにより、事前に定義されたタスクリストをGitHub Issueとして一括作成し、Specification JSONの `implementation` フィールドに記録する。GitHub Issue Templateの適用、HTMLコメントタグによるメタデータ埋め込み、`--dry-run` によるプレビューをサポートする。
+構造化されたタスク定義ファイル（JSON）からGitHub Issueを作成し、同期・検証する機能を提供する。`reqord issue create <spec-id> --tasks-file <path>` コマンドにより、事前に定義されたタスクリストをGitHub Issueとして一括作成し、Specification JSONの `implementation` フィールドに記録する。構造化Markdownによる本文生成、HTMLコメントタグによるメタデータ（spec-id）埋め込み、`--dry-run` によるプレビューをサポートする。
 
-**スコープ:** 本specは **Issue作成（書き込み操作）** のみを扱う。Issue同期・進捗追跡（読み取り操作）は spec-000024 で実装する。
+**スコープ:** Issue作成（`create`）、状態同期（`sync` / `sync-all`）、メタデータ検証（`validate`）を含む。
 
 **v1.1.0変更（Feedback #17）:** AI駆動のタスク分解（Anthropic SDK）はClaude Codeエコシステムに移管。reqordは構造化タスク定義（`--tasks-file`）からのIssue作成に集中する。タスク分解・並列グループ分析・クリティカルパス計算はClaude Code側の責務。
 
@@ -22,7 +22,6 @@ Repository:     repositories/specification.ts  (既存)
 External:       gh CLI (Issue作成)
                     ↓
 Storage:        .reqord/specifications/spec-NNNNNN.json (implementationフィールド)
-                .github/ISSUE_TEMPLATE/reqord-implementation.yml (テンプレート)
                 GitHub Issues
 ```
 
@@ -572,4 +571,4 @@ body:
 ### ラベル戦略
 
 **決定:** 有限集合のラベルのみを使用（`reqord-generated`, `P0`, `P1`, `P2`, `P3`）
-**理由:** ラベルはGitHub UIでのフィルタに利用可能。無限集合（spec-id, req-id）はHTMLコメントに埋め込む。
+**理由:** ラベルはGitHub UIでのフィルタに利用可能。spec-idはHTMLコメントタグ（`<!-- reqord:specification {"specificationId":"..."} -->`）に埋め込む。req-idはSpecification JSONから間接的に辿れるため、Issue本文には含めない。

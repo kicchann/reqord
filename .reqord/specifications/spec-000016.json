@@ -2,9 +2,9 @@
   "id": "spec-000016",
   "requirementId": "req-000016",
   "version": "1.0.0",
-  "status": "draft",
+  "status": "implemented",
   "createdAt": "2026-02-08T14:08:07.899Z",
-  "updatedAt": "2026-02-08T14:08:07.899Z",
+  "updatedAt": "2026-02-10T12:00:00.000Z",
   "versionHistory": [],
   "files": {
     "design": "specifications/spec-000016/design.md",
