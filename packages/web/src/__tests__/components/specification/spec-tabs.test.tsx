@@ -19,6 +19,24 @@ vi.mock("../../../components/specification/tab-research", () => ({
   ),
 }));
 
+vi.mock("../../../components/specification/tab-coverage", () => ({
+  TabCoverage: ({ successCriteria }: { successCriteria: string[] | null }) => (
+    <div data-testid="tab-coverage">Coverage: {successCriteria?.length ?? 0} criteria</div>
+  ),
+}));
+
+vi.mock("../../../components/specification/tab-issues", () => ({
+  TabIssues: ({ issues }: { issues: any[] | null }) => (
+    <div data-testid="tab-issues">Issues: {issues?.length ?? 0} issues</div>
+  ),
+}));
+
+vi.mock("../../../components/specification/tab-history", () => ({
+  TabHistory: ({ versionHistory }: { versionHistory: any[] }) => (
+    <div data-testid="tab-history">History: {versionHistory.length} versions</div>
+  ),
+}));
+
 vi.mock("../../../components/ui/tabs", () => ({
   Tabs: ({ tabs, activeTab, onTabChange }: any) => (
     <div data-testid="tabs-container">
@@ -46,7 +64,15 @@ describe("SpecTabs", () => {
   });
 
   it("defaults to design tab", () => {
-    render(<SpecTabs design="# Design" research="# Research" />);
+    render(
+      <SpecTabs
+        design="# Design"
+        research="# Research"
+        successCriteria={[]}
+        issues={[]}
+        versionHistory={[]}
+      />
+    );
 
     const designButton = screen.getByTestId("tab-button-design");
     expect(designButton).toHaveAttribute("data-active", "true");
@@ -55,7 +81,15 @@ describe("SpecTabs", () => {
 
   it("changes active tab when tab button is clicked", async () => {
     const user = userEvent.setup();
-    render(<SpecTabs design="# Design" research="# Research" />);
+    render(
+      <SpecTabs
+        design="# Design"
+        research="# Research"
+        successCriteria={[]}
+        issues={[]}
+        versionHistory={[]}
+      />
+    );
 
     const researchButton = screen.getByTestId("tab-button-research");
     await user.click(researchButton);
@@ -65,7 +99,15 @@ describe("SpecTabs", () => {
   });
 
   it("passes design content to TabDesign", () => {
-    render(<SpecTabs design="# Design content" research={null} />);
+    render(
+      <SpecTabs
+        design="# Design content"
+        research={null}
+        successCriteria={[]}
+        issues={[]}
+        versionHistory={[]}
+      />
+    );
 
     // Design tab should be active by default
     const designTab = screen.getByTestId("tab-design");
@@ -75,7 +117,15 @@ describe("SpecTabs", () => {
 
   it("passes research content to TabResearch", async () => {
     const user = userEvent.setup();
-    render(<SpecTabs design={null} research="# Research content" />);
+    render(
+      <SpecTabs
+        design={null}
+        research="# Research content"
+        successCriteria={[]}
+        issues={[]}
+        versionHistory={[]}
+      />
+    );
 
     await user.click(screen.getByTestId("tab-button-research"));
 

@@ -1,5 +1,5 @@
-import * as fs from "./file-system.js";
-import { getSpecificationsDir } from "./reqord-root.js";
+import * as fs from "./file-system";
+import { getSpecificationsDir } from "./reqord-root";
 
 export async function loadSpecFile(
   specId: string,

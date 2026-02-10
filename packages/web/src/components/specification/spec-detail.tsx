@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { Specification } from "@reqord/shared";
+import type { Specification, Requirement } from "@reqord/shared";
 import { StatusBadge } from "@/components/ui/badge";
 import { SpecTabs } from "./spec-tabs";
 
@@ -7,12 +7,12 @@ export function SpecDetail({
   specification,
   design,
   research,
-  requirementTitle,
+  requirement,
 }: {
   specification: Specification;
   design: string | null;
   research: string | null;
-  requirementTitle: string | null;
+  requirement: Requirement | null;
 }) {
   return (
     <div className="space-y-6">
@@ -43,8 +43,8 @@ export function SpecDetail({
           >
             {specification.requirementId}
           </Link>
-          {requirementTitle && (
-            <p className="mt-0.5 text-xs text-gray-500 truncate">{requirementTitle}</p>
+          {requirement?.title && (
+            <p className="mt-0.5 text-xs text-gray-500 truncate">{requirement.title}</p>
           )}
         </div>
         <div>
@@ -77,8 +77,14 @@ export function SpecDetail({
         </div>
       ) : null}
 
-      {/* Tabs for Design and Research */}
-      <SpecTabs design={design} research={research} />
+      {/* Tabs for Design, Research, Coverage, Issues, and History */}
+      <SpecTabs
+        design={design}
+        research={research}
+        successCriteria={requirement?.successCriteria ?? null}
+        issues={specification.implementation?.issues ?? null}
+        versionHistory={specification.versionHistory}
+      />
     </div>
   );
 }
