@@ -1,4 +1,4 @@
-import { RequirementSchema, type Requirement, REQUIREMENTS_DIR } from "@reqord/shared";
+import { RequirementSchema, type Requirement, REQUIREMENTS_DIR, formatZodError } from "@reqord/shared";
 import * as fs from "../repositories/file-system.js";
 
 function getRequirementsDir(cwd: string): string {
@@ -41,7 +41,7 @@ export async function findById(cwd: string, id: string): Promise<Requirement | n
   const raw = await fs.readJSON<unknown>(jsonPath);
   const result = RequirementSchema.safeParse(raw);
   if (!result.success) {
-    throw new Error(`Invalid requirement ${id}: ${result.error.message}`);
+    throw new Error(`要件 ${id} のバリデーションエラー:\n${formatZodError(result.error)}`);
   }
   return result.data;
 }

@@ -1,4 +1,4 @@
-import { SpecificationSchema, type Specification, SPECIFICATIONS_DIR } from "@reqord/shared";
+import { SpecificationSchema, type Specification, SPECIFICATIONS_DIR, formatZodError } from "@reqord/shared";
 import * as fs from "../repositories/file-system.js";
 
 function getSpecificationsDir(cwd: string): string {
@@ -60,7 +60,7 @@ export async function findById(cwd: string, id: string): Promise<Specification |
   const raw = await fs.readJSON<unknown>(jsonPath);
   const result = SpecificationSchema.safeParse(raw);
   if (!result.success) {
-    throw new Error(`Invalid specification ${id}: ${result.error.message}`);
+    throw new Error(`仕様 ${id} のバリデーションエラー:\n${formatZodError(result.error)}`);
   }
   return result.data;
 }

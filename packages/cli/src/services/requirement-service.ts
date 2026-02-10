@@ -1,5 +1,5 @@
 import type { Requirement, Priority, FormatType, Status } from "@reqord/shared";
-import { REQUIREMENTS_DIR, RequirementSchema } from "@reqord/shared";
+import { REQUIREMENTS_DIR, RequirementSchema, formatZodError } from "@reqord/shared";
 import * as reqRepo from "../repositories/requirement.js";
 import { generateNextId } from "../utils/id-generator.js";
 import {
@@ -220,7 +220,7 @@ export async function updateRequirement(
   // 9. Validate merged result through Zod
   const parseResult = RequirementSchema.safeParse(merged);
   if (!parseResult.success) {
-    throw new Error(`Validation failed: ${parseResult.error.message}`);
+    throw new Error(`バリデーションエラー:\n${formatZodError(parseResult.error)}`);
   }
 
   let after = parseResult.data;
