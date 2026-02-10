@@ -78,4 +78,58 @@ describe("handleError", () => {
       message: "Unknown error",
     });
   });
+
+  it("handles string error values", () => {
+    handleError("string error");
+
+    expect(consoleErrorSpy).toHaveBeenCalledOnce();
+    const output = consoleErrorSpy.mock.calls[0][0] as string;
+    expect(output).toContain("予期しないエラーが発生しました: string error");
+  });
+
+  it("handles number error values", () => {
+    handleError(42);
+
+    expect(consoleErrorSpy).toHaveBeenCalledOnce();
+    const output = consoleErrorSpy.mock.calls[0][0] as string;
+    expect(output).toContain("予期しないエラーが発生しました: 42");
+  });
+
+  it("handles null error values", () => {
+    handleError(null);
+
+    expect(consoleErrorSpy).toHaveBeenCalledOnce();
+    const output = consoleErrorSpy.mock.calls[0][0] as string;
+    expect(output).toContain("予期しないエラーが発生しました: null");
+  });
+
+  it("handles undefined error values", () => {
+    handleError(undefined);
+
+    expect(consoleErrorSpy).toHaveBeenCalledOnce();
+    const output = consoleErrorSpy.mock.calls[0][0] as string;
+    expect(output).toContain("予期しないエラーが発生しました: undefined");
+  });
+
+  it("handles plain object error values", () => {
+    handleError({ foo: "bar" });
+
+    expect(consoleErrorSpy).toHaveBeenCalledOnce();
+    const output = consoleErrorSpy.mock.calls[0][0] as string;
+    expect(output).toContain("予期しないエラーが発生しました: [object Object]");
+  });
+
+  it("outputs JSON for string error with json option", () => {
+    handleError("string error", { json: true });
+
+    expect(consoleErrorSpy).toHaveBeenCalledOnce();
+    const output = consoleErrorSpy.mock.calls[0][0] as string;
+    const parsed = JSON.parse(output);
+
+    expect(parsed).toEqual({
+      error: true,
+      code: "UNKNOWN",
+      message: "string error",
+    });
+  });
 });
