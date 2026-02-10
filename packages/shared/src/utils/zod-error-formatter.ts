@@ -56,7 +56,7 @@ export function formatZodIssue(issue: ZodIssue): string {
   switch (issue.code) {
     case "invalid_type": {
       const expected = TYPE_NAMES_JA[issue.expected] || issue.expected;
-      const received = issue.received;
+      const received = TYPE_NAMES_JA[issue.received] || issue.received;
       return `${path}: ${expected}が必要です（実際の型: ${received}）`;
     }
 
