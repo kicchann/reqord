@@ -11,11 +11,23 @@ vi.mock("../../services/approval-service.js", () => ({
   startApproval: vi.fn(),
 }));
 
+vi.mock("../../services/requirement-approval-handler.js", () => ({
+  requirementHandler: {
+    revalidate: vi.fn(),
+    updateStatus: vi.fn(),
+    saveCurrentApproval: vi.fn(),
+    updatePrInfo: vi.fn(),
+    buildPrTitle: vi.fn(),
+    buildPrBody: vi.fn(),
+  },
+}));
+
 import { showRequirement } from "../../services/requirement-service.js";
 import {
   startApproval,
   type ApprovalResult,
 } from "../../services/approval-service.js";
+import { requirementHandler } from "../../services/requirement-approval-handler.js";
 
 function makeRequirement(overrides: Partial<Requirement> = {}): Requirement {
   return {
@@ -76,8 +88,9 @@ describe("approveCommand", () => {
         version: "1.0.0",
         status: "draft",
         title: "Test Requirement",
-        jsonPath: ".reqord/requirements/req-000001.json",
+        files: [".reqord/requirements/req-000001.json"],
       },
+      requirementHandler,
       { dryRun: undefined }
     );
 
@@ -152,10 +165,11 @@ describe("approveCommand", () => {
       version: "2.1.0",
       status: "draft",
       title: "Another Requirement",
-      jsonPath: ".reqord/requirements/req-000042.json",
+      files: [".reqord/requirements/req-000042.json"],
     });
+    expect(callArgs[2]).toBe(requirementHandler);
     // Check dryRun is falsy (undefined or false)
-    expect(callArgs[2]?.dryRun).toBeFalsy();
+    expect(callArgs[3]?.dryRun).toBeFalsy();
 
     consoleLogSpy.mockRestore();
   });
@@ -182,6 +196,7 @@ describe("approveCommand", () => {
     expect(startApproval).toHaveBeenCalledWith(
       process.cwd(),
       expect.any(Object),
+      requirementHandler,
       { dryRun: true }
     );
 

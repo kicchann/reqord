@@ -63,20 +63,19 @@ describe("SpecificationSchema", () => {
       expect(result.currentApproval?.approvedAt).toBeUndefined();
     });
 
-    it("phaseが'requirement'を受け入れる", () => {
+    it("phaseが'requirement'を拒否する（Specificationではspecification固定）", () => {
       const specification = {
         ...baseSpecification,
         currentApproval: {
           version: "1.0.0",
-          phase: "requirement" as const,
+          phase: "requirement",
           prNumber: 123,
           prUrl: "https://github.com/owner/repo/pull/123",
           approvedBy: ["user1"],
         },
       };
 
-      const result = SpecificationSchema.parse(specification);
-      expect(result.currentApproval?.phase).toBe("requirement");
+      expect(() => SpecificationSchema.parse(specification)).toThrow();
     });
 
     it("phaseが'specification'を受け入れる", () => {

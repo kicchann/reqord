@@ -17,6 +17,7 @@ import { specCreateCommand } from "./commands/spec/create.js";
 import { specListCommand } from "./commands/spec/list.js";
 import { specShowCommand } from "./commands/spec/show.js";
 import { specDesignCommand } from "./commands/spec/design.js";
+import { specApproveCommand } from "./commands/spec/approve.js";
 import { feedbackCommand } from "./commands/feedback/index.js";
 import { ensureReqordInitialized } from "./middleware/reqord-check.js";
 
@@ -67,6 +68,7 @@ specCommand.addCommand(specCreateCommand);
 specCommand.addCommand(specListCommand);
 specCommand.addCommand(specShowCommand);
 specCommand.addCommand(specDesignCommand);
+specCommand.addCommand(specApproveCommand);
 
 specCommand.hook("preAction", async () => {
   await ensureReqordInitialized(process.cwd());

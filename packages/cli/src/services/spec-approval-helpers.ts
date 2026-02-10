@@ -16,7 +16,7 @@ export function extractDesignSummary(designContent: string): string {
   }
 
   // Extract content after the heading
-  const contentAfterHeading = summarySection.replace(/^##\s+(?:\d+\.\s+)?設計概要\s*\n+/, '');
+  const contentAfterHeading = summarySection.replace(/^##\s+(?:\d+\.\s+)?設計概要\s*\n+/, "");
   const summary = contentAfterHeading.trim();
 
   return summary || "(設計概要なし)";
@@ -49,5 +49,5 @@ status: draft → pending_approval
 ### 設計ファイル
 - \`specifications/${params.specId}/design.md\`
 
-> このPRをマージすると、仕様のステータスが \`approved\` に更新されます。`;
+> マージ後、\`reqord spec update ${params.specId} --status approved\` でステータスを更新してください。`;
 }
