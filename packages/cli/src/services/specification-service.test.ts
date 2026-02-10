@@ -34,6 +34,7 @@ import {
   listSpecifications,
   showSpecification,
   updateSpecDesign,
+  checkSpecApprovalPrerequisites,
 } from "./specification-service.js";
 
 const mockSpecRepo = vi.mocked(specRepo);
@@ -252,6 +253,87 @@ describe("updateSpecDesign", () => {
 
     await expect(
       updateSpecDesign("/cwd", "spec-999999"),
+    ).rejects.toThrow("Specification spec-999999 not found.");
+  });
+});
+
+// --- Cycle 5: checkSpecApprovalPrerequisites ---
+
+describe("checkSpecApprovalPrerequisites", () => {
+  it("Specificationがdraftで関連Requirementがapprovedで設計済みの場合は成功", async () => {
+    mockSpecRepo.findById.mockResolvedValue(makeSpecification({ status: "draft" }));
+    mockReqRepo.findById.mockResolvedValue(makeRequirement({ status: "approved" }));
+    mockSpecRepo.loadFile.mockResolvedValue("# 実際の設計内容\n\n設計の詳細...");
+
+    const result = await checkSpecApprovalPrerequisites("/cwd", "spec-000001");
+    expect(result.ok).toBe(true);
+    expect(result.errors).toEqual([]);
+  });
+
+  it("Specificationがdraft以外の場合はエラー", async () => {
+    mockSpecRepo.findById.mockResolvedValue(makeSpecification({ status: "approved" }));
+    mockReqRepo.findById.mockResolvedValue(makeRequirement({ status: "approved" }));
+    mockSpecRepo.loadFile.mockResolvedValue("# 設計内容");
+
+    const result = await checkSpecApprovalPrerequisites("/cwd", "spec-000001");
+    expect(result.ok).toBe(false);
+    expect(result.errors).toContainEqual(expect.stringContaining("draft ではありません"));
+  });
+
+  it("関連Requirementがapprovedの場合は成功", async () => {
+    // same as first test but explicit about requirement being approved
+    mockSpecRepo.findById.mockResolvedValue(makeSpecification({ status: "draft" }));
+    mockReqRepo.findById.mockResolvedValue(makeRequirement({ status: "approved" }));
+    mockSpecRepo.loadFile.mockResolvedValue("# 設計内容");
+
+    const result = await checkSpecApprovalPrerequisites("/cwd", "spec-000001");
+    expect(result.ok).toBe(true);
+  });
+
+  it("関連Requirementがpending_approvalの場合は成功", async () => {
+    mockSpecRepo.findById.mockResolvedValue(makeSpecification({ status: "draft" }));
+    mockReqRepo.findById.mockResolvedValue(makeRequirement({ status: "pending_approval" }));
+    mockSpecRepo.loadFile.mockResolvedValue("# 設計内容");
+
+    const result = await checkSpecApprovalPrerequisites("/cwd", "spec-000001");
+    expect(result.ok).toBe(true);
+  });
+
+  it("関連Requirementがdraftの場合はエラー", async () => {
+    mockSpecRepo.findById.mockResolvedValue(makeSpecification({ status: "draft" }));
+    mockReqRepo.findById.mockResolvedValue(makeRequirement({ status: "draft" }));
+    mockSpecRepo.loadFile.mockResolvedValue("# 設計内容");
+
+    const result = await checkSpecApprovalPrerequisites("/cwd", "spec-000001");
+    expect(result.ok).toBe(false);
+    expect(result.errors).toContainEqual(expect.stringContaining("未承認"));
+  });
+
+  it("design.mdがテンプレートのままの場合はエラー", async () => {
+    mockSpecRepo.findById.mockResolvedValue(makeSpecification({ status: "draft" }));
+    mockReqRepo.findById.mockResolvedValue(makeRequirement({ status: "approved" }));
+    mockSpecRepo.loadFile.mockResolvedValue("# {{id}} - Design\n\n## 対象要件: {{requirementId}}\n\n## 設計概要\n\n{{設計の目的とスコープを記述}}");
+
+    const result = await checkSpecApprovalPrerequisites("/cwd", "spec-000001");
+    expect(result.ok).toBe(false);
+    expect(result.errors).toContainEqual(expect.stringContaining("テンプレートのまま"));
+  });
+
+  it("design.mdがnullの場合はエラー", async () => {
+    mockSpecRepo.findById.mockResolvedValue(makeSpecification({ status: "draft" }));
+    mockReqRepo.findById.mockResolvedValue(makeRequirement({ status: "approved" }));
+    mockSpecRepo.loadFile.mockResolvedValue(null);
+
+    const result = await checkSpecApprovalPrerequisites("/cwd", "spec-000001");
+    expect(result.ok).toBe(false);
+    expect(result.errors).toContainEqual(expect.stringContaining("テンプレートのまま"));
+  });
+
+  it("Specificationが存在しない場合はエラーをthrow", async () => {
+    mockSpecRepo.findById.mockResolvedValue(null);
+
+    await expect(
+      checkSpecApprovalPrerequisites("/cwd", "spec-999999")
     ).rejects.toThrow("Specification spec-999999 not found.");
   });
 });
