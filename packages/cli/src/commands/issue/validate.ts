@@ -73,6 +73,10 @@ export const issueValidateCommand = new Command("validate")
           displayValidateResult(result);
         }
       }
+
+      if (results.some(r => !r.valid)) {
+        process.exitCode = 1;
+      }
     } catch (error) {
       handleError(error, { json: options.json });
     }

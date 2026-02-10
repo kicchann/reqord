@@ -63,7 +63,7 @@ describe("issueCreateCommand", () => {
     // Note: Commander marks options with parameters as required=true for the parameter,
     // but the option itself is optional (no requiredOption)
     expect(option?.mandatory).toBe(false);
-    expect(option?.defaultValue).toBe("20");
+    expect(option?.defaultValue).toBe(20);
   });
 
   it("calls createIssuesFromSpec with correct parameters", async () => {
@@ -74,9 +74,9 @@ describe("issueCreateCommand", () => {
           title: "Task 1",
           number: 42,
           url: "https://github.com/owner/repo/issues/42",
-          priority: "high",
+          priority: "P1",
           estimatedHours: 8,
-          labels: ["reqord-generated", "high"],
+          labels: ["reqord-generated", "P1"],
         },
       ],
       totalEstimatedHours: 8,
@@ -173,9 +173,9 @@ describe("issueCreateCommand", () => {
           title: "Task 1",
           number: 42,
           url: "https://github.com/owner/repo/issues/42",
-          priority: "high",
+          priority: "P1",
           estimatedHours: 8,
-          labels: ["reqord-generated", "high"],
+          labels: ["reqord-generated", "P1"],
         },
       ],
       totalEstimatedHours: 8,
@@ -209,9 +209,9 @@ describe("issueCreateCommand", () => {
           title: "Task 1",
           number: 42,
           url: "https://github.com/owner/repo/issues/42",
-          priority: "high",
+          priority: "P1",
           estimatedHours: 8,
-          labels: ["reqord-generated", "high"],
+          labels: ["reqord-generated", "P1"],
         },
       ],
       totalEstimatedHours: 8,

@@ -21,7 +21,7 @@ export interface CreatedIssueInfo {
   title: string;
   number?: number;
   url?: string;
-  priority: string;
+  priority: "P0" | "P1" | "P2" | "P3";
   estimatedHours: number;
   labels: string[];
 }
@@ -39,16 +39,6 @@ export async function loadTasksFile(
   const content = await fs.readText(fullPath);
   const json = JSON.parse(content);
   return TaskDefinitionFileSchema.parse(json);
-}
-
-export async function loadIssueTemplate(cwd: string): Promise<string | null> {
-  const templatePath = fs.joinPath(cwd, ".github/ISSUE_TEMPLATE/06-reqord-implementation.yml");
-
-  if (!(await fs.exists(templatePath))) {
-    return null;
-  }
-
-  return fs.readText(templatePath);
 }
 
 export function buildLabels(task: TaskDefinition): string[] {
@@ -103,6 +93,10 @@ export async function createIssuesFromSpec(
 
   const tasksData = await loadTasksFile(cwd, options.tasksFile);
   const maxIssues = options.maxIssues ?? 20;
+
+  if (!Number.isFinite(maxIssues) || maxIssues <= 0) {
+    throw new Error(`Invalid maxIssues value: ${maxIssues}. Must be a positive integer.`);
+  }
 
   if (tasksData.tasks.length > maxIssues) {
     throw new Error(

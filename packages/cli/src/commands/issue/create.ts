@@ -10,7 +10,13 @@ export const issueCreateCommand = new Command("create")
   .requiredOption("--tasks-file <path>", "Path to task definition file")
   .option("--dry-run", "Preview without creating issues")
   .option("--json", "Output as JSON")
-  .option("--max-issues <n>", "Maximum number of issues to create", "20")
+  .option("--max-issues <n>", "Maximum number of issues to create", (val: string) => {
+    const n = parseInt(val, 10);
+    if (!Number.isFinite(n) || n <= 0) {
+      throw new Error(`Invalid --max-issues value: "${val}". Must be a positive integer.`);
+    }
+    return n;
+  }, 20)
   .action(async (specId: string, options) => {
     try {
       const cwd = process.cwd();
@@ -18,7 +24,7 @@ export const issueCreateCommand = new Command("create")
         specId,
         tasksFile: options.tasksFile,
         dryRun: options.dryRun,
-        maxIssues: parseInt(options.maxIssues, 10),
+        maxIssues: options.maxIssues,
       });
 
       if (options.json) {

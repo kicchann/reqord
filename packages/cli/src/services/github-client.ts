@@ -54,13 +54,28 @@ export async function listIssuesByLabel(
   labels: string[],
   state: "open" | "closed" | "all" = "all",
 ): Promise<GitHubIssue[]> {
-  const labelArg = labels.map((l) => `--label ${l}`).join(" ");
-  const { stdout } = await execAsync(
-    `gh issue list ${labelArg} --state ${state} --json number,title,state,labels,createdAt,body --limit 1000`,
-    { maxBuffer: 10 * 1024 * 1024 },
-  );
-  const raw: GitHubIssueRaw[] = JSON.parse(stdout);
-  return raw.map(normalizeIssue);
+  return new Promise((resolve, reject) => {
+    const args = ["issue", "list"];
+    for (const label of labels) {
+      args.push("--label", label);
+    }
+    args.push("--state", state, "--json", "number,title,state,labels,createdAt,body", "--limit", "1000");
+
+    const proc = spawn("gh", args);
+    let stdout = "";
+    let stderr = "";
+    proc.stdout.on("data", (chunk: Buffer) => { stdout += chunk.toString(); });
+    proc.stderr.on("data", (chunk: Buffer) => { stderr += chunk.toString(); });
+    proc.on("close", (code) => {
+      if (code !== 0) {
+        reject(new Error(`gh issue list failed (code ${code}): ${stderr}`));
+        return;
+      }
+      const raw: GitHubIssueRaw[] = JSON.parse(stdout);
+      resolve(raw.map(normalizeIssue));
+    });
+    proc.on("error", reject);
+  });
 }
 
 export async function getIssue(issueNumber: number): Promise<GitHubIssue> {

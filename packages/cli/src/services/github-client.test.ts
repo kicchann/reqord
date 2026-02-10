@@ -448,37 +448,47 @@ describe("getIssueDetail", () => {
 });
 
 describe("listIssuesByLabel", () => {
-  it("指定ラベルでgh issue listを実行する", async () => {
-    mockExecAsync.mockResolvedValue({ stdout: "[]", stderr: "" });
+  it("指定ラベルでspawn経由でgh issue listを実行する", async () => {
+    createMockSpawnInstance(0, "[]");
 
     await listIssuesByLabel(["reqord-generated"]);
 
-    expect(mockExecAsync).toHaveBeenCalledWith(
-      "gh issue list --label reqord-generated --state all --json number,title,state,labels,createdAt,body --limit 1000",
-      { maxBuffer: 10 * 1024 * 1024 },
-    );
+    expect(mockSpawn).toHaveBeenCalledWith("gh", [
+      "issue", "list",
+      "--label", "reqord-generated",
+      "--state", "all",
+      "--json", "number,title,state,labels,createdAt,body",
+      "--limit", "1000",
+    ]);
   });
 
-  it("複数ラベル指定時に各ラベルを--labelで渡す", async () => {
-    mockExecAsync.mockResolvedValue({ stdout: "[]", stderr: "" });
+  it("複数ラベル指定時に各ラベルを個別の--label引数で渡す", async () => {
+    createMockSpawnInstance(0, "[]");
 
     await listIssuesByLabel(["reqord-generated", "P1"]);
 
-    expect(mockExecAsync).toHaveBeenCalledWith(
-      "gh issue list --label reqord-generated --label P1 --state all --json number,title,state,labels,createdAt,body --limit 1000",
-      { maxBuffer: 10 * 1024 * 1024 },
-    );
+    expect(mockSpawn).toHaveBeenCalledWith("gh", [
+      "issue", "list",
+      "--label", "reqord-generated",
+      "--label", "P1",
+      "--state", "all",
+      "--json", "number,title,state,labels,createdAt,body",
+      "--limit", "1000",
+    ]);
   });
 
   it("state指定でフィルタする", async () => {
-    mockExecAsync.mockResolvedValue({ stdout: "[]", stderr: "" });
+    createMockSpawnInstance(0, "[]");
 
     await listIssuesByLabel(["reqord-generated"], "open");
 
-    expect(mockExecAsync).toHaveBeenCalledWith(
-      "gh issue list --label reqord-generated --state open --json number,title,state,labels,createdAt,body --limit 1000",
-      { maxBuffer: 10 * 1024 * 1024 },
-    );
+    expect(mockSpawn).toHaveBeenCalledWith("gh", [
+      "issue", "list",
+      "--label", "reqord-generated",
+      "--state", "open",
+      "--json", "number,title,state,labels,createdAt,body",
+      "--limit", "1000",
+    ]);
   });
 
   it("結果をnormalizeして返す", async () => {
@@ -492,7 +502,7 @@ describe("listIssuesByLabel", () => {
         body: "Issue body",
       },
     ];
-    mockExecAsync.mockResolvedValue({ stdout: JSON.stringify(rawIssues), stderr: "" });
+    createMockSpawnInstance(0, JSON.stringify(rawIssues));
 
     const result = await listIssuesByLabel(["reqord-generated"]);
 
@@ -508,7 +518,7 @@ describe("listIssuesByLabel", () => {
   });
 
   it("ghコマンド失敗時にエラーを投げる", async () => {
-    mockExecAsync.mockRejectedValue(new Error("gh command failed"));
-    await expect(listIssuesByLabel(["reqord-generated"])).rejects.toThrow("gh command failed");
+    createMockSpawnInstance(1, "", "gh command failed");
+    await expect(listIssuesByLabel(["reqord-generated"])).rejects.toThrow("gh issue list failed");
   });
 });

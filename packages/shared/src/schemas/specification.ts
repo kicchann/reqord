@@ -15,7 +15,7 @@ export const ImplementationIssueSchema = z.object({
   number: z.number(),
   title: z.string(),
   url: z.string(),
-  priority: z.string(),
+  priority: z.enum(["P0", "P1", "P2", "P3"]),
   status: z.enum(["open", "in_progress", "closed"]).default("open"),
 });
 

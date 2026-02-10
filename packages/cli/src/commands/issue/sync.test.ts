@@ -40,7 +40,7 @@ describe("issueSyncCommand", () => {
 
   it("calls syncSpecification with correct parameters", async () => {
     const mockResult: SyncResult = {
-      specId: "req-000001",
+      specId: "spec-000001",
       synced: [
         {
           number: 42,
@@ -65,17 +65,17 @@ describe("issueSyncCommand", () => {
     await issueSyncCommand.parseAsync([
       "node",
       "test",
-      "req-000001",
+      "spec-000001",
     ]);
 
-    expect(syncSpecification).toHaveBeenCalledWith(process.cwd(), "req-000001");
+    expect(syncSpecification).toHaveBeenCalledWith(process.cwd(), "spec-000001");
 
     consoleLogSpy.mockRestore();
   });
 
   it("outputs JSON format when --json option is provided", async () => {
     const mockResult: SyncResult = {
-      specId: "req-000001",
+      specId: "spec-000001",
       synced: [
         {
           number: 42,
@@ -100,7 +100,7 @@ describe("issueSyncCommand", () => {
     await issueSyncCommand.parseAsync([
       "node",
       "test",
-      "req-000001",
+      "spec-000001",
       "--json",
     ]);
 
@@ -113,7 +113,7 @@ describe("issueSyncCommand", () => {
 
   it("displays formatted output by default", async () => {
     const mockResult: SyncResult = {
-      specId: "req-000001",
+      specId: "spec-000001",
       synced: [
         {
           number: 42,
@@ -138,11 +138,11 @@ describe("issueSyncCommand", () => {
     await issueSyncCommand.parseAsync([
       "node",
       "test",
-      "req-000001",
+      "spec-000001",
     ]);
 
     expect(consoleLogSpy).toHaveBeenCalledWith(
-      expect.stringContaining("Syncing req-000001")
+      expect.stringContaining("Syncing spec-000001")
     );
 
     consoleLogSpy.mockRestore();
@@ -160,7 +160,7 @@ describe("issueSyncCommand", () => {
     await issueSyncCommand.parseAsync([
       "node",
       "test",
-      "req-999999",
+      "spec-999999",
     ]);
 
     expect(consoleErrorSpy).toHaveBeenCalledWith(
@@ -196,7 +196,7 @@ describe("issueSyncAllCommand", () => {
   it("calls syncAll with correct parameters", async () => {
     const mockResults: SyncResult[] = [
       {
-        specId: "req-000001",
+        specId: "spec-000001",
         synced: [
           {
             number: 42,
@@ -232,7 +232,7 @@ describe("issueSyncAllCommand", () => {
   it("outputs JSON format when --json option is provided", async () => {
     const mockResults: SyncResult[] = [
       {
-        specId: "req-000001",
+        specId: "spec-000001",
         synced: [],
         progress: {
           total: 0,
@@ -263,7 +263,7 @@ describe("issueSyncAllCommand", () => {
   it("displays formatted output for multiple results", async () => {
     const mockResults: SyncResult[] = [
       {
-        specId: "req-000001",
+        specId: "spec-000001",
         synced: [
           {
             number: 42,
@@ -281,7 +281,7 @@ describe("issueSyncAllCommand", () => {
         errors: [],
       },
       {
-        specId: "req-000002",
+        specId: "spec-000002",
         synced: [
           {
             number: 43,
@@ -310,10 +310,10 @@ describe("issueSyncAllCommand", () => {
     ]);
 
     expect(consoleLogSpy).toHaveBeenCalledWith(
-      expect.stringContaining("Syncing req-000001")
+      expect.stringContaining("Syncing spec-000001")
     );
     expect(consoleLogSpy).toHaveBeenCalledWith(
-      expect.stringContaining("Syncing req-000002")
+      expect.stringContaining("Syncing spec-000002")
     );
 
     consoleLogSpy.mockRestore();
