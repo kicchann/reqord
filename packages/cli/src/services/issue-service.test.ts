@@ -254,7 +254,7 @@ describe("buildIssueBody", () => {
       dependencies: [],
     };
 
-    const body = buildIssueBody("spec-000001", task, null);
+    const body = buildIssueBody("spec-000001", task);
 
     expect(body).toContain('<!-- reqord:specification {"specificationId":"spec-000001"} -->');
     expect(body).toContain("## Test Task");
@@ -271,7 +271,7 @@ describe("buildIssueBody", () => {
       dependencies: ["Task A", "Task B"],
     };
 
-    const body = buildIssueBody("spec-000002", task, null);
+    const body = buildIssueBody("spec-000002", task);
 
     expect(body).toContain("**Dependencies:** Task A, Task B");
   });
@@ -285,7 +285,7 @@ describe("buildIssueBody", () => {
       dependencies: [],
     };
 
-    const body = buildIssueBody("spec-000003", task, null);
+    const body = buildIssueBody("spec-000003", task);
 
     expect(body).not.toContain("Dependencies:");
   });
