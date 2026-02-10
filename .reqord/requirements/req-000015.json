@@ -46,12 +46,12 @@
   },
   "estimatedComplexity": "small",
   "estimatedHours": 8,
-  "flags": [],
   "currentApproval": {
     "version": "2.0.0",
     "phase": "requirement",
-    "prNumber": 0,
-    "prUrl": "",
+    "prNumber": 108,
+    "prUrl": "https://github.com/kicchann/reqord/pull/108",
     "approvedBy": []
-  }
+  },
+  "flags": []
 }
