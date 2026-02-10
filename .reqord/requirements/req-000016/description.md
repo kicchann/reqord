@@ -20,9 +20,9 @@
    - タイトル、説明、推定時間、依存関係等
    - Zodスキーマでバリデーション
 3. GitHub Issue作成:
-   - Issue Templateを適用
-   - ラベル: `reqord-generated`, `spec:<id>`, `req:<id>`
-   - Reqordメタデータをコメントに埋め込み
+   - 構造化Markdownで本文を生成
+   - HTMLコメントタグでspec-idをメタデータとして埋め込み（`<!-- reqord:specification {"specificationId":"..."} -->`）
+   - ラベル: `reqord-generated`, `<priority>`（P0/P1/P2/P3）
 4. Specification JSONの `implementation` フィールドを更新
 
 タスク定義ファイル形式:
@@ -77,10 +77,9 @@
 | 並列グループ分析・クリティカルパス計算 | Claude Code エコシステム |
 | 分解戦略の選択・適用 | Claude Code エコシステム |
 
-## GitHub Issue Template
+## Issue本文テンプレート
 
-`reqord init` 時に `.github/ISSUE_TEMPLATE/reqord-implementation.yml` 等を生成。
-テンプレートにはSpecification ID, Requirement IDs, Estimated Hours, Description, Acceptance Criteriaのフィールドを含む。
+`buildIssueBody()` により構造化Markdownで本文を生成。先頭にHTMLコメントタグでspec-idを埋め込み、タイトル・説明・見積時間・依存タスクを記載する。
 
 ## 技術的制約
 
