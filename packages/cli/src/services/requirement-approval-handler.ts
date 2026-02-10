@@ -27,32 +27,37 @@ export const requirementHandler: ApprovalHandler = {
 
   async saveCurrentApproval(cwd, target, newVersion) {
     const req = await reqRepo.findById(cwd, target.id);
-    if (req) {
-      await reqRepo.save(cwd, {
-        ...req,
-        currentApproval: {
-          version: newVersion,
-          phase: "requirement" as const,
-          prNumber: 0,
-          prUrl: "",
-          approvedBy: [],
-        },
-      });
+    if (!req) {
+      throw new Error(`${target.id} not found.`);
     }
+    await reqRepo.save(cwd, {
+      ...req,
+      currentApproval: {
+        version: newVersion,
+        phase: "requirement" as const,
+        prNumber: 0,
+        prUrl: "",
+        approvedBy: [],
+      },
+    });
   },
 
   async updatePrInfo(cwd, target, prNumber, prUrl) {
     const req = await reqRepo.findById(cwd, target.id);
-    if (req?.currentApproval) {
-      await reqRepo.save(cwd, {
-        ...req,
-        currentApproval: {
-          ...req.currentApproval,
-          prNumber,
-          prUrl,
-        },
-      });
+    if (!req) {
+      throw new Error(`${target.id} not found.`);
     }
+    if (!req.currentApproval) {
+      throw new Error(`Cannot update PR info: ${target.id} has no current approval.`);
+    }
+    await reqRepo.save(cwd, {
+      ...req,
+      currentApproval: {
+        ...req.currentApproval,
+        prNumber,
+        prUrl,
+      },
+    });
   },
 
   buildPrTitle(target) {

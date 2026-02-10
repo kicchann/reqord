@@ -92,10 +92,10 @@ describe("startApproval", () => {
     expect(gitRepo.commit).toHaveBeenCalledWith("/test/cwd", "chore(reqord): request approval for req-000011");
     expect(gitRepo.push).toHaveBeenCalledWith("/test/cwd", "reqord/req-000011-approve-v1.0.0");
 
-    // Verify PR creation
+    // Verify PR creation (uses newVersion from updateStatus = "2.0.0")
     expect(githubRepo.createPullRequest).toHaveBeenCalledWith(
       expect.objectContaining({
-        title: "[Reqord] Approve req-000011: Test Requirement v1.0.0",
+        title: "[Reqord] Approve req-000011: Test Requirement v2.0.0",
         body: expect.stringContaining("req-000011"),
         head: "reqord/req-000011-approve-v1.0.0",
       })
@@ -183,7 +183,7 @@ describe("startApproval", () => {
     const prBody = vi.mocked(githubRepo.createPullRequest).mock.calls[0][0].body;
     expect(prBody).toContain("req-000022");
     expect(prBody).toContain("Feature X");
-    expect(prBody).toContain("2.1.0");
+    expect(prBody).toContain("2.0.0");
     expect(prBody).toContain("reqord req update req-000022 --status approved");
   });
 

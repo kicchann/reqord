@@ -53,11 +53,10 @@ export async function startApproval(
   }
 
   const branchName = buildBranchName(target);
-  const prTitle = handler.buildPrTitle(target);
-  const prBody = handler.buildPrBody(target);
 
   // 2. Dry-run mode
   if (options?.dryRun) {
+    const prTitle = handler.buildPrTitle(target);
     console.log(`[dry-run] ブランチ作成: ${branchName}`);
     console.log(`[dry-run] ステータス変更: draft → pending_approval`);
     console.log(`[dry-run] PR作成: ${prTitle}`);
@@ -86,14 +85,19 @@ export async function startApproval(
     await gitRepo.commit(cwd, `chore(reqord): request approval for ${target.id}`);
     await gitRepo.push(cwd, branchName);
 
-    // 9. Create PR
+    // 9. Build PR title/body AFTER updateStatus to use newVersion
+    const updatedTarget = { ...target, version: newVersion };
+    const prTitle = handler.buildPrTitle(updatedTarget);
+    const prBody = handler.buildPrBody(updatedTarget);
+
+    // 10. Create PR
     const prInfo = await githubRepo.createPullRequest({
       title: prTitle,
       body: prBody,
       head: branchName,
     });
 
-    // 10. Update with actual PR info
+    // 11. Update with actual PR info
     await handler.updatePrInfo(cwd, target, prInfo.number, prInfo.url);
     await gitRepo.add(cwd, target.files);
     await gitRepo.commit(cwd, `chore(reqord): update currentApproval with PR #${prInfo.number}`);

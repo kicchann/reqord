@@ -179,8 +179,12 @@ export async function checkSpecApprovalPrerequisites(
 
   // 3. design.md content check
   const design = await specRepo.loadFile(cwd, specId, "design.md");
-  if (!design || design.includes("{{")) {
-    errors.push("design.mdがテンプレートのままです。設計内容を記述してください。");
+  if (design == null) {
+    errors.push("design.mdが存在しないか読み込めません。design.mdを作成し、設計内容を記述してください。");
+  } else if (design.trim().length === 0) {
+    errors.push("design.mdが空です。設計内容を記述してください。");
+  } else if (design.includes("{{")) {
+    errors.push("design.mdがテンプレートのままです。プレースホルダを編集して設計内容を記述してください。");
   }
 
   return { ok: errors.length === 0, errors };
