@@ -38,7 +38,7 @@ export default async function SpecificationPage({
       specification={specification}
       design={design}
       research={research}
-      requirementTitle={requirement?.title ?? null}
+      requirement={requirement}
     />
   );
 }
