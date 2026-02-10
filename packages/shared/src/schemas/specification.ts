@@ -2,6 +2,10 @@ import { z } from "zod";
 import { StatusSchema, VersionHistoryEntrySchema } from "./common.js";
 import { FeedbackFlagSchema, CurrentApprovalSchema } from "./requirement.js";
 
+export const SpecCurrentApprovalSchema = CurrentApprovalSchema.extend({
+  phase: z.literal("specification"),
+});
+
 export const SpecificationSchema = z.object({
   id: z.string().regex(/^spec-\d{6}$/),
   requirementId: z.string().regex(/^req-\d{6}$/),
@@ -15,7 +19,7 @@ export const SpecificationSchema = z.object({
     supplementary: z.array(z.string()).default([]),
   }),
   flags: z.array(FeedbackFlagSchema).default([]),
-  currentApproval: CurrentApprovalSchema.optional(),
+  currentApproval: SpecCurrentApprovalSchema.optional(),
 });
 
 export type Specification = z.infer<typeof SpecificationSchema>;

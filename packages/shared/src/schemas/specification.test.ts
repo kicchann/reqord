@@ -63,7 +63,7 @@ describe("SpecificationSchema", () => {
       expect(result.currentApproval?.approvedAt).toBeUndefined();
     });
 
-    it("phaseが'requirement'を受け入れる", () => {
+    it("phaseが'requirement'を拒否する", () => {
       const specification = {
         ...baseSpecification,
         currentApproval: {
@@ -75,8 +75,7 @@ describe("SpecificationSchema", () => {
         },
       };
 
-      const result = SpecificationSchema.parse(specification);
-      expect(result.currentApproval?.phase).toBe("requirement");
+      expect(() => SpecificationSchema.parse(specification)).toThrow();
     });
 
     it("phaseが'specification'を受け入れる", () => {
