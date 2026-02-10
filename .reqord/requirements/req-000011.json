@@ -1,12 +1,20 @@
 {
   "id": "req-000011",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "title": "Requirement承認フロー (GitHub PR連携)",
-  "status": "draft",
+  "status": "pending_approval",
   "priority": "high",
   "createdAt": "2026-02-07T12:00:00Z",
-  "updatedAt": "2026-02-07T12:00:00Z",
-  "versionHistory": [],
+  "updatedAt": "2026-02-10T01:17:47.683Z",
+  "versionHistory": [
+    {
+      "version": "2.0.0",
+      "status": "pending_approval",
+      "gitCommit": "f97b4fc",
+      "changedAt": "2026-02-10T01:17:47.684Z",
+      "summary": "Status changed from draft to pending_approval"
+    }
+  ],
   "files": {
     "description": "requirements/req-000011/description.md",
     "supplementary": []
@@ -38,5 +46,13 @@
     "relatedTo": []
   },
   "estimatedComplexity": "medium",
-  "estimatedHours": 12
+  "estimatedHours": 12,
+  "currentApproval": {
+    "version": "2.0.0",
+    "phase": "requirement",
+    "prNumber": 107,
+    "prUrl": "https://github.com/kicchann/reqord/pull/107",
+    "approvedBy": []
+  },
+  "flags": []
 }
