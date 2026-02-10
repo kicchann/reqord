@@ -2,7 +2,7 @@ import type { Specification, Status, VersionHistoryEntry } from "@reqord/shared"
 import { SPECIFICATIONS_DIR } from "@reqord/shared";
 import * as specRepo from "../repositories/specification.js";
 import * as reqRepo from "../repositories/requirement.js";
-import { generateNextSpecId } from "../utils/spec-id-generator.js";
+import { generateNextSpecId } from "../utils/id-generator.js";
 import {
   loadProjectTemplate,
   DEFAULT_SPECIFICATION_DESIGN_TEMPLATE,
@@ -23,10 +23,7 @@ export async function createSpecification(
   cwd: string,
   options: CreateSpecOptions,
 ): Promise<CreateSpecResult> {
-  const requirement = await reqRepo.findById(cwd, options.requirementId);
-  if (!requirement) {
-    throw new Error(`Requirement ${options.requirementId} not found.`);
-  }
+  await reqRepo.findByIdOrThrow(cwd, options.requirementId);
 
   const id = await generateNextSpecId(cwd);
   const now = new Date().toISOString();
@@ -100,13 +97,8 @@ export async function showSpecification(
   cwd: string,
   id: string,
 ): Promise<ShowSpecResult> {
-  const specification = await specRepo.findById(cwd, id);
-  if (!specification) {
-    throw new Error(`Specification ${id} not found.`);
-  }
-
+  const specification = await specRepo.findByIdOrThrow(cwd, id);
   const design = await specRepo.loadFile(cwd, id, "design.md");
-
   return { specification, design };
 }
 
@@ -126,11 +118,7 @@ export async function updateSpecDesign(
   id: string,
   options: UpdateFileOptions = {},
 ): Promise<UpdateFileResult> {
-  const spec = await specRepo.findById(cwd, id);
-  if (!spec) {
-    throw new Error(`Specification ${id} not found.`);
-  }
-
+  const spec = await specRepo.findByIdOrThrow(cwd, id);
   const filePath = spec.files.design;
 
   if (options.content === undefined) {
@@ -157,11 +145,7 @@ export async function checkSpecApprovalPrerequisites(
   cwd: string,
   specId: string,
 ): Promise<PrerequisiteResult> {
-  const spec = await specRepo.findById(cwd, specId);
-  if (!spec) {
-    throw new Error(`Specification ${specId} not found.`);
-  }
-
+  const spec = await specRepo.findByIdOrThrow(cwd, specId);
   const errors: string[] = [];
 
   // 1. Status check
@@ -202,10 +186,7 @@ export async function updateSpecificationStatus(
   id: string,
   newStatus: Status,
 ): Promise<UpdateSpecStatusResult> {
-  const before = await specRepo.findById(cwd, id);
-  if (!before) {
-    throw new Error(`Specification ${id} not found.`);
-  }
+  const before = await specRepo.findByIdOrThrow(cwd, id);
 
   // Validate status transition
   if (!versionService.isValidTransition(before.status, newStatus)) {

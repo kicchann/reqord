@@ -2,6 +2,7 @@ import { Command } from "commander";
 import chalk from "chalk";
 import { showFeedback } from "../../services/feedback-service.js";
 import { handleError } from "../../utils/error-handler.js";
+import { parseIssueNumber } from "../../utils/display.js";
 
 export const feedbackShowCommand = new Command("show")
   .description("Show feedback details (GitHub Issue + index.json)")
@@ -10,11 +11,7 @@ export const feedbackShowCommand = new Command("show")
   .action(async (issueNumberStr: string, options: { json?: boolean }) => {
     try {
       const cwd = process.cwd();
-      const issueNumber = parseInt(issueNumberStr, 10);
-
-      if (isNaN(issueNumber)) {
-        throw new Error("Invalid issue number");
-      }
+      const issueNumber = parseIssueNumber(issueNumberStr);
 
       const result = await showFeedback(cwd, issueNumber);
 

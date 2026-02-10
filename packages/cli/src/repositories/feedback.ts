@@ -1,11 +1,11 @@
 import type { FeedbackIndex, FeedbackEntry } from "@reqord/shared";
-import { FeedbackIndexSchema, REQORD_DIR, FEEDBACK_DIR } from "@reqord/shared";
+import { FeedbackIndexSchema, FEEDBACK_DIR } from "@reqord/shared";
 import * as fs from "./file-system.js";
 
 const INDEX_FILENAME = "index.json";
 
 function getFeedbackDir(cwd: string): string {
-  return fs.joinPath(cwd, REQORD_DIR, FEEDBACK_DIR);
+  return fs.getReqordDir(cwd, FEEDBACK_DIR);
 }
 
 function getIndexPath(cwd: string): string {

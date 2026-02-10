@@ -8,6 +8,7 @@ vi.mock("./file-system.js", () => ({
   writeJSON: vi.fn(),
   mkdirp: vi.fn(),
   joinPath: vi.fn((...segments: string[]) => segments.join("/")),
+  getReqordDir: vi.fn((cwd: string, ...sub: string[]) => [cwd, ".reqord", ...sub].join("/")),
 }));
 
 import * as fs from "./file-system.js";

@@ -5,6 +5,7 @@ import { AppError, ErrorCode } from "../utils/errors.js";
 // Mock the file-system module
 vi.mock("../repositories/file-system.js", () => ({
   exists: vi.fn(),
+  getReqordDir: vi.fn((cwd: string, ...sub: string[]) => [cwd, ".reqord", ...sub].join("/")),
 }));
 
 // Import the mocked function
@@ -23,7 +24,7 @@ describe("ensureReqordInitialized", () => {
     ).resolves.toBeUndefined();
   });
 
-  it("should verify path.join is called with correct arguments", async () => {
+  it("should verify getReqordDir is called with correct arguments", async () => {
     vi.mocked(exists).mockResolvedValue(true);
 
     await ensureReqordInitialized("/home/user/project");

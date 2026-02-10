@@ -1,12 +1,8 @@
-import { RequirementSchema, type Requirement, REQORD_DIR, REQUIREMENTS_DIR } from "@reqord/shared";
+import { RequirementSchema, type Requirement, REQUIREMENTS_DIR } from "@reqord/shared";
 import * as fs from "../repositories/file-system.js";
 
-function getReqordRoot(cwd: string): string {
-  return fs.joinPath(cwd, REQORD_DIR);
-}
-
 function getRequirementsDir(cwd: string): string {
-  return fs.joinPath(getReqordRoot(cwd), REQUIREMENTS_DIR);
+  return fs.getReqordDir(cwd, REQUIREMENTS_DIR);
 }
 
 export async function save(cwd: string, requirement: Requirement): Promise<void> {
@@ -24,6 +20,14 @@ export async function saveDescription(
   const descDir = fs.joinPath(reqDir, id);
   await fs.mkdirp(descDir);
   await fs.writeText(fs.joinPath(descDir, "description.md"), content);
+}
+
+export async function findByIdOrThrow(cwd: string, id: string): Promise<Requirement> {
+  const requirement = await findById(cwd, id);
+  if (!requirement) {
+    throw new Error(`Requirement ${id} not found.`);
+  }
+  return requirement;
 }
 
 export async function findById(cwd: string, id: string): Promise<Requirement | null> {

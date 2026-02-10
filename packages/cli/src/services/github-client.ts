@@ -1,7 +1,4 @@
-import { exec, spawn } from "node:child_process";
-import { promisify } from "node:util";
-
-const execAsync = promisify(exec);
+import { spawn } from "node:child_process";
 
 export interface GitHubIssueLabel {
   name: string;
@@ -41,11 +38,37 @@ function normalizeIssue(raw: GitHubIssueRaw): GitHubIssue {
   };
 }
 
+function runGh(args: string[], options?: { stdin?: string }): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const proc = spawn("gh", args);
+    let stdout = "";
+    let stderr = "";
+    proc.stdout.on("data", (chunk: Buffer) => { stdout += chunk.toString(); });
+    proc.stderr.on("data", (chunk: Buffer) => { stderr += chunk.toString(); });
+
+    if (options?.stdin !== undefined) {
+      proc.stdin.write(options.stdin);
+      proc.stdin.end();
+    }
+
+    proc.on("close", (code) => {
+      if (code !== 0) {
+        reject(new Error(`gh ${args[0]} ${args[1] ?? ""} failed (code ${code}): ${stderr}`.trim()));
+        return;
+      }
+      resolve(stdout);
+    });
+    proc.on("error", reject);
+  });
+}
+
 export async function listFeedbackIssues(): Promise<GitHubIssue[]> {
-  const { stdout } = await execAsync(
-    "gh issue list --label feedback --json number,title,state,labels,createdAt,body --limit 1000",
-    { maxBuffer: 10 * 1024 * 1024 },
-  );
+  const stdout = await runGh([
+    "issue", "list",
+    "--label", "feedback",
+    "--json", "number,title,state,labels,createdAt,body",
+    "--limit", "1000",
+  ]);
   const raw: GitHubIssueRaw[] = JSON.parse(stdout);
   return raw.map(normalizeIssue);
 }
@@ -54,42 +77,31 @@ export async function listIssuesByLabel(
   labels: string[],
   state: "open" | "closed" | "all" = "all",
 ): Promise<GitHubIssue[]> {
-  return new Promise((resolve, reject) => {
-    const args = ["issue", "list"];
-    for (const label of labels) {
-      args.push("--label", label);
-    }
-    args.push("--state", state, "--json", "number,title,state,labels,createdAt,body", "--limit", "1000");
+  const args = ["issue", "list"];
+  for (const label of labels) {
+    args.push("--label", label);
+  }
+  args.push("--state", state, "--json", "number,title,state,labels,createdAt,body", "--limit", "1000");
 
-    const proc = spawn("gh", args);
-    let stdout = "";
-    let stderr = "";
-    proc.stdout.on("data", (chunk: Buffer) => { stdout += chunk.toString(); });
-    proc.stderr.on("data", (chunk: Buffer) => { stderr += chunk.toString(); });
-    proc.on("close", (code) => {
-      if (code !== 0) {
-        reject(new Error(`gh issue list failed (code ${code}): ${stderr}`));
-        return;
-      }
-      const raw: GitHubIssueRaw[] = JSON.parse(stdout);
-      resolve(raw.map(normalizeIssue));
-    });
-    proc.on("error", reject);
-  });
+  const stdout = await runGh(args);
+  const raw: GitHubIssueRaw[] = JSON.parse(stdout);
+  return raw.map(normalizeIssue);
 }
 
 export async function getIssue(issueNumber: number): Promise<GitHubIssue> {
-  const { stdout } = await execAsync(
-    `gh issue view ${issueNumber} --json number,title,state,labels,createdAt,body`,
-  );
+  const stdout = await runGh([
+    "issue", "view", String(issueNumber),
+    "--json", "number,title,state,labels,createdAt,body",
+  ]);
   const raw: GitHubIssueRaw = JSON.parse(stdout);
   return normalizeIssue(raw);
 }
 
 export async function getIssueDetail(issueNumber: number): Promise<GitHubIssueDetail> {
-  const { stdout } = await execAsync(
-    `gh issue view ${issueNumber} --json number,title,state,labels,createdAt,body,updatedAt,closedAt`,
-  );
+  const stdout = await runGh([
+    "issue", "view", String(issueNumber),
+    "--json", "number,title,state,labels,createdAt,body,updatedAt,closedAt",
+  ]);
   const raw = JSON.parse(stdout);
   return {
     ...normalizeIssue(raw),
@@ -102,30 +114,18 @@ export async function updateIssueBody(
   issueNumber: number,
   newBody: string,
 ): Promise<void> {
-  return new Promise((resolve, reject) => {
-    const proc = spawn("gh", ["issue", "edit", String(issueNumber), "--body-file", "-"]);
-    proc.stdin.write(newBody);
-    proc.stdin.end();
-    let stderr = "";
-    proc.stderr.on("data", (chunk: Buffer) => { stderr += chunk.toString(); });
-    proc.on("close", (code) => {
-      if (code === 0) resolve();
-      else reject(new Error(`gh issue edit failed (code ${code}): ${stderr}`));
-    });
-    proc.on("error", reject);
-  });
+  await runGh(["issue", "edit", String(issueNumber), "--body-file", "-"], { stdin: newBody });
 }
 
 export async function closeIssue(
   issueNumber: number,
   comment?: string,
 ): Promise<void> {
-  let cmd = `gh issue close ${issueNumber}`;
+  const args = ["issue", "close", String(issueNumber)];
   if (comment) {
-    const escaped = comment.replace(/"/g, '\\"');
-    cmd += ` --comment "${escaped}"`;
+    args.push("--comment", comment);
   }
-  await execAsync(cmd);
+  await runGh(args);
 }
 
 export interface CreateIssueOptions {
@@ -142,42 +142,26 @@ export interface CreatedIssue {
 export async function createIssue(
   options: CreateIssueOptions,
 ): Promise<CreatedIssue> {
-  return new Promise((resolve, reject) => {
-    const args = [
-      "issue",
-      "create",
-      "--title",
-      options.title,
-      "--label",
-      options.labels.join(","),
-      "--body-file",
-      "-",
-    ];
+  const args = [
+    "issue",
+    "create",
+    "--title",
+    options.title,
+    "--label",
+    options.labels.join(","),
+    "--body-file",
+    "-",
+  ];
 
-    const proc = spawn("gh", args);
-    proc.stdin.write(options.body);
-    proc.stdin.end();
+  const stdout = await runGh(args, { stdin: options.body });
 
-    let stdout = "";
-    let stderr = "";
-    proc.stdout.on("data", (chunk: Buffer) => { stdout += chunk.toString(); });
-    proc.stderr.on("data", (chunk: Buffer) => { stderr += chunk.toString(); });
-    proc.on("close", (code) => {
-      if (code !== 0) {
-        reject(new Error(`gh issue create failed (code ${code}): ${stderr}`));
-        return;
-      }
-      // gh issue create outputs the URL like: https://github.com/owner/repo/issues/123
-      const match = stdout.trim().match(/https:\/\/github\.com\/[^/]+\/[^/]+\/issues\/(\d+)/);
-      if (!match) {
-        reject(new Error(`Failed to extract issue URL from gh output: ${stdout}`));
-        return;
-      }
-      resolve({
-        number: parseInt(match[1], 10),
-        url: match[0],
-      });
-    });
-    proc.on("error", reject);
-  });
+  // gh issue create outputs the URL like: https://github.com/owner/repo/issues/123
+  const match = stdout.trim().match(/https:\/\/github\.com\/[^/]+\/[^/]+\/issues\/(\d+)/);
+  if (!match) {
+    throw new Error(`Failed to extract issue URL from gh output: ${stdout}`);
+  }
+  return {
+    number: parseInt(match[1], 10),
+    url: match[0],
+  };
 }

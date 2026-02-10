@@ -1,6 +1,5 @@
 import { execSync } from "node:child_process";
-import type { Requirement, Status } from "@reqord/shared";
-import type { VersionHistoryEntry } from "@reqord/shared";
+import type { Requirement, Status, VersionHistoryEntry } from "@reqord/shared";
 
 /**
  * Compare two values for equality, using JSON serialization for objects

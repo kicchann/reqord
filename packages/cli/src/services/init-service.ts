@@ -1,5 +1,4 @@
 import {
-  REQORD_DIR,
   CONTEXT_DIR,
   REQUIREMENTS_DIR,
   SPECIFICATIONS_DIR,
@@ -22,7 +21,7 @@ export interface InitResult {
 }
 
 export async function initProject(cwd: string): Promise<InitResult> {
-  const reqordRoot = fs.joinPath(cwd, REQORD_DIR);
+  const reqordRoot = fs.getReqordDir(cwd);
 
   if (await fs.exists(reqordRoot)) {
     return { created: [], alreadyExists: true };

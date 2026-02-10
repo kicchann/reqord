@@ -1,4 +1,4 @@
-import { REQORD_DIR, SETTINGS_DIR, TEMPLATES_DIR } from "@reqord/shared";
+import { SETTINGS_DIR, TEMPLATES_DIR } from "@reqord/shared";
 import * as fs from "../repositories/file-system.js";
 
 export const DEFAULT_REQUIREMENT_DESCRIPTION_TEMPLATE = `# {{title}}
@@ -110,13 +110,7 @@ export async function loadProjectTemplate(
   cwd: string,
   templateName: string,
 ): Promise<string | null> {
-  const templatePath = fs.joinPath(
-    cwd,
-    REQORD_DIR,
-    SETTINGS_DIR,
-    TEMPLATES_DIR,
-    templateName,
-  );
+  const templatePath = fs.getReqordDir(cwd, SETTINGS_DIR, TEMPLATES_DIR, templateName);
   if (await fs.exists(templatePath)) {
     return fs.readText(templatePath);
   }

@@ -68,11 +68,7 @@ export async function updateSpecificationImplementation(
   specId: string,
   implementation: Implementation
 ): Promise<void> {
-  const spec = await specRepo.findById(cwd, specId);
-  if (!spec) {
-    throw new Error(`Specification ${specId} not found`);
-  }
-
+  const spec = await specRepo.findByIdOrThrow(cwd, specId);
   spec.implementation = implementation;
   spec.updatedAt = new Date().toISOString();
   await specRepo.save(cwd, spec);
@@ -82,11 +78,7 @@ export async function createIssuesFromSpec(
   cwd: string,
   options: CreateIssuesOptions
 ): Promise<CreateIssuesResult> {
-  const spec = await specRepo.findById(cwd, options.specId);
-  if (!spec) {
-    throw new Error(`Specification ${options.specId} not found`);
-  }
-
+  const spec = await specRepo.findByIdOrThrow(cwd, options.specId);
   if (spec.status !== "approved") {
     throw new Error(`Specification ${options.specId} must be approved before creating issues`);
   }

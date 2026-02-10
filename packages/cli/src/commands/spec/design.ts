@@ -1,6 +1,6 @@
 import { Command } from "commander";
 import chalk from "chalk";
-import { readFile } from "node:fs/promises";
+import * as fs from "../../repositories/file-system.js";
 import { updateSpecDesign } from "../../services/specification-service.js";
 import { handleError } from "../../utils/error-handler.js";
 
@@ -14,7 +14,7 @@ export const specDesignCommand = new Command("design")
     try {
       let content: string | undefined;
       if (options.contentFile) {
-        content = await readFile(options.contentFile, "utf-8");
+        content = await fs.readText(options.contentFile);
       }
 
       const result = await updateSpecDesign(cwd, id, { content });

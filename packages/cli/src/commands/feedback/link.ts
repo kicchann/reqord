@@ -7,6 +7,7 @@ import {
 } from "../../services/feedback-service.js";
 import type { FeedbackType, FeedbackSeverity } from "@reqord/shared";
 import { handleError } from "../../utils/error-handler.js";
+import { parseIssueNumber } from "../../utils/display.js";
 
 export const feedbackLinkCommand = new Command("link")
   .description("Link feedback to requirement or specification")
@@ -25,11 +26,7 @@ export const feedbackLinkCommand = new Command("link")
   }) => {
     try {
       const cwd = process.cwd();
-      const issueNumber = parseInt(issueNumberStr, 10);
-
-      if (isNaN(issueNumber)) {
-        throw new Error("Invalid issue number");
-      }
+      const issueNumber = parseIssueNumber(issueNumberStr);
 
       // Mutual exclusion check
       const modes = [options.req, options.createdReq, options.spec].filter(Boolean);

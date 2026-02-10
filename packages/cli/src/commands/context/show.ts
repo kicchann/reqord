@@ -1,6 +1,5 @@
 import { Command } from "commander";
 import chalk from "chalk";
-import { REQORD_DIR } from "@reqord/shared";
 import { showContext, resolveFilePath } from "../../services/context-service.js";
 import * as fs from "../../repositories/file-system.js";
 import { handleError } from "../../utils/error-handler.js";
@@ -76,7 +75,7 @@ async function showFileDetail(
   const filePath = resolveFilePath(ctx.files[name]);
   if (!filePath) return;
 
-  const fullPath = fs.joinPath(cwd, REQORD_DIR, filePath);
+  const fullPath = fs.getReqordDir(cwd, filePath);
   try {
     const content = await fs.readText(fullPath);
     console.log(chalk.cyan(`--- ${name} (${filePath}) ---`));

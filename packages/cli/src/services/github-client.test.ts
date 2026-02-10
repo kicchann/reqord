@@ -5,19 +5,9 @@ import { PassThrough } from "node:stream";
 let mockSpawnInstance: EventEmitter & { stdin: PassThrough; stderr: PassThrough; stdout: PassThrough };
 
 vi.mock("node:child_process", () => {
-  const mockExec = Object.assign(vi.fn(), { __type: "exec" });
   const mockSpawn = vi.fn(() => mockSpawnInstance);
   return {
-    exec: mockExec,
     spawn: mockSpawn,
-  };
-});
-
-vi.mock("node:util", () => {
-  const mockExecAsync = vi.fn();
-  return {
-    promisify: () => mockExecAsync,
-    mockExecAsync,
   };
 });
 
@@ -30,10 +20,8 @@ import {
   getIssueDetail,
   listIssuesByLabel,
 } from "./github-client.js";
-import * as util from "node:util";
 import * as childProcess from "node:child_process";
 
-const mockExecAsync = (util as unknown as { mockExecAsync: ReturnType<typeof vi.fn> }).mockExecAsync;
 const mockSpawn = vi.mocked(childProcess.spawn);
 
 function createMockSpawnInstance(exitCode = 0, stdoutData = "", stderrData = "") {
@@ -63,17 +51,16 @@ beforeEach(() => {
 
 describe("listFeedbackIssues", () => {
   it("gh issueコマンドにbodyフィールドとmaxBufferを含めて実行する", async () => {
-    mockExecAsync.mockResolvedValue({
-      stdout: "[]",
-      stderr: "",
-    });
+    createMockSpawnInstance(0, "[]");
 
     await listFeedbackIssues();
 
-    expect(mockExecAsync).toHaveBeenCalledWith(
-      "gh issue list --label feedback --json number,title,state,labels,createdAt,body --limit 1000",
-      { maxBuffer: 10 * 1024 * 1024 },
-    );
+    expect(mockSpawn).toHaveBeenCalledWith("gh", [
+      "issue", "list",
+      "--label", "feedback",
+      "--json", "number,title,state,labels,createdAt,body",
+      "--limit", "1000",
+    ]);
   });
 
   it("JSON形式のissue一覧をパースする", async () => {
@@ -96,10 +83,7 @@ describe("listFeedbackIssues", () => {
       },
     ];
 
-    mockExecAsync.mockResolvedValue({
-      stdout: JSON.stringify(rawIssues),
-      stderr: "",
-    });
+    createMockSpawnInstance(0, JSON.stringify(rawIssues));
 
     const result = await listFeedbackIssues();
 
@@ -137,10 +121,7 @@ describe("listFeedbackIssues", () => {
       },
     ];
 
-    mockExecAsync.mockResolvedValue({
-      stdout: JSON.stringify(rawIssues),
-      stderr: "",
-    });
+    createMockSpawnInstance(0, JSON.stringify(rawIssues));
 
     const result = await listFeedbackIssues();
 
@@ -148,9 +129,9 @@ describe("listFeedbackIssues", () => {
   });
 
   it("ghコマンド失敗時にエラーを投げる", async () => {
-    mockExecAsync.mockRejectedValue(new Error("gh command failed"));
+    createMockSpawnInstance(1, "", "gh command failed");
 
-    await expect(listFeedbackIssues()).rejects.toThrow("gh command failed");
+    await expect(listFeedbackIssues()).rejects.toThrow("gh issue list failed");
   });
 });
 
@@ -165,16 +146,14 @@ describe("getIssue", () => {
       body: "Issue body",
     };
 
-    mockExecAsync.mockResolvedValue({
-      stdout: JSON.stringify(rawIssue),
-      stderr: "",
-    });
+    createMockSpawnInstance(0, JSON.stringify(rawIssue));
 
     await getIssue(17);
 
-    expect(mockExecAsync).toHaveBeenCalledWith(
-      "gh issue view 17 --json number,title,state,labels,createdAt,body",
-    );
+    expect(mockSpawn).toHaveBeenCalledWith("gh", [
+      "issue", "view", "17",
+      "--json", "number,title,state,labels,createdAt,body",
+    ]);
   });
 
   it("issueの詳細を正規化して返す", async () => {
@@ -187,10 +166,7 @@ describe("getIssue", () => {
       body: "Issue body content",
     };
 
-    mockExecAsync.mockResolvedValue({
-      stdout: JSON.stringify(rawIssue),
-      stderr: "",
-    });
+    createMockSpawnInstance(0, JSON.stringify(rawIssue));
 
     const result = await getIssue(17);
 
@@ -205,9 +181,9 @@ describe("getIssue", () => {
   });
 
   it("ghコマンド失敗時にエラーを投げる", async () => {
-    mockExecAsync.mockRejectedValue(new Error("Issue not found"));
+    createMockSpawnInstance(1, "", "Issue not found");
 
-    await expect(getIssue(999)).rejects.toThrow("Issue not found");
+    await expect(getIssue(999)).rejects.toThrow("gh issue view failed");
   });
 });
 
@@ -244,46 +220,39 @@ describe("updateIssueBody", () => {
 
 describe("closeIssue", () => {
   it("コメントなしでissueをクローズする", async () => {
-    mockExecAsync.mockResolvedValue({
-      stdout: "",
-      stderr: "",
-    });
+    createMockSpawnInstance(0);
 
     await closeIssue(17);
 
-    expect(mockExecAsync).toHaveBeenCalledWith("gh issue close 17");
+    expect(mockSpawn).toHaveBeenCalledWith("gh", ["issue", "close", "17"]);
   });
 
   it("コメント付きでissueをクローズする", async () => {
-    mockExecAsync.mockResolvedValue({
-      stdout: "",
-      stderr: "",
-    });
+    createMockSpawnInstance(0);
 
     await closeIssue(17, "Fixed in PR #123");
 
-    expect(mockExecAsync).toHaveBeenCalledWith(
-      'gh issue close 17 --comment "Fixed in PR #123"',
-    );
+    expect(mockSpawn).toHaveBeenCalledWith("gh", [
+      "issue", "close", "17",
+      "--comment", "Fixed in PR #123",
+    ]);
   });
 
-  it("コメント内のダブルクォートをエスケープする", async () => {
-    mockExecAsync.mockResolvedValue({
-      stdout: "",
-      stderr: "",
-    });
+  it("コメント内のダブルクォートを含む文字列をそのまま渡す", async () => {
+    createMockSpawnInstance(0);
 
     await closeIssue(17, 'Fixed with "new feature"');
 
-    expect(mockExecAsync).toHaveBeenCalledWith(
-      'gh issue close 17 --comment "Fixed with \\"new feature\\""',
-    );
+    expect(mockSpawn).toHaveBeenCalledWith("gh", [
+      "issue", "close", "17",
+      "--comment", 'Fixed with "new feature"',
+    ]);
   });
 
   it("ghコマンド失敗時にエラーを投げる", async () => {
-    mockExecAsync.mockRejectedValue(new Error("Failed to close issue"));
+    createMockSpawnInstance(1, "", "Failed to close issue");
 
-    await expect(closeIssue(17)).rejects.toThrow("Failed to close issue");
+    await expect(closeIssue(17)).rejects.toThrow("gh issue close failed");
   });
 });
 
@@ -393,13 +362,14 @@ describe("getIssueDetail", () => {
       updatedAt: "2026-01-05T00:00:00Z",
       closedAt: null,
     };
-    mockExecAsync.mockResolvedValue({ stdout: JSON.stringify(rawIssue), stderr: "" });
+    createMockSpawnInstance(0, JSON.stringify(rawIssue));
 
     await getIssueDetail(17);
 
-    expect(mockExecAsync).toHaveBeenCalledWith(
-      "gh issue view 17 --json number,title,state,labels,createdAt,body,updatedAt,closedAt",
-    );
+    expect(mockSpawn).toHaveBeenCalledWith("gh", [
+      "issue", "view", "17",
+      "--json", "number,title,state,labels,createdAt,body,updatedAt,closedAt",
+    ]);
   });
 
   it("updatedAtとclosedAtを含む詳細を返す", async () => {
@@ -413,7 +383,7 @@ describe("getIssueDetail", () => {
       updatedAt: "2026-01-10T00:00:00Z",
       closedAt: "2026-01-10T00:00:00Z",
     };
-    mockExecAsync.mockResolvedValue({ stdout: JSON.stringify(rawIssue), stderr: "" });
+    createMockSpawnInstance(0, JSON.stringify(rawIssue));
 
     const result = await getIssueDetail(17);
 
@@ -440,7 +410,7 @@ describe("getIssueDetail", () => {
       updatedAt: "2026-01-05T00:00:00Z",
       closedAt: null,
     };
-    mockExecAsync.mockResolvedValue({ stdout: JSON.stringify(rawIssue), stderr: "" });
+    createMockSpawnInstance(0, JSON.stringify(rawIssue));
 
     const result = await getIssueDetail(17);
     expect(result.closedAt).toBeNull();

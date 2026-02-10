@@ -5,10 +5,7 @@ import type { ApprovalHandler } from "./approval-service.js";
 
 export const specificationHandler: ApprovalHandler = {
   async revalidate(cwd, target) {
-    const spec = await specRepo.findById(cwd, target.id);
-    if (!spec) {
-      throw new Error(`${target.id} not found.`);
-    }
+    const spec = await specRepo.findByIdOrThrow(cwd, target.id);
     if (spec.status !== "draft") {
       throw new Error(
         `Cannot start approval: ${target.id} current status is "${spec.status}", expected "draft".`
@@ -27,10 +24,7 @@ export const specificationHandler: ApprovalHandler = {
   },
 
   async saveCurrentApproval(cwd, target, newVersion) {
-    const spec = await specRepo.findById(cwd, target.id);
-    if (!spec) {
-      throw new Error(`Cannot save current approval: ${target.id} not found.`);
-    }
+    const spec = await specRepo.findByIdOrThrow(cwd, target.id);
     await specRepo.save(cwd, {
       ...spec,
       currentApproval: {
@@ -44,10 +38,7 @@ export const specificationHandler: ApprovalHandler = {
   },
 
   async updatePrInfo(cwd, target, prNumber, prUrl) {
-    const spec = await specRepo.findById(cwd, target.id);
-    if (!spec) {
-      throw new Error(`${target.id} not found.`);
-    }
+    const spec = await specRepo.findByIdOrThrow(cwd, target.id);
     if (!spec.currentApproval) {
       throw new Error(`Cannot update PR info: current approval not found for "${target.id}".`);
     }

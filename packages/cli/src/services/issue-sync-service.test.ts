@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { Specification } from "@reqord/shared";
 
 vi.mock("../repositories/specification.js", () => ({
-  findById: vi.fn(),
+  findByIdOrThrow: vi.fn(),
   findAll: vi.fn(),
   save: vi.fn(),
 }));
@@ -19,7 +19,7 @@ import * as specRepo from "../repositories/specification.js";
 import * as githubClient from "./github-client.js";
 import { calculateProgress } from "../utils/progress-calculator.js";
 import type { GitHubIssueDetail } from "./github-client.js";
-import { mapGitHubState, syncSpecification, syncAll } from "./issue-sync-service.js";
+import { syncSpecification, syncAll } from "./issue-sync-service.js";
 
 const mockSpecRepo = vi.mocked(specRepo);
 const mockGithubClient = vi.mocked(githubClient);
@@ -42,25 +42,13 @@ beforeEach(() => {
   vi.clearAllMocks();
 });
 
-// --- mapGitHubState (output-based) ---
-
-describe("mapGitHubState", () => {
-  it("open → open", () => {
-    const result = mapGitHubState("open");
-    expect(result).toBe("open");
-  });
-
-  it("closed → closed", () => {
-    const result = mapGitHubState("closed");
-    expect(result).toBe("closed");
-  });
-});
-
 // --- syncSpecification (communication-based) ---
 
 describe("syncSpecification", () => {
   it("spec not found → throws error", async () => {
-    mockSpecRepo.findById.mockResolvedValue(null);
+    mockSpecRepo.findByIdOrThrow.mockRejectedValue(
+      new Error("Specification not found: spec-000001")
+    );
 
     await expect(syncSpecification("/cwd", "spec-000001")).rejects.toThrow(
       "Specification not found: spec-000001"
@@ -69,7 +57,7 @@ describe("syncSpecification", () => {
 
   it("spec has no implementation → throws error", async () => {
     const spec = makeSpecification();
-    mockSpecRepo.findById.mockResolvedValue(spec);
+    mockSpecRepo.findByIdOrThrow.mockResolvedValue(spec);
 
     await expect(syncSpecification("/cwd", "spec-000001")).rejects.toThrow(
       "No implementation found for spec-000001"
@@ -84,7 +72,7 @@ describe("syncSpecification", () => {
         createdAt: "2026-01-01T00:00:00.000Z",
       },
     });
-    mockSpecRepo.findById.mockResolvedValue(spec);
+    mockSpecRepo.findByIdOrThrow.mockResolvedValue(spec);
 
     await expect(syncSpecification("/cwd", "spec-000001")).rejects.toThrow(
       "No issues found for spec-000001"
@@ -121,7 +109,7 @@ describe("syncSpecification", () => {
         createdAt: "2026-01-01T00:00:00.000Z",
       },
     });
-    mockSpecRepo.findById.mockResolvedValue(spec);
+    mockSpecRepo.findByIdOrThrow.mockResolvedValue(spec);
 
     const ghIssue101: GitHubIssueDetail = {
       number: 101,
@@ -212,7 +200,7 @@ describe("syncSpecification", () => {
         createdAt: "2026-01-01T00:00:00.000Z",
       },
     });
-    mockSpecRepo.findById.mockResolvedValue(spec);
+    mockSpecRepo.findByIdOrThrow.mockResolvedValue(spec);
 
     const ghIssue101: GitHubIssueDetail = {
       number: 101,
@@ -272,7 +260,7 @@ describe("syncSpecification", () => {
         createdAt: "2026-01-01T00:00:00.000Z",
       },
     });
-    mockSpecRepo.findById.mockResolvedValue(spec);
+    mockSpecRepo.findByIdOrThrow.mockResolvedValue(spec);
 
     const ghIssue101: GitHubIssueDetail = {
       number: 101,
@@ -337,7 +325,7 @@ describe("syncSpecification", () => {
         createdAt: "2026-01-01T00:00:00.000Z",
       },
     });
-    mockSpecRepo.findById.mockResolvedValue(spec);
+    mockSpecRepo.findByIdOrThrow.mockResolvedValue(spec);
 
     const ghIssue101: GitHubIssueDetail = {
       number: 101,
@@ -396,7 +384,7 @@ describe("syncSpecification", () => {
         createdAt: "2026-01-01T00:00:00.000Z",
       },
     });
-    mockSpecRepo.findById.mockResolvedValue(spec);
+    mockSpecRepo.findByIdOrThrow.mockResolvedValue(spec);
 
     const ghIssue101: GitHubIssueDetail = {
       number: 101,
@@ -462,6 +450,8 @@ describe("syncAll", () => {
     });
 
     mockSpecRepo.findAll.mockResolvedValue([spec1, spec2]);
+    mockSpecRepo.findByIdOrThrow.mockResolvedValueOnce(spec1);
+    mockSpecRepo.findByIdOrThrow.mockResolvedValueOnce(spec2);
 
     mockGithubClient.getIssueDetail.mockResolvedValueOnce({
       number: 101,
@@ -517,6 +507,7 @@ describe("syncAll", () => {
     });
 
     mockSpecRepo.findAll.mockResolvedValue([spec1, spec2]);
+    mockSpecRepo.findByIdOrThrow.mockResolvedValueOnce(spec1);
 
     mockGithubClient.getIssueDetail.mockResolvedValueOnce({
       number: 101,

@@ -1,5 +1,5 @@
 import type { ProjectContext } from "@reqord/shared";
-import { REQORD_DIR, CONTEXT_DIR, DOMAIN_DIR } from "@reqord/shared";
+import { CONTEXT_DIR, DOMAIN_DIR } from "@reqord/shared";
 import * as contextRepo from "../repositories/project-context.js";
 import * as fs from "../repositories/file-system.js";
 
@@ -38,7 +38,7 @@ export async function initContext(
   await contextRepo.save(cwd, context);
 
   // Generate template files (skip if they already exist)
-  const contextDir = fs.joinPath(cwd, REQORD_DIR, CONTEXT_DIR);
+  const contextDir = fs.getReqordDir(cwd, CONTEXT_DIR);
 
   const templateFiles: Array<[string, unknown]> = [
     ["product.json", { name: options.name, vision: "", goals: [], targetUsers: [] }],
@@ -75,10 +75,10 @@ export async function showContext(cwd: string): Promise<ShowContextResult> {
     throw new Error(CONTEXT_NOT_FOUND);
   }
 
-  const contextDir = fs.joinPath(cwd, REQORD_DIR, CONTEXT_DIR);
+  const contextDir = fs.getReqordDir(cwd, CONTEXT_DIR);
 
   async function resolveFileStatus(fileRef: unknown): Promise<{ exists: boolean; content?: unknown }> {
-    const fullPath = fs.joinPath(cwd, REQORD_DIR, resolveFilePath(fileRef));
+    const fullPath = fs.getReqordDir(cwd, resolveFilePath(fileRef));
     const fileExists = await fs.exists(fullPath);
     const content = fileExists ? await safeReadJSON(fullPath) : undefined;
     return { exists: fileExists, content };

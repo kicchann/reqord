@@ -82,12 +82,18 @@ export const issueValidateCommand = new Command("validate")
     }
   });
 
+const ISSUE_ICONS: Record<string, string> = {
+  error: chalk.red("✗"),
+  warning: chalk.yellow("⚠"),
+  info: chalk.blue("ℹ"),
+};
+
 function displayValidateResult(result: ValidateResult): void {
   const status = result.valid ? chalk.green("VALID") : chalk.red("INVALID");
   console.log(`${result.specId}: ${status}`);
 
   for (const issue of result.issues) {
-    const icon = issue.type === "error" ? chalk.red("✗") : issue.type === "warning" ? chalk.yellow("⚠") : chalk.blue("ℹ");
+    const icon = ISSUE_ICONS[issue.type] ?? chalk.blue("ℹ");
     console.log(`  ${icon} ${issue.message}`);
   }
 }

@@ -3,6 +3,12 @@ import chalk from "chalk";
 import { validateRequirement } from "../../services/validation-service.js";
 import { handleError } from "../../utils/error-handler.js";
 
+const SEVERITY_LABELS: Record<string, string> = {
+  error: chalk.red("ERROR"),
+  warning: chalk.yellow("WARN"),
+  info: chalk.blue("INFO"),
+};
+
 export const validateCommand = new Command("validate")
   .description("Validate a requirement against quality criteria")
   .argument("<id>", "Requirement ID (e.g. req-000001)")
@@ -32,12 +38,7 @@ export const validateCommand = new Command("validate")
       if (result.issues.length > 0) {
         console.log(chalk.cyan("Issues:"));
         for (const issue of result.issues) {
-          const icon =
-            issue.severity === "error"
-              ? chalk.red("ERROR")
-              : issue.severity === "warning"
-                ? chalk.yellow("WARN")
-                : chalk.blue("INFO");
+          const icon = SEVERITY_LABELS[issue.severity] ?? chalk.blue("INFO");
           console.log(`  [${icon}] ${issue.field}: ${issue.message}`);
           if (issue.suggestion) {
             console.log(chalk.gray(`         → ${issue.suggestion}`));

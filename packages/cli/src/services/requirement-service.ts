@@ -95,11 +95,7 @@ export async function showRequirement(
   cwd: string,
   id: string,
 ): Promise<ShowResult> {
-  const requirement = await reqRepo.findById(cwd, id);
-  if (!requirement) {
-    throw new Error(`Requirement ${id} not found.`);
-  }
-
+  const requirement = await reqRepo.findByIdOrThrow(cwd, id);
   const description = await reqRepo.loadDescription(cwd, id);
   return { requirement, description };
 }
@@ -126,10 +122,7 @@ export async function updateRequirement(
   id: string,
   options: UpdateOptions,
 ): Promise<UpdateResult> {
-  const before = await reqRepo.findById(cwd, id);
-  if (!before) {
-    throw new Error(`Requirement ${id} not found.`);
-  }
+  const before = await reqRepo.findByIdOrThrow(cwd, id);
 
   // Start with existing data
   const merged: Record<string, unknown> = { ...before };
@@ -260,11 +253,7 @@ export async function deleteRequirement(
   cwd: string,
   id: string,
 ): Promise<void> {
-  const requirement = await reqRepo.findById(cwd, id);
-  if (!requirement) {
-    throw new Error(`Requirement ${id} not found.`);
-  }
-
+  await reqRepo.findByIdOrThrow(cwd, id);
   await reqRepo.deleteById(cwd, id);
 }
 

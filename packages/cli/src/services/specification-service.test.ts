@@ -5,6 +5,7 @@ import type { Requirement, Specification } from "@reqord/shared";
 vi.mock("../repositories/specification.js", () => ({
   save: vi.fn(),
   findById: vi.fn(),
+  findByIdOrThrow: vi.fn(),
   findAll: vi.fn(),
   deleteById: vi.fn(),
   saveFile: vi.fn(),
@@ -14,9 +15,10 @@ vi.mock("../repositories/specification.js", () => ({
 
 vi.mock("../repositories/requirement.js", () => ({
   findById: vi.fn(),
+  findByIdOrThrow: vi.fn(),
 }));
 
-vi.mock("../utils/spec-id-generator.js", () => ({
+vi.mock("../utils/id-generator.js", () => ({
   generateNextSpecId: vi.fn(),
 }));
 
@@ -27,7 +29,7 @@ vi.mock("../utils/templates.js", () => ({
 
 import * as specRepo from "../repositories/specification.js";
 import * as reqRepo from "../repositories/requirement.js";
-import { generateNextSpecId } from "../utils/spec-id-generator.js";
+import { generateNextSpecId } from "../utils/id-generator.js";
 import { loadProjectTemplate } from "../utils/templates.js";
 import {
   createSpecification,
@@ -88,7 +90,7 @@ beforeEach(() => {
 
 describe("createSpecification", () => {
   it("要件に紐づくSpecificationを生成する", async () => {
-    mockReqRepo.findById.mockResolvedValue(makeRequirement());
+    mockReqRepo.findByIdOrThrow.mockResolvedValue(makeRequirement());
     mockGenerateNextSpecId.mockResolvedValue("spec-000001");
     mockLoadProjectTemplate.mockResolvedValue(null);
 
@@ -106,7 +108,7 @@ describe("createSpecification", () => {
   });
 
   it("存在しない要件IDでエラーを投げる", async () => {
-    mockReqRepo.findById.mockResolvedValue(null);
+    mockReqRepo.findByIdOrThrow.mockRejectedValue(new Error("Requirement req-999999 not found."));
 
     await expect(
       createSpecification("/cwd", { requirementId: "req-999999" }),
@@ -114,7 +116,7 @@ describe("createSpecification", () => {
   });
 
   it("テンプレートからdesign.mdを生成する", async () => {
-    mockReqRepo.findById.mockResolvedValue(makeRequirement());
+    mockReqRepo.findByIdOrThrow.mockResolvedValue(makeRequirement());
     mockGenerateNextSpecId.mockResolvedValue("spec-000001");
     mockLoadProjectTemplate.mockResolvedValue(null);
 
@@ -189,7 +191,7 @@ describe("listSpecifications", () => {
 describe("showSpecification", () => {
   it("仕様とファイル内容を返す", async () => {
     const spec = makeSpecification();
-    mockSpecRepo.findById.mockResolvedValue(spec);
+    mockSpecRepo.findByIdOrThrow.mockResolvedValue(spec);
     mockSpecRepo.loadFile.mockImplementation(
       async (_cwd: string, _id: string, filename: string) => {
         if (filename === "design.md") return "# Design content";
@@ -204,7 +206,7 @@ describe("showSpecification", () => {
   });
 
   it("存在しない仕様でエラーを投げる", async () => {
-    mockSpecRepo.findById.mockResolvedValue(null);
+    mockSpecRepo.findByIdOrThrow.mockRejectedValue(new Error("Specification spec-999999 not found."));
 
     await expect(
       showSpecification("/cwd", "spec-999999"),
@@ -217,7 +219,7 @@ describe("showSpecification", () => {
 describe("updateSpecDesign", () => {
   it("コンテンツ未指定時はファイルパスを返す", async () => {
     const spec = makeSpecification();
-    mockSpecRepo.findById.mockResolvedValue(spec);
+    mockSpecRepo.findByIdOrThrow.mockResolvedValue(spec);
 
     const result = await updateSpecDesign("/cwd", "spec-000001");
 
@@ -227,7 +229,7 @@ describe("updateSpecDesign", () => {
 
   it("contentFileで内容を更新できる", async () => {
     const spec = makeSpecification();
-    mockSpecRepo.findById.mockResolvedValue(spec);
+    mockSpecRepo.findByIdOrThrow.mockResolvedValue(spec);
 
     const result = await updateSpecDesign("/cwd", "spec-000001", {
       content: "# Updated design",
@@ -250,7 +252,7 @@ describe("updateSpecDesign", () => {
   });
 
   it("存在しない仕様でエラーを投げる", async () => {
-    mockSpecRepo.findById.mockResolvedValue(null);
+    mockSpecRepo.findByIdOrThrow.mockRejectedValue(new Error("Specification spec-999999 not found."));
 
     await expect(
       updateSpecDesign("/cwd", "spec-999999"),
@@ -262,7 +264,7 @@ describe("updateSpecDesign", () => {
 
 describe("checkSpecApprovalPrerequisites", () => {
   it("Specificationがdraftで関連Requirementがapprovedで設計済みの場合は成功", async () => {
-    mockSpecRepo.findById.mockResolvedValue(makeSpecification({ status: "draft" }));
+    mockSpecRepo.findByIdOrThrow.mockResolvedValue(makeSpecification({ status: "draft" }));
     mockReqRepo.findById.mockResolvedValue(makeRequirement({ status: "approved" }));
     mockSpecRepo.loadFile.mockResolvedValue("# 実際の設計内容\n\n設計の詳細...");
 
@@ -272,7 +274,7 @@ describe("checkSpecApprovalPrerequisites", () => {
   });
 
   it("Specificationがdraft以外の場合はエラー", async () => {
-    mockSpecRepo.findById.mockResolvedValue(makeSpecification({ status: "approved" }));
+    mockSpecRepo.findByIdOrThrow.mockResolvedValue(makeSpecification({ status: "approved" }));
     mockReqRepo.findById.mockResolvedValue(makeRequirement({ status: "approved" }));
     mockSpecRepo.loadFile.mockResolvedValue("# 設計内容");
 
@@ -283,7 +285,7 @@ describe("checkSpecApprovalPrerequisites", () => {
 
   it("関連Requirementがapprovedの場合は成功", async () => {
     // same as first test but explicit about requirement being approved
-    mockSpecRepo.findById.mockResolvedValue(makeSpecification({ status: "draft" }));
+    mockSpecRepo.findByIdOrThrow.mockResolvedValue(makeSpecification({ status: "draft" }));
     mockReqRepo.findById.mockResolvedValue(makeRequirement({ status: "approved" }));
     mockSpecRepo.loadFile.mockResolvedValue("# 設計内容");
 
@@ -292,7 +294,7 @@ describe("checkSpecApprovalPrerequisites", () => {
   });
 
   it("関連Requirementがpending_approvalの場合は成功", async () => {
-    mockSpecRepo.findById.mockResolvedValue(makeSpecification({ status: "draft" }));
+    mockSpecRepo.findByIdOrThrow.mockResolvedValue(makeSpecification({ status: "draft" }));
     mockReqRepo.findById.mockResolvedValue(makeRequirement({ status: "pending_approval" }));
     mockSpecRepo.loadFile.mockResolvedValue("# 設計内容");
 
@@ -301,7 +303,7 @@ describe("checkSpecApprovalPrerequisites", () => {
   });
 
   it("関連Requirementがdraftの場合はエラー", async () => {
-    mockSpecRepo.findById.mockResolvedValue(makeSpecification({ status: "draft" }));
+    mockSpecRepo.findByIdOrThrow.mockResolvedValue(makeSpecification({ status: "draft" }));
     mockReqRepo.findById.mockResolvedValue(makeRequirement({ status: "draft" }));
     mockSpecRepo.loadFile.mockResolvedValue("# 設計内容");
 
@@ -311,7 +313,7 @@ describe("checkSpecApprovalPrerequisites", () => {
   });
 
   it("design.mdがテンプレートのままの場合はエラー", async () => {
-    mockSpecRepo.findById.mockResolvedValue(makeSpecification({ status: "draft" }));
+    mockSpecRepo.findByIdOrThrow.mockResolvedValue(makeSpecification({ status: "draft" }));
     mockReqRepo.findById.mockResolvedValue(makeRequirement({ status: "approved" }));
     mockSpecRepo.loadFile.mockResolvedValue("# {{id}} - Design\n\n## 対象要件: {{requirementId}}\n\n## 設計概要\n\n{{設計の目的とスコープを記述}}");
 
@@ -321,7 +323,7 @@ describe("checkSpecApprovalPrerequisites", () => {
   });
 
   it("design.mdがnullの場合はエラー", async () => {
-    mockSpecRepo.findById.mockResolvedValue(makeSpecification({ status: "draft" }));
+    mockSpecRepo.findByIdOrThrow.mockResolvedValue(makeSpecification({ status: "draft" }));
     mockReqRepo.findById.mockResolvedValue(makeRequirement({ status: "approved" }));
     mockSpecRepo.loadFile.mockResolvedValue(null);
 
@@ -331,7 +333,7 @@ describe("checkSpecApprovalPrerequisites", () => {
   });
 
   it("design.mdが空白のみの場合はエラー", async () => {
-    mockSpecRepo.findById.mockResolvedValue(makeSpecification({ status: "draft" }));
+    mockSpecRepo.findByIdOrThrow.mockResolvedValue(makeSpecification({ status: "draft" }));
     mockReqRepo.findById.mockResolvedValue(makeRequirement({ status: "approved" }));
     mockSpecRepo.loadFile.mockResolvedValue("  \n  \n  ");
 
@@ -341,7 +343,7 @@ describe("checkSpecApprovalPrerequisites", () => {
   });
 
   it("関連Requirementが見つからない場合はエラー", async () => {
-    mockSpecRepo.findById.mockResolvedValue(makeSpecification({ status: "draft" }));
+    mockSpecRepo.findByIdOrThrow.mockResolvedValue(makeSpecification({ status: "draft" }));
     mockReqRepo.findById.mockResolvedValue(null);
     mockSpecRepo.loadFile.mockResolvedValue("# 設計内容");
 
@@ -351,7 +353,7 @@ describe("checkSpecApprovalPrerequisites", () => {
   });
 
   it("Specificationが存在しない場合はエラーをthrow", async () => {
-    mockSpecRepo.findById.mockResolvedValue(null);
+    mockSpecRepo.findByIdOrThrow.mockRejectedValue(new Error("Specification spec-999999 not found."));
 
     await expect(
       checkSpecApprovalPrerequisites("/cwd", "spec-999999")
@@ -368,7 +370,7 @@ describe("updateSpecificationStatus", () => {
       version: "1.0.0",
       versionHistory: [],
     });
-    mockSpecRepo.findById.mockResolvedValue(before);
+    mockSpecRepo.findByIdOrThrow.mockResolvedValue(before);
 
     const result = await updateSpecificationStatus("/cwd", "spec-000001", "pending_approval");
 
@@ -389,7 +391,7 @@ describe("updateSpecificationStatus", () => {
       status: "draft",
       version: "3.5.2",
     });
-    mockSpecRepo.findById.mockResolvedValue(before);
+    mockSpecRepo.findByIdOrThrow.mockResolvedValue(before);
 
     const result = await updateSpecificationStatus("/cwd", "spec-000001", "pending_approval");
 
@@ -401,7 +403,7 @@ describe("updateSpecificationStatus", () => {
       status: "approved",
       version: "2.0.0",
     });
-    mockSpecRepo.findById.mockResolvedValue(before);
+    mockSpecRepo.findByIdOrThrow.mockResolvedValue(before);
 
     await expect(
       updateSpecificationStatus("/cwd", "spec-000001", "draft")
@@ -413,7 +415,7 @@ describe("updateSpecificationStatus", () => {
       status: "pending_approval",
       version: "2.0.0",
     });
-    mockSpecRepo.findById.mockResolvedValue(before);
+    mockSpecRepo.findByIdOrThrow.mockResolvedValue(before);
 
     await expect(
       updateSpecificationStatus("/cwd", "spec-000001", "implemented")
@@ -421,7 +423,7 @@ describe("updateSpecificationStatus", () => {
   });
 
   it("Specificationが存在しない場合はエラー", async () => {
-    mockSpecRepo.findById.mockResolvedValue(null);
+    mockSpecRepo.findByIdOrThrow.mockRejectedValue(new Error("Specification spec-999999 not found."));
 
     await expect(
       updateSpecificationStatus("/cwd", "spec-999999", "pending_approval")
@@ -433,7 +435,7 @@ describe("updateSpecificationStatus", () => {
       status: "draft",
       version: "1.0.0",
     });
-    mockSpecRepo.findById.mockResolvedValue(before);
+    mockSpecRepo.findByIdOrThrow.mockResolvedValue(before);
 
     await updateSpecificationStatus("/cwd", "spec-000001", "pending_approval");
 
@@ -453,7 +455,7 @@ describe("updateSpecificationStatus", () => {
       version: "1.0.0",
       updatedAt: "2025-01-01T00:00:00.000Z",
     });
-    mockSpecRepo.findById.mockResolvedValue(before);
+    mockSpecRepo.findByIdOrThrow.mockResolvedValue(before);
 
     const result = await updateSpecificationStatus("/cwd", "spec-000001", "pending_approval");
 
