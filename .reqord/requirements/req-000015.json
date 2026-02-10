@@ -1,12 +1,20 @@
 {
   "id": "req-000015",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "title": "Specification承認フロー",
-  "status": "draft",
+  "status": "pending_approval",
   "priority": "medium",
   "createdAt": "2026-02-07T12:00:00Z",
-  "updatedAt": "2026-02-07T12:00:00Z",
-  "versionHistory": [],
+  "updatedAt": "2026-02-10T01:17:59.303Z",
+  "versionHistory": [
+    {
+      "version": "2.0.0",
+      "status": "pending_approval",
+      "gitCommit": "f97b4fc",
+      "changedAt": "2026-02-10T01:17:59.304Z",
+      "summary": "Status changed from draft to pending_approval"
+    }
+  ],
   "files": {
     "description": "requirements/req-000015/description.md",
     "supplementary": []
@@ -37,5 +45,13 @@
     "relatedTo": []
   },
   "estimatedComplexity": "small",
-  "estimatedHours": 8
+  "estimatedHours": 8,
+  "currentApproval": {
+    "version": "2.0.0",
+    "phase": "requirement",
+    "prNumber": 108,
+    "prUrl": "https://github.com/kicchann/reqord/pull/108",
+    "approvedBy": []
+  },
+  "flags": []
 }
