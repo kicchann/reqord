@@ -2,9 +2,9 @@
   "id": "spec-000010",
   "requirementId": "req-000010",
   "version": "1.0.0",
-  "status": "draft",
+  "status": "approved",
   "createdAt": "2026-02-08T14:08:07.385Z",
-  "updatedAt": "2026-02-08T14:08:07.385Z",
+  "updatedAt": "2026-02-10T07:30:00Z",
   "versionHistory": [],
   "files": {
     "design": "specifications/spec-000010/design.md",
