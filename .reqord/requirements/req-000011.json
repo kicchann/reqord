@@ -1,11 +1,11 @@
 {
   "id": "req-000011",
-  "version": "2.0.0",
+  "version": "4.0.0",
   "title": "Requirement承認フロー (GitHub PR連携)",
-  "status": "pending_approval",
+  "status": "implemented",
   "priority": "high",
   "createdAt": "2026-02-07T12:00:00Z",
-  "updatedAt": "2026-02-10T01:17:47.683Z",
+  "updatedAt": "2026-02-10T01:19:51.255Z",
   "versionHistory": [
     {
       "version": "2.0.0",
@@ -13,6 +13,22 @@
       "gitCommit": "f97b4fc",
       "changedAt": "2026-02-10T01:17:47.684Z",
       "summary": "Status changed from draft to pending_approval"
+    },
+    {
+      "version": "3.0.0",
+      "status": "approved",
+      "gitCommit": "fd38137",
+      "changedAt": "2026-02-10T01:19:45.420Z",
+      "summary": "Status changed from pending_approval to approved",
+      "approvedAt": "2026-02-10T01:19:45.420Z",
+      "approvedBy": []
+    },
+    {
+      "version": "4.0.0",
+      "status": "implemented",
+      "gitCommit": "fd38137",
+      "changedAt": "2026-02-10T01:19:51.256Z",
+      "summary": "Status changed from approved to implemented"
     }
   ],
   "files": {
