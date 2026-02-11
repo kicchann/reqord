@@ -90,6 +90,8 @@ describe("specApproveCommand", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     process.exitCode = 0;
+    // Reset Commander option state to avoid leak between tests
+    specApproveCommand.setOptionValue("dryRun", undefined);
   });
 
   it("正常系: 前提条件OKでPR作成", async () => {
@@ -302,6 +304,103 @@ describe("specApproveCommand", () => {
         ".reqord/specifications/spec-000042/design.md",
       ],
     });
+
+    consoleLogSpy.mockRestore();
+  });
+
+  it("flags付きSpecificationで警告を表示してから承認を続行する", async () => {
+    const specification = makeSpecification({
+      flags: [
+        {
+          type: "feedback-review",
+          reason: "Feedback from issue #21",
+          createdAt: "2026-01-01T00:00:00.000Z",
+          relatedIssues: [21],
+          severity: "high",
+        },
+      ],
+    });
+    const requirement = makeRequirement();
+
+    vi.mocked(checkSpecApprovalPrerequisites).mockResolvedValue({
+      ok: true,
+      errors: [],
+    });
+    vi.mocked(showSpecification).mockResolvedValue({
+      specification,
+      design: "# Design",
+    });
+    vi.mocked(showRequirement).mockResolvedValue({
+      requirement,
+      description: null,
+    });
+    vi.mocked(extractDesignSummary).mockReturnValue("summary");
+    vi.mocked(buildSpecApprovalPrBody).mockReturnValue("body");
+
+    const approvalResult: ApprovalResult = {
+      branchName: "reqord/spec-000001-approve-v1.0.0",
+      prNumber: 99,
+      prUrl: "https://github.com/owner/repo/pull/99",
+    };
+    vi.mocked(startApproval).mockResolvedValue(approvalResult);
+
+    const consoleLogSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+
+    await specApproveCommand.parseAsync(["node", "test", "spec-000001"]);
+
+    // Warning displayed
+    expect(consoleLogSpy).toHaveBeenCalledWith(
+      expect.stringContaining("Warning: spec-000001 has 1 unresolved feedback flag(s)")
+    );
+    expect(consoleLogSpy).toHaveBeenCalledWith(
+      expect.stringContaining("feedback-review: Feedback from issue #21 (high)")
+    );
+    expect(consoleLogSpy).toHaveBeenCalledWith(
+      expect.stringContaining("Proceeding with approval...")
+    );
+
+    // Approval still proceeds
+    expect(startApproval).toHaveBeenCalled();
+    expect(consoleLogSpy).toHaveBeenCalledWith(
+      expect.stringContaining("Approval PR created for spec-000001")
+    );
+
+    consoleLogSpy.mockRestore();
+  });
+
+  it("flagsが空の場合は警告を表示しない", async () => {
+    const specification = makeSpecification({ flags: [] });
+    const requirement = makeRequirement();
+
+    vi.mocked(checkSpecApprovalPrerequisites).mockResolvedValue({
+      ok: true,
+      errors: [],
+    });
+    vi.mocked(showSpecification).mockResolvedValue({
+      specification,
+      design: "# Design",
+    });
+    vi.mocked(showRequirement).mockResolvedValue({
+      requirement,
+      description: null,
+    });
+    vi.mocked(extractDesignSummary).mockReturnValue("summary");
+    vi.mocked(buildSpecApprovalPrBody).mockReturnValue("body");
+
+    const approvalResult: ApprovalResult = {
+      branchName: "reqord/spec-000001-approve-v1.0.0",
+      prNumber: 99,
+      prUrl: "https://github.com/owner/repo/pull/99",
+    };
+    vi.mocked(startApproval).mockResolvedValue(approvalResult);
+
+    const consoleLogSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+
+    await specApproveCommand.parseAsync(["node", "test", "spec-000001"]);
+
+    expect(consoleLogSpy).not.toHaveBeenCalledWith(
+      expect.stringContaining("Warning")
+    );
 
     consoleLogSpy.mockRestore();
   });

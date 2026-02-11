@@ -19,6 +19,24 @@ export const approveCommand = new Command("approve")
     try {
       const { requirement } = await showRequirement(cwd, id);
 
+      // v2.0.0: Flag warning before approval
+      if (requirement.flags.length > 0) {
+        console.log(
+          chalk.yellow(
+            `⚠ Warning: ${requirement.id} has ${requirement.flags.length} unresolved feedback flag(s):`,
+          ),
+        );
+        for (const flag of requirement.flags) {
+          console.log(
+            chalk.yellow(
+              `  - ${flag.type}: ${flag.reason} (${flag.severity})`,
+            ),
+          );
+        }
+        console.log(chalk.yellow("Proceeding with approval..."));
+        console.log();
+      }
+
       const target: ApprovalTarget = {
         type: "requirement",
         id: requirement.id,

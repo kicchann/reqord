@@ -58,6 +58,8 @@ export {
   type FeedbackType,
   type FeedbackSeverity,
   type FeedbackStatus,
+  type FeedbackLinkedTo,
+  type FeedbackResolved,
   type FeedbackEntry,
   type FeedbackIndex,
 } from "./feedback.js";

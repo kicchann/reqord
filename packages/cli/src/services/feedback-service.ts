@@ -229,6 +229,7 @@ function createEmptyFeedbackEntry(issueNumber: number): FeedbackEntry {
       requirements: [],
       createdRequirements: [],
       specifications: [],
+      createdSpecifications: [],
     },
     syncedAt: new Date().toISOString(),
     status: "open",
@@ -263,7 +264,84 @@ function buildImpactSummary(feedback: FeedbackEntry): string {
     lines.push(`- Linked Specifications: ${feedback.linkedTo.specifications.join(", ")}`);
   }
 
-  lines.push("", "Flags remain on linked requirements. Use `reqord req unflag` to remove when resolved.");
+  lines.push("", "Flags remain on linked artifacts. Use `reqord feedback resolve` to remove when resolved.");
 
   return lines.join("\n");
+}
+
+// v2.0.0: Resolve feedback flag (SC-11)
+export interface ResolveFeedbackOptions {
+  issueNumber: number;
+  artifactId: string; // req-NNNNNN or spec-NNNNNN
+}
+
+export async function resolveFeedback(
+  cwd: string,
+  options: ResolveFeedbackOptions,
+): Promise<void> {
+  const index = await feedbackRepo.loadIndex(cwd);
+  const feedback = index.feedbacks.find(
+    (f) => f.githubIssue === options.issueNumber,
+  );
+
+  if (!feedback) {
+    throw new Error(
+      `Feedback for issue #${options.issueNumber} not found in index.yaml`,
+    );
+  }
+
+  const isReq = options.artifactId.startsWith("req-");
+  const isSpec = options.artifactId.startsWith("spec-");
+
+  if (!isReq && !isSpec) {
+    throw new Error(
+      `Invalid artifact ID: ${options.artifactId}. Must start with "req-" or "spec-"`,
+    );
+  }
+
+  // Verify artifact is linked
+  const linkedList = isReq
+    ? feedback.linkedTo.requirements
+    : feedback.linkedTo.specifications;
+  if (!linkedList.includes(options.artifactId)) {
+    throw new Error(
+      `${options.artifactId} is not linked to feedback #${options.issueNumber}`,
+    );
+  }
+
+  // Step 1: Remove feedback-review flag from artifact (safe side first)
+  if (isReq) {
+    const requirement = await reqRepo.findByIdOrThrow(cwd, options.artifactId);
+    requirement.flags = requirement.flags.filter(
+      (f) =>
+        !(
+          f.type === "feedback-review" &&
+          f.relatedIssues.includes(options.issueNumber)
+        ),
+    );
+    await reqRepo.save(cwd, requirement);
+  } else {
+    const specification = await specRepo.findByIdOrThrow(cwd, options.artifactId);
+    specification.flags = specification.flags.filter(
+      (f) =>
+        !(
+          f.type === "feedback-review" &&
+          f.relatedIssues.includes(options.issueNumber)
+        ),
+    );
+    await specRepo.save(cwd, specification);
+  }
+
+  // Step 2: Add to linkedTo.resolved
+  if (!feedback.linkedTo.resolved) {
+    feedback.linkedTo.resolved = { requirements: [], specifications: [] };
+  }
+  const resolvedList = isReq
+    ? feedback.linkedTo.resolved.requirements
+    : feedback.linkedTo.resolved.specifications;
+  if (!resolvedList.includes(options.artifactId)) {
+    resolvedList.push(options.artifactId);
+  }
+
+  await feedbackRepo.saveIndex(cwd, index);
 }
