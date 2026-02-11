@@ -25,7 +25,7 @@ export const approveCommand = new Command("approve")
         version: requirement.version,
         status: requirement.status,
         title: requirement.title,
-        files: [`${REQORD_DIR}/${REQUIREMENTS_DIR}/${requirement.id}.json`],
+        files: [`${REQORD_DIR}/${REQUIREMENTS_DIR}/${requirement.id}.yaml`],
       };
 
       const result = await startApproval(cwd, target, requirementHandler, {

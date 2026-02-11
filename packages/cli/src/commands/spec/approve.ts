@@ -62,7 +62,7 @@ export const specApproveCommand = new Command("approve")
         status: specification.status,
         title: `Specification ${specification.id} (${requirement.title})`,
         files: [
-          `${REQORD_DIR}/${SPECIFICATIONS_DIR}/${specification.id}.json`,
+          `${REQORD_DIR}/${SPECIFICATIONS_DIR}/${specification.id}.yaml`,
           `${REQORD_DIR}/${SPECIFICATIONS_DIR}/${specification.id}/design.md`,
         ],
       };

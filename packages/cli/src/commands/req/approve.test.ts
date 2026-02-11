@@ -88,7 +88,7 @@ describe("approveCommand", () => {
         version: "1.0.0",
         status: "draft",
         title: "Test Requirement",
-        files: [".reqord/requirements/req-000001.json"],
+        files: [".reqord/requirements/req-000001.yaml"],
       },
       requirementHandler,
       { dryRun: undefined }
@@ -165,7 +165,7 @@ describe("approveCommand", () => {
       version: "2.1.0",
       status: "draft",
       title: "Another Requirement",
-      files: [".reqord/requirements/req-000042.json"],
+      files: [".reqord/requirements/req-000042.yaml"],
     });
     expect(callArgs[2]).toBe(requirementHandler);
     // Check dryRun is falsy (undefined or false)

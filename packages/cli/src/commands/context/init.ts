@@ -26,10 +26,10 @@ export const contextInitCommand = new Command("init")
       console.log(`  Language: ${context.language}`);
       console.log("");
       console.log(chalk.gray("Generated files:"));
-      console.log(chalk.gray("  context/context.json"));
-      console.log(chalk.gray("  context/product.json"));
-      console.log(chalk.gray("  context/technical.json"));
-      console.log(chalk.gray("  context/structure.json"));
+      console.log(chalk.gray("  context/context.yaml"));
+      console.log(chalk.gray("  context/product.yaml"));
+      console.log(chalk.gray("  context/technical.yaml"));
+      console.log(chalk.gray("  context/structure.yaml"));
       console.log(chalk.gray("  context/domain/"));
       console.log("");
       console.log(

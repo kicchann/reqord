@@ -187,7 +187,7 @@ describe("showFeedback", () => {
     vi.clearAllMocks();
   });
 
-  it("index.jsonとGitHub IssueのマージデータをReturn", async () => {
+  it("index.yamlとGitHub IssueのマージデータをReturn", async () => {
     const feedback = makeFeedbackEntry({ githubIssue: 17 });
     mockFeedbackRepo.loadIndex.mockResolvedValue(makeFeedbackIndex([feedback]));
     const issue = makeGitHubIssue({ number: 17 });
@@ -198,11 +198,11 @@ describe("showFeedback", () => {
     expect(result).toEqual({ feedback, issue });
   });
 
-  it("index.jsonに存在しないissueでエラーを投げる", async () => {
+  it("index.yamlに存在しないissueでエラーを投げる", async () => {
     mockFeedbackRepo.loadIndex.mockResolvedValue(makeFeedbackIndex([]));
 
     await expect(showFeedback("/test/cwd", 99)).rejects.toThrow(
-      "Feedback for issue #99 not found in index.json",
+      "Feedback for issue #99 not found in index.yaml",
     );
   });
 
@@ -223,7 +223,7 @@ describe("linkToRequirement", () => {
     vi.clearAllMocks();
   });
 
-  it("index.jsonのlinkedTo.requirementsに追加する", async () => {
+  it("index.yamlのlinkedTo.requirementsに追加する", async () => {
     const feedback = makeFeedbackEntry({ githubIssue: 17 });
     mockFeedbackRepo.loadIndex.mockResolvedValue(makeFeedbackIndex([feedback]));
     const requirement = makeRequirement({ id: "req-000001" });
@@ -346,7 +346,7 @@ describe("linkToRequirement", () => {
     expect(savedReq).toBeUndefined();
   });
 
-  it("index.jsonにfeedbackがない場合は新規作成する", async () => {
+  it("index.yamlにfeedbackがない場合は新規作成する", async () => {
     mockFeedbackRepo.loadIndex.mockResolvedValue(makeFeedbackIndex([]));
     const requirement = makeRequirement({ id: "req-000001" });
     mockReqRepo.findByIdOrThrow.mockResolvedValue(requirement);
@@ -412,7 +412,7 @@ describe("linkWithNewRequirement", () => {
     });
   });
 
-  it("index.jsonのlinkedTo.createdRequirementsに追加する", async () => {
+  it("index.yamlのlinkedTo.createdRequirementsに追加する", async () => {
     mockFeedbackRepo.loadIndex.mockResolvedValue(makeFeedbackIndex([]));
     const issue = makeGitHubIssue({ number: 17, title: "Test" });
     mockGithubClient.getIssue.mockResolvedValue(issue);
@@ -454,7 +454,7 @@ describe("linkToSpecification", () => {
     vi.clearAllMocks();
   });
 
-  it("index.jsonのlinkedTo.specificationsに追加する", async () => {
+  it("index.yamlのlinkedTo.specificationsに追加する", async () => {
     const feedback = makeFeedbackEntry({ githubIssue: 17 });
     mockFeedbackRepo.loadIndex.mockResolvedValue(makeFeedbackIndex([feedback]));
     const specification = makeSpecification({ id: "spec-000001" });
@@ -550,7 +550,7 @@ describe("closeFeedback", () => {
     vi.clearAllMocks();
   });
 
-  it("index.jsonのstatusをclosedに更新する", async () => {
+  it("index.yamlのstatusをclosedに更新する", async () => {
     const feedback = makeFeedbackEntry({ githubIssue: 17, status: "open" });
     mockFeedbackRepo.loadIndex.mockResolvedValue(makeFeedbackIndex([feedback]));
 

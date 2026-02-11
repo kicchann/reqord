@@ -25,7 +25,7 @@ function makeApprovalTarget(overrides: Partial<ApprovalTarget> = {}): ApprovalTa
     version: "1.0.0",
     status: "draft",
     title: "Test Requirement",
-    files: [".reqord/requirements/req-000011.json"],
+    files: [".reqord/requirements/req-000011.yaml"],
     ...overrides,
   };
 }
@@ -88,7 +88,7 @@ describe("startApproval", () => {
     expect(mockHandler.saveCurrentApproval).toHaveBeenCalledWith("/test/cwd", target, "2.0.0");
 
     // Verify git operations
-    expect(gitRepo.add).toHaveBeenCalledWith("/test/cwd", [".reqord/requirements/req-000011.json"]);
+    expect(gitRepo.add).toHaveBeenCalledWith("/test/cwd", [".reqord/requirements/req-000011.yaml"]);
     expect(gitRepo.commit).toHaveBeenCalledWith("/test/cwd", "chore(reqord): request approval for req-000011");
     expect(gitRepo.push).toHaveBeenCalledWith("/test/cwd", "reqord/req-000011-approve-v1.0.0");
 

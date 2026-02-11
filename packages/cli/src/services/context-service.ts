@@ -3,7 +3,7 @@ import { CONTEXT_DIR, DOMAIN_DIR } from "@reqord/shared";
 import * as contextRepo from "../repositories/project-context.js";
 import * as fs from "../repositories/file-system.js";
 
-const CONTEXT_NOT_FOUND = "context.json not found. Run 'reqord context init' first.";
+const CONTEXT_NOT_FOUND = "context.yaml not found. Run 'reqord context init' first.";
 
 export interface InitContextOptions {
   id: string;
@@ -16,7 +16,7 @@ export async function initContext(
   options: InitContextOptions,
 ): Promise<ProjectContext> {
   if (await contextRepo.contextExists(cwd)) {
-    throw new Error("context.json already exists.");
+    throw new Error("context.yaml already exists.");
   }
 
   const now = new Date().toISOString();
@@ -28,9 +28,9 @@ export async function initContext(
     createdAt: now,
     updatedAt: now,
     files: {
-      product: { path: `${CONTEXT_DIR}/product.json`, format: "json" },
-      technical: { structured: `${CONTEXT_DIR}/technical.json` },
-      structure: { structured: `${CONTEXT_DIR}/structure.json` },
+      product: { path: `${CONTEXT_DIR}/product.yaml`, format: "yaml" },
+      technical: { structured: `${CONTEXT_DIR}/technical.yaml` },
+      structure: { structured: `${CONTEXT_DIR}/structure.yaml` },
       domain: [],
     },
   };
@@ -41,15 +41,15 @@ export async function initContext(
   const contextDir = fs.getReqordDir(cwd, CONTEXT_DIR);
 
   const templateFiles: Array<[string, unknown]> = [
-    ["product.json", { name: options.name, vision: "", goals: [], targetUsers: [] }],
-    ["technical.json", { stack: {}, constraints: [], decisions: [] }],
-    ["structure.json", { modules: [], layers: [] }],
+    ["product.yaml", { name: options.name, vision: "", goals: [], targetUsers: [] }],
+    ["technical.yaml", { stack: {}, constraints: [], decisions: [] }],
+    ["structure.yaml", { modules: [], layers: [] }],
   ];
 
   for (const [filename, defaultContent] of templateFiles) {
     const filePath = fs.joinPath(contextDir, filename);
     if (!(await fs.exists(filePath))) {
-      await fs.writeJSON(filePath, defaultContent);
+      await fs.writeYAML(filePath, defaultContent);
     }
   }
 
@@ -80,7 +80,7 @@ export async function showContext(cwd: string): Promise<ShowContextResult> {
   async function resolveFileStatus(fileRef: unknown): Promise<{ exists: boolean; content?: unknown }> {
     const fullPath = fs.getReqordDir(cwd, resolveFilePath(fileRef));
     const fileExists = await fs.exists(fullPath);
-    const content = fileExists ? await safeReadJSON(fullPath) : undefined;
+    const content = fileExists ? await safeReadYAML(fullPath) : undefined;
     return { exists: fileExists, content };
   }
 
@@ -155,9 +155,9 @@ export async function updateContext(
   return { before, after, updatedFiles };
 }
 
-async function safeReadJSON(path: string): Promise<unknown> {
+async function safeReadYAML(path: string): Promise<unknown> {
   try {
-    return await fs.readJSON(path);
+    return await fs.readYAML(path);
   } catch {
     return null;
   }

@@ -5,7 +5,7 @@ import { handleError } from "../../utils/error-handler.js";
 import { parseIssueNumber } from "../../utils/display.js";
 
 export const feedbackShowCommand = new Command("show")
-  .description("Show feedback details (GitHub Issue + index.json)")
+  .description("Show feedback details (GitHub Issue + index.yaml)")
   .argument("<issue-number>", "GitHub issue number")
   .option("--json", "Output as JSON")
   .action(async (issueNumberStr: string, options: { json?: boolean }) => {

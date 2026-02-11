@@ -4,8 +4,8 @@ import { syncFromGitHub, syncToGitHub } from "../../services/feedback-sync-servi
 import { handleError } from "../../utils/error-handler.js";
 
 export const syncCommand = new Command("sync")
-  .description("Sync GitHub Issues with feedback label to index.json")
-  .option("--from-local", "Sync from index.json to GitHub")
+  .description("Sync GitHub Issues with feedback label to index.yaml")
+  .option("--from-local", "Sync from index.yaml to GitHub")
   .option("--json", "Output as JSON")
   .action(async (options: { fromLocal?: boolean; json?: boolean }) => {
     try {
@@ -18,8 +18,8 @@ export const syncCommand = new Command("sync")
         console.log(JSON.stringify({ synced: count }));
       } else {
         const direction = options.fromLocal
-          ? "index.json → GitHub"
-          : "GitHub → index.json";
+          ? "index.yaml → GitHub"
+          : "GitHub → index.yaml";
         console.log(chalk.green(`✓ Synced ${count} feedbacks (${direction})`));
       }
     } catch (error) {
