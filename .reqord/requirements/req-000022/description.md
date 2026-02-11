@@ -17,7 +17,7 @@
 - **クリティカルパス残時間**: 全Specの並列分析に基づく
 - **サマリーカード**: Requirements, Specs, Issues それぞれの状態別集計
 - **警告表示**: Gap未実行、Validation失敗、ブロック中Issue
-- **依存関係グラフ**: インタラクティブなMermaid図
+- **依存関係グラフ**: インタラクティブなグラフ表示
 
 ### Specification詳細画面
 
@@ -41,21 +41,6 @@
 - Requirement → Specification → Issue の追跡パスを表示
 - ノードクリックで詳細画面に遷移
 - ステータスに応じたノード色
-
-## CLIコマンド
-
-### reqord preview
-
-- Next.js開発サーバーを `localhost:3000` で起動
-- `.reqord/` ディレクトリをデータソースとして読み取り
-
-## 技術スタック
-
-- Next.js 15 (App Router)
-- Tailwind CSS
-- Mermaid.js (依存グラフ)
-- Recharts (Gantt Chart)
-- React Markdown (Markdownレンダリング)
 
 ## 技術的制約
 
