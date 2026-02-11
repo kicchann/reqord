@@ -9,24 +9,24 @@
   "versionHistory": [
     {
       "version": "1.0.0",
-      "changedAt": "2026-02-07T12:00:00Z",
-      "summary": "初版作成（AI駆動タスク分解を含む）",
       "status": "draft",
-      "gitCommit": "legacy"
+      "gitCommit": "legacy",
+      "changedAt": "2026-02-07T12:00:00Z",
+      "summary": "初版作成（AI駆動タスク分解を含む）"
     },
     {
       "version": "1.1.0",
-      "changedAt": "2026-02-09T10:00:00Z",
-      "summary": "AI駆動タスク分解をClaude Codeエコシステムに移管。構造化タスク定義からのIssue作成に集中",
       "status": "draft",
-      "gitCommit": "legacy"
+      "gitCommit": "legacy",
+      "changedAt": "2026-02-09T10:00:00Z",
+      "summary": "AI駆動タスク分解をClaude Codeエコシステムに移管。構造化タスク定義からのIssue作成に集中"
     },
     {
       "version": "1.2.0",
-      "changedAt": "2026-02-10T12:00:00Z",
-      "summary": "実装完了。SC2（テンプレート）とSC6（メタデータ）を実装に合わせて修正",
       "status": "implemented",
-      "gitCommit": "pending"
+      "gitCommit": "pending",
+      "changedAt": "2026-02-10T12:00:00Z",
+      "summary": "実装完了。SC2（テンプレート）とSC6（メタデータ）を実装に合わせて修正"
     }
   ],
   "files": {
@@ -70,6 +70,15 @@
         17
       ],
       "severity": "high"
+    },
+    {
+      "type": "feedback-review",
+      "reason": "Feedback from issue #30",
+      "createdAt": "2026-02-11T07:19:01.430Z",
+      "relatedIssues": [
+        30
+      ],
+      "severity": "low"
     }
   ]
 }

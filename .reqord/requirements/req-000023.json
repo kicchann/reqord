@@ -72,6 +72,15 @@
         22
       ],
       "severity": "medium"
+    },
+    {
+      "type": "feedback-review",
+      "reason": "Feedback from issue #167",
+      "createdAt": "2026-02-11T07:21:24.182Z",
+      "relatedIssues": [
+        167
+      ],
+      "severity": "medium"
     }
   ]
 }

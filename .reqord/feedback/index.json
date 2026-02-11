@@ -3,6 +3,7 @@
     {
       "githubIssue": 21,
       "type": "improvement",
+      "severity": "low",
       "linkedTo": {
         "requirements": [
           "req-000022"
@@ -10,7 +11,7 @@
         "createdRequirements": [],
         "specifications": []
       },
-      "syncedAt": "2026-02-09T07:40:21.232Z",
+      "syncedAt": "2026-02-11T07:21:23.639Z",
       "status": "open"
     },
     {
@@ -24,8 +25,8 @@
         "createdRequirements": [],
         "specifications": []
       },
-      "syncedAt": "2026-02-09T07:40:21.214Z",
-      "status": "closed"
+      "syncedAt": "2026-02-11T07:21:23.634Z",
+      "status": "open"
     },
     {
       "githubIssue": 30,
@@ -38,7 +39,7 @@
         "createdRequirements": [],
         "specifications": []
       },
-      "syncedAt": "2026-02-09T07:40:21.206Z",
+      "syncedAt": "2026-02-11T07:21:23.631Z",
       "status": "open"
     },
     {
@@ -57,6 +58,7 @@
     {
       "githubIssue": 19,
       "type": "improvement",
+      "severity": "low",
       "linkedTo": {
         "requirements": [
           "req-000001"
@@ -64,7 +66,105 @@
         "createdRequirements": [],
         "specifications": []
       },
-      "syncedAt": "2026-02-09T07:40:21.235Z",
+      "syncedAt": "2026-02-11T07:21:23.642Z",
+      "status": "open"
+    },
+    {
+      "githubIssue": 161,
+      "type": "bug",
+      "severity": "medium",
+      "linkedTo": {
+        "requirements": [
+          "req-000011"
+        ],
+        "createdRequirements": [],
+        "specifications": []
+      },
+      "syncedAt": "2026-02-11T07:21:23.599Z",
+      "status": "open"
+    },
+    {
+      "githubIssue": 159,
+      "type": "improvement",
+      "severity": "medium",
+      "linkedTo": {
+        "requirements": [
+          "req-000027"
+        ],
+        "createdRequirements": [],
+        "specifications": []
+      },
+      "syncedAt": "2026-02-11T07:21:23.602Z",
+      "status": "open"
+    },
+    {
+      "githubIssue": 157,
+      "type": "improvement",
+      "severity": "medium",
+      "linkedTo": {
+        "requirements": [
+          "req-000013"
+        ],
+        "createdRequirements": [],
+        "specifications": []
+      },
+      "syncedAt": "2026-02-11T07:21:23.617Z",
+      "status": "open"
+    },
+    {
+      "githubIssue": 111,
+      "type": "improvement",
+      "severity": "low",
+      "linkedTo": {
+        "requirements": [
+          "req-000011"
+        ],
+        "createdRequirements": [],
+        "specifications": []
+      },
+      "syncedAt": "2026-02-11T07:21:23.620Z",
+      "status": "open"
+    },
+    {
+      "githubIssue": 110,
+      "type": "improvement",
+      "severity": "low",
+      "linkedTo": {
+        "requirements": [
+          "req-000026"
+        ],
+        "createdRequirements": [],
+        "specifications": []
+      },
+      "syncedAt": "2026-02-11T07:21:23.623Z",
+      "status": "open"
+    },
+    {
+      "githubIssue": 109,
+      "type": "bug",
+      "severity": "medium",
+      "linkedTo": {
+        "requirements": [
+          "req-000011"
+        ],
+        "createdRequirements": [],
+        "specifications": []
+      },
+      "syncedAt": "2026-02-11T07:21:23.627Z",
+      "status": "open"
+    },
+    {
+      "githubIssue": 167,
+      "type": "bug",
+      "severity": "medium",
+      "linkedTo": {
+        "requirements": [
+          "req-000023"
+        ],
+        "createdRequirements": [],
+        "specifications": []
+      },
+      "syncedAt": "2026-02-11T07:21:23.589Z",
       "status": "open"
     }
   ]

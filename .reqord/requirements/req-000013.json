@@ -9,10 +9,10 @@
   "versionHistory": [
     {
       "version": "1.0.0",
-      "changedAt": "2026-02-07T12:00:00Z",
-      "summary": "初版作成",
       "status": "implemented",
-      "gitCommit": "legacy"
+      "gitCommit": "legacy",
+      "changedAt": "2026-02-07T12:00:00Z",
+      "summary": "初版作成"
     }
   ],
   "files": {
@@ -59,6 +59,15 @@
       "createdAt": "2026-02-09T10:00:00Z",
       "relatedIssues": [
         17
+      ],
+      "severity": "medium"
+    },
+    {
+      "type": "feedback-review",
+      "reason": "Feedback from issue #157",
+      "createdAt": "2026-02-11T07:24:49.598Z",
+      "relatedIssues": [
+        157
       ],
       "severity": "medium"
     }
