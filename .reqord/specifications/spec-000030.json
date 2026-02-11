@@ -1,0 +1,69 @@
+{
+  "id": "spec-000030",
+  "requirementId": "req-000027",
+  "version": "2.0.0",
+  "status": "pending_approval",
+  "createdAt": "2026-02-11T09:00:00.000Z",
+  "updatedAt": "2026-02-11T10:12:44.402Z",
+  "versionHistory": [
+    {
+      "version": "2.0.0",
+      "status": "pending_approval",
+      "gitCommit": "1268ea2",
+      "changedAt": "2026-02-11T10:12:44.402Z",
+      "summary": "Status changed from draft to pending_approval"
+    }
+  ],
+  "files": {
+    "design": "specifications/spec-000030/design.md",
+    "supplementary": []
+  },
+  "flags": [],
+  "currentApproval": {
+    "version": "2.0.0",
+    "phase": "specification",
+    "prNumber": 181,
+    "prUrl": "https://github.com/kicchann/reqord/pull/181",
+    "approvedBy": []
+  },
+  "implementation": {
+    "issues": [
+      {
+        "number": 177,
+        "title": "[Task] spec-000030-3: Web UI Repository層 YAML対応 + 統合テスト",
+        "url": "https://github.com/kicchann/reqord/issues/177",
+        "priority": "P1",
+        "status": "open"
+      },
+      {
+        "number": 176,
+        "title": "[Task] spec-000030-2: CLI Repository層 YAML対応",
+        "url": "https://github.com/kicchann/reqord/issues/176",
+        "priority": "P1",
+        "status": "open"
+      },
+      {
+        "number": 175,
+        "title": "[Task] spec-000030-1: FileSystem層 - readYAML/writeYAML + js-yaml依存追加",
+        "url": "https://github.com/kicchann/reqord/issues/175",
+        "priority": "P1",
+        "status": "open"
+      },
+      {
+        "number": 173,
+        "title": "[Task] spec-000030: YAML変換レイヤー実装",
+        "url": "https://github.com/kicchann/reqord/issues/173",
+        "priority": "P1",
+        "status": "open"
+      }
+    ],
+    "totalEstimatedHours": 14,
+    "createdAt": "2026-02-11T09:30:00.000Z",
+    "progress": {
+      "total": 4,
+      "completed": 0,
+      "percentage": 0,
+      "lastSyncedAt": "2026-02-11T09:30:00.000Z"
+    }
+  }
+}
