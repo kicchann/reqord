@@ -143,7 +143,7 @@
 - 技術スタックに合わない提案が出る
 
 **どうすべきか**:
-- AI利用前にProjectContextの4ファイルを充実させる
+- AI利用前にProjectContextの編集対象4ファイルを充実させる（`context.json` はツールが自動管理）
   - `product.md` — ビジョン、課題、ターゲットユーザー
   - `technical.md` — 技術スタック、アーキテクチャ
   - `structure.md` — 命名規則、ディレクトリ構造
