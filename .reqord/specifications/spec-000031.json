@@ -1,0 +1,62 @@
+{
+  "id": "spec-000031",
+  "requirementId": "req-000027",
+  "version": "2.0.0",
+  "status": "pending_approval",
+  "createdAt": "2026-02-11T09:00:00.000Z",
+  "updatedAt": "2026-02-11T10:12:56.621Z",
+  "versionHistory": [
+    {
+      "version": "2.0.0",
+      "status": "pending_approval",
+      "gitCommit": "1268ea2",
+      "changedAt": "2026-02-11T10:12:56.621Z",
+      "summary": "Status changed from draft to pending_approval"
+    }
+  ],
+  "files": {
+    "design": "specifications/spec-000031/design.md",
+    "supplementary": []
+  },
+  "flags": [],
+  "implementation": {
+    "issues": [
+      {
+        "number": 179,
+        "title": "[Task] spec-000031-2: CLIコマンド migrate-to-yaml + dry-run + 統合テスト",
+        "url": "https://github.com/kicchann/reqord/issues/179",
+        "priority": "P2",
+        "status": "open"
+      },
+      {
+        "number": 178,
+        "title": "[Task] spec-000031-1: MigrationService - createMigrationPlan + convertToYaml + バックアップ",
+        "url": "https://github.com/kicchann/reqord/issues/178",
+        "priority": "P2",
+        "status": "open"
+      },
+      {
+        "number": 174,
+        "title": "[Task] spec-000031: migrate-to-yamlコマンド実装",
+        "url": "https://github.com/kicchann/reqord/issues/174",
+        "priority": "P2",
+        "status": "open"
+      }
+    ],
+    "totalEstimatedHours": 10,
+    "createdAt": "2026-02-11T09:30:00.000Z",
+    "progress": {
+      "total": 3,
+      "completed": 0,
+      "percentage": 0,
+      "lastSyncedAt": "2026-02-11T09:30:00.000Z"
+    }
+  },
+  "currentApproval": {
+    "version": "2.0.0",
+    "phase": "specification",
+    "prNumber": 0,
+    "prUrl": "",
+    "approvedBy": []
+  }
+}
