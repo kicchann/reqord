@@ -55,6 +55,12 @@ dependencies:
     - req-000019
 estimatedComplexity: medium
 estimatedHours: 20
+currentApproval:
+  version: 3.0.0
+  phase: requirement
+  prNumber: 207
+  prUrl: https://github.com/kicchann/reqord/pull/207
+  approvedBy: []
 flags:
   - type: feedback-review
     reason: 'Feedback from issue #23'
@@ -86,9 +92,3 @@ flags:
     relatedIssues:
       - 170
     severity: low
-currentApproval:
-  version: 3.0.0
-  phase: requirement
-  prNumber: 0
-  prUrl: ''
-  approvedBy: []
