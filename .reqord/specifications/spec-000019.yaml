@@ -1,0 +1,10 @@
+id: spec-000019
+requirementId: req-000019
+version: 1.0.0
+status: draft
+createdAt: 2026-02-08T14:08:08.151Z
+updatedAt: 2026-02-08T14:08:08.151Z
+versionHistory: []
+files:
+  design: specifications/spec-000019/design.md
+  supplementary: []

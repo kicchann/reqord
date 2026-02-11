@@ -1,0 +1,66 @@
+{
+  "id": "req-000001",
+  "version": "1.0.0",
+  "title": "CLI初期化コマンド",
+  "status": "implemented",
+  "priority": "high",
+  "createdAt": "2026-02-07T10:00:00Z",
+  "updatedAt": "2026-02-11T12:30:00Z",
+  "versionHistory": [
+    {
+      "version": "1.0.0",
+      "status": "draft",
+      "gitCommit": "073c09c",
+      "changedAt": "2026-02-11T12:00:00Z",
+      "summary": "Status changed from implemented to draft: add GitHub Actions finalize-approval workflow to reqord init"
+    },
+    {
+      "version": "1.0.0",
+      "status": "implemented",
+      "gitCommit": "073c09c",
+      "changedAt": "2026-02-11T12:30:00Z",
+      "summary": "Implemented: reqord init generates finalize-approval.yml workflow"
+    }
+  ],
+  "files": {
+    "description": "requirements/req-000001/description.md",
+    "supplementary": []
+  },
+  "successCriteria": [
+    "reqord init で .reqord/ ディレクトリ構造が作成される",
+    "context/, requirements/, specifications/, settings/, assets/ が生成される",
+    "settings/templates/ に初期テンプレートが配置される",
+    "既存の .reqord/ がある場合はエラーメッセージを表示する",
+    "初期化完了後にサマリーが表示される",
+    "reqord init で承認PRマージ後の自動ステータス更新用 GitHub Actions ワークフローテンプレートが生成される"
+  ],
+  "format": {
+    "type": "user-story",
+    "userStory": {
+      "as": "開発者",
+      "iWant": "CLIコマンドでプロジェクトの要件管理を初期化したい",
+      "soThat": "手動でディレクトリやファイルを作成せずに素早く始められる"
+    }
+  },
+  "dependencies": {
+    "blockedBy": [],
+    "blocks": [
+      "req-000002",
+      "req-000003"
+    ],
+    "relatedTo": []
+  },
+  "estimatedComplexity": "small",
+  "estimatedHours": 8,
+  "flags": [
+    {
+      "type": "feedback-review",
+      "reason": "Feedback from issue #19",
+      "createdAt": "2026-02-09T07:44:24.565Z",
+      "relatedIssues": [
+        19
+      ],
+      "severity": "medium"
+    }
+  ]
+}

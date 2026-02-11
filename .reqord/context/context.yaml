@@ -1,0 +1,18 @@
+id: reqord
+name: Reqord
+version: 0.1.0
+language: ja
+updatedAt: 2026-02-06T18:46:32.180Z
+files:
+  product:
+    path: context/product.json
+    format: json
+  technical:
+    structured: context/technical.json
+    narrative: context/technical-narrative.md
+  structure:
+    structured: context/structure.json
+    narrative: context/structure-diagram.md
+  domain:
+    - context/domain/ai-integration.md
+    - context/domain/requirements-engineering.md

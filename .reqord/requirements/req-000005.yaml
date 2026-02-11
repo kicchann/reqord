@@ -1,0 +1,34 @@
+id: req-000005
+version: 1.0.0
+title: Requirementバージョン管理
+status: implemented
+priority: medium
+createdAt: 2026-02-07T10:00:00Z
+updatedAt: 2026-02-09T12:00:00Z
+versionHistory: []
+files:
+  description: requirements/req-000005/description.md
+  supplementary: []
+successCriteria:
+  - 要件更新時にバージョンが自動インクリメントされる
+  - versionHistory にバージョン履歴が記録される
+  - reqord req history <id> でバージョン履歴を表示できる
+  - 特定バージョンの要件内容を参照できる
+  - Gitコミットとバージョンが紐付けられる
+format:
+  type: ears
+  ears:
+    type: event-driven
+    trigger: 開発者が要件を更新する
+    condition: 要件のステータスがapprovedである
+    action: システムはバージョンをインクリメントし履歴を記録する
+    response: 変更前の承認情報を保持したまま
+dependencies:
+  blockedBy:
+    - req-000002
+  blocks:
+    - req-000011
+  relatedTo:
+    - req-000006
+estimatedComplexity: medium
+estimatedHours: 12

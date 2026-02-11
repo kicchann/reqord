@@ -1,0 +1,49 @@
+id: req-000026
+version: 3.0.0
+title: PRテンプレート・状態遷移ワークフロー整備
+status: approved
+priority: medium
+createdAt: 2026-02-11T07:25:04.815Z
+updatedAt: 2026-02-11T08:05:05.898Z
+versionHistory:
+  - version: 2.0.0
+    status: pending_approval
+    gitCommit: 4a1fcac
+    changedAt: 2026-02-11T08:05:05.704Z
+    summary: Status changed from draft to pending_approval
+  - version: 3.0.0
+    status: approved
+    gitCommit: 4a1fcac
+    changedAt: 2026-02-11T08:05:05.899Z
+    summary: Status changed from pending_approval to approved
+    approvedAt: 2026-02-11T08:05:05.899Z
+    approvedBy: []
+files:
+  description: requirements/req-000026/description.md
+  supplementary: []
+successCriteria:
+  - .github/PULL_REQUEST_TEMPLATE.md が作成され、Summary・Related Issues・Test plan・Checklistのセクションを含み、手動PR作成時にGitHub UIで自動適用される
+  - reqord req approve <id> で生成されるPR本文に、変更対象の要件ID・タイトル・バージョン・成功基準一覧・依存関係・変更diff概要が含まれる
+  - reqord spec approve <id> で生成されるPR本文に、対象仕様ID・要件ID・設計概要・コンポーネント一覧・テスト方針が含まれる
+  - テンプレート内のChecklistに最低5項目（テスト実行、lint通過、CHANGELOG更新、breaking changes確認、セルフレビュー完了）が含まれる
+  - 承認PR本文のフォーマットがGitHub Flavored Markdownとして構文エラーなくレンダリングされ、レビュアーが変更内容を把握できる見出し・テーブル・リスト構造になっている
+format:
+  type: user-story
+  userStory:
+    as: 開発者・レビュアー
+    iWant: 手動PRと承認PRの両方で統一されたフォーマットでPR情報を記載したい
+    soThat: PR内容がばらつかず、レビュー時に必要な情報が漏れなく記載される
+dependencies:
+  blockedBy: []
+  blocks: []
+  relatedTo:
+    - req-000011
+estimatedComplexity: small
+estimatedHours: 4
+flags:
+  - type: feedback-review
+    reason: 'Feedback from issue #110'
+    createdAt: 2026-02-11T07:25:11.151Z
+    relatedIssues:
+      - 110
+    severity: low

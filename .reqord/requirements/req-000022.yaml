@@ -1,0 +1,50 @@
+id: req-000022
+version: 1.0.0
+title: Web UI拡張 (Dashboard・依存グラフ・Gantt Chart)
+status: implemented
+priority: medium
+createdAt: 2026-02-07T12:00:00Z
+updatedAt: 2026-02-09T12:00:00Z
+versionHistory: []
+files:
+  description: requirements/req-000022/description.md
+  supplementary: []
+successCriteria:
+  - Dashboardでプロジェクト全体のHealth（Requirements/Specs/Issues進捗）が表示される
+  - インタラクティブな依存関係グラフが表示される
+  - Gantt ChartでIssue進捗とクリティカルパスが可視化される
+  - Specification詳細画面（Research/Design/Coverage/Issues/History タブ）が表示される
+format:
+  type: user-story
+  userStory:
+    as: プロジェクトマネージャー
+    iWant: 要件・仕様・進捗を視覚的に把握したい
+    soThat: テキストベースでは見えない全体像と問題点を素早く発見できる
+dependencies:
+  blockedBy:
+    - req-000007
+    - req-000013
+  blocks: []
+  relatedTo:
+    - req-000016
+estimatedComplexity: large
+estimatedHours: 32
+flags:
+  - type: feedback-review
+    reason: Req→Spec→Issueトレーサビリティグラフのビュー切り替えUX（ノード内ボタン・滑らかなトランジション）の仕様レベル明確化が必要
+    createdAt: 2026-02-09T15:00:00Z
+    relatedIssues:
+      - 21
+    severity: low
+  - type: feedback-review
+    reason: 'Feedback from issue #169'
+    createdAt: 2026-02-11T07:42:19.687Z
+    relatedIssues:
+      - 169
+    severity: low
+  - type: feedback-review
+    reason: 'Feedback from issue #170'
+    createdAt: 2026-02-11T07:42:24.638Z
+    relatedIssues:
+      - 170
+    severity: low

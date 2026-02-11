@@ -1,0 +1,61 @@
+id: req-000016
+version: 1.2.0
+title: GitHub Issue生成・管理
+status: implemented
+priority: high
+createdAt: 2026-02-07T12:00:00Z
+updatedAt: 2026-02-10T12:00:00Z
+versionHistory:
+  - version: 1.0.0
+    status: draft
+    gitCommit: legacy
+    changedAt: 2026-02-07T12:00:00Z
+    summary: 初版作成（AI駆動タスク分解を含む）
+  - version: 1.1.0
+    status: draft
+    gitCommit: legacy
+    changedAt: 2026-02-09T10:00:00Z
+    summary: AI駆動タスク分解をClaude Codeエコシステムに移管。構造化タスク定義からのIssue作成に集中
+  - version: 1.2.0
+    status: implemented
+    gitCommit: pending
+    changedAt: 2026-02-10T12:00:00Z
+    summary: 実装完了。SC2（テンプレート）とSC6（メタデータ）を実装に合わせて修正
+files:
+  description: requirements/req-000016/description.md
+  supplementary: []
+successCriteria:
+  - reqord issue create <spec-id> --tasks-file <path> で構造化タスク定義からGitHub Issueが作成される
+  - 構造化Markdownテンプレートで本文が生成され、メタデータがHTMLコメントタグとして埋め込まれる
+  - reqord issue sync <spec-id> でGitHub Issueの状態がSpecification JSONに同期される
+  - reqord issue sync-all で全Specificationの同期が実行される
+  - reqord issue validate <spec-id> でメタデータ整合性チェックが実行される
+  - Reqordメタデータ（spec-id）がHTMLコメントタグに、reqord-generatedと優先度がラベルに付与される
+format:
+  type: user-story
+  userStory:
+    as: 開発者
+    iWant: 構造化されたタスク定義からGitHub Issueを作成し進捗を追跡したい
+    soThat: 仕様から実装への追跡可能性を維持しつつ効率的にタスク管理できる
+dependencies:
+  blockedBy:
+    - req-000013
+    - req-000015
+  blocks:
+    - req-000018
+  relatedTo: []
+estimatedComplexity: medium
+estimatedHours: 16
+flags:
+  - type: feedback-review
+    reason: AI駆動タスク分解（Anthropic SDK）をClaude Codeエコシステムに移管。reqordは構造化タスク定義(--tasks-file)からのIssue作成・同期・検証に集中
+    createdAt: 2026-02-09T10:00:00Z
+    relatedIssues:
+      - 17
+    severity: high
+  - type: feedback-review
+    reason: 'Feedback from issue #30'
+    createdAt: 2026-02-11T07:19:01.430Z
+    relatedIssues:
+      - 30
+    severity: low

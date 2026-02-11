@@ -1,0 +1,45 @@
+id: req-000018
+version: 3.0.0
+title: 実装検証
+status: approved
+priority: low
+createdAt: 2026-02-07T12:00:00Z
+updatedAt: 2026-02-11T08:05:04.761Z
+versionHistory:
+  - version: 2.0.0
+    status: pending_approval
+    gitCommit: 4a1fcac
+    changedAt: 2026-02-11T08:05:04.580Z
+    summary: Status changed from draft to pending_approval
+  - version: 3.0.0
+    status: approved
+    gitCommit: 4a1fcac
+    changedAt: 2026-02-11T08:05:04.762Z
+    summary: Status changed from pending_approval to approved
+    approvedAt: 2026-02-11T08:05:04.762Z
+    approvedBy: []
+files:
+  description: requirements/req-000018/description.md
+  supplementary: []
+successCriteria:
+  - reqord validate impl <spec-id> で実装完了度が検証され、Issue完了率・コンポーネント実装率・テストカバレッジが数値で表示される
+  - 全GitHub Issueの完了状態が確認され、未完了Issue数とopen/closedの内訳が表示される
+  - Specificationのdesign.mdに記載されたコンポーネント（ファイルパス）の実装有無が検証され、存在率が80%以上であればPASSとなる
+  - テスト記述の有無が検証され、unit test / integration testのカバレッジが表示される
+  - 検証結果が--jsonオプションで構造化出力され、CI連携が可能である
+  - '--strict オプション使用時、Issue完了率100%・コンポーネント実装率100%・テストカバレッジ80%以上でない場合はexit code 1で終了する'
+format:
+  type: user-story
+  userStory:
+    as: テックリード
+    iWant: 仕様に対する実装の完了度を検証したい
+    soThat: リリース前に実装漏れを防げる
+dependencies:
+  blockedBy:
+    - req-000016
+    - req-000013
+  blocks: []
+  relatedTo: []
+estimatedComplexity: medium
+estimatedHours: 12
+flags: []

@@ -1,0 +1,35 @@
+id: req-000007
+version: 1.0.0
+title: ローカルUI基本機能
+status: implemented
+priority: medium
+createdAt: 2026-02-07T10:00:00Z
+updatedAt: 2026-02-09T11:57:46Z
+versionHistory: []
+files:
+  description: requirements/req-000007/description.md
+  supplementary: []
+successCriteria:
+  - reqord ui でローカルWebサーバーが起動する
+  - 要件一覧がテーブル形式で表示される
+  - 要件の詳細表示（JSON + description.md レンダリング）ができる
+  - 依存関係グラフが視覚的に表示される
+  - ステータス・優先度でフィルタリングできる
+  - GUIから要件のCRUD操作がスキーマバリデーション付きで行える
+  - GUIが要件編集の主要手段として日常的に使用できる
+format:
+  type: user-story
+  userStory:
+    as: 開発者
+    iWant: ブラウザで要件を視覚的に管理したい
+    soThat: 要件の全体像と依存関係を直感的に把握でき、スキーマエラーなく安全に編集できる
+dependencies:
+  blockedBy:
+    - req-000002
+    - req-000004
+  blocks:
+    - req-000022
+  relatedTo:
+    - req-000006
+estimatedComplexity: large
+estimatedHours: 24

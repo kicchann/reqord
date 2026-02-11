@@ -1,0 +1,55 @@
+id: req-000027
+version: 3.0.0
+title: データ形式のYAML移行
+status: approved
+priority: medium
+createdAt: 2026-02-11T07:25:06.280Z
+updatedAt: 2026-02-11T08:05:06.278Z
+versionHistory:
+  - version: 2.0.0
+    status: pending_approval
+    gitCommit: 4a1fcac
+    changedAt: 2026-02-11T08:05:06.094Z
+    summary: Status changed from draft to pending_approval
+  - version: 3.0.0
+    status: approved
+    gitCommit: 4a1fcac
+    changedAt: 2026-02-11T08:05:06.279Z
+    summary: Status changed from pending_approval to approved
+    approvedAt: 2026-02-11T08:05:06.279Z
+    approvedBy: []
+files:
+  description: requirements/req-000027/description.md
+  supplementary: []
+successCriteria:
+  - .reqord/requirements/req-NNNNNN.yaml 形式でRequirementを保存・読み込みできる
+  - .reqord/specifications/spec-NNNNNN.yaml 形式でSpecificationを保存・読み込みできる
+  - >-
+    .reqord/context/ 配下の product.json, technical.json, structure.json が product.yaml, technical.yaml, structure.yaml
+    に変換され、読み込み・書き込みができる
+  - 既存のJSONファイルをYAMLに一括変換する reqord migrate-to-yaml コマンドが実装される
+  - Zod スキーマは変更せず、JSON-YAML変換レイヤーでフォーマット変換が行われる
+  - CLI・Web UI の既存機能がすべてYAML形式で正常動作する（後方互換性維持は不要）
+format:
+  type: user-story
+  userStory:
+    as: 開発者・プロダクトオーナー
+    iWant: 要件・仕様・コンテキストをYAML形式で管理したい
+    soThat: JSONに比べて可読性が高く、コメント記述も可能で、人間による直接編集がしやすくなる
+dependencies:
+  blockedBy: []
+  blocks: []
+  relatedTo:
+    - req-000001
+    - req-000002
+    - req-000003
+    - req-000007
+estimatedComplexity: large
+estimatedHours: 32
+flags:
+  - type: feedback-review
+    reason: 'Feedback from issue #159'
+    createdAt: 2026-02-11T07:25:14.787Z
+    relatedIssues:
+      - 159
+    severity: medium

@@ -1,0 +1,76 @@
+monorepo:
+  tool: npm-workspaces
+  packages:
+    - name: '@reqord/cli'
+      path: packages/cli
+      description: CLIツール本体。Commander.jsベースのコマンド群
+    - name: '@reqord/web'
+      path: packages/web
+      description: Web UI。Next.js 15 App Router
+    - name: '@reqord/shared'
+      path: packages/shared
+      description: 共有型定義、バリデーター、定数
+namingConventions:
+  - target: files
+    convention: kebab-case
+    example: requirement-repository.ts
+  - target: directories
+    convention: kebab-case
+    example: gap-analysis/
+  - target: classes
+    convention: PascalCase
+    example: RequirementRepository
+  - target: interfaces
+    convention: PascalCase
+    example: IFCExporter
+  - target: types
+    convention: PascalCase
+    example: RequirementStatus
+  - target: functions
+    convention: camelCase
+    example: createRequirement
+  - target: variables
+    convention: camelCase
+    example: requirementId
+  - target: constants
+    convention: UPPER_SNAKE_CASE
+    example: MAX_RETRY_COUNT
+  - target: enum-values
+    convention: PascalCase
+    example: RequirementStatus.PendingApproval
+  - target: test-files
+    convention: kebab-case.test.ts
+    example: requirement-repository.test.ts
+  - target: reqord-ids
+    convention: prefix-nnnnnn
+    example: req-000001, spec-000001
+importRules:
+  preferred:
+    - rule: 絶対パス（パッケージ間）
+      example: import { Requirement } from '@reqord/shared'
+    - rule: 相対パス（パッケージ内）
+      example: import { validate } from '../validators/requirement'
+    - rule: Named exports
+      example: export { RequirementRepository }
+    - rule: Type imports
+      example: import type { Requirement } from '@reqord/shared'
+  forbidden:
+    - rule: Default exports
+      exception: Next.js page/layout コンポーネントのみ許可
+    - rule: 循環依存
+      exception: なし
+    - rule: パッケージ内部への直接参照
+      example: import from '@reqord/cli/src/...' は禁止
+    - rule: 相対パスでのパッケージ跨ぎ
+      example: import from '../../packages/shared' は禁止
+architecturalRules:
+  - rule: 依存方向の統一
+    description: cli → shared, web → shared の方向のみ。shared は cli/web に依存しない
+  - rule: Domain層のフレームワーク非依存
+    description: shared パッケージの型定義・バリデーションはNode.js/ブラウザAPI・フレームワークに依存しない
+  - rule: JSON + Markdown分離原則
+    description: メタデータ（ID、ステータス、依存関係等）はJSON、コンテンツ（説明文、設計書等）はMarkdownに分離
+  - rule: Repository経由のファイルアクセス
+    description: ビジネスロジックからファイルシステムに直接アクセスしない。Repository層を経由する
+  - rule: CLI/Web共通ロジックの共有化
+    description: バリデーション、型定義、定数は @reqord/shared に配置。CLI/Webで重複実装しない

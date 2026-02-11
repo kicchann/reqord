@@ -1,0 +1,32 @@
+vision: AI駆動開発における要件管理の標準ツールとなり、「考えたこと」から「実装可能なタスク」への変換を誰でも簡単に行えるようにする
+problemStatement: AI駆動開発において、要件がチャット履歴やメモに散在し、コンテキストが断片化する。手作業でのIssue作成がボトルネックとなり、要件から実装までのトレーサビリティが失われる
+targetUsers:
+  - role: AI駆動開発者
+    description: Claude Code等のAIツールを活用してソフトウェアを開発する個人開発者・エンジニア
+  - role: テックリード
+    description: チームの技術方針を決定し、要件の品質と設計の整合性を担保する技術リーダー
+  - role: プロダクトオーナー
+    description: プロダクトの要件を定義し、優先順位を決定するビジネス側の意思決定者
+coreFeatures:
+  - name: ProjectContext管理
+    description: プロジェクトのビジョン、技術スタック、コード構造、ドメイン知識を構造化して管理。AIツールへのコンテキスト提供を最適化
+  - name: 要件CRUD
+    description: JSON(メタデータ) + Markdown(コンテンツ)のハイブリッド形式で要件を作成・読取・更新・削除。EARS形式・User Story対応
+  - name: AI要件詳細化
+    description: 簡単なタイトル・説明からAIが詳細な要件定義を生成。EARS形式変換、成功基準定義、複雑度見積もりを自動化
+  - name: Gap Analysis
+    description: 既存コードベースと新要件の差分を自動分析。既存実装のカバレッジ評価、不足機能の特定、コンフリクト検出
+  - name: 仕様設計
+    description: 要件からAIが技術設計書を生成。アーキテクチャ図(Mermaid)、コード例、技術的決定の文書化
+  - name: GitHub Issue生成
+    description: 仕様からAIが実装タスクに分解し、並列実行分析・クリティカルパス特定を含むGitHub Issueを自動生成
+  - name: 承認フロー
+    description: 要件・仕様の変更をGitHub PRベースで承認。CODEOWNERSと連携したレビュー・承認プロセス
+  - name: Web UI
+    description: 依存関係グラフの可視化、Ganttチャート、進捗ダッシュボード。Mermaid.jsによるインタラクティブな図表示
+valueProposition: 構造化されたコンテキストとAIの組み合わせにより、要件定義からGitHub Issue作成までのプロセスを90%短縮する
+outOfScope:
+  - リアルタイム共同編集（Git + PRベースのコラボレーションを採用）
+  - Jira/Asana等の既存プロジェクト管理ツールの代替
+  - AIによるコード生成（要件→Issue生成までが範囲）
+  - 多言語同時対応（初期リリースは日本語のみ。言語設定で将来対応予定）
