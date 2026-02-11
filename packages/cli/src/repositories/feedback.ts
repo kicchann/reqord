@@ -2,7 +2,7 @@ import type { FeedbackIndex, FeedbackEntry } from "@reqord/shared";
 import { FeedbackIndexSchema, FEEDBACK_DIR } from "@reqord/shared";
 import * as fs from "./file-system.js";
 
-const INDEX_FILENAME = "index.json";
+const INDEX_FILENAME = "index.yaml";
 
 function getFeedbackDir(cwd: string): string {
   return fs.getReqordDir(cwd, FEEDBACK_DIR);
@@ -17,7 +17,7 @@ export async function loadIndex(cwd: string): Promise<FeedbackIndex> {
   if (!(await fs.exists(indexPath))) {
     return { feedbacks: [] };
   }
-  const raw = await fs.readJSON<unknown>(indexPath);
+  const raw = await fs.readYAML<unknown>(indexPath);
   const result = FeedbackIndexSchema.safeParse(raw);
   if (!result.success) {
     throw new Error(`Invalid feedback index: ${result.error.message}`);
@@ -30,7 +30,7 @@ export async function saveIndex(cwd: string, index: FeedbackIndex): Promise<void
   await fs.mkdirp(feedbackDir);
   const indexPath = getIndexPath(cwd);
   const validated = FeedbackIndexSchema.parse(index);
-  await fs.writeJSON(indexPath, validated);
+  await fs.writeYAML(indexPath, validated);
 }
 
 export async function findFeedbackByIssue(

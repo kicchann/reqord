@@ -7,8 +7,8 @@ function getRequirementsDir(cwd: string): string {
 
 export async function save(cwd: string, requirement: Requirement): Promise<void> {
   const reqDir = getRequirementsDir(cwd);
-  const jsonPath = fs.joinPath(reqDir, `${requirement.id}.json`);
-  await fs.writeJSON(jsonPath, requirement);
+  const yamlPath = fs.joinPath(reqDir, `${requirement.id}.yaml`);
+  await fs.writeYAML(yamlPath, requirement);
 }
 
 export async function saveDescription(
@@ -32,13 +32,13 @@ export async function findByIdOrThrow(cwd: string, id: string): Promise<Requirem
 
 export async function findById(cwd: string, id: string): Promise<Requirement | null> {
   const reqDir = getRequirementsDir(cwd);
-  const jsonPath = fs.joinPath(reqDir, `${id}.json`);
+  const yamlPath = fs.joinPath(reqDir, `${id}.yaml`);
 
-  if (!(await fs.exists(jsonPath))) {
+  if (!(await fs.exists(yamlPath))) {
     return null;
   }
 
-  const raw = await fs.readJSON<unknown>(jsonPath);
+  const raw = await fs.readYAML<unknown>(yamlPath);
   const result = RequirementSchema.safeParse(raw);
   if (!result.success) {
     throw new Error(`要件 ${id} のバリデーションエラー:\n${formatZodError(result.error)}`);
@@ -59,22 +59,22 @@ export async function loadDescription(cwd: string, id: string): Promise<string |
 
 export async function deleteById(cwd: string, id: string): Promise<void> {
   const reqDir = getRequirementsDir(cwd);
-  const jsonPath = fs.joinPath(reqDir, `${id}.json`);
+  const yamlPath = fs.joinPath(reqDir, `${id}.yaml`);
   const descDir = fs.joinPath(reqDir, id);
 
-  await fs.remove(jsonPath);
+  await fs.remove(yamlPath);
   await fs.remove(descDir);
 }
 
 export async function findAll(cwd: string): Promise<Requirement[]> {
   const reqDir = getRequirementsDir(cwd);
   const files = await fs.readdirFiles(reqDir, (name) =>
-    /^req-\d{6}\.json$/.test(name),
+    /^req-\d{6}\.yaml$/.test(name),
   );
 
   const requirements: Requirement[] = [];
   for (const file of files.sort()) {
-    const raw = await fs.readJSON<unknown>(fs.joinPath(reqDir, file));
+    const raw = await fs.readYAML<unknown>(fs.joinPath(reqDir, file));
     const result = RequirementSchema.safeParse(raw);
     if (result.success) {
       requirements.push(result.data);

@@ -8,12 +8,12 @@ export class LocalRequirementRepository implements RequirementRepository {
   async findAll(): Promise<Requirement[]> {
     const reqDir = getRequirementsDir();
     const files = await fs.readdirFiles(reqDir, (name) =>
-      /^req-\d{6}\.json$/.test(name),
+      /^req-\d{6}\.yaml$/.test(name),
     );
 
     const requirements: Requirement[] = [];
     for (const file of files.sort()) {
-      const raw = await fs.readJSON<unknown>(fs.joinPath(reqDir, file));
+      const raw = await fs.readYAML<unknown>(fs.joinPath(reqDir, file));
       const result = RequirementSchema.safeParse(raw);
       if (result.success) {
         requirements.push(result.data);
@@ -24,13 +24,13 @@ export class LocalRequirementRepository implements RequirementRepository {
 
   async findById(id: string): Promise<Requirement | null> {
     const reqDir = getRequirementsDir();
-    const jsonPath = fs.joinPath(reqDir, `${id}.json`);
+    const yamlPath = fs.joinPath(reqDir, `${id}.yaml`);
 
-    if (!(await fs.exists(jsonPath))) {
+    if (!(await fs.exists(yamlPath))) {
       return null;
     }
 
-    const raw = await fs.readJSON<unknown>(jsonPath);
+    const raw = await fs.readYAML<unknown>(yamlPath);
     const result = RequirementSchema.safeParse(raw);
     if (!result.success) {
       throw new Error(`Invalid requirement ${id}: ${result.error.message}`);
@@ -52,8 +52,8 @@ export class LocalRequirementRepository implements RequirementRepository {
   async save(requirement: Requirement): Promise<void> {
     const reqDir = getRequirementsDir();
     await fs.mkdirp(reqDir);
-    const jsonPath = fs.joinPath(reqDir, `${requirement.id}.json`);
-    await fs.writeJSON(jsonPath, requirement);
+    const yamlPath = fs.joinPath(reqDir, `${requirement.id}.yaml`);
+    await fs.writeYAML(yamlPath, requirement);
   }
 
   async saveDescription(id: string, content: string): Promise<void> {
@@ -65,10 +65,10 @@ export class LocalRequirementRepository implements RequirementRepository {
 
   async deleteById(id: string): Promise<void> {
     const reqDir = getRequirementsDir();
-    const jsonPath = fs.joinPath(reqDir, `${id}.json`);
+    const yamlPath = fs.joinPath(reqDir, `${id}.yaml`);
     const descDir = fs.joinPath(reqDir, id);
 
-    await fs.remove(jsonPath);
+    await fs.remove(yamlPath);
     await fs.remove(descDir);
   }
 

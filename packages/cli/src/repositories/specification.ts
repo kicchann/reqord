@@ -12,8 +12,8 @@ export async function ensureSpecDir(cwd: string, id: string): Promise<void> {
 
 export async function save(cwd: string, spec: Specification): Promise<void> {
   const specsDir = getSpecificationsDir(cwd);
-  const jsonPath = fs.joinPath(specsDir, `${spec.id}.json`);
-  await fs.writeJSON(jsonPath, spec);
+  const yamlPath = fs.joinPath(specsDir, `${spec.id}.yaml`);
+  await fs.writeYAML(yamlPath, spec);
 }
 
 export async function saveFile(
@@ -51,13 +51,13 @@ export async function findByIdOrThrow(cwd: string, id: string): Promise<Specific
 
 export async function findById(cwd: string, id: string): Promise<Specification | null> {
   const specsDir = getSpecificationsDir(cwd);
-  const jsonPath = fs.joinPath(specsDir, `${id}.json`);
+  const yamlPath = fs.joinPath(specsDir, `${id}.yaml`);
 
-  if (!(await fs.exists(jsonPath))) {
+  if (!(await fs.exists(yamlPath))) {
     return null;
   }
 
-  const raw = await fs.readJSON<unknown>(jsonPath);
+  const raw = await fs.readYAML<unknown>(yamlPath);
   const result = SpecificationSchema.safeParse(raw);
   if (!result.success) {
     throw new Error(`仕様 ${id} のバリデーションエラー:\n${formatZodError(result.error)}`);
@@ -68,12 +68,12 @@ export async function findById(cwd: string, id: string): Promise<Specification |
 export async function findAll(cwd: string): Promise<Specification[]> {
   const specsDir = getSpecificationsDir(cwd);
   const files = await fs.readdirFiles(specsDir, (name) =>
-    /^spec-\d{6}\.json$/.test(name),
+    /^spec-\d{6}\.yaml$/.test(name),
   );
 
   const specifications: Specification[] = [];
   for (const file of files.sort()) {
-    const raw = await fs.readJSON<unknown>(fs.joinPath(specsDir, file));
+    const raw = await fs.readYAML<unknown>(fs.joinPath(specsDir, file));
     const result = SpecificationSchema.safeParse(raw);
     if (result.success) {
       specifications.push(result.data);
@@ -84,9 +84,9 @@ export async function findAll(cwd: string): Promise<Specification[]> {
 
 export async function deleteById(cwd: string, id: string): Promise<void> {
   const specsDir = getSpecificationsDir(cwd);
-  const jsonPath = fs.joinPath(specsDir, `${id}.json`);
+  const yamlPath = fs.joinPath(specsDir, `${id}.yaml`);
   const specDir = fs.joinPath(specsDir, id);
 
-  await fs.remove(jsonPath);
+  await fs.remove(yamlPath);
   await fs.remove(specDir);
 }

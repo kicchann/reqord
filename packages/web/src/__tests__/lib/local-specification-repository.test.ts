@@ -2,22 +2,26 @@ import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { mkdtemp, writeFile, mkdir, rm } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
+import { dump as yamlDump, JSON_SCHEMA } from "js-yaml";
 
-function makeSpecJson(overrides: Record<string, unknown> = {}) {
-  return JSON.stringify({
-    id: "spec-000001",
-    requirementId: "req-000001",
-    version: "1.0.0",
-    status: "draft",
-    createdAt: "2026-02-08T14:07:39.737Z",
-    updatedAt: "2026-02-08T14:07:54.055Z",
-    versionHistory: [],
-    files: {
-      design: "specifications/spec-000001/design.md",
-      supplementary: [],
+function makeSpecYaml(overrides: Record<string, unknown> = {}) {
+  return yamlDump(
+    {
+      id: "spec-000001",
+      requirementId: "req-000001",
+      version: "1.0.0",
+      status: "draft",
+      createdAt: "2026-02-08T14:07:39.737Z",
+      updatedAt: "2026-02-08T14:07:54.055Z",
+      versionHistory: [],
+      files: {
+        design: "specifications/spec-000001/design.md",
+        supplementary: [],
+      },
+      ...overrides,
     },
-    ...overrides,
-  });
+    { schema: JSON_SCHEMA },
+  );
 }
 
 describe("LocalSpecificationRepository", () => {
@@ -47,12 +51,12 @@ describe("LocalSpecificationRepository", () => {
   describe("findAll", () => {
     it("returns all valid specification files sorted by ID", async () => {
       await writeFile(
-        join(specDir, "spec-000002.json"),
-        makeSpecJson({ id: "spec-000002", requirementId: "req-000002" }),
+        join(specDir, "spec-000002.yaml"),
+        makeSpecYaml({ id: "spec-000002", requirementId: "req-000002" }),
       );
       await writeFile(
-        join(specDir, "spec-000001.json"),
-        makeSpecJson({ id: "spec-000001", requirementId: "req-000001" }),
+        join(specDir, "spec-000001.yaml"),
+        makeSpecYaml({ id: "spec-000001", requirementId: "req-000001" }),
       );
 
       const repo = await getRepo();
@@ -63,12 +67,12 @@ describe("LocalSpecificationRepository", () => {
       expect(specs[1].id).toBe("spec-000002");
     });
 
-    it("skips invalid JSON files", async () => {
+    it("skips invalid YAML files", async () => {
       await writeFile(
-        join(specDir, "spec-000001.json"),
-        makeSpecJson({ id: "spec-000001" }),
+        join(specDir, "spec-000001.yaml"),
+        makeSpecYaml({ id: "spec-000001" }),
       );
-      await writeFile(join(specDir, "spec-000002.json"), "{ invalid json }");
+      await writeFile(join(specDir, "spec-000002.yaml"), "invalid: yaml: content:");
 
       const repo = await getRepo();
       const specs = await repo.findAll();
@@ -77,10 +81,10 @@ describe("LocalSpecificationRepository", () => {
       expect(specs[0].id).toBe("spec-000001");
     });
 
-    it("skips files not matching spec-NNNNNN.json pattern", async () => {
+    it("skips files not matching spec-NNNNNN.yaml pattern", async () => {
       await writeFile(
-        join(specDir, "spec-000001.json"),
-        makeSpecJson({ id: "spec-000001" }),
+        join(specDir, "spec-000001.yaml"),
+        makeSpecYaml({ id: "spec-000001" }),
       );
       await writeFile(join(specDir, "notes.txt"), "not a spec");
 
@@ -101,8 +105,8 @@ describe("LocalSpecificationRepository", () => {
   describe("findById", () => {
     it("returns a specification when it exists", async () => {
       await writeFile(
-        join(specDir, "spec-000001.json"),
-        makeSpecJson({ id: "spec-000001" }),
+        join(specDir, "spec-000001.yaml"),
+        makeSpecYaml({ id: "spec-000001" }),
       );
 
       const repo = await getRepo();
@@ -122,8 +126,8 @@ describe("LocalSpecificationRepository", () => {
 
     it("throws on invalid specification data", async () => {
       await writeFile(
-        join(specDir, "spec-000001.json"),
-        JSON.stringify({ id: "spec-000001" }),
+        join(specDir, "spec-000001.yaml"),
+        yamlDump({ id: "spec-000001" }, { schema: JSON_SCHEMA }),
       );
 
       const repo = await getRepo();
@@ -156,16 +160,16 @@ describe("LocalSpecificationRepository", () => {
   describe("findByRequirementId", () => {
     it("returns specifications matching the requirement ID", async () => {
       await writeFile(
-        join(specDir, "spec-000001.json"),
-        makeSpecJson({ id: "spec-000001", requirementId: "req-000001" }),
+        join(specDir, "spec-000001.yaml"),
+        makeSpecYaml({ id: "spec-000001", requirementId: "req-000001" }),
       );
       await writeFile(
-        join(specDir, "spec-000002.json"),
-        makeSpecJson({ id: "spec-000002", requirementId: "req-000002" }),
+        join(specDir, "spec-000002.yaml"),
+        makeSpecYaml({ id: "spec-000002", requirementId: "req-000002" }),
       );
       await writeFile(
-        join(specDir, "spec-000003.json"),
-        makeSpecJson({ id: "spec-000003", requirementId: "req-000001" }),
+        join(specDir, "spec-000003.yaml"),
+        makeSpecYaml({ id: "spec-000003", requirementId: "req-000001" }),
       );
 
       const repo = await getRepo();
@@ -177,8 +181,8 @@ describe("LocalSpecificationRepository", () => {
 
     it("returns empty array when no specifications match", async () => {
       await writeFile(
-        join(specDir, "spec-000001.json"),
-        makeSpecJson({ id: "spec-000001", requirementId: "req-000001" }),
+        join(specDir, "spec-000001.yaml"),
+        makeSpecYaml({ id: "spec-000001", requirementId: "req-000001" }),
       );
 
       const repo = await getRepo();
