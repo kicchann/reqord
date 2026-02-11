@@ -15,7 +15,7 @@ export function CriticalPathDisplay({ items }: CriticalPathDisplayProps) {
         {items.map((item) => {
           const isCompleted = item.status === "closed";
           const isPending =
-            item.status === "pending" || item.status === "in_progress";
+            item.status === "open" || item.status === "in_progress";
 
           let textClass = "";
           if (isCompleted) {

@@ -139,6 +139,27 @@ export interface CreatedIssue {
   url: string;
 }
 
+export async function listAllIssues(
+  state: "open" | "closed" | "all" = "all",
+  limit: number = 500,
+): Promise<GitHubIssue[]> {
+  const args = [
+    "issue", "list",
+    "--state", state,
+    "--json", "number,title,state,labels,createdAt,body",
+    "--limit", String(limit),
+  ];
+
+  const stdout = await runGh(args);
+  const raw: GitHubIssueRaw[] = JSON.parse(stdout);
+  return raw.map(normalizeIssue);
+}
+
+export async function getRepoUrl(): Promise<string> {
+  const stdout = await runGh(["repo", "view", "--json", "url", "-q", ".url"]);
+  return stdout.trim();
+}
+
 export async function createIssue(
   options: CreateIssueOptions,
 ): Promise<CreatedIssue> {

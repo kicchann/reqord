@@ -7,9 +7,21 @@ import { IssueNode } from "../../../components/graph/issue-node";
 
 // Mock @xyflow/react Handle and Position
 vi.mock("@xyflow/react", () => ({
-  Handle: ({ type, position }: any) => <div data-testid={`handle-${type}`} />,
+  Handle: ({ type }: any) => <div data-testid={`handle-${type}`} />,
   Position: { Left: "left", Right: "right", Top: "top", Bottom: "bottom" },
 }));
+
+const defaultNodeProps = {
+  selected: false,
+  dragging: false,
+  draggable: true,
+  selectable: true,
+  deletable: false,
+  zIndex: 0,
+  isConnectable: true,
+  positionAbsoluteX: 0,
+  positionAbsoluteY: 0,
+};
 
 describe("IssueNode", () => {
   afterEach(() => {
@@ -19,6 +31,7 @@ describe("IssueNode", () => {
   it("renders issue number text", () => {
     render(
       <IssueNode
+        {...defaultNodeProps}
         id="issue-spec-000001-123"
         data={{
           label: "Issue #123",
@@ -36,6 +49,7 @@ describe("IssueNode", () => {
   it("renders open status with yellow background class", () => {
     const { container } = render(
       <IssueNode
+        {...defaultNodeProps}
         id="issue-spec-000001-123"
         data={{
           label: "Issue #123",
@@ -54,6 +68,7 @@ describe("IssueNode", () => {
   it("renders closed status with green background class", () => {
     const { container } = render(
       <IssueNode
+        {...defaultNodeProps}
         id="issue-spec-000001-124"
         data={{
           label: "Issue #124",
@@ -72,6 +87,7 @@ describe("IssueNode", () => {
   it("renders in_progress status with blue background class", () => {
     const { container } = render(
       <IssueNode
+        {...defaultNodeProps}
         id="issue-spec-000001-125"
         data={{
           label: "Issue #125",
@@ -90,6 +106,7 @@ describe("IssueNode", () => {
   it("renders status badge", () => {
     render(
       <IssueNode
+        {...defaultNodeProps}
         id="issue-spec-000001-123"
         data={{
           label: "Issue #123",
@@ -107,6 +124,7 @@ describe("IssueNode", () => {
   it("renders only target handle", () => {
     render(
       <IssueNode
+        {...defaultNodeProps}
         id="issue-spec-000001-123"
         data={{
           label: "Issue #123",
@@ -127,6 +145,7 @@ describe("IssueNode", () => {
 
     render(
       <IssueNode
+        {...defaultNodeProps}
         id="issue-spec-000001-123"
         data={{
           label: "Issue #123",
@@ -145,7 +164,8 @@ describe("IssueNode", () => {
 
     expect(windowOpenSpy).toHaveBeenCalledWith(
       "https://github.com/test/repo/issues/123",
-      "_blank"
+      "_blank",
+      "noopener,noreferrer"
     );
 
     windowOpenSpy.mockRestore();

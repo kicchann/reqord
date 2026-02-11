@@ -134,7 +134,7 @@ describe("SpecTabs", () => {
 
   it("handles null content for both tabs", async () => {
     const user = userEvent.setup();
-    render(<SpecTabs design={null} research={null} />);
+    render(<SpecTabs design={null} research={null} successCriteria={[]} issues={[]} versionHistory={[]} />);
 
     // Design tab shown by default
     expect(screen.getByTestId("tab-design")).toHaveTextContent("Design: null");
@@ -145,7 +145,7 @@ describe("SpecTabs", () => {
   });
 
   it("renders both Design and Research tab labels", () => {
-    render(<SpecTabs design={null} research={null} />);
+    render(<SpecTabs design={null} research={null} successCriteria={[]} issues={[]} versionHistory={[]} />);
 
     expect(screen.getByTestId("tab-button-design")).toHaveTextContent("Design");
     expect(screen.getByTestId("tab-button-research")).toHaveTextContent("Research");

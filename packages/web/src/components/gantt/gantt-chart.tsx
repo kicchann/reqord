@@ -29,10 +29,22 @@ export function GanttChart({ data }: GanttChartProps) {
   const svgHeight = HEADER_HEIGHT + totalRows * ROW_HEIGHT + 20;
 
   const handleBarClick = (task: GanttTask) => {
-    window.open(task.issueUrl, "_blank");
+    window.open(task.issueUrl, "_blank", "noopener,noreferrer");
   };
 
-  let currentY = HEADER_HEIGHT;
+  // Precompute Y positions to avoid mutating variables during render
+  const groupLayouts: { groupY: number; taskYs: { taskY: number; barY: number }[] }[] = [];
+  let offsetY = HEADER_HEIGHT;
+  for (const group of data.groups) {
+    const groupY = offsetY;
+    offsetY += GROUP_HEADER_HEIGHT;
+    const taskYs: { taskY: number; barY: number }[] = [];
+    for (let i = 0; i < group.tasks.length; i++) {
+      taskYs.push({ taskY: offsetY + (ROW_HEIGHT - BAR_HEIGHT) / 2, barY: offsetY });
+      offsetY += ROW_HEIGHT;
+    }
+    groupLayouts.push({ groupY, taskYs });
+  }
 
   return (
     <div>
@@ -42,39 +54,30 @@ export function GanttChart({ data }: GanttChartProps) {
           hourWidth={HOUR_WIDTH}
           leftLabelWidth={LEFT_LABEL_WIDTH}
         />
-        {data.groups.map((group) => {
-          const groupY = currentY;
-          currentY += GROUP_HEADER_HEIGHT;
-
-          const taskElements = group.tasks.map((task) => {
-            const taskY = currentY + (ROW_HEIGHT - BAR_HEIGHT) / 2;
-            const barY = currentY;
-            currentY += ROW_HEIGHT;
-
-            return (
-              <g key={task.id}>
-                <GanttBar
-                  task={task}
-                  y={taskY}
-                  hourWidth={HOUR_WIDTH}
-                  leftLabelWidth={LEFT_LABEL_WIDTH}
-                  onHover={setHoveredTask}
-                  onClick={handleBarClick}
-                />
-                <GanttCriticalPath
-                  task={task}
-                  y={barY + (ROW_HEIGHT - BAR_HEIGHT) / 2}
-                  hourWidth={HOUR_WIDTH}
-                  leftLabelWidth={LEFT_LABEL_WIDTH}
-                />
-              </g>
-            );
-          });
+        {data.groups.map((group, gi) => {
+          const layout = groupLayouts[gi];
 
           return (
             <g key={group.priority}>
-              <GanttGroup label={group.label} y={groupY} width={svgWidth} />
-              {taskElements}
+              <GanttGroup label={group.label} y={layout.groupY} width={svgWidth} />
+              {group.tasks.map((task, ti) => (
+                <g key={task.id}>
+                  <GanttBar
+                    task={task}
+                    y={layout.taskYs[ti].taskY}
+                    hourWidth={HOUR_WIDTH}
+                    leftLabelWidth={LEFT_LABEL_WIDTH}
+                    onHover={setHoveredTask}
+                    onClick={handleBarClick}
+                  />
+                  <GanttCriticalPath
+                    task={task}
+                    y={layout.taskYs[ti].barY + (ROW_HEIGHT - BAR_HEIGHT) / 2}
+                    hourWidth={HOUR_WIDTH}
+                    leftLabelWidth={LEFT_LABEL_WIDTH}
+                  />
+                </g>
+              ))}
             </g>
           );
         })}

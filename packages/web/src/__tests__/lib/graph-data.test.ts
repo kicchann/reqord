@@ -2,9 +2,6 @@ import { describe, it, expect } from "vitest";
 import type { Requirement, Specification } from "@reqord/shared";
 import {
   buildMultiLevelGraphData,
-  type MultiLevelGraphData,
-  type MultiLevelNode,
-  type MultiLevelEdge,
 } from "../../lib/graph-data.js";
 
 // Test helpers

@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useCallback } from "react";
 import dynamic from "next/dynamic";
+import { useSearchParams, useRouter } from "next/navigation";
 import type { Requirement, Specification } from "@reqord/shared";
-import { GraphModeSelector, type GraphMode } from "./graph-mode-selector";
-import { buildMultiLevelGraphData } from "@/lib/graph-data";
+import { DrillDownBreadcrumb } from "./drilldown-breadcrumb";
 
 const DependencyGraph = dynamic(
   () => import("./dependency-graph").then((mod) => mod.DependencyGraph),
@@ -16,8 +16,8 @@ const DependencyGraph = dynamic(
   }
 );
 
-const MultiLevelGraph = dynamic(
-  () => import("./multi-level-graph").then((mod) => mod.MultiLevelGraph),
+const DrillDownGraph = dynamic(
+  () => import("./drilldown-graph").then((mod) => mod.DrillDownGraph),
   {
     ssr: false,
     loading: () => (
@@ -37,21 +37,60 @@ export function GraphPageClient({
   specifications,
   specCountMap,
 }: GraphPageClientProps) {
-  const [mode, setMode] = useState<GraphMode>("requirements");
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const selectedReqId = searchParams.get("req");
+
+  const handleRequirementClick = useCallback(
+    (reqId: string) => {
+      router.push(`/graph?req=${reqId}`);
+    },
+    [router],
+  );
+
+  const handleBackToOverview = useCallback(() => {
+    router.push("/graph");
+  }, [router]);
+
+  if (selectedReqId) {
+    const requirement = requirements.find((r) => r.id === selectedReqId);
+    if (!requirement) {
+      // Invalid req ID → fallback to overview
+      return (
+        <div>
+          <h1 className="mb-4 text-2xl font-bold">Dependency Graph</h1>
+          <DependencyGraph
+            requirements={requirements}
+            specCountMap={specCountMap}
+            onRequirementClick={handleRequirementClick}
+          />
+        </div>
+      );
+    }
+
+    const relatedSpecs = specifications.filter(
+      (s) => s.requirementId === selectedReqId,
+    );
+
+    return (
+      <div>
+        <DrillDownBreadcrumb
+          requirementTitle={requirement.title}
+          onBack={handleBackToOverview}
+        />
+        <DrillDownGraph requirement={requirement} specifications={relatedSpecs} />
+      </div>
+    );
+  }
 
   return (
     <div>
-      <div className="mb-4 flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Dependency Graph</h1>
-        <GraphModeSelector mode={mode} onModeChange={setMode} />
-      </div>
-      {mode === "requirements" ? (
-        <DependencyGraph requirements={requirements} specCountMap={specCountMap} />
-      ) : (
-        <MultiLevelGraph
-          data={buildMultiLevelGraphData(requirements, specifications)}
-        />
-      )}
+      <h1 className="mb-4 text-2xl font-bold">Dependency Graph</h1>
+      <DependencyGraph
+        requirements={requirements}
+        specCountMap={specCountMap}
+        onRequirementClick={handleRequirementClick}
+      />
     </div>
   );
 }

@@ -49,7 +49,7 @@ export function buildIssueBody(
   specId: string,
   task: TaskDefinition
 ): string {
-  const metadataTag = `<!-- reqord:specification {"specificationId":"${specId}"} -->`;
+  const metadataTag = `<!-- reqord:specification {"specificationId":"${specId}","priority":"${task.priority}","estimatedHours":${task.estimatedHours}} -->`;
 
   let body = metadataTag + "\n\n";
   body += `## ${task.title}\n\n`;

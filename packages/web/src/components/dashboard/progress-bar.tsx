@@ -10,6 +10,12 @@ type ProgressBarProps = {
   color: string;
 };
 
+const COLOR_CLASSES: Record<string, string> = {
+  blue: "bg-blue-500",
+  purple: "bg-purple-500",
+  green: "bg-green-500",
+};
+
 export function ProgressBar({
   label,
   current,
@@ -17,6 +23,8 @@ export function ProgressBar({
   percentage,
   color,
 }: ProgressBarProps) {
+  const bgClass = COLOR_CLASSES[color] ?? "bg-gray-500";
+
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
@@ -28,7 +36,7 @@ export function ProgressBar({
       <div className="h-2 overflow-hidden rounded-full bg-gray-200">
         <div
           data-testid="progress-bar-fill"
-          className={`h-full bg-${color}-500 transition-all duration-300`}
+          className={`h-full ${bgClass} transition-all duration-300`}
           style={{ width: `${percentage}%` }}
         />
       </div>

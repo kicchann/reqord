@@ -4,10 +4,51 @@
   "version": "1.0.0",
   "status": "draft",
   "createdAt": "2026-02-08T14:08:08.410Z",
-  "updatedAt": "2026-02-08T14:08:08.410Z",
+  "updatedAt": "2026-02-10T22:45:11.144Z",
   "versionHistory": [],
   "files": {
     "design": "specifications/spec-000022/design.md",
     "supplementary": []
+  },
+  "flags": [],
+  "implementation": {
+    "issues": [
+      {
+        "number": 143,
+        "title": "[Task] spec-000022-3: Dashboard page & UI components",
+        "url": "https://github.com/kicchann/reqord/issues/143",
+        "priority": "P1",
+        "status": "open"
+      },
+      {
+        "number": 142,
+        "title": "[Task] spec-000022-2: Dashboard data aggregation",
+        "url": "https://github.com/kicchann/reqord/issues/142",
+        "priority": "P0",
+        "status": "open"
+      },
+      {
+        "number": 141,
+        "title": "[Task] spec-000022-1: Specification data layer for Web",
+        "url": "https://github.com/kicchann/reqord/issues/141",
+        "priority": "P0",
+        "status": "open"
+      },
+      {
+        "number": 138,
+        "title": "[Task] spec-000022: Web UI ダッシュボード実装",
+        "url": "https://github.com/kicchann/reqord/issues/138",
+        "priority": "P2",
+        "status": "closed"
+      }
+    ],
+    "totalEstimatedHours": 22,
+    "createdAt": "2026-02-10T22:45:11.144Z",
+    "progress": {
+      "total": 4,
+      "completed": 1,
+      "percentage": 25,
+      "lastSyncedAt": "2026-02-10T22:45:11.144Z"
+    }
   }
 }

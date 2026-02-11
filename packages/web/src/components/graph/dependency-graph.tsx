@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useCallback } from "react";
+import React, { useMemo, useCallback } from "react";
 import {
   ReactFlow,
   Background,
@@ -15,15 +15,18 @@ import "@xyflow/react/dist/style.css";
 import type { Requirement } from "@reqord/shared";
 import { computeDagLayout } from "./dag-layout";
 import { RequirementNode } from "./requirement-node";
+import { EDGE_STYLES } from "./edge-styles";
 
 const nodeTypes = { requirement: RequirementNode };
 
 export function DependencyGraph({
   requirements,
   specCountMap = {},
+  onRequirementClick,
 }: {
   requirements: Requirement[];
   specCountMap?: Record<string, number>;
+  onRequirementClick?: (reqId: string) => void;
 }) {
   const { initialNodes, initialEdges } = useMemo(() => {
     const { nodes: layoutNodes, edges: layoutEdges } = computeDagLayout(requirements);
@@ -37,6 +40,7 @@ export function DependencyGraph({
         status: n.status,
         priority: n.priority,
         specCount: specCountMap[n.id] ?? 0,
+        ...(onRequirementClick ? { onDrillDown: onRequirementClick } : {}),
       },
     }));
 
@@ -45,12 +49,12 @@ export function DependencyGraph({
       source: e.source,
       target: e.target,
       animated: false,
-      style: { stroke: "#94a3b8" },
-      markerEnd: { type: "arrowclosed" as const, color: "#94a3b8" },
+      style: EDGE_STYLES.dependency,
+      markerEnd: { type: "arrowclosed" as const, color: EDGE_STYLES.dependency.stroke },
     }));
 
     return { initialNodes: rfNodes, initialEdges: rfEdges };
-  }, [requirements, specCountMap]);
+  }, [requirements, specCountMap, onRequirementClick]);
 
   const [nodes, , onNodesChange] = useNodesState(initialNodes);
   const [edges, , onEdgesChange] = useEdgesState(initialEdges);

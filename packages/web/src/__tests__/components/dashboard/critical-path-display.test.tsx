@@ -60,14 +60,14 @@ describe("CriticalPathDisplay", () => {
     expect(item).toHaveClass("line-through");
   });
 
-  it("applies bold styling to pending items", () => {
+  it("applies bold styling to open items", () => {
     const items: CriticalPathItem[] = [
       {
         issueNumber: 100,
-        title: "Pending task",
+        title: "Open task",
         url: "https://github.com/repo/issues/100",
         priority: "high",
-        status: "pending",
+        status: "open",
         estimatedHours: 8,
         specId: "spec-000001",
       },

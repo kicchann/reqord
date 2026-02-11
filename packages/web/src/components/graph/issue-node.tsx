@@ -16,13 +16,13 @@ type IssueNodeData = {
   issueUrl: string;
 };
 
-function IssueNodeComponent({ data, id }: NodeProps) {
+function IssueNodeComponent({ data }: NodeProps) {
   const nodeData = data as IssueNodeData;
   const bgClass = STATUS_COLORS[nodeData.status] ?? "bg-gray-200";
 
   const handleClick = () => {
     if (nodeData.issueUrl) {
-      window.open(nodeData.issueUrl, "_blank");
+      window.open(nodeData.issueUrl, "_blank", "noopener,noreferrer");
     }
   };
 

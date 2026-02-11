@@ -38,7 +38,7 @@ type PriorityConfig = {
 const PRIORITY_CONFIGS: Record<string, PriorityConfig> = {
   P0: { priority: "P0", label: "P0: Sequential", isSerial: true },
   P1: { priority: "P1", label: "P1: Parallel", isSerial: false },
-  P2: { priority: "P2", label: "P1: Parallel", isSerial: false },
+  P2: { priority: "P2", label: "P2: Parallel", isSerial: false },
   P3: { priority: "P3", label: "P3: Parallel", isSerial: false },
 };
 

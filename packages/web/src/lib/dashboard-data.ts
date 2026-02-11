@@ -183,6 +183,7 @@ export function extractCriticalPath(
           url: issue.url,
           priority: issue.priority,
           status: issue.status,
+          // Per-issue estimates not available; use spec-level total as approximation
           estimatedHours: spec.implementation.totalEstimatedHours,
           specId: spec.id,
         });

@@ -3,7 +3,6 @@ import type { Implementation, ImplementationIssue } from "@reqord/shared";
 import {
   transformToGanttData,
   DEFAULT_HOURS,
-  type GanttData,
 } from "../../lib/gantt-data.js";
 
 function makeIssue(
@@ -232,7 +231,7 @@ describe("transformToGanttData", () => {
         "P1: Parallel",
       );
       expect(result.groups.find((g) => g.priority === "P2")?.label).toBe(
-        "P1: Parallel",
+        "P2: Parallel",
       );
     });
   });
