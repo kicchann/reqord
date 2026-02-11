@@ -10,19 +10,19 @@ files:
   description: requirements/req-000023/description.md
   supplementary: []
 successCriteria:
-  - reqord feedback sync で feedbackラベル付きGitHub Issueを取得し、.reqord/feedback/index.json が更新される
-  - reqord feedback sync --from-local で index.json の紐付け情報を元にGitHub Issueのラベルが同期される
-  - reqord feedback list でfeedbackラベル付きGitHub Issueの一覧が表示される（index.jsonから取得）
-  - reqord feedback show <issue-number> でFeedbackの詳細（種別・関連アーティファクト・深刻度）が表示される（GitHub + index.jsonのマージデータ）
+  - reqord feedback sync で feedbackラベル付きGitHub Issueを取得し、.reqord/feedback/index.yaml が更新される
+  - reqord feedback sync --from-local で index.yaml の紐付け情報を元にGitHub Issueのラベルが同期される
+  - reqord feedback list でfeedbackラベル付きGitHub Issueの一覧が表示される（index.yamlから取得）
+  - reqord feedback show <issue-number> でFeedbackの詳細（種別・関連アーティファクト・深刻度）が表示される（GitHub + index.yamlのマージデータ）
   - >-
-    reqord feedback link <issue-number> --req <id> で既存Requirementに紐付けられ、feedback-reviewフラグが追加され、index.jsonとGitHub
+    reqord feedback link <issue-number> --req <id> で既存Requirementに紐付けられ、feedback-reviewフラグが追加され、index.yamlとGitHub
     Issueラベルが更新される
-  - reqord feedback link <issue-number> --created-req でFeedbackから新Requirementが自動採番で作成され、index.jsonとGitHub Issueラベルが更新される
+  - reqord feedback link <issue-number> --created-req でFeedbackから新Requirementが自動採番で作成され、index.yamlとGitHub Issueラベルが更新される
   - >-
-    reqord feedback link <issue-number> --spec <id> でSpecificationに紐付けられ、index.jsonとGitHub Issueラベルが更新される（Requirement
+    reqord feedback link <issue-number> --spec <id> でSpecificationに紐付けられ、index.yamlとGitHub Issueラベルが更新される（Requirement
     flagなし）
-  - reqord feedback close <issue-number> で影響範囲確定後にFeedbackがクローズされ、index.jsonとGitHub Issueが更新される
-  - '@reqord/sharedパッケージにFeedbackIndexのZodスキーマが定義され、index.jsonバリデーションが実行される'
+  - reqord feedback close <issue-number> で影響範囲確定後にFeedbackがクローズされ、index.yamlとGitHub Issueが更新される
+  - "@reqord/sharedパッケージにFeedbackIndexのZodスキーマが定義され、index.yamlバリデーションが実行される"
   - reqord feedback link実行時に--type, --severityオプションでFeedbackのメタデータを設定できる
 format:
   type: user-story
@@ -43,31 +43,31 @@ estimatedComplexity: medium
 estimatedHours: 20
 flags:
   - type: feedback-review
-    reason: 'Feedback from issue #23'
+    reason: "Feedback from issue #23"
     createdAt: 2026-02-09T07:45:11.891Z
     relatedIssues:
       - 23
     severity: low
   - type: feedback-review
-    reason: 'Feedback from issue #30'
+    reason: "Feedback from issue #30"
     createdAt: 2026-02-09T07:45:15.197Z
     relatedIssues:
       - 30
     severity: low
   - type: feedback-review
-    reason: 'Feedback from issue #22'
+    reason: "Feedback from issue #22"
     createdAt: 2026-02-09T07:48:28.635Z
     relatedIssues:
       - 22
     severity: medium
   - type: feedback-review
-    reason: 'Feedback from issue #167'
+    reason: "Feedback from issue #167"
     createdAt: 2026-02-11T07:21:24.182Z
     relatedIssues:
       - 167
     severity: medium
   - type: feedback-review
-    reason: 'Feedback from issue #170'
+    reason: "Feedback from issue #170"
     createdAt: 2026-02-11T07:42:33.156Z
     relatedIssues:
       - 170

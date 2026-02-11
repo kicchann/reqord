@@ -17,7 +17,7 @@ files:
 successCriteria:
   - reqord context show でプロジェクトコンテキストを表示できる
   - reqord context update でコンテキスト情報を更新できる
-  - product.json, technical.json, structure.json を個別に管理できる
+  - product.yaml, technical.yaml, structure.yaml を個別に管理できる
   - コンテキスト情報が外部ツール連携に適した構造化形式で保存される
 format:
   type: user-story

@@ -5,13 +5,13 @@ language: ja
 updatedAt: 2026-02-06T18:46:32.180Z
 files:
   product:
-    path: context/product.json
-    format: json
+    path: context/product.yaml
+    format: yaml
   technical:
-    structured: context/technical.json
+    structured: context/technical.yaml
     narrative: context/technical-narrative.md
   structure:
-    structured: context/structure.json
+    structured: context/structure.yaml
     narrative: context/structure-diagram.md
   domain:
     - context/domain/ai-integration.md
