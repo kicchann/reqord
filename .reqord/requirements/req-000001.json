@@ -5,8 +5,23 @@
   "status": "implemented",
   "priority": "high",
   "createdAt": "2026-02-07T10:00:00Z",
-  "updatedAt": "2026-02-09T11:57:46Z",
-  "versionHistory": [],
+  "updatedAt": "2026-02-11T12:30:00Z",
+  "versionHistory": [
+    {
+      "version": "1.0.0",
+      "status": "draft",
+      "gitCommit": "073c09c",
+      "changedAt": "2026-02-11T12:00:00Z",
+      "summary": "Status changed from implemented to draft: add GitHub Actions finalize-approval workflow to reqord init"
+    },
+    {
+      "version": "1.0.0",
+      "status": "implemented",
+      "gitCommit": "073c09c",
+      "changedAt": "2026-02-11T12:30:00Z",
+      "summary": "Implemented: reqord init generates finalize-approval.yml workflow"
+    }
+  ],
   "files": {
     "description": "requirements/req-000001/description.md",
     "supplementary": []
@@ -16,7 +31,8 @@
     "context/, requirements/, specifications/, settings/, assets/ が生成される",
     "settings/templates/ に初期テンプレートが配置される",
     "既存の .reqord/ がある場合はエラーメッセージを表示する",
-    "初期化完了後にサマリーが表示される"
+    "初期化完了後にサマリーが表示される",
+    "reqord init で承認PRマージ後の自動ステータス更新用 GitHub Actions ワークフローテンプレートが生成される"
   ],
   "format": {
     "type": "user-story",

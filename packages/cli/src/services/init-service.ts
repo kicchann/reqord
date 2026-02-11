@@ -1,3 +1,5 @@
+import { fileURLToPath } from "node:url";
+import { dirname } from "node:path";
 import {
   CONTEXT_DIR,
   REQUIREMENTS_DIR,
@@ -71,6 +73,16 @@ export async function initProject(cwd: string): Promise<InitResult> {
   for (const dir of gitkeepDirs) {
     await fs.writeText(fs.joinPath(dir, ".gitkeep"), "");
   }
+
+  // Write GitHub Actions workflow for finalize-approval
+  const workflowDir = fs.joinPath(cwd, ".github", "workflows");
+  await fs.mkdirp(workflowDir);
+  const workflowDest = fs.joinPath(workflowDir, "finalize-approval.yml");
+  const currentDir = dirname(fileURLToPath(import.meta.url));
+  const workflowSrc = fs.joinPath(currentDir, "..", "templates", "finalize-approval.yml");
+  const workflowContent = await fs.readText(workflowSrc);
+  await fs.writeText(workflowDest, workflowContent);
+  created.push(workflowDest);
 
   return { created, alreadyExists: false };
 }
