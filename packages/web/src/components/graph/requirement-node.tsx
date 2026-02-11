@@ -1,8 +1,8 @@
 "use client";
 
-import { memo } from "react";
+import React, { memo, useCallback } from "react";
 import { Handle, Position, type NodeProps } from "@xyflow/react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 const STATUS_COLORS: Record<string, string> = {
   draft: "border-gray-300 bg-gray-50",
@@ -17,28 +17,50 @@ type RequirementNodeData = {
   status: string;
   priority: string;
   specCount?: number;
+  onDrillDown?: (reqId: string) => void;
 };
 
 function RequirementNodeComponent({ data, id }: NodeProps) {
   const nodeData = data as RequirementNodeData;
   const borderClass = STATUS_COLORS[nodeData.status] ?? "border-gray-300 bg-white";
+  const router = useRouter();
+
+  const handleBodyClick = useCallback(() => {
+    router.push(`/requirements/${id}`);
+  }, [router, id]);
+
+  const handleDrillDown = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      nodeData.onDrillDown?.(id);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [nodeData.onDrillDown, id],
+  );
+
+  const handleButtonMouseDown = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+  }, []);
 
   return (
     <div
-      className={`rounded-lg border-2 px-3 py-2 shadow-sm ${borderClass}`}
+      className={`cursor-pointer rounded-lg border-2 px-3 py-2 shadow-sm ${borderClass}`}
       style={{ width: 220 }}
+      onClick={handleBodyClick}
     >
       <Handle type="target" position={Position.Left} className="!bg-gray-400" />
-      <Link href={`/requirements/${id}`} className="block">
-        <p className="truncate text-xs font-mono text-gray-500">{id}</p>
-        <p className="mt-0.5 truncate text-sm font-medium text-gray-900">
-          {nodeData.label}
-        </p>
-      </Link>
-      {nodeData.specCount && nodeData.specCount > 0 ? (
-        <p className="mt-1 text-xs text-gray-400">
+      <p className="truncate text-xs font-mono text-gray-500">{id}</p>
+      <p className="mt-0.5 truncate text-sm font-medium text-gray-900">
+        {nodeData.label}
+      </p>
+      {nodeData.onDrillDown && nodeData.specCount && nodeData.specCount > 0 ? (
+        <button
+          className="nodrag mt-1 text-xs text-gray-400"
+          onClick={handleDrillDown}
+          onMouseDown={handleButtonMouseDown}
+        >
           📄 {nodeData.specCount} spec{nodeData.specCount > 1 ? "s" : ""}
-        </p>
+        </button>
       ) : null}
       <Handle type="source" position={Position.Right} className="!bg-gray-400" />
     </div>

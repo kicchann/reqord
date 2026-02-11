@@ -4,10 +4,58 @@
   "version": "1.0.0",
   "status": "draft",
   "createdAt": "2026-02-08T14:08:15.325Z",
-  "updatedAt": "2026-02-08T14:08:15.325Z",
+  "updatedAt": "2026-02-10T22:45:11.137Z",
   "versionHistory": [],
   "files": {
     "design": "specifications/spec-000026/design.md",
     "supplementary": []
+  },
+  "flags": [],
+  "implementation": {
+    "issues": [
+      {
+        "number": 149,
+        "title": "[Task] spec-000026-4: Multi-level graph UI & mode selector",
+        "url": "https://github.com/kicchann/reqord/issues/149",
+        "priority": "P1",
+        "status": "closed"
+      },
+      {
+        "number": 148,
+        "title": "[Task] spec-000026-3: Multi-level graph data layer",
+        "url": "https://github.com/kicchann/reqord/issues/148",
+        "priority": "P1",
+        "status": "closed"
+      },
+      {
+        "number": 147,
+        "title": "[Task] spec-000026-2: Spec detail - Coverage/Issues/History tabs",
+        "url": "https://github.com/kicchann/reqord/issues/147",
+        "priority": "P1",
+        "status": "open"
+      },
+      {
+        "number": 146,
+        "title": "[Task] spec-000026-1: Spec detail - tabs + Design/Research",
+        "url": "https://github.com/kicchann/reqord/issues/146",
+        "priority": "P1",
+        "status": "open"
+      },
+      {
+        "number": 140,
+        "title": "[Task] spec-000026: 依存グラフ拡張・Spec詳細実装",
+        "url": "https://github.com/kicchann/reqord/issues/140",
+        "priority": "P2",
+        "status": "closed"
+      }
+    ],
+    "totalEstimatedHours": 26,
+    "createdAt": "2026-02-10T22:45:11.136Z",
+    "progress": {
+      "total": 5,
+      "completed": 3,
+      "percentage": 60,
+      "lastSyncedAt": "2026-02-10T22:45:11.137Z"
+    }
   }
 }

@@ -1,3 +1,4 @@
+import React from "react";
 import type { Status, Priority, Complexity } from "@reqord/shared";
 
 const STATUS_STYLES: Record<Status, string> = {

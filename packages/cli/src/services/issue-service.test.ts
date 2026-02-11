@@ -257,7 +257,7 @@ describe("buildIssueBody", () => {
 
     const body = buildIssueBody("spec-000001", task);
 
-    expect(body).toContain('<!-- reqord:specification {"specificationId":"spec-000001"} -->');
+    expect(body).toContain('<!-- reqord:specification {"specificationId":"spec-000001","priority":"P2","estimatedHours":3} -->');
     expect(body).toContain("## Test Task");
     expect(body).toContain("Test description");
     expect(body).toContain("**Estimated Hours:** 3");
