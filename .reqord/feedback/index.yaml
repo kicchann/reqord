@@ -18,7 +18,7 @@ feedbacks:
       createdRequirements: []
       specifications: []
     syncedAt: 2026-02-11T07:21:23.634Z
-    status: open
+    status: resolved
   - githubIssue: 30
     type: improvement
     severity: low
@@ -37,7 +37,7 @@ feedbacks:
       createdRequirements: []
       specifications: []
     syncedAt: 2026-02-09T07:40:21.228Z
-    status: closed
+    status: resolved
   - githubIssue: 19
     type: improvement
     severity: low
@@ -117,7 +117,7 @@ feedbacks:
       createdRequirements: []
       specifications: []
     syncedAt: 2026-02-11T07:21:23.589Z
-    status: open
+    status: resolved
   - githubIssue: 170
     type: improvement
     severity: low

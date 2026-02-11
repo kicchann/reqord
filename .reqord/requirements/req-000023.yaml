@@ -42,6 +42,9 @@ successCriteria:
   - >-
     reqord feedback resolve <req-id> --issue <number> でRequirement/Specificationからflagが削除され、
     index.yamlのstatusがresolvedに更新される
+  - >-
+    reqord feedback sync 実行時、既存エントリの手動設定メタデータ（type, severity, linkedTo）は保持され、
+    GitHub Issueから取得可能な情報（status, syncedAt）のみ更新される（マージ更新）
   - flags配列が空でないRequirement/Specificationに対して承認操作を行う場合、警告が表示される
 format:
   type: user-story
@@ -67,34 +70,4 @@ currentApproval:
   prUrl: https://github.com/kicchann/reqord/pull/207
   approvedBy: []
   approvedAt: 2026-02-11T14:30:00Z
-flags:
-  - type: feedback-review
-    reason: 'Feedback from issue #23'
-    createdAt: 2026-02-09T07:45:11.891Z
-    relatedIssues:
-      - 23
-    severity: low
-  - type: feedback-review
-    reason: 'Feedback from issue #30'
-    createdAt: 2026-02-09T07:45:15.197Z
-    relatedIssues:
-      - 30
-    severity: low
-  - type: feedback-review
-    reason: 'Feedback from issue #22'
-    createdAt: 2026-02-09T07:48:28.635Z
-    relatedIssues:
-      - 22
-    severity: medium
-  - type: feedback-review
-    reason: 'Feedback from issue #167'
-    createdAt: 2026-02-11T07:21:24.182Z
-    relatedIssues:
-      - 167
-    severity: medium
-  - type: feedback-review
-    reason: 'Feedback from issue #170'
-    createdAt: 2026-02-11T07:42:33.156Z
-    relatedIssues:
-      - 170
-    severity: low
+flags: []
