@@ -146,7 +146,21 @@ export async function migrateToYaml(
     }
   }
 
-  // Abort if too many errors
+  // Design Decision: No automatic rollback on failure
+  // When migration fails after some files have been migrated, we intentionally do NOT
+  // perform an automatic rollback. Instead:
+  // 1. Successfully migrated files remain in YAML format
+  // 2. Original JSON files are preserved in .reqord/.backup/{timestamp}/
+  // 3. Users can manually inspect the situation and choose to:
+  //    - Restore from backup if needed
+  //    - Fix the issue and re-run migration
+  //    - Continue with partial migration
+  // This design prioritizes transparency and user control over automatic recovery,
+  // as rollback logic after partial migration would be complex and risky.
+  
+  // Abort if too many errors (>10% threshold)
+  // This threshold helps detect major issues (e.g., corrupted files, permission problems)
+  // before too many files are affected, while allowing minor individual errors.
   if (plan.length > 0 && errors.length > 0 && errors.length / plan.length > 0.1) {
     throw new AppError(
       `移行がエラー率10%を超えたため中断しました (${errors.length}/${plan.length}件失敗)。--dry-run で確認してください。`,
