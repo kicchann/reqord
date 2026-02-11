@@ -15,7 +15,7 @@ Requirementのステータスをdraftからapprovedへ遷移させるための�
 
 1. 対象Requirementのstatusが `draft` または `pending_approval` であることを検証
 2. Gitブランチを作成: `reqord/req-<id>-approve-v<version>`
-3. Requirement JSONの `status` を `pending_approval` に更新してコミット
+3. Requirement YAMLの `status` を `pending_approval` に更新してコミット
 4. GitHub PRを作成:
    - タイトル: `[Reqord] Approve req-<id>: <title> v<version>`
    - CODEOWNERSからレビュアーを自動アサイン
@@ -35,4 +35,4 @@ Requirementのステータスをdraftからapprovedへ遷移させるための�
 
 - GitHub CLI (`gh`) を使用してPR作成・操作
 - ブランチ名は `reqord/` プレフィックスで統一
-- 承認状態の整合性はJSONとGit履歴の両方で保証
+- 承認状態の整合性はYAMLとGit履歴の両方で保証

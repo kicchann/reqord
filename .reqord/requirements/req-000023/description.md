@@ -240,7 +240,7 @@ reqord feedback link 13 --created-req --type requirement-gap --severity medium
 ```
 
 動作:
-1. 次の連番IDで新Requirementを作成（JSON + ディレクトリ）
+1. 次の連番IDで新Requirementを作成（YAML + ディレクトリ）
 2. `origin: { feedbackIssue: 13 }`を記録
 3. index.yamlの`linkedTo.createdRequirements`に追加
 4. GitHub Issueにラベル追加（`req:NNNNNN`, typeラベル）

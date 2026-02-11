@@ -181,7 +181,7 @@ interface NodeDetailPanelProps {
   → GraphPage (Server Component)
     → getAllRequirements()
       → getRepository() → LocalRequirementRepository
-        → findAll() → .reqord/requirements/req-*.json 読み込み
+        → findAll() → .reqord/requirements/req-*.yaml 読み込み
     → <GraphLoader requirements={data} />
   → HTML + Requirement[] データのシリアライゼーション
 

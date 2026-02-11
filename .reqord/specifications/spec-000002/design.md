@@ -2,7 +2,7 @@
 
 ## 1. 設計概要
 
-要件（Requirement）の作成・一覧・詳細表示・更新・削除の5つのCRUD操作をCLIコマンドとして提供する。各要件はJSON（メタデータ）とMarkdown（説明文）のハイブリッドストレージに保存され、6桁ゼロパディングの自動採番IDで管理される。すべての書き込み操作はZodスキーマによるバリデーションを経由する。
+要件（Requirement）の作成・一覧・詳細表示・更新・削除の5つのCRUD操作をCLIコマンドとして提供する。各要件はYAML（メタデータ）とMarkdown（説明文）のハイブリッドストレージに保存され、6桁ゼロパディングの自動採番IDで管理される。すべての書き込み操作はZodスキーマによるバリデーションを経由する。
 
 ## 2. アーキテクチャ
 
@@ -20,7 +20,7 @@ Repository:     repositories/requirement.ts
 File System:    repositories/file-system.ts
                     ↓
 Storage:        .reqord/requirements/
-                  ├── req-NNNNNN.json        (メタデータ)
+                  ├── req-NNNNNN.yaml        (メタデータ)
                   └── req-NNNNNN/
                       └── description.md     (説明文)
 ```
@@ -49,18 +49,18 @@ Storage:        .reqord/requirements/
 - `listRequirements(cwd, options)`: 全件取得 + status/priorityフィルタリング
 - `showRequirement(cwd, id)`: メタデータ + description.md読み込み
 - `updateRequirement(cwd, id, options)`: マージ戦略（patch-file → 個別フラグ上書き）、Zod再検証、updatedAt自動更新
-- `deleteRequirement(cwd, id)`: 存在確認後にJSON + ディレクトリ削除
+- `deleteRequirement(cwd, id)`: 存在確認後にYAML + ディレクトリ削除
 
 ### 3.3 RequirementRepository (`repositories/requirement.ts`)
 
-**責務:** ファイルI/O。Zodバリデーション付きread、JSON/Markdown write。
+**責務:** ファイルI/O。Zodバリデーション付きread、YAML/Markdown write。
 
-- `save(cwd, requirement)`: req-NNNNNN.jsonへJSON書き込み
+- `save(cwd, requirement)`: req-NNNNNN.yamlへYAML書き込み
 - `saveDescription(cwd, id, content)`: req-NNNNNN/description.mdへテキスト書き込み
-- `findById(cwd, id)`: JSON読み込み + RequirementSchema.safeParse
-- `findAll(cwd)`: `req-\d{6}\.json`パターンマッチで全件取得
+- `findById(cwd, id)`: YAML読み込み + RequirementSchema.safeParse
+- `findAll(cwd)`: `req-\d{6}\.yaml`パターンマッチで全件取得
 - `loadDescription(cwd, id)`: description.mdテキスト読み込み
-- `deleteById(cwd, id)`: JSONファイル + 説明文ディレクトリの再帰削除
+- `deleteById(cwd, id)`: YAMLファイル + 説明文ディレクトリの再帰削除
 
 ### 3.4 ID自動採番 (`utils/id-generator.ts`)
 
@@ -79,7 +79,7 @@ Storage:        .reqord/requirements/
     → createRequirement(cwd, { title, priority, format })
       → generateNextId(cwd) → "req-000001"
       → Requirementオブジェクト構築（デフォルト値含む）
-      → reqRepo.save(cwd, requirement) → req-000001.json書き込み
+      → reqRepo.save(cwd, requirement) → req-000001.yaml書き込み
       → loadProjectTemplate() → テンプレート取得（or デフォルト）
       → reqRepo.saveDescription(cwd, id, description) → description.md書き込み
   → 成功メッセージ + メタデータ表示
@@ -116,10 +116,10 @@ Storage:        .reqord/requirements/
 
 ## 6. 技術的決定事項
 
-### JSON + Markdownハイブリッドストレージ
+### YAML + Markdownハイブリッドストレージ
 
-**決定:** メタデータはJSON、説明文はMarkdownとして分離保存
-**理由:** メタデータの構造化検索・バリデーションにはJSONが適切。説明文はMarkdownエディタやGitで自然に扱えるフォーマット。人間の編集容易性とプログラム的な構造化の両立。
+**決定:** メタデータはYAML、説明文はMarkdownとして分離保存
+**理由:** メタデータの構造化検索・バリデーションにはYAMLが適切。説明文はMarkdownエディタやGitで自然に扱えるフォーマット。人間の編集容易性とプログラム的な構造化の両立。
 
 ### 更新時のマージ戦略
 

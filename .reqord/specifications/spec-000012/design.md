@@ -2,7 +2,7 @@
 
 ## 1. 設計概要
 
-要件変更時の影響範囲を自動的に分析し、関連するSpecification・Issue・Requirementを特定する。依存グラフ（blockedBy, blocks, relatedTo）を走査して波及先を検出し、必要に応じてGitHub Issue/PRへ通知コメントを送信する。影響範囲の分析結果はRequirement JSONのimpactフィールドに記録し、`--json` / `--dry-run` オプションでCI/CD連携にも対応する。
+要件変更時の影響範囲を自動的に分析し、関連するSpecification・Issue・Requirementを特定する。依存グラフ（blockedBy, blocks, relatedTo）を走査して波及先を検出し、必要に応じてGitHub Issue/PRへ通知コメントを送信する。影響範囲の分析結果はRequirement YAMLのimpactフィールドに記録し、`--json` / `--dry-run` オプションでCI/CD連携にも対応する。
 
 ## 2. アーキテクチャ
 
@@ -18,7 +18,7 @@ Repository:     repositories/requirement.ts  (既存)
                     ↓
 External:       gh CLI (通知用)
                     ↓
-Storage:        .reqord/requirements/req-NNNNNN.json (impactフィールド)
+Storage:        .reqord/requirements/req-NNNNNN.yaml (impactフィールド)
                 GitHub Issues / PRs (コメント)
 ```
 
@@ -244,7 +244,7 @@ impact: z.object({
 
 ### impactフィールドの永続化
 
-**決定:** 分析結果をRequirement JSONのimpactフィールドに記録
+**決定:** 分析結果をRequirement YAMLのimpactフィールドに記録
 **理由:** 分析は計算コストがかかるため、結果をキャッシュすることで繰り返し表示時のパフォーマンスを向上させる。lastAnalyzedAtで鮮度を管理し、依存関係変更時に再分析を促す。
 
 ### relatedToの走査

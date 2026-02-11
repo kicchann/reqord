@@ -57,10 +57,10 @@ packages/web/src/
 ```
 ブラウザ → /specifications/[id] (GET)
   → SpecificationDetailPage (Server Component)
-    → getSpecificationById(id) → Specification JSON
+    → getSpecificationById(id) → Specification YAML
     → loadDesignFile(id) → design.md
     → loadResearchFile(id) → research.md (存在する場合)
-    → getRequirementById(spec.requirementId) → Requirement JSON
+    → getRequirementById(spec.requirementId) → Requirement YAML
   → SpecDetail (Client Component)
     → タブ切替 → 各タブコンポーネント描画
 
@@ -102,7 +102,7 @@ export default async function SpecificationsPage() {
 #### Specification詳細ページ (`specifications/[id]/page.tsx` - 新規)
 
 - `generateMetadata` で動的タイトル生成
-- 並列データ取得: Specification JSON + design.md + research.md + Requirement
+- 並列データ取得: Specification YAML + design.md + research.md + Requirement
 - Specificationが存在しない場合は `notFound()` を呼び出し
 - `<SpecDetail>` コンポーネントに全データを委譲
 
@@ -520,7 +520,7 @@ const navItems = [
 ブラウザ → /specifications/spec-000016 (GET)
   → SpecificationDetailPage (Server Component)
     → Promise.all([
-        getSpecificationById("spec-000016"),  → Specification JSON
+        getSpecificationById("spec-000016"),  → Specification YAML
         loadSpecFile("spec-000016", "design.md"),  → design.md内容
         loadSpecFile("spec-000016", "research.md"),  → research.md内容（nullの場合あり）
         getAllRequirements(),  → Requirement[] (requirementIdの解決用)

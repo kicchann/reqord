@@ -4,8 +4,8 @@
 
 Feedback一覧表示・詳細表示・紐付け・クローズの4つのCLIコマンドを提供する。本specは以下の責務を担う:
 
-- **list**: index.jsonからFeedback一覧を表示（フィルタリング対応）
-- **show**: GitHub Issue + index.jsonマージデータの詳細表示
+- **list**: index.yamlからFeedback一覧を表示（フィルタリング対応）
+- **show**: GitHub Issue + index.yamlマージデータの詳細表示
 - **link**: Requirement/Specificationへの紐付け + フラグ管理 + 新Requirement作成
 - **close**: Feedbackクローズ + GitHub Issueクローズ
 
@@ -36,7 +36,7 @@ Feedback一覧表示・詳細表示・紐付け・クローズの4つのCLIコ�
 ┌────────────────────┐   ┌────────────────────┐
 │ FeedbackRepository │   │ GitHubClient       │
 │ (spec-000027)      │   │ (spec-000027)      │
-│ - index.json       │   │ - gh CLI           │
+│ - index.yaml       │   │ - gh CLI           │
 └────────────────────┘   └────────────────────┘
              │
              ▼
@@ -120,7 +120,7 @@ export async function listFeedbacks(
   return { feedbacks };
 }
 
-// Feedback詳細取得（GitHub Issue + index.json マージ）
+// Feedback詳細取得（GitHub Issue + index.yaml マージ）
 export async function showFeedback(
   cwd: string,
   issueNumber: number
@@ -129,7 +129,7 @@ export async function showFeedback(
   const feedback = index.feedbacks.find((f) => f.githubIssue === issueNumber);
 
   if (!feedback) {
-    throw new Error(`Feedback for issue #${issueNumber} not found in index.json. Run 'reqord feedback sync' first.`);
+    throw new Error(`Feedback for issue #${issueNumber} not found in index.yaml. Run 'reqord feedback sync' first.`);
   }
 
   const issue = await getIssue(issueNumber);
@@ -146,7 +146,7 @@ export async function linkToRequirement(
   let feedback = index.feedbacks.find((f) => f.githubIssue === options.issueNumber);
 
   if (!feedback) {
-    // index.jsonにない場合は新規作成
+    // index.yamlにない場合は新規作成
     feedback = {
       githubIssue: options.issueNumber,
       linkedTo: {
@@ -169,7 +169,7 @@ export async function linkToRequirement(
     feedback.linkedTo.requirements.push(options.requirementId);
   }
 
-  // index.json保存
+  // index.yaml保存
   await saveIndex(cwd, index);
 
   // Requirementにfeedback-reviewフラグ追加
@@ -222,7 +222,7 @@ export async function linkWithNewRequirement(
   result.requirement.origin = { feedbackIssue: options.issueNumber };
   await saveRequirement(cwd, result.requirement);
 
-  // index.json更新
+  // index.yaml更新
   const index = await loadIndex(cwd);
   let feedback = index.feedbacks.find((f) => f.githubIssue === options.issueNumber);
 
@@ -310,7 +310,7 @@ export async function closeFeedback(
     throw new Error(`Feedback for issue #${issueNumber} not found`);
   }
 
-  // index.jsonステータス更新
+  // index.yamlステータス更新
   feedback.status = "closed";
   await saveIndex(cwd, index);
 
@@ -353,7 +353,7 @@ import Table from "cli-table3";
 import { listFeedbacks } from "../../services/feedback-service";
 
 export const listCommand = new Command("list")
-  .description("List feedback issues from index.json")
+  .description("List feedback issues from index.yaml")
   .option("--state <state>", "Filter by state (open|closed|all)", "all")
   .option("--type <type>", "Filter by type")
   .option("--json", "Output as JSON")
@@ -408,7 +408,7 @@ import chalk from "chalk";
 import { showFeedback } from "../../services/feedback-service";
 
 export const showCommand = new Command("show")
-  .description("Show feedback details (GitHub Issue + index.json)")
+  .description("Show feedback details (GitHub Issue + index.yaml)")
   .argument("<issue-number>", "GitHub issue number")
   .action(async (issueNumberStr: string) => {
     try {
@@ -508,7 +508,7 @@ import chalk from "chalk";
 import { closeFeedback } from "../../services/feedback-service";
 
 export const closeCommand = new Command("close")
-  .description("Close feedback (updates index.json and closes GitHub Issue)")
+  .description("Close feedback (updates index.yaml and closes GitHub Issue)")
   .argument("<issue-number>", "GitHub issue number")
   .action(async (issueNumberStr: string) => {
     try {
@@ -566,7 +566,7 @@ program.addCommand(feedbackCommand);
    $ reqord feedback list --state open
 
 2. listFeedbacks()
-   ├─ loadIndex() でindex.jsonを読み込み
+   ├─ loadIndex() でindex.yamlを読み込み
    ├─ フィルタリング（state, type）
    └─ テーブル表示
 
@@ -586,7 +586,7 @@ program.addCommand(feedbackCommand);
    $ reqord feedback show 17
 
 2. showFeedback()
-   ├─ loadIndex() でindex.jsonから取得
+   ├─ loadIndex() でindex.yamlから取得
    ├─ getIssue() でGitHub Issueから取得
    └─ マージして表示
 
@@ -609,7 +609,7 @@ program.addCommand(feedbackCommand);
    $ reqord feedback link 17 --req req-000006 --type improvement --severity high
 
 2. linkToRequirement()
-   ├─ index.json更新
+   ├─ index.yaml更新
    │  ├─ linkedTo.requirements に追加
    │  └─ type, severity設定
    ├─ Requirement JSON読み込み
@@ -634,7 +634,7 @@ program.addCommand(feedbackCommand);
    ├─ generateNextId() で連番採番
    ├─ createRequirement() で新Requirement作成
    ├─ origin: { feedbackIssue: 13 } を記録
-   ├─ index.json更新（linkedTo.createdRequirements）
+   ├─ index.yaml更新（linkedTo.createdRequirements）
    └─ Issue bodyにHTMLコメント挿入/更新
 
 3. 出力
@@ -648,7 +648,7 @@ program.addCommand(feedbackCommand);
    $ reqord feedback close 17
 
 2. closeFeedback()
-   ├─ index.jsonのstatus更新（closed）
+   ├─ index.yamlのstatus更新（closed）
    ├─ 影響範囲サマリー生成
    └─ gh issue close --comment でクローズ
 
@@ -685,16 +685,16 @@ program.addCommand(feedbackCommand);
 
 ## 6. 技術的決定事項
 
-### 6.1 index.json未存在時の挙動
+### 6.1 index.yaml未存在時の挙動
 
-**決定**: index.jsonにない場合でもlinkコマンドで新規エントリを作成
+**決定**: index.yamlにない場合でもlinkコマンドで新規エントリを作成
 
 **理由**:
 - `reqord feedback sync`実行を強制しない柔軟性
 - GitHub Issueが先に作成され、後からreqordで管理開始するケースに対応
 
 **実装**:
-- linkコマンド実行時、index.jsonにissueNumberがなければ新規FeedbackEntryを作成
+- linkコマンド実行時、index.yamlにissueNumberがなければ新規FeedbackEntryを作成
 - syncコマンド実行で既存エントリとマージ
 
 ### 6.2 新Requirement作成時のタイトル形式

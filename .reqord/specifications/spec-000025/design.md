@@ -275,7 +275,7 @@ interface GanttTooltipProps {
 ブラウザ → /specifications/[id] (GET)
   → SpecificationDetailPage (Server Component)
     → getSpecificationById(id)
-      → .reqord/specifications/spec-NNNNNN.json 読み込み
+      → .reqord/specifications/spec-NNNNNN.yaml 読み込み
       → implementation フィールド取得
     → transformToGanttData(specId, implementation)
       → Priority別グループ分け

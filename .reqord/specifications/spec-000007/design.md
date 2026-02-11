@@ -154,7 +154,7 @@ interface RequirementRepository {
   → RequirementsPage (Server Component)
     → getAllRequirements()
       → getRepository() → LocalRequirementRepository
-        → findAll() → .reqord/requirements/req-*.json読み込み
+        → findAll() → .reqord/requirements/req-*.yaml読み込み
     → <RequirementTable requirements={data} />
   → HTML レスポンス
 ```
@@ -167,7 +167,7 @@ interface RequirementRepository {
     → FormData → JSONオブジェクト変換
     → repo.generateNextId() → "req-000002"
     → RequirementSchema.safeParse(raw) → バリデーション
-    → repo.save(requirement) → JSON書き込み
+    → repo.save(requirement) → YAML書き込み
     → repo.saveDescription(id, description) → Markdown書き込み
     → revalidatePath("/requirements")
     → redirect(`/requirements/${id}`)

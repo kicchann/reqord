@@ -18,7 +18,7 @@ Repository:     repositories/requirement.ts  (既存)
                     ↓
 External:       git CLI / gh CLI
                     ↓
-Storage:        .reqord/requirements/req-NNNNNN.json
+Storage:        .reqord/requirements/req-NNNNNN.yaml
                 GitHub PR
 ```
 
@@ -175,7 +175,7 @@ status: draft → pending_approval
       → requirementService.updateRequirement(cwd, id, { status: "pending_approval" })
       → gitRepo.createBranch("reqord/req-000011-approve-v1.0.0")
       → gitRepo.checkout("reqord/req-000011-approve-v1.0.0")
-      → gitRepo.add([".reqord/requirements/req-000011.json"])
+      → gitRepo.add([".reqord/requirements/req-000011.yaml"])
       → gitRepo.commit("chore(reqord): request approval for req-000011")
       → gitRepo.push("reqord/req-000011-approve-v1.0.0")
       → githubRepo.createPullRequest({ title, body, head })

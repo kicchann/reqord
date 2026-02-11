@@ -16,7 +16,7 @@ Requirementに基づくSpecification（仕様）の作成・管理機能。設�
 ### reqord spec create \<req-id\>
 
 - Requirementに紐づくSpecificationを生成
-- `specifications/spec-NNN.json` + `specifications/spec-NNN/` ディレクトリ
+- `specifications/spec-NNN.yaml` + `specifications/spec-NNN/` ディレクトリ
 - 初期ファイル:
   - `design.md` (テンプレートから生成)
 
@@ -28,7 +28,7 @@ Requirementに基づくSpecification（仕様）の作成・管理機能。設�
 
 ### reqord spec show \<id\>
 
-- JSON + design.md の内容を整形表示
+- YAML + design.md の内容を整形表示
 - supplementaryファイル一覧表示
 
 ### reqord spec edit \<id\> --file \<filename\>
@@ -39,7 +39,7 @@ Requirementに基づくSpecification（仕様）の作成・管理機能。設�
 
 ## データ構造
 
-仕様書のJSONフォーマット。主要フィールド:
+仕様書のYAMLフォーマット。主要フィールド:
 
 - `requirementId`: 紐づくRequirement ID
 - `files`: 外部ファイル参照（design + supplementary）
@@ -47,12 +47,12 @@ Requirementに基づくSpecification（仕様）の作成・管理機能。設�
 
 ## 責務分離
 
-| 責務 | 担当 |
-|------|------|
-| Specification JSON/ファイルのCRUD | reqord CLI（本要件） |
-| design.mdテンプレート生成 | reqord CLI（本要件） |
-| AI駆動の設計書コンテンツ生成 | Claude Code `/reqord:design` |
-| AI駆動の調査レポート生成 | Claude Code エコシステム |
+| 責務                              | 担当                         |
+| --------------------------------- | ---------------------------- |
+| Specification YAML/ファイルのCRUD | reqord CLI（本要件）         |
+| design.mdテンプレート生成         | reqord CLI（本要件）         |
+| AI駆動の設計書コンテンツ生成      | Claude Code `/reqord:design` |
+| AI駆動の調査レポート生成          | Claude Code エコシステム     |
 
 ## 技術的制約
 

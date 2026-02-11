@@ -19,7 +19,7 @@ Repository:     repositories/specification.ts     (既存)
 External:       gh CLI (Issue状態取得)
                 ファイルシステム (コンポーネント/テスト存在確認)
                     ↓
-Storage:        .reqord/specifications/spec-NNNNNN.json
+Storage:        .reqord/specifications/spec-NNNNNN.yaml
                 .reqord/specifications/spec-NNNNNN/design.md
 ```
 

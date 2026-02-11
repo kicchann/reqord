@@ -8,23 +8,23 @@ Phase 1で create/list は完了しているため、これらを追加するこ
 ## ユーザーストーリー
 
 開発者として、CLIから要件の詳細表示・更新・削除を行いたい。
-なぜなら、JSON直接編集に頼らず安全に要件を管理したいから。
+なぜなら、直接編集に頼らず安全に要件を管理したいから。
 
 ## CLIコマンド仕様
 
 ### `reqord req show <id>`
 
-- 指定IDの要件JSON全フィールドを整形表示
+- 指定IDの要件YAML全フィールドを整形表示
 - description.mdの内容も合わせて表示
 - 存在しないIDの場合はエラーメッセージ
 
 ### `reqord req update <id> [options]`
 
-| オプション | 説明 |
-|-----------|------|
-| `--status <status>` | ステータス変更（draft/approved/implemented/deprecated） |
-| `--priority <priority>` | 優先度変更（high/medium/low） |
-| `--title <title>` | タイトル変更 |
+| オプション              | 説明                                                    |
+| ----------------------- | ------------------------------------------------------- |
+| `--status <status>`     | ステータス変更（draft/approved/implemented/deprecated） |
+| `--priority <priority>` | 優先度変更（high/medium/low）                           |
+| `--title <title>`       | タイトル変更                                            |
 
 - updatedAtを自動更新
 - 変更前後の差分を表示
@@ -32,7 +32,7 @@ Phase 1で create/list は完了しているため、これらを追加するこ
 
 ### `reqord req delete <id>`
 
-- JSONファイルとdescriptionディレクトリを削除
+- YAMLファイルとdescriptionディレクトリを削除
 - 実行前に確認プロンプト（`--force` で省略可能）
 - 削除完了メッセージを表示
 

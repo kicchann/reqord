@@ -9,7 +9,7 @@
 
 ---
 
-Reqord stores requirements as structured data (JSON + Markdown) inside your Git repository, giving every requirement a clear lifecycle from draft to implementation. No SaaS, no backend -- just `git clone` and your entire requirements history is there, version-controlled alongside your code, ready for humans and AI tools alike.
+Reqord stores requirements as structured data (YAML + Markdown) inside your Git repository, giving every requirement a clear lifecycle from draft to implementation. No SaaS, no backend -- just `git clone` and your entire requirements history is there, version-controlled alongside your code, ready for humans and AI tools alike.
 
 <!-- Screenshot: Dashboard overview showing project health metrics, requirement status breakdown, and an interactive dependency graph -->
 
@@ -133,13 +133,13 @@ reqord spec design spec-000001
 
 ## Key Features
 
-### Hybrid Storage (JSON + Markdown)
+### Hybrid Storage (YAML + Markdown)
 
-Requirements are stored as JSON metadata (status, priority, dependencies, version history) paired with Markdown content (descriptions, success criteria, use cases). Machine-readable structure with human-readable documentation.
+Requirements are stored as YAML metadata (status, priority, dependencies, version history) paired with Markdown content (descriptions, success criteria, use cases). Machine-readable structure with human-readable documentation.
 
 ```
 .reqord/requirements/
-  req-000001.json          # Metadata: status, priority, dependencies
+  req-000001.yaml          # Metadata: status, priority, dependencies
   req-000001/
     description.md         # Content: detailed description, criteria
 ```
@@ -217,7 +217,7 @@ How Reqord compares to existing tools for managing what to build:
 |---|---|---|---|---|---|
 | **Git-native** | Yes -- lives in your repo | No | No | No | Partial |
 | **Offline-first** | Yes -- no server needed | No | No | No | No |
-| **AI-ready structure** | JSON + Markdown, typed schemas | Unstructured text | Unstructured text | Unstructured text | Unstructured text |
+| **AI-ready structure** | YAML + Markdown, typed schemas | Unstructured text | Unstructured text | Unstructured text | Unstructured text |
 | **Traceability** | Enforced (Req -> Spec -> Issue) | Manual linking | Manual linking | Manual linking | Manual linking |
 | **Approval workflow** | PR-based with CODEOWNERS | Built-in workflow | Built-in workflow | No formal approval | No formal approval |
 | **Version control** | Full Git history + semantic versions | Limited history | Limited history | Page history | No versioning |
@@ -254,8 +254,8 @@ All data lives in the `.reqord/` directory within your project repository:
 ```
 .reqord/
   context/           # Project context (product, technical, structure, domain knowledge)
-  requirements/      # Requirement JSON + Markdown files
-  specifications/    # Specification JSON + design documents
+  requirements/      # Requirement YAML + Markdown files
+  specifications/    # Specification YAML + design documents
   settings/          # Templates and rules
   assets/            # Shared assets
 ```

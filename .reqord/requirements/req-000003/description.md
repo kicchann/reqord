@@ -13,7 +13,7 @@
 
 ### reqord context show
 
-- context.json のサマリーを表示
+- context.yaml のサマリーを表示
 - `--detail` で product/technical/structure の詳細表示
 - `--json` で機械読み取り可能な出力
 
@@ -25,13 +25,13 @@
 
 ## データ構造
 
-- `context.json` - メタ情報（プロジェクト名、バージョン、更新日時）
-- `product.json` - プロダクト情報（ビジョン、ターゲット、スコープ）
-- `technical.json` - 技術情報（言語、フレームワーク、インフラ）
-- `structure.json` - プロジェクト構造（ディレクトリ、パッケージ）
+- `context.yaml` - メタ情報（プロジェクト名、バージョン、更新日時）
+- `product.yaml` - プロダクト情報（ビジョン、ターゲット、スコープ）
+- `technical.yaml` - 技術情報（言語、フレームワーク、インフラ）
+- `structure.yaml` - プロジェクト構造（ディレクトリ、パッケージ）
 
 ## 技術的制約
 
-- JSONスキーマバリデーション
+- スキーマバリデーション
 - 部分更新対応（パッチ的な更新）
 - ドメイン用語ファイル（domain/）は将来拡張

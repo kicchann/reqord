@@ -52,19 +52,19 @@ Requirementの内容・ProjectContext・既存コード実装状況を基に、S
 **グループA（並列実行）:**
 
 - 対象specの紐づくrequirement情報:
-  - `.reqord/requirements/<req-id>.json` をReadツールで読み取り
+  - `.reqord/requirements/<req-id>.yaml` をReadツールで読み取り
   - `.reqord/requirements/<req-id>/description.md` をReadツールで読み取り
-- ProjectContext情報（context.jsonの`files`フィールドが参照するファイルを読み取り）:
-  - `.reqord/context/context.json` をReadツールで読み取り
-  - context.jsonの`files.product`が示すファイル（例: `product.json`）をReadツールで読み取り
-  - context.jsonの`files.technical`が示すファイル（例: `technical.json`）をReadツールで読み取り
-  - context.jsonの`files.structure`が示すファイル（例: `structure.json`）をReadツールで読み取り
-  - context.jsonの`files.domain`が示すファイル群をReadツールで読み取り（存在する場合のみ）
+- ProjectContext情報（context.yamlの`files`フィールドが参照するファイルを読み取り）:
+  - `.reqord/context/context.yaml` をReadツールで読み取り
+  - context.yamlの`files.product`が示すファイル（例: `product.yaml`）をReadツールで読み取り
+  - context.yamlの`files.technical`が示すファイル（例: `technical.yaml`）をReadツールで読み取り
+  - context.yamlの`files.structure`が示すファイル（例: `structure.yaml`）をReadツールで読み取り
+  - context.yamlの`files.domain`が示すファイル群をReadツールで読み取り（存在する場合のみ）
 
 **グループB（グループA完了後）:**
 
 - 全requirements一覧（依存関係の全体像把握）:
-  - `.reqord/requirements/req-NNNNNN.json` を全件Readツールで読み取り
+  - `.reqord/requirements/req-NNNNNN.yaml` を全件Readツールで読み取り
 - 他の既存specificationのdesign.md（関連specが実装済みの場合、設計パターンの一貫性のために参照）:
   - 対象specと同じrequirementに紐づく他specのdesign.mdを読み取り（存在する場合のみ）
 
@@ -189,7 +189,7 @@ ProjectContextのtechnicalファイルに記載のアーキテクチャ・設計
 
 | 入力 | 用途 |
 |------|------|
-| requirement.json | successCriteria, format, dependencies, complexity |
+| requirement.yaml | successCriteria, format, dependencies, complexity |
 | description.md | 詳細要件、ユースケース、技術的制約 |
 | ProjectContext (technical) | 技術スタック、アーキテクチャ、設計パターン |
 | ProjectContext (structure) | コード構造、命名規則、インポートルール |
@@ -212,7 +212,7 @@ ProjectContextのtechnicalファイルに記載のアーキテクチャ・設計
 1バッチあたり5〜8 spec程度を1エージェントに委譲し、各エージェントには以下を渡す:
 
 - 対象specの一覧
-- 対応するrequirement情報（JSON + description.md）
+- 対応するrequirement情報（YAML + description.md）
 - 既存コード調査結果（該当部分のみ）
 - 記述ガイドライン（本Step 5の内容）
 

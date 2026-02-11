@@ -17,16 +17,16 @@ Requirementに関連する全情報（ProjectContext、Requirement詳細、Speci
 
 指定Requirementに関連する全コンテキストを統合出力:
 
-1. **ProjectContext** (product.json, technical.json, structure.json の要約)
-2. **Requirement詳細** (JSON + description.md)
+1. **ProjectContext** (product.yaml, technical.yaml, structure.yaml の要約)
+2. **Requirement詳細** (YAML + description.md)
 3. **関連Specification** (存在する場合、design.md含む)
 4. **依存Requirement** (blockedBy, blocks の概要)
 
 出力形式:
 ```
 # Project Context
-[product.jsonの要約]
-[technical.jsonの要約]
+[product.yamlの要約]
+[technical.yamlの要約]
 
 # Requirement: req-001 - タイトル
 [description.mdの全文]

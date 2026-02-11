@@ -21,7 +21,7 @@ Repository:     repositories/specification.ts  (既存)
                     ↓
 External:       gh CLI (Issue作成)
                     ↓
-Storage:        .reqord/specifications/spec-NNNNNN.json (implementationフィールド)
+Storage:        .reqord/specifications/spec-NNNNNN.yaml (implementationフィールド)
                 GitHub Issues
 ```
 
@@ -530,7 +530,7 @@ body:
   - プレビュー表示のみ、JSON未変更を確認
 - **create コマンド（実行）**:
   - GitHub API呼び出しモック化
-  - Specification JSON の implementation フィールド更新検証
+  - Specification YAML の implementation フィールド更新検証
 - **--json 出力フォーマット検証**
 
 ### E2Eテスト（手動）

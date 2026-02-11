@@ -37,7 +37,7 @@ Repository:     repositories/specification.ts (既存)
                     ↓
 External:       gh CLI → GitHub API
                     ↓
-Storage:        .reqord/specifications/spec-NNNNNN.json
+Storage:        .reqord/specifications/spec-NNNNNN.yaml
 ```
 
 ## 3. コンポーネント設計

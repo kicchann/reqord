@@ -2,11 +2,11 @@
 
 ## 1. 設計概要
 
-GitHub Issueと`.reqord/feedback/index.json`の双方向同期機構を提供する。本specは以下の責務を担う:
+GitHub Issueと`.reqord/feedback/index.yaml`の双方向同期機構を提供する。本specは以下の責務を担う:
 
 - **Zod スキーマ定義**: `@reqord/shared`パッケージにFeedbackIndex型を定義
-- **同期ロジック**: GitHub Issue (gh CLI) ↔ index.json の双方向同期
-- **Repository層**: index.jsonのCRUD操作
+- **同期ロジック**: GitHub Issue (gh CLI) ↔ index.yaml の双方向同期
+- **Repository層**: index.yamlのCRUD操作
 
 本機能は**未実装**であり、本設計書に基づき新規実装する。
 
@@ -20,8 +20,8 @@ GitHub Issueと`.reqord/feedback/index.json`の双方向同期機構を提供す
            │
            ▼
 ┌─────────────────────┐
-│ FeedbackSyncService │ GitHub → index.json (default)
-│ (packages/cli)      │ index.json → GitHub (--from-local)
+│ FeedbackSyncService │ GitHub → index.yaml (default)
+│ (packages/cli)      │ index.yaml → GitHub (--from-local)
 └──────────┬──────────┘
            │
            ├─────────────────────┐
@@ -29,7 +29,7 @@ GitHub Issueと`.reqord/feedback/index.json`の双方向同期機構を提供す
 ┌─────────────────────┐   ┌─────────────────────┐
 │ GitHubClient        │   │ FeedbackRepository  │
 │ (packages/cli)      │   │ (packages/cli)      │
-│ - gh CLI実行        │   │ - index.json読み書き│
+│ - gh CLI実行        │   │ - index.yaml読み書き│
 │ - Issue取得/更新    │   │ - Zod検証           │
 └─────────────────────┘   └──────────┬──────────┘
                                      │
@@ -115,7 +115,7 @@ export * from "./feedback";
 
 **ファイルパス**: `packages/cli/src/repositories/feedback.ts`
 
-**責務**: index.jsonの読み書き、Zod検証
+**責務**: index.yamlの読み書き、Zod検証
 
 **インターフェース**:
 
@@ -125,15 +125,15 @@ import type {
   FeedbackEntry,
 } from "@reqord/shared";
 import { FeedbackIndexSchema } from "@reqord/shared";
-import { readJSON, writeJSON } from "./file-system";
+import { readYAML, writeYAML } from "./file-system";
 import path from "node:path";
 
-const FEEDBACK_INDEX_PATH = ".reqord/feedback/index.json";
+const FEEDBACK_INDEX_PATH = ".reqord/feedback/index.yaml";
 
 export async function loadIndex(cwd: string): Promise<FeedbackIndex> {
   const indexPath = path.join(cwd, FEEDBACK_INDEX_PATH);
   try {
-    const data = await readJSON(indexPath);
+    const data = await readYAML(indexPath);
     return FeedbackIndexSchema.parse(data);
   } catch (error) {
     // ファイルが存在しない場合は空のindexを返す
@@ -147,7 +147,7 @@ export async function saveIndex(
 ): Promise<void> {
   const indexPath = path.join(cwd, FEEDBACK_INDEX_PATH);
   const validated = FeedbackIndexSchema.parse(index);
-  await writeJSON(indexPath, validated);
+  await writeYAML(indexPath, validated);
 }
 
 export async function findFeedbackByIssue(
@@ -250,7 +250,7 @@ import { listFeedbackIssues, getIssue, updateIssueBody, type GitHubIssue } from 
 import { loadIndex, upsertFeedback } from "../repositories/feedback";
 import { parseReqordComment, buildReqordComment, upsertReqordComment } from "./reqord-comment";
 
-// GitHub → index.json 同期
+// GitHub → index.yaml 同期
 export async function syncFromGitHub(cwd: string): Promise<number> {
   const issues = await listFeedbackIssues();
   let updatedCount = 0;
@@ -264,7 +264,7 @@ export async function syncFromGitHub(cwd: string): Promise<number> {
   return updatedCount;
 }
 
-// index.json → GitHub 同期（HTMLコメントをIssue bodyに挿入/更新）
+// index.yaml → GitHub 同期（HTMLコメントをIssue bodyに挿入/更新）
 export async function syncToGitHub(cwd: string): Promise<number> {
   const index = await loadIndex(cwd);
   let updatedCount = 0;
@@ -319,8 +319,8 @@ import chalk from "chalk";
 import { syncFromGitHub, syncToGitHub } from "../../services/feedback-sync-service";
 
 export const syncCommand = new Command("sync")
-  .description("Sync GitHub Issues with feedback label to index.json")
-  .option("--from-local", "Sync from index.json to GitHub")
+  .description("Sync GitHub Issues with feedback label to index.yaml")
+  .option("--from-local", "Sync from index.yaml to GitHub")
   .option("--json", "Output as JSON")
   .action(async (options) => {
     try {
@@ -334,8 +334,8 @@ export const syncCommand = new Command("sync")
         console.log(JSON.stringify({ synced: count }));
       } else {
         const direction = options.fromLocal
-          ? "index.json → GitHub"
-          : "GitHub → index.json";
+          ? "index.yaml → GitHub"
+          : "GitHub → index.yaml";
         console.log(chalk.green(`✓ Synced ${count} feedbacks (${direction})`));
       }
     } catch (error) {
@@ -347,7 +347,7 @@ export const syncCommand = new Command("sync")
 
 ## 4. データフロー
 
-### 4.1 GitHub → index.json 同期 (デフォルト)
+### 4.1 GitHub → index.yaml 同期 (デフォルト)
 
 ```
 1. ユーザー実行
@@ -359,20 +359,20 @@ export const syncCommand = new Command("sync")
    │  ├─ <!-- reqord:feedback {...} --> をパース
    │  ├─ type, severity を抽出
    │  └─ linkedTo (requirements, specifications) を抽出
-   └─ upsertFeedback() でindex.jsonに保存/更新
+   └─ upsertFeedback() でindex.yamlに保存/更新
 
 3. 結果表示
-   ✓ Synced 3 feedbacks (GitHub → index.json)
+   ✓ Synced 3 feedbacks (GitHub → index.yaml)
 ```
 
-### 4.2 index.json → GitHub 同期 (--from-local)
+### 4.2 index.yaml → GitHub 同期 (--from-local)
 
 ```
 1. ユーザー実行
    $ reqord feedback sync --from-local
 
 2. syncToGitHub()
-   ├─ loadIndex() でindex.jsonを読み込み
+   ├─ loadIndex() でindex.yamlを読み込み
    ├─ 各feedbackのGitHub Issue bodyを取得
    ├─ FeedbackEntryからHTMLコメントを構築
    │  └─ <!-- reqord:feedback {"type":"...","linkedTo":{...}} -->
@@ -380,7 +380,7 @@ export const syncCommand = new Command("sync")
    └─ gh issue edit --body-file でIssue body更新
 
 3. 結果表示
-   ✓ Synced 3 feedbacks (index.json → GitHub)
+   ✓ Synced 3 feedbacks (index.yaml → GitHub)
 ```
 
 ## 5. テスト方針
@@ -411,8 +411,8 @@ export const syncCommand = new Command("sync")
 
 **E2Eシナリオ**:
 1. 空のプロジェクトで`reqord feedback sync`実行
-2. index.jsonが生成され、feedbackラベル付きIssueが同期されることを確認
-3. index.json手動編集後、`reqord feedback sync --from-local`実行
+2. index.yamlが生成され、feedbackラベル付きIssueが同期されることを確認
+3. index.yaml手動編集後、`reqord feedback sync --from-local`実行
 4. GitHub Issue上のラベルが更新されることを確認
 
 ## 6. 技術的決定事項
@@ -430,9 +430,9 @@ export const syncCommand = new Command("sync")
 - Octokit: 認証設定の複雑さ、依存関係増加
 - @actions/github: GitHub Actions専用、ローカル実行に不向き
 
-### 6.2 index.jsonの最小限設計
+### 6.2 index.yamlの最小限設計
 
-**決定**: index.jsonにはGitHub Issue参照情報のみを保持
+**決定**: index.yamlにはGitHub Issue参照情報のみを保持
 
 **理由**:
 - GitHub IssueがSSoT（Single Source of Truth）
@@ -447,7 +447,7 @@ export const syncCommand = new Command("sync")
 
 ### 6.3 双方向同期の競合解決
 
-**決定**: 同期方向を明示的に指定（デフォルトはGitHub → index.json）
+**決定**: 同期方向を明示的に指定（デフォルトはGitHub → index.yaml）
 
 **理由**:
 - 自動マージによるデータ破損リスク回避
@@ -455,7 +455,7 @@ export const syncCommand = new Command("sync")
 
 **運用**:
 - GitHub Issueでラベル変更 → `reqord feedback sync` で取り込み
-- index.json手動編集 → `reqord feedback sync --from-local` で反映
+- index.yaml手動編集 → `reqord feedback sync --from-local` で反映
 
 ### 6.4 APIレート制限への配慮
 

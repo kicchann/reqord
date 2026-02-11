@@ -2,7 +2,7 @@
 
 ## 1. 設計概要
 
-`reqord context <req-id>` コマンドにより、指定された要件に関連するすべてのコンテキスト情報をLLM向けのMarkdown形式に集約して標準出力に出力する。ProjectContext（product/technical/structure）、Requirement（JSON + description.md）、Gap Analysis結果、関連Specification、依存要件をひとつのドキュメントに統合する。`--compact`（約2000トークン）と `--full`（約10000トークン）のモードでトークン量を制御し、パイプ経由でのLLM入力（`reqord context req-001 | claude code`）を主要ユースケースとする。
+`reqord context <req-id>` コマンドにより、指定された要件に関連するすべてのコンテキスト情報をLLM向けのMarkdown形式に集約して標準出力に出力する。ProjectContext（product/technical/structure）、Requirement（YAML + description.md）、Gap Analysis結果、関連Specification、依存要件をひとつのドキュメントに統合する。`--compact`（約2000トークン）と `--full`（約10000トークン）のモードでトークン量を制御し、パイプ経由でのLLM入力（`reqord context req-001 | claude code`）を主要ユースケースとする。
 
 ## 2. アーキテクチャ
 
@@ -105,7 +105,7 @@ export async function collectContext(
 | ProjectContext: product | 全文 | name + visionのみ |
 | ProjectContext: technical | 全文 | stack概要のみ |
 | ProjectContext: structure | 全文 | 省略 |
-| Requirement JSON | 全フィールド | id, title, status, successCriteria, format |
+| Requirement YAML | 全フィールド | id, title, status, successCriteria, format |
 | Requirement description.md | 全文 | 先頭500文字 |
 | Gap Analysis | 全詳細 | coverageとmissingFeatures概要 |
 | Related Specifications | design.mdの設計概要セクション | id + statusのみ |
@@ -120,13 +120,13 @@ export async function collectContext(
 ## プロジェクト情報
 
 ### プロダクト
-{product.json の内容}
+{product.yaml の内容}
 
 ### 技術スタック
-{technical.json の内容}
+{technical.yaml の内容}
 
 ### プロジェクト構造
-{structure.json の内容}
+{structure.yaml の内容}
 
 ## 対象要件: {req.id}
 
@@ -203,9 +203,9 @@ function extractDesignSummary(designContent: string): string | null {
     → contextExportService.exportContext(cwd, "req-000016", { mode: "full", format: "markdown" })
       → collectContext(cwd, "req-000016")
         → contextRepo.load(cwd) → ProjectContext取得
-        → contextRepo.loadContextFile(cwd, "product") → product.json
-        → contextRepo.loadContextFile(cwd, "technical") → technical.json
-        → contextRepo.loadContextFile(cwd, "structure") → structure.json
+        → contextRepo.loadContextFile(cwd, "product") → product.yaml
+        → contextRepo.loadContextFile(cwd, "technical") → technical.yaml
+        → contextRepo.loadContextFile(cwd, "structure") → structure.yaml
         → reqRepo.findById(cwd, "req-000016") → Requirement取得
         → reqRepo.loadDescription(cwd, "req-000016") → description.md
         → requirement.gapAnalysis → Gap Analysis結果

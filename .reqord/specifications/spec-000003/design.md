@@ -2,7 +2,7 @@
 
 ## 1. 設計概要
 
-プロジェクトコンテキスト（プロダクト情報、技術スタック、プロジェクト構造、ドメイン知識）の初期化・表示・更新を提供する。コンテキストは複数のJSONファイルに分散保存され、`context.json`がルートメタデータ、`product.json`/`technical.json`/`structure.json`が個別の詳細情報、`domain/`ディレクトリがドメイン知識ファイルを格納する。
+プロジェクトコンテキスト（プロダクト情報、技術スタック、プロジェクト構造、ドメイン知識）の初期化・表示・更新を提供する。コンテキストは複数のYAMLファイルに分散保存され、`context.yaml`がルートメタデータ、`product.yaml`/`technical.yaml`/`structure.yaml`が個別の詳細情報、`domain/`ディレクトリがドメイン知識ファイルを格納する。
 
 ## 2. アーキテクチャ
 
@@ -18,10 +18,10 @@ Repository:     repositories/project-context.ts
 File System:    repositories/file-system.ts
                     ↓
 Storage:        .reqord/context/
-                  ├── context.json       (ルートメタデータ)
-                  ├── product.json       (プロダクト情報)
-                  ├── technical.json     (技術スタック)
-                  ├── structure.json     (プロジェクト構造)
+                  ├── context.yaml       (ルートメタデータ)
+                  ├── product.yaml       (プロダクト情報)
+                  ├── technical.yaml     (技術スタック)
+                  ├── structure.yaml     (プロジェクト構造)
                   └── domain/            (ドメイン知識)
 ```
 
@@ -41,9 +41,9 @@ RequirementのCRUDと同じCommand → Service → Repository → FileSystemパ�
 
 **責務:** コンテキスト管理のビジネスロジック。
 
-- `initContext(cwd, options)`: 既存チェック → context.json生成 → テンプレートファイル（product/technical/structure）配置 → domain/ディレクトリ作成
-- `showContext(cwd)`: context.json読み込み + 各ファイルの存在確認 + domain/配下のファイル一覧取得 + 各ファイルの内容読み込み
-- `updateContext(cwd, options)`: context.jsonのメタデータ更新 + 各サブファイルのパッチ適用（シャローマージ）
+- `initContext(cwd, options)`: 既存チェック → context.yaml生成 → テンプレートファイル（product/technical/structure）配置 → domain/ディレクトリ作成
+- `showContext(cwd)`: context.yaml読み込み + 各ファイルの存在確認 + domain/配下のファイル一覧取得 + 各ファイルの内容読み込み
+- `updateContext(cwd, options)`: context.yamlのメタデータ更新 + 各サブファイルのパッチ適用（シャローマージ）
 
 **ヘルパー:**
 - `resolveFilePath(fileRef)`: files構造のファイル参照（文字列/オブジェクト）をパスに解決
@@ -52,9 +52,9 @@ RequirementのCRUDと同じCommand → Service → Repository → FileSystemパ�
 
 **責務:** コンテキスト関連ファイルのI/O。
 
-- `load(cwd)`: context.json読み込み + ProjectContextSchema.safeParse
-- `save(cwd, context)`: context.json書き込み
-- `contextExists(cwd)`: context.jsonの存在確認
+- `load(cwd)`: context.yaml読み込み + ProjectContextSchema.safeParse
+- `save(cwd, context)`: context.yaml書き込み
+- `contextExists(cwd)`: context.yamlの存在確認
 - `loadContextFile(cwd, fileType)`: product/technical/structureの個別読み込み
 - `saveContextFile(cwd, fileType, data)`: 個別ファイル書き込み
 
@@ -89,9 +89,9 @@ RequirementのCRUDと同じCommand → Service → Repository → FileSystemパ�
       → ProjectContextオブジェクト構築
       → contextRepo.save(cwd, context)
       → テンプレートファイル生成:
-        - product.json: { name, vision, goals, targetUsers }
-        - technical.json: { stack, constraints, decisions }
-        - structure.json: { modules, layers }
+        - product.yaml: { name, vision, goals, targetUsers }
+        - technical.yaml: { stack, constraints, decisions }
+        - structure.yaml: { modules, layers }
       → domain/ディレクトリ作成
   → メタデータ + 生成ファイル一覧表示
 ```
@@ -104,7 +104,7 @@ RequirementのCRUDと同じCommand → Service → Repository → FileSystemパ�
     → loadPatchFile("tech-patch.json") → JSONオブジェクト
     → updateContext(cwd, { technicalPatch })
       → contextRepo.load(cwd) → before
-      → context.jsonのupdatedAt更新 → contextRepo.save()
+      → context.yamlのupdatedAt更新 → contextRepo.save()
       → contextRepo.loadContextFile(cwd, "technical") → existing
       → シャローマージ: { ...existing, ...patch }
       → contextRepo.saveContextFile(cwd, "technical", merged)
@@ -115,7 +115,7 @@ RequirementのCRUDと同じCommand → Service → Repository → FileSystemパ�
 
 ### ユニットテスト
 
-- **context-service**: init/show/updateの各関数。リポジトリモック化。既存context.jsonがある場合のinit拒否、ファイル不在時のshow動作
+- **context-service**: init/show/updateの各関数。リポジトリモック化。既存context.yamlがある場合のinit拒否、ファイル不在時のshow動作
 - **project-context repository**: Zodバリデーション、ファイル読み書き
 - **resolveFilePath**: 文字列/オブジェクト形式両方のファイル参照解決
 
@@ -129,7 +129,7 @@ RequirementのCRUDと同じCommand → Service → Repository → FileSystemパ�
 
 ### ファイル分散構造
 
-**決定:** context.json + product.json + technical.json + structure.json + domain/ に分離
+**決定:** context.yaml + product.yaml + technical.yaml + structure.yaml + domain/ に分離
 **理由:** 一つのファイルにすべてを格納すると巨大化し、部分更新が困難になる。各領域を独立ファイルにすることで、AIエージェントやユーザーが特定領域のみを更新できる。
 
 ### filesフィールドの柔軟な参照形式

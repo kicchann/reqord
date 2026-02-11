@@ -2,7 +2,7 @@
 
 ## 1. 設計概要
 
-新しい要件が既存コードベースとどの程度ギャップがあるかをAI（Anthropic SDK）で分析する。`reqord req gap-analysis <id>` コマンドにより、既存実装のカバレッジ（full/partial/none）、不足機能、既存コードとの矛盾をファイル名・行番号付きで出力する。分析結果はRequirement JSONのgapAnalysisフィールドに記録し、`reqord validate gap <id>` で既存分析の再検証を行う。
+新しい要件が既存コードベースとどの程度ギャップがあるかをAI（Anthropic SDK）で分析する。`reqord req gap-analysis <id>` コマンドにより、既存実装のカバレッジ（full/partial/none）、不足機能、既存コードとの矛盾をファイル名・行番号付きで出力する。分析結果はRequirement YAMLのgapAnalysisフィールドに記録し、`reqord validate gap <id>` で既存分析の再検証を行う。
 
 ## 2. アーキテクチャ
 
@@ -19,7 +19,7 @@ Repository:     repositories/requirement.ts     (既存)
 External:       Anthropic API (Claude)
                 ファイルシステム (プロジェクトコード)
                     ↓
-Storage:        .reqord/requirements/req-NNNNNN.json (gapAnalysisフィールド)
+Storage:        .reqord/requirements/req-NNNNNN.yaml (gapAnalysisフィールド)
 ```
 
 コードベースの走査を専用リポジトリ（codebase.ts）に隔離し、AI分析はspec-000016で導入するAIリポジトリを再利用する。分析対象のファイル収集とAI解析を分離することで、テスト性と拡張性を確保する。
@@ -303,7 +303,7 @@ export interface GapRevalidationResult {
 ### 統合テスト
 
 - テスト用の小規模コードベースでの分析実行（AIモック使用）
-- gapAnalysisフィールドのJSON永続化
+- gapAnalysisフィールドのYAML永続化
 - `--json` 出力フォーマット検証
 - `--path`, `--include`, `--exclude` オプションの動作
 

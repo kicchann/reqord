@@ -19,7 +19,7 @@ Repository:     repositories/specification.ts  (既存)
                     ↓
 External:       git CLI / gh CLI
                     ↓
-Storage:        .reqord/specifications/spec-NNNNNN.json
+Storage:        .reqord/specifications/spec-NNNNNN.yaml
                 GitHub PR
 ```
 
@@ -91,7 +91,7 @@ const target: ApprovalTarget = {
   status: spec.status,
   title: `Specification ${spec.id} (${req.title})`,
   files: [
-    `.reqord/specifications/${spec.id}.json`,
+    `.reqord/specifications/${spec.id}.yaml`,
     `.reqord/specifications/${spec.id}/design.md`,
   ],
 };
@@ -165,7 +165,7 @@ status: draft → pending_approval
       → specificationService.updateSpec(cwd, id, { status: "pending_approval" })
       → gitRepo.createBranch("reqord/spec-000015-approve-v1.0.0")
       → gitRepo.checkout("reqord/spec-000015-approve-v1.0.0")
-      → gitRepo.add([".reqord/specifications/spec-000015.json", ".reqord/specifications/spec-000015/design.md"])
+      → gitRepo.add([".reqord/specifications/spec-000015.yaml", ".reqord/specifications/spec-000015/design.md"])
       → gitRepo.commit("chore(reqord): request approval for spec-000015")
       → gitRepo.push("reqord/spec-000015-approve-v1.0.0")
       → githubRepo.createPullRequest({ title, body, head })

@@ -12,7 +12,7 @@
 The system shall [action].
 ```
 
-例: `The system shall store all data in JSON + Markdown format.`
+例: `The system shall store all data in YAML + Markdown format.`
 
 ### 2. Event-driven（イベント駆動）
 
@@ -72,13 +72,13 @@ As a [role], I want [action], so that [benefit].
 
 すべての要件は以下の基準を満たすこと。
 
-| 基準 | 説明 | 例 |
-|------|------|-----|
-| **S**pecific | 具体的で明確 | "レスポンス時間3秒以内" (良) vs "速く" (悪) |
-| **M**easurable | 測定可能な成功基準 | "カバレッジ80%以上" (良) vs "十分なテスト" (悪) |
-| **A**chievable | 技術的に達成可能 | 現在のスタックで実装可能か |
-| **R**elevant | プロダクトビジョンに合致 | product.json の vision/coreFeatures に関連 |
-| **T**ime-bound | 見積もり可能 | estimatedComplexity + estimatedHours を設定 |
+| 基準           | 説明                     | 例                                              |
+| -------------- | ------------------------ | ----------------------------------------------- |
+| **S**pecific   | 具体的で明確             | "レスポンス時間3秒以内" (良) vs "速く" (悪)     |
+| **M**easurable | 測定可能な成功基準       | "カバレッジ80%以上" (良) vs "十分なテスト" (悪) |
+| **A**chievable | 技術的に達成可能         | 現在のスタックで実装可能か                      |
+| **R**elevant   | プロダクトビジョンに合致 | product.yaml の vision/coreFeatures に関連      |
+| **T**ime-bound | 見積もり可能             | estimatedComplexity + estimatedHours を設定     |
 
 ## 避けるべき曖昧表現
 
@@ -118,9 +118,9 @@ As a [role], I want [action], so that [benefit].
 
 ## 複雑度見積もり
 
-| 複雑度 | 目安時間 | 説明 |
-|--------|----------|------|
-| small | 1-8時間 | 単一コンポーネントの変更、明確な実装パス |
-| medium | 8-24時間 | 複数コンポーネントにまたがる変更、設計判断を含む |
-| large | 24-40時間 | アーキテクチャへの影響あり、複数の技術的判断を含む |
-| xlarge | 40時間超 | 分割推奨。大規模リファクタリングや新規サブシステム |
+| 複雑度 | 目安時間  | 説明                                               |
+| ------ | --------- | -------------------------------------------------- |
+| small  | 1-8時間   | 単一コンポーネントの変更、明確な実装パス           |
+| medium | 8-24時間  | 複数コンポーネントにまたがる変更、設計判断を含む   |
+| large  | 24-40時間 | アーキテクチャへの影響あり、複数の技術的判断を含む |
+| xlarge | 40時間超  | 分割推奨。大規模リファクタリングや新規サブシステム |

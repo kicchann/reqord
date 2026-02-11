@@ -316,7 +316,7 @@ export async function getSpecificationById(id: string): Promise<Specification | 
 
 - `REQORD_ROOT` 環境変数で `.reqord/` ディレクトリを特定
 - spec-000007で実装したRequirement読み取りパターン（LocalRequirementRepository）と同様のファイルスキャン
-- `spec-\d{6}\.json` パターンマッチで全件取得
+- `spec-\d{6}\.yaml` パターンマッチで全件取得
 
 ### 3.4 ナビゲーション更新
 
@@ -340,10 +340,10 @@ const navItems = [
     → getDashboardData()
       → getAllRequirements()
         → LocalRequirementRepository.findAll()
-          → .reqord/requirements/req-*.json 読み込み
+          → .reqord/requirements/req-*.yaml 読み込み
       → getAllSpecifications()
         → specificationRepository.findAll()
-          → .reqord/specifications/spec-*.json 読み込み
+          → .reqord/specifications/spec-*.yaml 読み込み
       → Requirements集計: byStatus, approvedPercentage
       → Specifications集計: byStatus, approvedPercentage
       → Issues集計: 各spec.implementation.issues から

@@ -43,8 +43,8 @@ flowchart LR
     end
 
     subgraph Output
-        REQFILES[".reqord/requirements/<br/>JSON + Markdown"]
-        SPECFILES[".reqord/specifications/<br/>JSON + Markdown + Mermaid"]
+        REQFILES[".reqord/requirements/<br/>YAML + Markdown"]
+        SPECFILES[".reqord/specifications/<br/>YAML + Markdown + Mermaid"]
         GHISSUES["GitHub Issues<br/>テンプレート適用済み"]
     end
 
@@ -65,9 +65,9 @@ flowchart LR
 
 ### Repository Pattern
 
-データアクセス層の抽象化。ファイルシステム操作（JSON/Markdown読み書き）をRepositoryで抽象化し、ビジネスロジックからI/Oを分離する。
+データアクセス層の抽象化。ファイルシステム操作（YAML/Markdown読み書き）をRepositoryで抽象化し、ビジネスロジックからI/Oを分離する。
 
-- `RequirementRepository` - 要件のCRUD（JSON + Markdownの統合管理）
+- `RequirementRepository` - 要件のCRUD（YAML + Markdownの統合管理）
 - `SpecificationRepository` - 仕様のCRUD
 - `ContextRepository` - ProjectContextの読み書き
 

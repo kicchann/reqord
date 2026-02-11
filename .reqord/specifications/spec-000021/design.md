@@ -19,7 +19,7 @@ External:       Anthropic API (Claude)
 Shared:         @reqord/shared
                   schemas/requirement.ts          (既存: FormatSchema)
                     ↓
-Storage:        .reqord/requirements/req-NNNNNN.json
+Storage:        .reqord/requirements/req-NNNNNN.yaml
 ```
 
 フォーマット変換ロジックをformat-serviceに集約し、AI呼び出しはspec-000016で導入するAIリポジトリを再利用する。変換プロンプトの構築とレスポンスのZodスキーマ検証をサービス層で行う。

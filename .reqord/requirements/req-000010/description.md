@@ -22,7 +22,7 @@ Error: Invalid requirement req-000001: Validation error
 ### 改善後のエラー表示
 
 ```
-Error: req-000001.json のバリデーションに失敗しました:
+Error: req-000001.yaml のバリデーションに失敗しました:
   - status: 不正な値 "unknown"（期待値: draft, approved, implemented, deprecated）
   - priority: 必須フィールドが未設定
 ```

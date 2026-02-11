@@ -19,8 +19,8 @@ Shared:         @reqord/shared
                   schemas/requirement.ts          (既存: gapAnalysisフィールド参照)
                   schemas/specification.ts        (既存: implementationフィールド参照)
                     ↓
-Storage:        .reqord/requirements/req-NNNNNN.json
-                .reqord/specifications/spec-NNNNNN.json
+Storage:        .reqord/requirements/req-NNNNNN.yaml
+                .reqord/specifications/spec-NNNNNN.yaml
 ```
 
 集計ロジックをstatus-serviceに集約し、表示フォーマットはコマンド層に委譲する。リポジトリ層の既存findAll/findByIdメソッドを活用し、新規のリポジトリ追加は不要。

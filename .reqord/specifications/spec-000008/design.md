@@ -27,7 +27,7 @@ Repository Layer:
     └── deleteById(cwd, id) → void
       ↓
 File System:
-  .reqord/requirements/req-NNNNNN.json
+  .reqord/requirements/req-NNNNNN.yaml
   .reqord/requirements/req-NNNNNN/description.md
 ```
 
@@ -95,7 +95,7 @@ Description:
 
 ### 3.3 deleteコマンド (`commands/req/delete.ts`)
 
-**責務:** 指定IDの要件を削除（JSONファイル + 説明文ディレクトリ）。
+**責務:** 指定IDの要件を削除（YAMLファイル + 説明文ディレクトリ）。
 
 **入力:**
 - `<id>`: 必須引数
@@ -113,7 +113,7 @@ Description:
 ```
 
 **削除対象:**
-- `.reqord/requirements/req-NNNNNN.json`
+- `.reqord/requirements/req-NNNNNN.yaml`
 - `.reqord/requirements/req-NNNNNN/` ディレクトリ全体（description.md含む）
 
 **エラー処理:** 指定IDが存在しない場合は `Requirement {id} not found.` エラー。
@@ -127,7 +127,7 @@ Description:
   → showCommand.action(id, { json: false })
     → showRequirement(cwd, "req-000001")
       → reqRepo.findById(cwd, "req-000001")
-        → .reqord/requirements/req-000001.json読み込み
+        → .reqord/requirements/req-000001.yaml読み込み
         → RequirementSchema.safeParse → Requirement
       → reqRepo.loadDescription(cwd, "req-000001")
         → .reqord/requirements/req-000001/description.md読み込み
@@ -166,7 +166,7 @@ Description:
     → deleteRequirement(cwd, "req-000001")
       → reqRepo.findById → 存在確認
       → reqRepo.deleteById(cwd, "req-000001")
-        → fs.remove("req-000001.json")
+        → fs.remove("req-000001.yaml")
         → fs.remove("req-000001/")
   → "Deleted requirement: req-000001"
 ```
