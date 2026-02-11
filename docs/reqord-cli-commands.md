@@ -18,11 +18,11 @@ reqord init
 |---------|------|------|
 | `reqord context init` | プロジェクトコンテキストを初期化（名前・言語設定） | 実装済み |
 | `reqord context show` | プロジェクトコンテキストのサマリーを表示 | 実装済み |
-| `reqord context update` | コンテキストメタデータを更新（name, version, JSON patch） | 実装済み |
-| `reqord context export <req-id>` | 要件に関連するコンテキストを統合出力（markdown/JSON） | 🔴 未実装 |
+| `reqord context update` | コンテキストメタデータを更新（name, version, YAML patch） | 実装済み |
+| `reqord context export <req-id>` | 要件に関連するコンテキストを統合出力（markdown/YAML） | 🔴 未実装 |
 
 - 保存先: `.reqord/context/`
-- 管理対象: product.json, technical.json, structure.json
+- 管理対象: product.yaml, technical.yaml, structure.yaml
 
 ### context export（未実装）
 
@@ -45,10 +45,11 @@ ProjectContext + Requirement + Specificationを結合し、外部ツール向け
 | `reqord req delete <id>` | 要件を削除（確認プロンプト付き） | 実装済み |
 | `reqord req validate <id>` | 要件の品質をSMARTスコアリングで検証 | 実装済み |
 | `reqord req history <id>` | 要件のバージョン履歴を表示 | 実装済み |
-| `reqord req approve <id>` | 要件の承認PRを作成（GitHub PR連携） | 🔴 未実装 |
+| `reqord req approve <id>` | 要件の承認PRを作成（GitHub PR連携） | 実装済み |
 
 - 要件ID形式: `req-NNNNNN`（6桁ゼロ埋め）
 - 保存先: `.reqord/requirements/`
+- 保存形式: YAML（`req-NNNNNN.yaml`）
 
 ### req history
 
@@ -59,9 +60,9 @@ ProjectContext + Requirement + Specificationを結合し、外部ツール向け
 - `--json` フラグでJSON出力に対応
 - `reqord req update` で `--major` / `--minor` / `--patch` フラグによるバージョン上書きに対応
 
-### req approve（未実装）
+### req approve
 
-**出典**: req-000011「Requirement承認フロー (GitHub PR連携)」(draft)
+**出典**: req-000011「Requirement承認フロー (GitHub PR連携)」(implemented)
 
 要件の承認用GitHub PRを作成する。
 
@@ -78,11 +79,22 @@ ProjectContext + Requirement + Specificationを結合し、外部ツール向け
 | `reqord spec list` | 仕様一覧を表示（status・要件IDフィルタ対応） | 実装済み |
 | `reqord spec show <id>` | 仕様の詳細を表示（JSON出力対応） | 実装済み |
 | `reqord spec design <id>` | 仕様の設計ドキュメントを表示・更新 | 実装済み |
+| `reqord spec approve <id>` | 仕様の承認PRを作成（GitHub PR連携） | 実装済み |
 | `reqord spec validate <id>` | 仕様の設計検証（アーキテクチャ整合性、命名規則） | 🔴 未実装 |
 | `reqord spec coverage <id>` | 要件カバレッジ状況を表示 | 🔴 未実装 |
-| `reqord spec approve <id>` | 仕様の承認PRを作成（GitHub PR連携） | 🔴 未実装 |
 
 - 保存先: `.reqord/specifications/`
+- 保存形式: YAML（`spec-NNNNNN.yaml`）
+
+### spec approve
+
+**出典**: req-000015「Specification承認フロー」(implemented)
+
+仕様の承認用GitHub PRを作成する。
+
+- 親Requirementが `approved` であることを事前検証
+- `reqord/spec-<id>-approve-v<version>` ブランチを作成
+- CODEOWNERSからレビュアーを自動アサイン
 
 ### spec validate（未実装）
 
@@ -90,7 +102,7 @@ ProjectContext + Requirement + Specificationを結合し、外部ツール向け
 
 仕様のアーキテクチャ整合性と命名規則を検証する。
 
-- 検証結果を `designValidation` としてSpecification JSONに保存
+- 検証結果を `designValidation` としてSpecification YAMLに保存
 - `--json` 出力対応
 
 ### spec coverage（未実装）
@@ -99,28 +111,34 @@ ProjectContext + Requirement + Specificationを結合し、外部ツール向け
 
 要件の各成功基準がSpecificationのどのセクションでカバーされているかを表示する。
 
-### spec approve（未実装）
-
-**出典**: req-000015「Specification承認フロー」(draft)
-
-仕様の承認用GitHub PRを作成する。
-
-- 親Requirementが `approved` であることを事前検証
-- `reqord/spec-<id>-approve-v<version>` ブランチを作成
-- CODEOWNERSからレビュアーを自動アサイン
-
 ## feedback（フィードバック管理）
 
 | コマンド | 説明 | 状態 |
 |---------|------|------|
 | `reqord feedback list` | フィードバック一覧を表示（state・typeフィルタ対応） | 実装済み |
-| `reqord feedback show <id>` | フィードバック詳細を表示（GitHub issue + index.json） | 実装済み |
+| `reqord feedback show <id>` | フィードバック詳細を表示（GitHub issue + index.yaml） | 実装済み |
 | `reqord feedback close <id>` | フィードバックをクローズ（GitHub issue連動） | 実装済み |
 | `reqord feedback link <id>` | フィードバックを要件・仕様にリンク（type・severity指定） | 実装済み |
-| `reqord feedback sync` | GitHub issuesとindex.jsonの双方向同期 | 実装済み |
+| `reqord feedback sync` | GitHub issuesとindex.yamlの双方向同期 | 実装済み |
 
-- 保存先: `.reqord/feedback/index.json`
+- 保存先: `.reqord/feedback/index.yaml`
 - GitHub連携: `feedback` ラベル付きissueと同期
+
+## issue（GitHub Issue生成・管理）
+
+**出典**: req-000016「GitHub Issue生成・管理」(implemented)
+
+| コマンド | 説明 | 状態 |
+|---------|------|------|
+| `reqord issue create <spec-id>` | 構造化タスクファイルからGitHub Issueを一括生成 | 実装済み |
+| `reqord issue sync <spec-id>` | Issue状態をSpecification YAMLに同期 | 実装済み |
+| `reqord issue sync-all` | 全SpecificationのIssue状態を同期 | 実装済み |
+| `reqord issue validate <spec-id>` | Issueメタデータの整合性チェック | 実装済み |
+| `reqord issue fetch <spec-id>` | GitHub Issueの情報を取得 | 実装済み |
+
+- `--tasks-file <path>` でタスク定義ファイルを指定
+- Reqordメタデータをラベル・コメントとして埋め込み
+- `--dry-run` / `--json` オプション対応
 
 ## impact（影響範囲分析）🔴 未実装
 
@@ -132,21 +150,6 @@ ProjectContext + Requirement + Specificationを結合し、外部ツール向け
 | `reqord impact notify <id>` | 影響範囲のステークホルダーに通知（Issue/PRコメント） | 🔴 未実装 |
 
 - 要件更新時に `impact` フィールドを自動計算
-- `--dry-run` / `--json` オプション対応
-
-## issue（GitHub Issue生成・管理）🔴 未実装
-
-**出典**: req-000016「GitHub Issue生成・管理」(draft)
-
-| コマンド | 説明 | 状態 |
-|---------|------|------|
-| `reqord issue create <spec-id>` | 構造化タスクファイルからGitHub Issueを一括生成 | 🔴 未実装 |
-| `reqord issue sync <spec-id>` | Issue状態をSpecification JSONに同期 | 🔴 未実装 |
-| `reqord issue sync-all` | 全SpecificationのIssue状態を同期 | 🔴 未実装 |
-| `reqord issue validate <spec-id>` | Issueメタデータの整合性チェック | 🔴 未実装 |
-
-- `--tasks-file <path>` でタスク定義JSONを指定
-- Reqordメタデータをラベル・コメントとして埋め込み
 - `--dry-run` / `--json` オプション対応
 
 ## validate（実装検証）🔴 未実装
@@ -188,3 +191,11 @@ ProjectContext + Requirement + Specificationを結合し、外部ツール向け
 - インタラクティブ依存グラフ（Mermaid.js）
 - Gantt Chart（Recharts）
 - Specification詳細ビュー（Research/Design/Coverage/Issues/Historyタブ）
+
+## migrate-to-yaml（データ形式移行ユーティリティ）
+
+```bash
+reqord migrate-to-yaml
+```
+
+`.reqord/` 配下のJSON形式データファイルをYAML形式に一括変換するユーティリティコマンド。req-000027で実施したJSON→YAML移行に使用。
