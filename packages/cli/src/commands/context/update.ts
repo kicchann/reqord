@@ -12,9 +12,9 @@ export const contextUpdateCommand = new Command("update")
   .description("Update project context")
   .option("-n, --name <name>", "New project name")
   .option("-v, --version <version>", "New project version")
-  .option("--product <path>", "JSON file to patch product.json")
-  .option("--technical <path>", "JSON file to patch technical.json")
-  .option("--structure <path>", "JSON file to patch structure.json")
+  .option("--product <path>", "JSON file to patch product.yaml")
+  .option("--technical <path>", "JSON file to patch technical.yaml")
+  .option("--structure <path>", "JSON file to patch structure.yaml")
   .option("--json", "Output as JSON")
   .action(
     async (options: {
@@ -61,7 +61,7 @@ export const contextUpdateCommand = new Command("update")
         }
         if (result.updatedFiles.length > 0) {
           console.log(
-            `  files: ${result.updatedFiles.map((f) => `${f}.json`).join(", ")} updated`,
+            `  files: ${result.updatedFiles.map((f) => `${f}.yaml`).join(", ")} updated`,
           );
         }
       } catch (error) {

@@ -5,7 +5,7 @@ import { handleError } from "../../utils/error-handler.js";
 import { parseIssueNumber } from "../../utils/display.js";
 
 export const feedbackCloseCommand = new Command("close")
-  .description("Close feedback (updates index.json and closes GitHub Issue)")
+  .description("Close feedback (updates index.yaml and closes GitHub Issue)")
   .argument("<issue-number>", "GitHub issue number")
   .action(async (issueNumberStr: string) => {
     try {

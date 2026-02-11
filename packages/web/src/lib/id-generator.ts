@@ -4,12 +4,12 @@ import * as fs from "./file-system";
 export async function generateNextId(cwd: string): Promise<string> {
   const reqDir = fs.joinPath(cwd, REQORD_DIR, REQUIREMENTS_DIR);
   const files = await fs.readdirFiles(reqDir, (name) =>
-    /^req-\d{6}\.json$/.test(name),
+    /^req-\d{6}\.yaml$/.test(name),
   );
 
   let maxNum = 0;
   for (const file of files) {
-    const match = file.match(/^req-(\d{6})\.json$/);
+    const match = file.match(/^req-(\d{6})\.yaml$/);
     if (match) {
       const num = parseInt(match[1], 10);
       if (num > maxNum) {

@@ -6,7 +6,7 @@ async function generateNextPrefixedId(
   dir: string,
   prefix: string,
 ): Promise<string> {
-  const pattern = new RegExp(`^${prefix}-(\\d{6})\\.json$`);
+  const pattern = new RegExp(`^${prefix}-(\\d{6})\\.yaml$`);
   const targetDir = fs.getReqordDir(cwd, dir);
   const files = await fs.readdirFiles(targetDir, (name) => pattern.test(name));
 

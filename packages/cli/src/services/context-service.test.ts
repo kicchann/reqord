@@ -15,6 +15,8 @@ vi.mock("../repositories/file-system.js", () => ({
   exists: vi.fn(),
   readJSON: vi.fn(),
   writeJSON: vi.fn(),
+  readYAML: vi.fn(),
+  writeYAML: vi.fn(),
   mkdirp: vi.fn(),
   readdirFiles: vi.fn(),
   joinPath: vi.fn((...args: string[]) => args.join("/")),
@@ -32,9 +34,9 @@ function makeContext(overrides: Partial<ProjectContext> = {}): ProjectContext {
     createdAt: "2026-01-01T00:00:00Z",
     updatedAt: "2026-01-01T00:00:00Z",
     files: {
-      product: { path: "context/product.json", format: "json" },
-      technical: { structured: "context/technical.json" },
-      structure: { structured: "context/structure.json" },
+      product: { path: "context/product.yaml", format: "yaml" },
+      technical: { structured: "context/technical.yaml" },
+      structure: { structured: "context/structure.yaml" },
       domain: [],
     },
     ...overrides,
@@ -50,7 +52,7 @@ describe("updateContext", () => {
     vi.mocked(contextRepo.load).mockResolvedValue(null);
 
     await expect(updateContext("/cwd", {})).rejects.toThrow(
-      "context.json not found. Run 'reqord context init' first.",
+      "context.yaml not found. Run 'reqord context init' first.",
     );
   });
 
@@ -87,7 +89,7 @@ describe("updateContext", () => {
     expect(result.after.createdAt).toBe(ctx.createdAt);
   });
 
-  it("product.jsonをパッチ更新できる", async () => {
+  it("product.yamlをパッチ更新できる", async () => {
     const ctx = makeContext();
     vi.mocked(contextRepo.load).mockResolvedValue(ctx);
     vi.mocked(contextRepo.save).mockResolvedValue(undefined);
@@ -117,7 +119,7 @@ describe("updateContext", () => {
     expect(result.updatedFiles).toContain("product");
   });
 
-  it("technical.jsonをパッチ更新できる", async () => {
+  it("technical.yamlをパッチ更新できる", async () => {
     const ctx = makeContext();
     vi.mocked(contextRepo.load).mockResolvedValue(ctx);
     vi.mocked(contextRepo.save).mockResolvedValue(undefined);
@@ -145,7 +147,7 @@ describe("updateContext", () => {
     expect(result.updatedFiles).toContain("technical");
   });
 
-  it("structure.jsonをパッチ更新できる", async () => {
+  it("structure.yamlをパッチ更新できる", async () => {
     const ctx = makeContext();
     vi.mocked(contextRepo.load).mockResolvedValue(ctx);
     vi.mocked(contextRepo.save).mockResolvedValue(undefined);

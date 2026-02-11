@@ -143,7 +143,7 @@ describe("specApproveCommand", () => {
         status: "draft",
         title: "Specification spec-000001 (Test Requirement)",
         files: [
-          ".reqord/specifications/spec-000001.json",
+          ".reqord/specifications/spec-000001.yaml",
           ".reqord/specifications/spec-000001/design.md",
         ],
       },
@@ -298,7 +298,7 @@ describe("specApproveCommand", () => {
       status: "draft",
       title: "Specification spec-000042 (Feature X)",
       files: [
-        ".reqord/specifications/spec-000042.json",
+        ".reqord/specifications/spec-000042.yaml",
         ".reqord/specifications/spec-000042/design.md",
       ],
     });

@@ -7,7 +7,7 @@ import { handleError } from "../../utils/error-handler.js";
 import { FEEDBACK_STATUS_COLORS, identityColor } from "../../utils/display.js";
 
 export const feedbackListCommand = new Command("list")
-  .description("List feedback issues from index.json")
+  .description("List feedback issues from index.yaml")
   .option("--state <state>", "Filter by state (open|closed|all)", "all")
   .option("--type <type>", "Filter by type")
   .option("--json", "Output as JSON")

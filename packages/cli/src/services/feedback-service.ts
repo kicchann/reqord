@@ -63,7 +63,7 @@ export async function showFeedback(
 
   if (!feedback) {
     throw new Error(
-      `Feedback for issue #${issueNumber} not found in index.json. Run 'reqord feedback sync' first.`,
+      `Feedback for issue #${issueNumber} not found in index.yaml. Run 'reqord feedback sync' first.`,
     );
   }
 
@@ -78,7 +78,7 @@ export async function linkToRequirement(
   // Verify requirement exists
   const requirement = await reqRepo.findByIdOrThrow(cwd, options.requirementId);
 
-  // Update index.json
+  // Update index.yaml
   const index = await feedbackRepo.loadIndex(cwd);
   const feedback = getOrCreateFeedback(index, options.issueNumber, options);
 
@@ -137,7 +137,7 @@ export async function linkWithNewRequirement(
   requirement.origin = { feedbackIssue: options.issueNumber };
   await reqRepo.save(cwd, requirement);
 
-  // Update index.json
+  // Update index.yaml
   const index = await feedbackRepo.loadIndex(cwd);
   const feedback = getOrCreateFeedback(index, options.issueNumber, options);
   feedback.linkedTo.createdRequirements.push(newId);
@@ -165,7 +165,7 @@ export async function linkToSpecification(
   // Verify specification exists
   const specification = await specRepo.findByIdOrThrow(cwd, options.specificationId);
 
-  // Update index.json
+  // Update index.yaml
   const index = await feedbackRepo.loadIndex(cwd);
   const feedback = getOrCreateFeedback(index, options.issueNumber, options);
 
