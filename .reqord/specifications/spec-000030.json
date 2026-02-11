@@ -19,6 +19,13 @@
     "supplementary": []
   },
   "flags": [],
+  "currentApproval": {
+    "version": "2.0.0",
+    "phase": "specification",
+    "prNumber": 181,
+    "prUrl": "https://github.com/kicchann/reqord/pull/181",
+    "approvedBy": []
+  },
   "implementation": {
     "issues": [
       {
@@ -58,12 +65,5 @@
       "percentage": 0,
       "lastSyncedAt": "2026-02-11T09:30:00.000Z"
     }
-  },
-  "currentApproval": {
-    "version": "2.0.0",
-    "phase": "specification",
-    "prNumber": 0,
-    "prUrl": "",
-    "approvedBy": []
   }
 }
