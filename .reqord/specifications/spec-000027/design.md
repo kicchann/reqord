@@ -8,7 +8,12 @@ GitHub Issueと`.reqord/feedback/index.yaml`の双方向同期機構を提供す
 - **同期ロジック**: GitHub Issue (gh CLI) ↔ index.yaml の双方向同期
 - **Repository層**: index.yamlのCRUD操作
 
-本機能は**未実装**であり、本設計書に基づき新規実装する。
+### v2.0.0 追加スコープ
+
+- **linkedTo.resolved スキーマ**: フラグ解決状態のアーティファクト単位追跡（SC-11対応）
+- **linkedTo.createdSpecifications**: feedbackから作成されたspecの記録
+- **syncマージ更新**: sync時の手動メタデータ保持（SC-12対応）
+- **パフォーマンス改善**: Issue毎のファイルI/O → 一括load/save
 
 ## 2. アーキテクチャ
 
@@ -75,11 +80,21 @@ export const FeedbackSeveritySchema = z.enum([
 // Feedbackのステータス
 export const FeedbackStatusSchema = z.enum(["open", "closed"]);
 
+// linkedTo.resolved構造（v2.0.0追加）
+// フラグ解決済みのアーティファクトを追跡
+// 各配列はlinkedTo.requirements/specificationsのサブセット
+const FeedbackResolvedSchema = z.object({
+  requirements: z.array(z.string()),
+  specifications: z.array(z.string()),
+}).optional();
+
 // linkedTo構造
 const FeedbackLinkedToSchema = z.object({
   requirements: z.array(z.string()),
   createdRequirements: z.array(z.string()),
   specifications: z.array(z.string()),
+  createdSpecifications: z.array(z.string()).default([]),  // v2.0.0追加
+  resolved: FeedbackResolvedSchema,                        // v2.0.0追加
 });
 
 // Feedbackエントリ
@@ -102,6 +117,8 @@ export type FeedbackType = z.infer<typeof FeedbackTypeSchema>;
 export type FeedbackSeverity = z.infer<typeof FeedbackSeveritySchema>;
 export type FeedbackStatus = z.infer<typeof FeedbackStatusSchema>;
 export type FeedbackEntry = z.infer<typeof FeedbackEntrySchema>;
+export type FeedbackLinkedTo = z.infer<typeof FeedbackLinkedToSchema>;  // v2.0.0追加
+export type FeedbackResolved = z.infer<typeof FeedbackResolvedSchema>; // v2.0.0追加
 export type FeedbackIndex = z.infer<typeof FeedbackIndexSchema>;
 ```
 
@@ -247,21 +264,51 @@ export async function closeIssue(
 ```typescript
 import type { FeedbackEntry } from "@reqord/shared";
 import { listFeedbackIssues, getIssue, updateIssueBody, type GitHubIssue } from "./github-client";
-import { loadIndex, upsertFeedback } from "../repositories/feedback";
+import { loadIndex, saveIndex } from "../repositories/feedback";
 import { parseReqordComment, buildReqordComment, upsertReqordComment } from "./reqord-comment";
 
-// GitHub → index.yaml 同期
+// GitHub → index.yaml 同期（v2.0.0: マージ更新 + 一括I/O）
 export async function syncFromGitHub(cwd: string): Promise<number> {
   const issues = await listFeedbackIssues();
+  const index = await loadIndex(cwd);  // 1回のload
   let updatedCount = 0;
 
   for (const issue of issues) {
-    const feedback = parseGitHubIssue(issue);
-    await upsertFeedback(cwd, feedback);
+    const fromGitHub = parseGitHubIssue(issue);
+    const existing = index.feedbacks.find(
+      (f) => f.githubIssue === issue.number
+    );
+
+    if (existing) {
+      // マージ更新: 手動メタデータを保持
+      const merged = mergeFeedback(existing, fromGitHub);
+      const idx = index.feedbacks.indexOf(existing);
+      index.feedbacks[idx] = merged;
+    } else {
+      index.feedbacks.push(fromGitHub);
+    }
     updatedCount++;
   }
 
+  await saveIndex(cwd, index);  // 1回のsave
   return updatedCount;
+}
+
+// v2.0.0: マージ更新ロジック
+// 手動設定メタデータ（type, severity, linkedTo）はexistingを保持
+// GitHub Issue状態（status, syncedAt）はGitHubから更新
+export function mergeFeedback(
+  existing: FeedbackEntry,
+  fromGitHub: FeedbackEntry
+): FeedbackEntry {
+  return {
+    githubIssue: existing.githubIssue,
+    type: existing.type ?? fromGitHub.type,           // existing優先
+    severity: existing.severity ?? fromGitHub.severity, // existing優先
+    linkedTo: existing.linkedTo,                       // 常にexistingを保持（resolved含む）
+    syncedAt: fromGitHub.syncedAt,                     // 常にGitHubから更新
+    status: fromGitHub.status,                         // 常にGitHubから更新（Issue状態のみ）
+  };
 }
 
 // index.yaml → GitHub 同期（HTMLコメントをIssue bodyに挿入/更新）
@@ -298,6 +345,7 @@ export function parseGitHubIssue(issue: GitHubIssue): FeedbackEntry {
       requirements: [],
       createdRequirements: [],
       specifications: [],
+      createdSpecifications: [],  // v2.0.0追加
     },
     syncedAt: new Date().toISOString(),
     status: issue.state === "closed" ? "closed" : "open",
@@ -353,13 +401,20 @@ export const syncCommand = new Command("sync")
 1. ユーザー実行
    $ reqord feedback sync
 
-2. syncFromGitHub()
+2. syncFromGitHub()（v2.0.0: マージ更新 + 一括I/O）
+   ├─ loadIndex() で既存index.yamlを一括読み込み
    ├─ gh issue list --label feedback でGitHub Issueを取得（bodyフィールド含む）
-   ├─ 各Issue bodyのHTMLコメントからFeedbackEntryを構築
-   │  ├─ <!-- reqord:feedback {...} --> をパース
-   │  ├─ type, severity を抽出
-   │  └─ linkedTo (requirements, specifications) を抽出
-   └─ upsertFeedback() でindex.yamlに保存/更新
+   ├─ 各Issueについて:
+   │  ├─ Issue bodyのHTMLコメントからFeedbackEntryを構築
+   │  │  ├─ <!-- reqord:feedback {...} --> をパース
+   │  │  ├─ type, severity を抽出
+   │  │  └─ linkedTo (requirements, specifications) を抽出
+   │  ├─ 既存エントリがある場合: mergeFeedback()でマージ
+   │  │  ├─ type, severity → existing優先
+   │  │  ├─ linkedTo（resolved含む） → 常にexisting保持
+   │  │  └─ status, syncedAt → GitHubから更新
+   │  └─ 既存エントリがない場合: 新規追加
+   └─ saveIndex() でindex.yamlに一括保存
 
 3. 結果表示
    ✓ Synced 3 feedbacks (GitHub → index.yaml)
@@ -391,6 +446,9 @@ export const syncCommand = new Command("sync")
 - FeedbackIndexSchemaのバリデーション
 - 不正なtype/severityの検出
 - optional フィールドの挙動
+- v2.0.0: `resolved`がoptionalで後方互換性を維持
+- v2.0.0: `createdSpecifications`がdefault `[]`で後方互換性を維持
+- v2.0.0: `resolved.requirements`/`resolved.specifications`のバリデーション
 
 **packages/cli/src/repositories/feedback.test.ts**
 - loadIndex(): 存在しないファイルの場合空配列を返す
@@ -401,6 +459,12 @@ export const syncCommand = new Command("sync")
 - parseGitHubIssue(): HTMLコメントからメタデータ抽出
 - syncFromGitHub(): GitHubClientのモック化
 - syncToGitHub(): HTMLコメント挿入/更新の検証
+- v2.0.0: mergeFeedback(): 手動メタデータ保持の検証
+  - type/severityがexisting優先
+  - linkedTo（resolved含む）が常にexisting保持
+  - status/syncedAtが常にGitHubから更新
+- v2.0.0: syncFromGitHub(): 一括load/save（ファイルI/O回数の検証）
+- v2.0.0: syncFromGitHub(): 既存エントリのマージ更新
 
 **packages/cli/src/services/reqord-comment.test.ts**
 - parseReqordComment(): HTMLコメントからメタデータ抽出
@@ -468,3 +532,70 @@ export const syncCommand = new Command("sync")
 **実装**:
 - syncコマンドは`gh issue list`を1回のみ実行
 - show/linkコマンドは必要時のみ`gh issue view`実行
+
+### 6.5 resolved追跡の構造（v2.0.0）
+
+**決定**: `status`はGitHub Issue状態に限定し、解決追跡は`linkedTo.resolved`で行う
+
+**理由**:
+- `status`（open/closed）はGitHub Issueの状態を忠実に反映する責務
+- resolvedはリンク先アーティファクト単位の概念（1つのfeedbackが複数req/specにリンクされ、個別に解決される）
+- linkedToの構造を対称的に拡張し、元のstring[]を維持
+
+**構造**:
+```yaml
+linkedTo:
+  requirements: ["req-000006", "req-000020"]
+  createdRequirements: ["req-000023"]
+  specifications: ["spec-000005"]
+  createdSpecifications: []              # v2.0.0追加
+  resolved:                              # v2.0.0追加
+    requirements: ["req-000006"]         # flag解決済みのreq
+    specifications: []                   # flag解決済みのspec
+```
+
+- `resolved`はoptional（既存データとの後方互換性）
+- `createdSpecifications`は`default([])`（既存データとの後方互換性）
+- `resolved`の各配列は`linkedTo.requirements`/`specifications`のサブセット
+- `createdRequirements`/`createdSpecifications`はflag対象外のため`resolved`不要
+
+### 6.6 syncのマージ更新方針（v2.0.0）
+
+**決定**: `syncFromGitHub`時に手動メタデータを保持するマージ更新
+
+**理由**:
+- v1.0.0ではGitHubからの完全上書き（`upsertFeedback`）だった
+- `type`, `severity`, `linkedTo`はlinkコマンドで手動設定されるため、sync時に消えてはならない
+- `status`はGitHub Issue状態のみを表すため、常にGitHubから更新
+
+**マージルール**:
+| フィールド | 方針 | 理由 |
+|-----------|------|------|
+| `type` | existing優先 | linkで手動設定 |
+| `severity` | existing優先 | linkで手動設定 |
+| `linkedTo` | 常にexistingを保持 | ローカルでのみ管理（resolved含む） |
+| `syncedAt` | 常にGitHubから更新 | 同期タイムスタンプ |
+| `status` | 常にGitHubから更新 | GitHub Issue状態のみ表す |
+
+### 6.7 パフォーマンス改善（v2.0.0）
+
+**決定**: Issue毎のファイルI/Oから一括load/saveに変更
+
+**理由**:
+- v1.0.0: Issue毎に`loadIndex` + `saveIndex`（N回のファイルI/O）
+- v2.0.0: 1回の`loadIndex` → メモリ上でマージ → 1回の`saveIndex`
+- feedbackが増えるほどI/O回数削減効果が大きい
+
+### 6.8 既存データのマイグレーション（v2.0.0）
+
+**決定**: `status: resolved`の既存エントリは手動修正またはsync再実行で対応
+
+**理由**:
+- `status`はGitHub Issue状態のみを表すため、`resolved`は不正な値
+- `syncFromGitHub`再実行でGitHub Issueの実際のstate（open/closed）が反映される
+- `linkedTo.resolved`への変換は手動で行う（解決済みアーティファクトの判断が必要）
+
+**手順**:
+1. `status: resolved` → GitHub Issueの実際のstate（open/closed）に修正
+2. 解決済みアーティファクトがあれば`linkedTo.resolved`に追記
+3. `reqord feedback sync`実行でstatus/syncedAtをGitHubから再取得

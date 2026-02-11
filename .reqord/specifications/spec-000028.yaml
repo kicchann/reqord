@@ -1,9 +1,9 @@
 id: spec-000028
 requirementId: req-000023
-version: 1.0.0
-status: implemented
+version: 2.0.0
+status: approved
 createdAt: 2026-02-09T05:48:42.351Z
-updatedAt: 2026-02-09T11:57:48Z
+updatedAt: 2026-02-12T00:00:00Z
 versionHistory: []
 files:
   design: specifications/spec-000028/design.md
