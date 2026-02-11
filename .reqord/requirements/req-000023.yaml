@@ -1,11 +1,15 @@
 id: req-000023
-version: 1.1.0
+version: 2.0.0
 title: Feedback管理 (GitHub Issue連携)
-status: implemented
+status: draft
 priority: medium
 createdAt: 2026-02-09T10:00:00Z
 updatedAt: 2026-02-09T11:57:46Z
-versionHistory: []
+versionHistory:
+  - version: 2.0.0
+    status: draft
+    changedAt: 2026-02-11T12:00:00Z
+    summary: "flagライフサイクル管理を追加: flagは一時的マーカーとして対応完了後に削除、index.yamlがトレーサビリティのSOT"
 files:
   description: requirements/req-000023/description.md
   supplementary: []
@@ -24,6 +28,10 @@ successCriteria:
   - reqord feedback close <issue-number> で影響範囲確定後にFeedbackがクローズされ、index.yamlとGitHub Issueが更新される
   - "@reqord/sharedパッケージにFeedbackIndexのZodスキーマが定義され、index.yamlバリデーションが実行される"
   - reqord feedback link実行時に--type, --severityオプションでFeedbackのメタデータを設定できる
+  - >-
+    reqord feedback resolve <req-id> --issue <number> でRequirement/Specificationからflagが削除され、
+    index.yamlのstatusがresolvedに更新される
+  - flags配列が空でないRequirement/Specificationに対して承認操作を行う場合、警告が表示される
 format:
   type: user-story
   userStory:
