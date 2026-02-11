@@ -78,11 +78,13 @@ export async function initProject(cwd: string): Promise<InitResult> {
   const workflowDir = fs.joinPath(cwd, ".github", "workflows");
   await fs.mkdirp(workflowDir);
   const workflowDest = fs.joinPath(workflowDir, "finalize-approval.yml");
-  const currentDir = dirname(fileURLToPath(import.meta.url));
-  const workflowSrc = fs.joinPath(currentDir, "..", "templates", "finalize-approval.yml");
-  const workflowContent = await fs.readText(workflowSrc);
-  await fs.writeText(workflowDest, workflowContent);
-  created.push(workflowDest);
+  if (!(await fs.exists(workflowDest))) {
+    const currentDir = dirname(fileURLToPath(import.meta.url));
+    const workflowSrc = fs.joinPath(currentDir, "..", "templates", "finalize-approval.yml");
+    const workflowContent = await fs.readText(workflowSrc);
+    await fs.writeText(workflowDest, workflowContent);
+    created.push(workflowDest);
+  }
 
   return { created, alreadyExists: false };
 }

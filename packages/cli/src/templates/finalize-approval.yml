@@ -11,6 +11,7 @@ jobs:
   finalize-approval:
     if: >-
       github.event.pull_request.merged == true &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
       startsWith(github.event.pull_request.head.ref, 'reqord/') &&
       contains(github.event.pull_request.head.ref, '-approve-v')
     runs-on: ubuntu-latest
