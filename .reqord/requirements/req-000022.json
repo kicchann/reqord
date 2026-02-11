@@ -42,7 +42,27 @@
       "type": "feedback-review",
       "reason": "Req→Spec→Issueトレーサビリティグラフのビュー切り替えUX（ノード内ボタン・滑らかなトランジション）の仕様レベル明確化が必要",
       "createdAt": "2026-02-09T15:00:00Z",
-      "relatedIssues": [21],
+      "relatedIssues": [
+        21
+      ],
+      "severity": "low"
+    },
+    {
+      "type": "feedback-review",
+      "reason": "Feedback from issue #169",
+      "createdAt": "2026-02-11T07:42:19.687Z",
+      "relatedIssues": [
+        169
+      ],
+      "severity": "low"
+    },
+    {
+      "type": "feedback-review",
+      "reason": "Feedback from issue #170",
+      "createdAt": "2026-02-11T07:42:24.638Z",
+      "relatedIssues": [
+        170
+      ],
       "severity": "low"
     }
   ]

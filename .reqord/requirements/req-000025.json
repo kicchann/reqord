@@ -5,15 +5,19 @@
   "status": "draft",
   "priority": "medium",
   "createdAt": "2026-02-11T12:00:00Z",
-  "updatedAt": "2026-02-11T12:00:00Z",
+  "updatedAt": "2026-02-11T07:57:05.155Z",
   "versionHistory": [],
   "files": {
     "description": "requirements/req-000025/description.md",
     "supplementary": []
   },
   "successCriteria": [
-    "reqord ui コマンドでWeb UIのローカルサーバーが起動する",
-    "ブラウザでプロジェクトのダッシュボード・依存グラフ・Gantt Chart・Specification詳細の閲覧・編集ができる"
+    "reqord ui コマンドでWeb UIのローカルサーバーが http://localhost:3000 で起動する",
+    "起動時にターミナルにアクセスURL http://localhost:3000 が表示され、Ctrl+Cで停止できる",
+    "ブラウザでプロジェクトのダッシュボード・依存グラフ・Gantt Chart・Specification詳細の閲覧・編集ができる",
+    "reqord ui --port 8080 でポート番号を変更でき、指定ポートでサーバーが起動する",
+    "reqord ui --open でブラウザが自動的に開く",
+    ".reqord/ ディレクトリが存在しない場合は 'Run reqord init first' というエラーメッセージを表示して終了する"
   ],
   "format": {
     "type": "user-story",

@@ -5,26 +5,40 @@
   "status": "draft",
   "priority": "medium",
   "createdAt": "2026-02-11T07:25:06.280Z",
-  "updatedAt": "2026-02-11T07:25:06.280Z",
+  "updatedAt": "2026-02-11T07:57:09.135Z",
   "versionHistory": [],
   "files": {
     "description": "requirements/req-000027/description.md",
     "supplementary": []
   },
-  "successCriteria": [],
+  "successCriteria": [
+    ".reqord/requirements/req-NNNNNN.yaml 形式でRequirementを保存・読み込みできる",
+    ".reqord/specifications/spec-NNNNNN.yaml 形式でSpecificationを保存・読み込みできる",
+    ".reqord/context/ 配下の product.json, technical.json, structure.json が product.yaml, technical.yaml, structure.yaml に変換され、読み込み・書き込みができる",
+    "既存のJSONファイルをYAMLに一括変換する reqord migrate-to-yaml コマンドが実装される",
+    "Zod スキーマは変更せず、JSON-YAML変換レイヤーでフォーマット変換が行われる",
+    "CLI・Web UI の既存機能がすべてYAML形式で正常動作する（後方互換性維持は不要）"
+  ],
   "format": {
     "type": "user-story",
     "userStory": {
-      "as": "",
-      "iWant": "",
-      "soThat": ""
+      "as": "開発者・プロダクトオーナー",
+      "iWant": "要件・仕様・コンテキストをYAML形式で管理したい",
+      "soThat": "JSONに比べて可読性が高く、コメント記述も可能で、人間による直接編集がしやすくなる"
     }
   },
   "dependencies": {
     "blockedBy": [],
     "blocks": [],
-    "relatedTo": []
+    "relatedTo": [
+      "req-000001",
+      "req-000002",
+      "req-000003",
+      "req-000007"
+    ]
   },
+  "estimatedComplexity": "large",
+  "estimatedHours": 32,
   "flags": [
     {
       "type": "feedback-review",

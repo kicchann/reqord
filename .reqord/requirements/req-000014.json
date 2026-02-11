@@ -5,18 +5,19 @@
   "status": "draft",
   "priority": "medium",
   "createdAt": "2026-02-07T12:00:00Z",
-  "updatedAt": "2026-02-07T12:00:00Z",
+  "updatedAt": "2026-02-11T07:56:49.349Z",
   "versionHistory": [],
   "files": {
     "description": "requirements/req-000014/description.md",
     "supplementary": []
   },
   "successCriteria": [
-    "reqord spec validate <id> でアーキテクチャ整合性・命名規則チェックが実行される",
-    "reqord spec coverage <id> で要件カバレッジ状況がテーブル表示される",
-    "未カバーの要件が警告として表示される",
-    "designValidation結果がSpecification JSONに記録される",
-    "検証結果が--jsonオプションで構造化出力される"
+    "reqord spec validate <id> でアーキテクチャ整合性・命名規則チェックが実行され、ok/warning/errorで判定される",
+    "reqord spec coverage <id> で要件カバレッジ状況がテーブル表示され、covered/partial/not-coveredステータスが表示される",
+    "未カバーの要件が警告として表示され、カバレッジが50%未満の場合はexit code 1で終了する",
+    "designValidation結果がSpecification JSONの designValidation フィールドに記録される",
+    "検証結果が--jsonオプションで構造化出力され、CI連携が可能である",
+    "ProjectContextのtechnical.mdとstructure.mdのパースエラー時には明確なエラーメッセージが表示される"
   ],
   "format": {
     "type": "user-story",
@@ -36,5 +37,6 @@
     ]
   },
   "estimatedComplexity": "medium",
-  "estimatedHours": 12
+  "estimatedHours": 12,
+  "flags": []
 }
