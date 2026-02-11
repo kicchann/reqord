@@ -1,0 +1,56 @@
+id: req-000013
+version: 1.1.0
+title: Specification CRUD
+status: implemented
+priority: high
+createdAt: 2026-02-07T12:00:00Z
+updatedAt: 2026-02-09T11:57:46Z
+versionHistory:
+  - version: 1.0.0
+    status: implemented
+    gitCommit: legacy
+    changedAt: 2026-02-07T12:00:00Z
+    summary: 初版作成
+files:
+  description: requirements/req-000013/description.md
+  supplementary: []
+successCriteria:
+  - reqord spec create <req-id> でSpecification JSON+ディレクトリが生成される
+  - reqord spec list でSpecification一覧がテーブル表示される
+  - reqord spec show <id> でSpecification詳細が表示される
+  - reqord spec edit <id> --file research でresearch.mdの内容を表示・更新できる
+  - reqord spec edit <id> --file design でdesign.mdの内容を表示・更新できる
+  - Specification JSONがZodスキーマでバリデーションされる
+  - design.md, supplementary/ が適切に管理される
+format:
+  type: user-story
+  userStory:
+    as: 開発者
+    iWant: 要件に基づく仕様書をCLIで管理したい
+    soThat: 要件から設計への追跡可能性を確保できる
+dependencies:
+  blockedBy:
+    - req-000002
+    - req-000004
+  blocks:
+    - req-000014
+    - req-000015
+    - req-000016
+    - req-000018
+    - req-000022
+  relatedTo: []
+estimatedComplexity: large
+estimatedHours: 20
+flags:
+  - type: feedback-review
+    reason: spec design/researchコマンドをファイル管理（表示・更新）に限定。AI駆動の設計書生成は/reqord:designコマンド（Claude Code）の責務
+    createdAt: 2026-02-09T10:00:00Z
+    relatedIssues:
+      - 17
+    severity: medium
+  - type: feedback-review
+    reason: 'Feedback from issue #157'
+    createdAt: 2026-02-11T07:24:49.598Z
+    relatedIssues:
+      - 157
+    severity: medium

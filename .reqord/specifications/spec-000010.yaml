@@ -1,0 +1,25 @@
+id: spec-000010
+requirementId: req-000010
+version: 1.0.0
+status: approved
+createdAt: 2026-02-08T14:08:07.385Z
+updatedAt: 2026-02-10T22:45:11.147Z
+versionHistory: []
+files:
+  design: specifications/spec-000010/design.md
+  supplementary: []
+flags: []
+implementation:
+  issues:
+    - number: 132
+      title: '[Feature] Zodバリデーションエラー詳細表示（req-000010 / spec-000010）'
+      url: https://github.com/kicchann/reqord/issues/132
+      priority: P2
+      status: closed
+  totalEstimatedHours: 0
+  createdAt: 2026-02-10T22:45:11.147Z
+  progress:
+    total: 1
+    completed: 1
+    percentage: 100
+    lastSyncedAt: 2026-02-10T22:45:11.147Z

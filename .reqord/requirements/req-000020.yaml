@@ -1,0 +1,44 @@
+id: req-000020
+version: 1.1.0
+title: コンテキスト統合出力
+status: approved
+priority: medium
+createdAt: 2026-02-07T12:00:00Z
+updatedAt: 2026-02-09T12:00:00Z
+versionHistory:
+  - version: 1.0.0
+    changedAt: 2026-02-07T12:00:00Z
+    summary: LLMコンテキスト出力として初版作成
+    status: approved
+    gitCommit: legacy
+files:
+  description: requirements/req-000020/description.md
+  supplementary: []
+successCriteria:
+  - reqord context export <req-id> でRequirementに関連する全コンテキストが構造化出力される
+  - ProjectContext + Requirement + Specification が統合される
+  - パイプで外部ツールに渡せるテキスト形式（Markdown/JSON）で出力される
+  - 出力サイズを --compact / --full オプションで制御できる
+format:
+  type: user-story
+  userStory:
+    as: 開発者
+    iWant: 要件に関連する全情報を統合して出力したい
+    soThat: 外部ツール（AIエージェント・レビューツール等）に正確なコンテキストを提供できる
+dependencies:
+  blockedBy:
+    - req-000002
+    - req-000003
+  blocks: []
+  relatedTo:
+    - req-000006
+    - req-000013
+estimatedComplexity: small
+estimatedHours: 8
+flags:
+  - type: feedback-review
+    reason: 'LLM特化の表現を汎用化: コマンド名変更（context → context export）、トークン最適化をClaude Code側に、Gap Analysis統合を削除（deprecated）'
+    createdAt: 2026-02-09T10:00:00Z
+    relatedIssues:
+      - 17
+    severity: medium

@@ -1,0 +1,49 @@
+id: req-000024
+version: 3.0.0
+title: Web UIからのCLIジョブ実行 (Agent API)
+status: approved
+priority: high
+createdAt: 2026-02-10T12:00:00Z
+updatedAt: 2026-02-11T08:05:05.129Z
+versionHistory:
+  - version: 2.0.0
+    status: pending_approval
+    gitCommit: 4a1fcac
+    changedAt: 2026-02-11T08:05:04.942Z
+    summary: Status changed from draft to pending_approval
+  - version: 3.0.0
+    status: approved
+    gitCommit: 4a1fcac
+    changedAt: 2026-02-11T08:05:05.130Z
+    summary: Status changed from pending_approval to approved
+    approvedAt: 2026-02-11T08:05:05.130Z
+    approvedBy: []
+files:
+  description: requirements/req-000024/description.md
+  supplementary: []
+successCriteria:
+  - Web UI上で「承認依頼」ボタンを押すと、バックグラウンドでCLIの承認コマンドが実行され、GitHub PRが作成される
+  - ジョブの実行中は進捗状態がUIに表示され、完了時にPR URLがリンクとして表示される
+  - Agent APIサーバー (packages/agent) がローカルで起動し、POST /jobs でジョブ作成、GET /jobs/:id でステータス取得ができる
+  - Agent APIが未起動の場合（Vercel デプロイ時）、NEXT_PUBLIC_AGENT_URL環境変数が未設定であればアクションボタンは非表示となり、純粋なViewerとして動作する
+  - packages/web に child_process・fs.writeFileSync のローカル依存が含まれず、Vercelビルドが成功する
+  - 承認依頼以外のジョブ（仕様書生成、Issue作成）も同じJob Runnerパターンで追加可能な汎用的な構造になっており、ジョブタイプは列挙型で管理される
+  - 'CLIに --json オプションが追加され、API連携に適した構造化出力 { success: boolean, prUrl?: string, branch?: string, error?: string } が得られる'
+format:
+  type: user-story
+  userStory:
+    as: 開発者・レビュアー
+    iWant: Web UIのボタン操作だけでCLIの承認依頼やジョブ実行を行いたい
+    soThat: ターミナルを開かずにブラウザ上で要件管理ワークフローを完結できる
+dependencies:
+  blockedBy:
+    - req-000007
+    - req-000011
+  blocks: []
+  relatedTo:
+    - req-000015
+    - req-000016
+    - req-000022
+estimatedComplexity: large
+estimatedHours: 40
+flags: []

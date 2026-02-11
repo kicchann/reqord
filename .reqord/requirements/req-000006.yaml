@@ -1,0 +1,48 @@
+id: req-000006
+version: 1.1.0
+title: 構造化出力・バッチ更新
+status: approved
+priority: medium
+createdAt: 2026-02-07T10:00:00Z
+updatedAt: 2026-02-09T12:00:00Z
+versionHistory:
+  - version: 1.0.0
+    changedAt: 2026-02-07T10:00:00Z
+    summary: AIエージェント向けCLI最適化として初版作成
+    status: approved
+    gitCommit: legacy
+files:
+  description: requirements/req-000006/description.md
+  supplementary: []
+successCriteria:
+  - reqord req show <id> --json で要件データが構造化JSONとして出力される
+  - reqord req list --json で要件一覧が構造化JSONとして出力される
+  - reqord context show --json でProjectContextが実データ含む構造化JSONとして出力される
+  - reqord req update <id> --patch-file でJSON一括更新に対応する
+  - reqord req update <id> --description-file でdescription.md更新に対応する
+  - reqord req validate <id> でルールベースの品質チェック（依存関係整合性・循環依存・フィールド完全性・曖昧表現検出）が実行される
+  - 外部ツール（AIエージェント・CI・スクリプト等）がreqord CLIのみで要件の読み取り・更新・検証を完結できる
+format:
+  type: user-story
+  userStory:
+    as: 外部ツール連携を行う開発者
+    iWant: reqord CLIの全操作を構造化データで行えるようにしたい
+    soThat: AIエージェント・CI・スクリプト等の外部ツールからreqordを操作できる
+dependencies:
+  blockedBy:
+    - req-000002
+    - req-000003
+  blocks: []
+  relatedTo:
+    - req-000003
+    - req-000005
+    - req-000007
+estimatedComplexity: medium
+estimatedHours: 12
+flags:
+  - type: feedback-review
+    reason: 'AI補助機能を分離: SMARTスコアリング削除、Claude Codeスラッシュコマンド参照削除、ルールベースvalidateに限定'
+    createdAt: 2026-02-09T10:00:00Z
+    relatedIssues:
+      - 17
+    severity: high

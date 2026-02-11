@@ -1,0 +1,45 @@
+id: req-000014
+version: 3.0.0
+title: 設計検証・要件カバレッジ
+status: approved
+priority: medium
+createdAt: 2026-02-07T12:00:00Z
+updatedAt: 2026-02-11T08:05:04.384Z
+versionHistory:
+  - version: 2.0.0
+    status: pending_approval
+    gitCommit: 4a1fcac
+    changedAt: 2026-02-11T08:05:04.207Z
+    summary: Status changed from draft to pending_approval
+  - version: 3.0.0
+    status: approved
+    gitCommit: 4a1fcac
+    changedAt: 2026-02-11T08:05:04.385Z
+    summary: Status changed from pending_approval to approved
+    approvedAt: 2026-02-11T08:05:04.385Z
+    approvedBy: []
+files:
+  description: requirements/req-000014/description.md
+  supplementary: []
+successCriteria:
+  - reqord spec validate <id> でアーキテクチャ整合性・命名規則チェックが実行され、ok/warning/errorで判定される
+  - reqord spec coverage <id> で要件カバレッジ状況がテーブル表示され、covered/partial/not-coveredステータスが表示される
+  - 未カバーの要件が警告として表示され、カバレッジが50%未満の場合はexit code 1で終了する
+  - designValidation結果がSpecification JSONの designValidation フィールドに記録される
+  - 検証結果が--jsonオプションで構造化出力され、CI連携が可能である
+  - ProjectContextのtechnical.mdとstructure.mdのパースエラー時には明確なエラーメッセージが表示される
+format:
+  type: user-story
+  userStory:
+    as: アーキテクト
+    iWant: 仕様が設計原則に準拠しているか自動検証したい
+    soThat: 設計品質を承認前に保証できる
+dependencies:
+  blockedBy:
+    - req-000013
+  blocks: []
+  relatedTo:
+    - req-000003
+estimatedComplexity: medium
+estimatedHours: 12
+flags: []

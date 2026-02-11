@@ -1,0 +1,45 @@
+id: req-000025
+version: 3.0.0
+title: reqord ui CLIコマンド
+status: approved
+priority: medium
+createdAt: 2026-02-11T12:00:00Z
+updatedAt: 2026-02-11T08:05:05.493Z
+versionHistory:
+  - version: 2.0.0
+    status: pending_approval
+    gitCommit: 4a1fcac
+    changedAt: 2026-02-11T08:05:05.307Z
+    summary: Status changed from draft to pending_approval
+  - version: 3.0.0
+    status: approved
+    gitCommit: 4a1fcac
+    changedAt: 2026-02-11T08:05:05.494Z
+    summary: Status changed from pending_approval to approved
+    approvedAt: 2026-02-11T08:05:05.494Z
+    approvedBy: []
+files:
+  description: requirements/req-000025/description.md
+  supplementary: []
+successCriteria:
+  - reqord ui コマンドでWeb UIのローカルサーバーが http://localhost:3000 で起動する
+  - 起動時にターミナルにアクセスURL http://localhost:3000 が表示され、Ctrl+Cで停止できる
+  - ブラウザでプロジェクトのダッシュボード・依存グラフ・Gantt Chart・Specification詳細の閲覧・編集ができる
+  - reqord ui --port 8080 でポート番号を変更でき、指定ポートでサーバーが起動する
+  - reqord ui --open でブラウザが自動的に開く
+  - .reqord/ ディレクトリが存在しない場合は 'Run reqord init first' というエラーメッセージを表示して終了する
+format:
+  type: user-story
+  userStory:
+    as: 開発者
+    iWant: CLIからワンコマンドでWeb UIを起動したい
+    soThat: 手動でNext.js開発サーバーを起動する手間なく、要件・仕様の閲覧・編集ができる
+dependencies:
+  blockedBy:
+    - req-000007
+    - req-000022
+  blocks: []
+  relatedTo: []
+estimatedComplexity: small
+estimatedHours: 4
+flags: []

@@ -1,0 +1,45 @@
+id: req-000012
+version: 3.0.0
+title: 影響範囲分析
+status: approved
+priority: medium
+createdAt: 2026-02-07T12:00:00Z
+updatedAt: 2026-02-11T08:05:04.024Z
+versionHistory:
+  - version: 2.0.0
+    status: pending_approval
+    gitCommit: 4a1fcac
+    changedAt: 2026-02-11T08:05:03.835Z
+    summary: Status changed from draft to pending_approval
+  - version: 3.0.0
+    status: approved
+    gitCommit: 4a1fcac
+    changedAt: 2026-02-11T08:05:04.025Z
+    summary: Status changed from pending_approval to approved
+    approvedAt: 2026-02-11T08:05:04.025Z
+    approvedBy: []
+files:
+  description: requirements/req-000012/description.md
+  supplementary: []
+successCriteria:
+  - reqord impact analyze <id> で影響を受けるSpecification・Issue・Requirementが一覧表示される
+  - reqord impact notify <id> で影響先に通知（Issue/PRコメント）が送信される
+  - Requirement更新時にimpactフィールドが自動計算され、JSONファイルに保存される
+  - 依存グラフに基づく波及分析が正確に動作し、循環依存が検出される
+  - analyze/notify コマンドで --json オプションが利用可能で、構造化された影響分析結果が出力される
+  - GitHub APIのレート制限を考慮し、通知は100件/時以下のバッチ処理で実行される
+format:
+  type: user-story
+  userStory:
+    as: プロジェクトマネージャー
+    iWant: 要件変更時の影響範囲を自動で把握したい
+    soThat: 変更による意図しない副作用を防げる
+dependencies:
+  blockedBy:
+    - req-000011
+  blocks: []
+  relatedTo:
+    - req-000005
+estimatedComplexity: medium
+estimatedHours: 12
+flags: []

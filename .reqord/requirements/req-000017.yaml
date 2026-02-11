@@ -1,0 +1,45 @@
+id: req-000017
+version: 1.1.0
+title: Gap Analysis (既存コード差分分析)
+status: deprecated
+priority: medium
+createdAt: 2026-02-07T12:00:00Z
+updatedAt: 2026-02-09T10:00:00Z
+versionHistory:
+  - version: 1.0.0
+    changedAt: 2026-02-07T12:00:00Z
+    summary: 初版作成
+    status: deprecated
+    gitCommit: legacy
+files:
+  description: requirements/req-000017/description.md
+  supplementary: []
+successCriteria:
+  - reqord req gap-analysis <id> で既存コードとの差分分析が実行される
+  - reqord validate gap <id> でGap Analysis結果の妥当性を検証できる
+  - 既存実装のカバレッジ（full/partial/none）が判定される
+  - 不足機能がリスト表示される
+  - 既存コードとの矛盾がファイル名・行番号付きで表示される
+  - gapAnalysis結果がRequirement JSONに記録される
+format:
+  type: user-story
+  userStory:
+    as: 開発者
+    iWant: 新しい要件が既存コードとどの程度ギャップがあるか把握したい
+    soThat: 実装工数を正確に見積もり、既存コードとの衝突を事前に防げる
+dependencies:
+  blockedBy:
+    - req-000002
+  blocks: []
+  relatedTo:
+    - req-000006
+estimatedComplexity: medium
+estimatedHours: 16
+deprecatedReason: 'AI駆動のコード分析機能はreqord CLIの責務外。Claude Codeエコシステム（code-explorerエージェント等）で実現する。reqordはデータ管理に集中する方針（Feedback #17）'
+flags:
+  - type: feedback-review
+    reason: AI補助機能のreqord CLI/SDKからClaude Codeエコシステムへの分離
+    createdAt: 2026-02-09T10:00:00Z
+    relatedIssues:
+      - 17
+    severity: high
