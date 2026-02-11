@@ -5,7 +5,7 @@
   "status": "draft",
   "priority": "high",
   "createdAt": "2026-02-10T12:00:00Z",
-  "updatedAt": "2026-02-10T12:00:00Z",
+  "updatedAt": "2026-02-11T07:57:04.045Z",
   "versionHistory": [],
   "files": {
     "description": "requirements/req-000024/description.md",
@@ -15,10 +15,10 @@
     "Web UI上で「承認依頼」ボタンを押すと、バックグラウンドでCLIの承認コマンドが実行され、GitHub PRが作成される",
     "ジョブの実行中は進捗状態がUIに表示され、完了時にPR URLがリンクとして表示される",
     "Agent APIサーバー (packages/agent) がローカルで起動し、POST /jobs でジョブ作成、GET /jobs/:id でステータス取得ができる",
-    "Agent APIが未起動の場合（Vercel等）、アクションボタンは非表示となり、純粋なViewerとして動作する",
-    "packages/web に一切のローカル依存（child_process, fs書き込み等）が含まれない",
-    "承認依頼以外のジョブ（仕様書生成、Issue作成等）も同じパターンで追加可能な汎用的なJob Runner構造になっている",
-    "CLIに --json オプションが追加され、API連携に適した構造化出力が得られる"
+    "Agent APIが未起動の場合（Vercel デプロイ時）、NEXT_PUBLIC_AGENT_URL環境変数が未設定であればアクションボタンは非表示となり、純粋なViewerとして動作する",
+    "packages/web に child_process・fs.writeFileSync のローカル依存が含まれず、Vercelビルドが成功する",
+    "承認依頼以外のジョブ（仕様書生成、Issue作成）も同じJob Runnerパターンで追加可能な汎用的な構造になっており、ジョブタイプは列挙型で管理される",
+    "CLIに --json オプションが追加され、API連携に適した構造化出力 { success: boolean, prUrl?: string, branch?: string, error?: string } が得られる"
   ],
   "format": {
     "type": "user-story",

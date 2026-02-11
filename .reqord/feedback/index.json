@@ -166,6 +166,35 @@
       },
       "syncedAt": "2026-02-11T07:21:23.589Z",
       "status": "open"
+    },
+    {
+      "githubIssue": 170,
+      "type": "improvement",
+      "severity": "low",
+      "linkedTo": {
+        "requirements": [
+          "req-000022",
+          "req-000023"
+        ],
+        "createdRequirements": [],
+        "specifications": []
+      },
+      "syncedAt": "2026-02-11T07:42:10.948Z",
+      "status": "closed"
+    },
+    {
+      "githubIssue": 169,
+      "type": "improvement",
+      "severity": "low",
+      "linkedTo": {
+        "requirements": [
+          "req-000022"
+        ],
+        "createdRequirements": [],
+        "specifications": []
+      },
+      "syncedAt": "2026-02-11T07:42:10.958Z",
+      "status": "closed"
     }
   ]
 }
