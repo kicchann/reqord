@@ -22,6 +22,7 @@ More text`;
         requirements: ["req-000001"],
         createdRequirements: [],
         specifications: [],
+        createdSpecifications: [],
       },
     });
   });
@@ -38,6 +39,7 @@ More text`;
         requirements: ["req-000006"],
         createdRequirements: [],
         specifications: ["spec-000001"],
+        createdSpecifications: [],
       },
     });
   });
@@ -78,6 +80,7 @@ More text`;
         requirements: ["req-000005"],
         createdRequirements: [],
         specifications: ["spec-000005"],
+        createdSpecifications: [],
       },
     });
   });
@@ -92,6 +95,7 @@ More text`;
         requirements: ["req-000001"],
         createdRequirements: [],
         specifications: [],
+        createdSpecifications: [],
       },
     });
   });
@@ -107,6 +111,7 @@ More text`;
         requirements: ["req-000001"],
         createdRequirements: [],
         specifications: [],
+        createdSpecifications: [],
       },
     });
   });
@@ -122,6 +127,7 @@ More text`;
         requirements: [],
         createdRequirements: [],
         specifications: [],
+        createdSpecifications: [],
       },
     });
   });
@@ -143,6 +149,38 @@ Some text
 
     expect(result).toBeNull();
   });
+
+  it("createdSpecifications付きのコメントをパースする", () => {
+    const body = `<!-- reqord:feedback {"type":"bug","linkedTo":{"requirements":["req-000001"],"createdRequirements":[],"specifications":[],"createdSpecifications":["spec-000010"]}} -->`;
+
+    const result = parseReqordComment(body);
+
+    expect(result).toEqual({
+      type: "bug",
+      linkedTo: {
+        requirements: ["req-000001"],
+        createdRequirements: [],
+        specifications: [],
+        createdSpecifications: ["spec-000010"],
+      },
+    });
+  });
+
+  it("createdSpecificationsがない場合はデフォルト値[]で補完する", () => {
+    const body = `<!-- reqord:feedback {"type":"bug","linkedTo":{"requirements":["req-000001"],"createdRequirements":[],"specifications":[]}} -->`;
+
+    const result = parseReqordComment(body);
+
+    expect(result).toEqual({
+      type: "bug",
+      linkedTo: {
+        requirements: ["req-000001"],
+        createdRequirements: [],
+        specifications: [],
+        createdSpecifications: [],
+      },
+    });
+  });
 });
 
 // --- buildReqordComment (output-based) ---
@@ -155,6 +193,7 @@ describe("buildReqordComment", () => {
         requirements: ["req-000001"],
         createdRequirements: [],
         specifications: [],
+        createdSpecifications: [],
       },
     };
 
@@ -175,6 +214,7 @@ describe("buildReqordComment", () => {
         requirements: ["req-000006"],
         createdRequirements: [],
         specifications: ["spec-000001"],
+        createdSpecifications: [],
       },
     };
 
@@ -190,6 +230,7 @@ describe("buildReqordComment", () => {
         requirements: ["req-000001"],
         createdRequirements: [],
         specifications: [],
+        createdSpecifications: [],
       },
     };
 
@@ -206,6 +247,24 @@ describe("buildReqordComment", () => {
         requirements: [],
         createdRequirements: [],
         specifications: [],
+        createdSpecifications: [],
+      },
+    };
+
+    const result = buildReqordComment(metadata);
+    const parsed = parseReqordComment(result);
+
+    expect(parsed).toEqual(metadata);
+  });
+
+  it("createdSpecifications付きのメタデータからコメントを構築する", () => {
+    const metadata: ReqordFeedbackComment = {
+      type: "bug",
+      linkedTo: {
+        requirements: ["req-000001"],
+        createdRequirements: [],
+        specifications: [],
+        createdSpecifications: ["spec-000010", "spec-000011"],
       },
     };
 
@@ -227,6 +286,7 @@ describe("upsertReqordComment", () => {
         requirements: ["req-000001"],
         createdRequirements: [],
         specifications: [],
+        createdSpecifications: [],
       },
     };
 
@@ -249,6 +309,7 @@ More text`;
         requirements: ["req-000006"],
         createdRequirements: [],
         specifications: [],
+        createdSpecifications: [],
       },
     };
 
@@ -269,6 +330,7 @@ More text`;
         requirements: [],
         createdRequirements: [],
         specifications: [],
+        createdSpecifications: [],
       },
     };
 
@@ -297,6 +359,7 @@ More text`;
         requirements: ["req-000001"],
         createdRequirements: [],
         specifications: [],
+        createdSpecifications: [],
       },
     };
 

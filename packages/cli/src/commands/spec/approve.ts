@@ -40,6 +40,24 @@ export const specApproveCommand = new Command("approve")
       const { specification, design } = await showSpecification(cwd, id);
       const { requirement } = await showRequirement(cwd, specification.requirementId);
 
+      // v2.0.0: Flag warning before approval
+      if (specification.flags.length > 0) {
+        console.log(
+          chalk.yellow(
+            `⚠ Warning: ${specification.id} has ${specification.flags.length} unresolved feedback flag(s):`,
+          ),
+        );
+        for (const flag of specification.flags) {
+          console.log(
+            chalk.yellow(
+              `  - ${flag.type}: ${flag.reason} (${flag.severity})`,
+            ),
+          );
+        }
+        console.log(chalk.yellow("Proceeding with approval..."));
+        console.log();
+      }
+
       // 3. Build custom handler with actual design content
       const designSummary = extractDesignSummary(design ?? "");
       const customHandler = {

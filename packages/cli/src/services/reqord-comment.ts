@@ -7,6 +7,7 @@ export interface ReqordFeedbackComment {
     requirements: string[];
     createdRequirements: string[];
     specifications: string[];
+    createdSpecifications: string[];
   };
 }
 
@@ -25,6 +26,7 @@ export function parseReqordComment(body: string): ReqordFeedbackComment | null {
         requirements: Array.isArray(raw.requirements) ? raw.requirements : [],
         createdRequirements: Array.isArray(raw.createdRequirements) ? raw.createdRequirements : [],
         specifications: Array.isArray(raw.specifications) ? raw.specifications : [],
+        createdSpecifications: Array.isArray(raw.createdSpecifications) ? raw.createdSpecifications : [],
       },
     };
     if (data.type) result.type = data.type;

@@ -25,6 +25,7 @@ function makeFeedbackEntry(overrides: Partial<FeedbackEntry> = {}): FeedbackEntr
       requirements: [],
       createdRequirements: [],
       specifications: [],
+      createdSpecifications: [],
     },
     syncedAt: "2026-02-09T12:00:00Z",
     status: "open",

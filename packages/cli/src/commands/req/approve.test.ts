@@ -56,6 +56,8 @@ describe("approveCommand", () => {
     vi.clearAllMocks();
     // Reset process.exitCode
     process.exitCode = 0;
+    // Reset Commander option state to avoid leak between tests
+    approveCommand.setOptionValue("dryRun", undefined);
   });
 
   it("正常系: approveコマンド実行", async () => {
@@ -203,6 +205,79 @@ describe("approveCommand", () => {
     // Verify success message NOT shown in dry-run mode
     expect(consoleLogSpy).not.toHaveBeenCalledWith(
       expect.stringContaining("Approval PR created")
+    );
+
+    consoleLogSpy.mockRestore();
+  });
+
+  it("flags付きRequirementで警告を表示してから承認を続行する", async () => {
+    const requirement = makeRequirement({
+      flags: [
+        {
+          type: "feedback-review",
+          reason: "Feedback from issue #17",
+          createdAt: "2026-01-01T00:00:00.000Z",
+          relatedIssues: [17],
+          severity: "medium",
+        },
+      ],
+    });
+    vi.mocked(showRequirement).mockResolvedValue({
+      requirement,
+      description: null,
+    });
+
+    const approvalResult: ApprovalResult = {
+      branchName: "reqord/req-000001-approve-v1.0.0",
+      prNumber: 42,
+      prUrl: "https://github.com/owner/repo/pull/42",
+    };
+    vi.mocked(startApproval).mockResolvedValue(approvalResult);
+
+    const consoleLogSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+
+    await approveCommand.parseAsync(["node", "test", "req-000001"]);
+
+    // Warning displayed
+    expect(consoleLogSpy).toHaveBeenCalledWith(
+      expect.stringContaining("Warning: req-000001 has 1 unresolved feedback flag(s)")
+    );
+    expect(consoleLogSpy).toHaveBeenCalledWith(
+      expect.stringContaining("feedback-review: Feedback from issue #17 (medium)")
+    );
+    expect(consoleLogSpy).toHaveBeenCalledWith(
+      expect.stringContaining("Proceeding with approval...")
+    );
+
+    // Approval still proceeds
+    expect(startApproval).toHaveBeenCalled();
+    expect(consoleLogSpy).toHaveBeenCalledWith(
+      expect.stringContaining("Approval PR created for req-000001")
+    );
+
+    consoleLogSpy.mockRestore();
+  });
+
+  it("flagsが空の場合は警告を表示しない", async () => {
+    const requirement = makeRequirement({ flags: [] });
+    vi.mocked(showRequirement).mockResolvedValue({
+      requirement,
+      description: null,
+    });
+
+    const approvalResult: ApprovalResult = {
+      branchName: "reqord/req-000001-approve-v1.0.0",
+      prNumber: 42,
+      prUrl: "https://github.com/owner/repo/pull/42",
+    };
+    vi.mocked(startApproval).mockResolvedValue(approvalResult);
+
+    const consoleLogSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+
+    await approveCommand.parseAsync(["node", "test", "req-000001"]);
+
+    expect(consoleLogSpy).not.toHaveBeenCalledWith(
+      expect.stringContaining("Warning")
     );
 
     consoleLogSpy.mockRestore();
