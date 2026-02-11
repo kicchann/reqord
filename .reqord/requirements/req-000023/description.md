@@ -2,7 +2,7 @@
 
 ## 概要
 
-GitHub Issueをベースとしたフィードバック管理機能。feedbackラベル付きGitHub Issueと`.reqord/feedback/index.json`の同期をコアコンセプトとし、要件/仕様との紐付け・フラグ管理を提供する。GitHub Issueを真実の情報源（Single Source of Truth）とし、reqordはメタデータの同期・紐付け・トラッキングに集中する。
+GitHub Issueをベースとしたフィードバック管理機能。feedbackラベル付きGitHub Issueと`.reqord/feedback/index.yaml`の同期をコアコンセプトとし、要件/仕様との紐付け・フラグ管理を提供する。GitHub Issueを真実の情報源（Single Source of Truth）とし、reqordはメタデータの同期・紐付け・トラッキングに集中する。
 
 > **v1.1.0変更点**: sync中心設計へ再構成。structureコマンドを廃止し、syncコマンドを追加。メタデータ設定はlinkコマンドに統合。Zodスキーマバリデーション成功基準を追加。
 
@@ -104,7 +104,7 @@ reqord feedback close 14
 
 ```
 1. 開発者がバグ/改善提案をGitHub Issueで報告（feedbackラベル付き）
-2. reqord feedback sync で index.json に同期
+2. reqord feedback sync で index.yaml に同期
 3. チームで調査・議論（コメント）
 4. 影響レベルに応じて紐付け:
    a. 既存reqに影響 → reqord feedback link --req → Feedback closed
@@ -121,7 +121,7 @@ reqord feedback close 14
 
 | 責務 | 担当 |
 |------|------|
-| GitHub Issueとindex.jsonの同期 | reqord CLI（本要件） |
+| GitHub Issueとindex.yamlの同期 | reqord CLI（本要件） |
 | Feedbackの一覧・詳細表示 | reqord CLI（本要件） |
 | Requirement/Specificationとの紐付け | reqord CLI（本要件） |
 | flagsの追加・除去 | reqord CLI（本要件） |
@@ -133,15 +133,15 @@ reqord feedback close 14
 
 ### reqord feedback sync
 
-GitHub Issueと.reqord/feedback/index.jsonを同期する。全コマンドの起点。
+GitHub Issueと.reqord/feedback/index.yamlを同期する。全コマンドの起点。
 
-**GitHub → index.json 同期（デフォルト）:**
+**GitHub → index.yaml 同期（デフォルト）:**
 
 ```bash
 reqord feedback sync
 # → Fetching feedback issues from GitHub...
 # → Found 3 issues with 'feedback' label
-# → Updated .reqord/feedback/index.json
+# → Updated .reqord/feedback/index.yaml
 ```
 
 動作:
@@ -150,10 +150,10 @@ reqord feedback sync
    - `req:000006` → `linkedTo.requirements: ["req-000006"]`
    - `spec:000001` → `linkedTo.specifications: ["spec-000001"]`
    - `bug`, `improvement`, `requirement-gap`, `spec-mismatch`, `security` → `type`
-3. index.jsonにないIssueを追加、既存エントリをマージ更新
+3. index.yamlにないIssueを追加、既存エントリをマージ更新
 4. GitHub Issueがcloseされている場合は`status: "closed"`に更新
 
-**index.json → GitHub 同期（--from-local）:**
+**index.yaml → GitHub 同期（--from-local）:**
 
 ```bash
 reqord feedback sync --from-local
@@ -162,17 +162,17 @@ reqord feedback sync --from-local
 ```
 
 動作:
-1. index.jsonの`linkedTo`情報を元にGitHub Issueラベルを追加/更新
+1. index.yamlの`linkedTo`情報を元にGitHub Issueラベルを追加/更新
 2. `req:NNNNNN`, `spec:NNNNNN`, feedbackタイプのラベルを設定
 3. 既存ラベルは保持（feedback, priority等）
 
 オプション:
-- `--from-local` : index.json → GitHub方向の同期
+- `--from-local` : index.yaml → GitHub方向の同期
 - `--json` : 同期結果をJSON出力
 
 ### reqord feedback list
 
-同期済みのindex.jsonからFeedback一覧を表示。
+同期済みのindex.yamlからFeedback一覧を表示。
 
 ```bash
 reqord feedback list
@@ -190,7 +190,7 @@ reqord feedback list --state open --json
 
 ### reqord feedback show \<issue-number\>
 
-Feedbackの詳細表示。GitHub Issue内容 + index.jsonメタデータを統合表示。
+Feedbackの詳細表示。GitHub Issue内容 + index.yamlメタデータを統合表示。
 
 ```bash
 reqord feedback show 17
@@ -207,7 +207,7 @@ reqord feedback show 17
 
 動作:
 1. `gh issue view <issue-number> --json title,body,state,labels,createdAt` でGitHub Issueを取得
-2. index.jsonから対応するfeedbackエントリを検索
+2. index.yamlから対応するfeedbackエントリを検索
 3. 両方のデータをマージして表示
 
 ### reqord feedback link \<issue-number\>
@@ -221,14 +221,14 @@ reqord feedback link 17 --req req-000006 --type improvement --severity high
 # → Linked Feedback #17 to req-000006
 # → Added feedback-review flag to req-000006
 # → Updated GitHub Issue labels: req:000006, improvement
-# → Updated .reqord/feedback/index.json
+# → Updated .reqord/feedback/index.yaml
 ```
 
 動作:
-1. index.jsonの`linkedTo.requirements`に追加
+1. index.yamlの`linkedTo.requirements`に追加
 2. 対象Requirementに`feedback-review`フラグを追加
 3. GitHub Issueにラベル追加（`req:000006`, typeラベル）
-4. index.jsonに`type`, `severity`を記録
+4. index.yamlに`type`, `severity`を記録
 
 #### パターンB: 新規Requirement作成（--created-req）
 
@@ -236,13 +236,13 @@ reqord feedback link 17 --req req-000006 --type improvement --severity high
 reqord feedback link 13 --created-req --type requirement-gap --severity medium
 # → Created req-000023 from Feedback #13
 # → Updated GitHub Issue labels: req:000023, requirement-gap
-# → Updated .reqord/feedback/index.json
+# → Updated .reqord/feedback/index.yaml
 ```
 
 動作:
 1. 次の連番IDで新Requirementを作成（JSON + ディレクトリ）
 2. `origin: { feedbackIssue: 13 }`を記録
-3. index.jsonの`linkedTo.createdRequirements`に追加
+3. index.yamlの`linkedTo.createdRequirements`に追加
 4. GitHub Issueにラベル追加（`req:NNNNNN`, typeラベル）
 
 #### パターンC: Specificationへの紐付け（--spec）
@@ -251,11 +251,11 @@ reqord feedback link 13 --created-req --type requirement-gap --severity medium
 reqord feedback link 15 --spec spec-000001 --type spec-mismatch
 # → Linked Feedback #15 to spec-000001
 # → Updated GitHub Issue labels: spec:000001, spec-mismatch
-# → Updated .reqord/feedback/index.json
+# → Updated .reqord/feedback/index.yaml
 ```
 
 動作:
-1. index.jsonの`linkedTo.specifications`に追加
+1. index.yamlの`linkedTo.specifications`に追加
 2. GitHub Issueにラベル追加（`spec:000001`, typeラベル）
 3. Requirementへのflagは付与しない（Spec更新で対応するため）
 
@@ -273,12 +273,12 @@ reqord feedback link 15 --spec spec-000001 --type spec-mismatch
 ```bash
 reqord feedback close 17
 # → Closed Feedback #17 on GitHub
-# → Updated .reqord/feedback/index.json (status: closed)
+# → Updated .reqord/feedback/index.yaml (status: closed)
 # → Flags remain on: req-000006 (feedback-review), req-000020 (feedback-review)
 ```
 
 動作:
-1. index.jsonの`status`を`closed`に更新
+1. index.yamlの`status`を`closed`に更新
 2. `gh issue close <issue-number> --comment "<影響範囲サマリー>"`でGitHub Issueをクローズ
 3. Requirementのflagsは**残す**（flagの除去はRequirement側の対応完了時に行う）
 
@@ -286,39 +286,35 @@ reqord feedback close 17
 
 ## データ構造
 
-### .reqord/feedback/index.json
+### .reqord/feedback/index.yaml
 
 GitHub Issueへの参照情報のみ保持（軽量）。syncコマンドで同期される。
 
-```json
-{
-  "feedbacks": [
-    {
-      "githubIssue": 17,
-      "type": "improvement",
-      "severity": "high",
-      "linkedTo": {
-        "requirements": ["req-000006", "req-000017", "req-000020", "req-000021"],
-        "createdRequirements": [],
-        "specifications": []
-      },
-      "syncedAt": "2026-02-09T10:00:00Z",
-      "status": "closed"
-    },
-    {
-      "githubIssue": 13,
-      "type": "requirement-gap",
-      "severity": "medium",
-      "linkedTo": {
-        "requirements": [],
-        "createdRequirements": ["req-000023"],
-        "specifications": []
-      },
-      "syncedAt": "2026-02-09T10:30:00Z",
-      "status": "closed"
-    }
-  ]
-}
+```yaml
+feedbacks:
+  - githubIssue: 17
+    type: improvement
+    severity: high
+    linkedTo:
+      requirements:
+        - req-000006
+        - req-000017
+        - req-000020
+        - req-000021
+      createdRequirements: []
+      specifications: []
+    syncedAt: "2026-02-09T10:00:00Z"
+    status: closed
+  - githubIssue: 13
+    type: requirement-gap
+    severity: medium
+    linkedTo:
+      requirements: []
+      createdRequirements:
+        - req-000023
+      specifications: []
+    syncedAt: "2026-02-09T10:30:00Z"
+    status: closed
 ```
 
 ### Feedbackの種別（type）
@@ -331,16 +327,42 @@ GitHub Issueへの参照情報のみ保持（軽量）。syncコマンドで同�
 
 ### Requirementのflagsとの連携
 
-Feedback紐付け時にRequirementに追加されるフラグ:
+#### 設計原則: flagは一時的なマーカーである
 
-```json
-{
-  "type": "feedback-review",
-  "reason": "Feedbackの内容サマリー",
-  "createdAt": "2026-02-09T10:00:00Z",
-  "relatedIssues": [17],
-  "severity": "high"
-}
+flagとindex.yamlはそれぞれ異なる責務を持つ:
+
+| データ | 責務 | ライフサイクル |
+|--------|------|---------------|
+| `feedback/index.yaml` | feedback issue → req/specの紐付け記録（**トレーサビリティのSource of Truth**） | 永続。削除しない |
+| `requirement.flags[]` | 「未対応のフィードバックがある」ことを示すアクションマーカー | 一時的。対応完了後に削除 |
+
+flagにstatusは持たせない（index.yamlとの二重管理を避けるため）。flagの有無自体が「未対応/対応済み」を表す。
+
+#### flagのライフサイクル
+
+```
+feedback link → flagをreq/specに追加（未対応マーカー）
+    ↓
+flagの内容をreq/specに反映（version up、成功基準追加など）
+    ↓
+feedback resolve → flagを削除 + index.yamlのstatusをresolvedに更新
+```
+
+#### version up可否の判定
+
+- `flags.length === 0` → 対応完了。version upしてよい
+- `flags.length > 0` → 未対応のフィードバックがある。対応してからversion upすべき
+
+#### flagのデータ構造
+
+Feedback紐付け時にRequirement/Specificationに追加されるフラグ:
+
+```yaml
+- type: feedback-review
+  reason: "Feedbackの内容サマリー"
+  createdAt: "2026-02-09T10:00:00Z"
+  relatedIssues: [17]
+  severity: high
 ```
 
 ## 技術的制約
@@ -348,6 +370,6 @@ Feedback紐付け時にRequirementに追加されるフラグ:
 - GitHub CLI (`gh`) を使用してIssue操作
 - reqord自体にはAI SDK依存を追加しない
 - feedbackの分析（種別推定・関連要件推定）はClaude Codeエコシステムの責務
-- `.reqord/feedback/index.json` はGitHub Issueへの参照のみ保持（詳細は全てGitHub上）
+- `.reqord/feedback/index.yaml` はGitHub Issueへの参照のみ保持（詳細は全てGitHub上）
 - APIレート制限への配慮（sync時にバッチ取得）
 - @reqord/sharedパッケージでFeedbackIndexのZodスキーマを定義し、read/write時にバリデーション

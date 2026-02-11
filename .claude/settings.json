@@ -46,7 +46,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "cd \"$CLAUDE_PROJECT_DIR\" && node ./.claude/hooks/analytics/analyze-custom-commands.js",
+            "command": "cd \"$CLAUDE_PROJECT_DIR\" && node ./.claude/hooks/analytics/analyze-custom-commands.cjs",
             "timeout": 30
           }
         ]

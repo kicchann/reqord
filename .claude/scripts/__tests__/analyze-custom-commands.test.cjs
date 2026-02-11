@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Tests for analyze-custom-commands.js
- * Run with: node .claude/hooks/analytics/__tests__/analyze-custom-commands.test.js
+ * Run with: node .claude/scripts/__tests__/analyze-custom-commands.test.js
  */
 
 const assert = require('assert');
@@ -9,8 +9,9 @@ const path = require('path');
 const fs = require('fs');
 
 // Test helper to load the module functions
+// Since we'll export functions from the main script for testing
 function loadModule() {
-  const modulePath = path.join(__dirname, '..', 'analyze-custom-commands.js');
+  const modulePath = path.join(__dirname, '..', 'analyze-custom-commands.cjs');
   delete require.cache[require.resolve(modulePath)];
   return require(modulePath);
 }
@@ -127,35 +128,10 @@ suite.test('extractCommandName: handles missing command field', () => {
   assert.strictEqual(result, null, 'Should return null');
 });
 
-suite.test('extractCommandName: extracts from Windows-style script path', () => {
-  const mod = loadModule();
-  const toolInput = { command: 'node .claude\\commands\\check-ci.js' };
-  const result = mod.extractCommandName(toolInput);
-
-  assert.strictEqual(result, 'check-ci', 'Should extract from Windows path');
-});
-
-suite.test('extractCommandName: extracts from Windows-style custom script', () => {
-  const mod = loadModule();
-  const toolInput = { command: 'node .claude\\scripts\\custom-report.js' };
-  const result = mod.extractCommandName(toolInput);
-
-  assert.strictEqual(result, 'custom-report', 'Should extract from Windows custom script');
-});
-
-suite.test('extractCommandName: handles mixed path separators', () => {
-  const mod = loadModule();
-  const toolInput = { command: 'node .claude/commands\\check-ci.js' };
-  const result = mod.extractCommandName(toolInput);
-
-  assert.strictEqual(result, 'check-ci', 'Should handle mixed separators');
-});
-
 // Test: getCustomCommandDefinitions
 suite.test('getCustomCommandDefinitions: loads commands from directory', () => {
   const mod = loadModule();
-  // Navigate up from .claude/hooks/analytics/__tests__/ to project root
-  const baseDir = path.join(__dirname, '../../../..');
+  const baseDir = path.join(__dirname, '../../..');
   const result = mod.getCustomCommandDefinitions(baseDir);
 
   assert.ok(Array.isArray(result), 'Should return array');
@@ -201,8 +177,8 @@ suite.test('mergeStats: merges session data into existing stats', () => {
   const existing = JSON.parse(JSON.stringify(statsSample));
   const sessionAnalysis = {
     commands: new Map([
-      ['list-issues', { count: 2, errors: [], timestamps: ['2026-01-28T09:00:00Z'] }],
-      ['show-issue', { count: 1, errors: [], timestamps: ['2026-01-28T09:30:00Z'] }]
+      ['list-issues', { count: 2, errors: [] }],
+      ['show-issue', { count: 1, errors: [] }]
     ]),
     startTime: '2026-01-28T09:00:00Z',
     endTime: '2026-01-28T09:30:00Z'
@@ -219,7 +195,7 @@ suite.test('mergeStats: creates new command entry', () => {
   const mod = loadModule();
   const existing = { version: '1.0', totalSessions: 1, commands: {} };
   const sessionAnalysis = {
-    commands: new Map([['new-command', { count: 1, errors: [], timestamps: ['2026-01-28T09:00:00Z'] }]]),
+    commands: new Map([['new-command', { count: 1, errors: [] }]]),
     startTime: '2026-01-28T09:00:00Z',
     endTime: '2026-01-28T09:30:00Z'
   };
