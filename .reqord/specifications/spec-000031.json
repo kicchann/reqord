@@ -1,10 +1,10 @@
 {
   "id": "spec-000031",
   "requirementId": "req-000027",
-  "version": "2.0.0",
-  "status": "pending_approval",
+  "version": "3.0.0",
+  "status": "approved",
   "createdAt": "2026-02-11T09:00:00.000Z",
-  "updatedAt": "2026-02-11T10:12:56.621Z",
+  "updatedAt": "2026-02-11T10:30:00.000Z",
   "versionHistory": [
     {
       "version": "2.0.0",
@@ -12,6 +12,13 @@
       "gitCommit": "1268ea2",
       "changedAt": "2026-02-11T10:12:56.621Z",
       "summary": "Status changed from draft to pending_approval"
+    },
+    {
+      "version": "3.0.0",
+      "status": "approved",
+      "gitCommit": "52791d9",
+      "changedAt": "2026-02-11T10:30:00.000Z",
+      "summary": "Status changed from pending_approval to approved"
     }
   ],
   "files": {
@@ -20,11 +27,12 @@
   },
   "flags": [],
   "currentApproval": {
-    "version": "2.0.0",
+    "version": "3.0.0",
     "phase": "specification",
     "prNumber": 182,
     "prUrl": "https://github.com/kicchann/reqord/pull/182",
-    "approvedBy": []
+    "approvedBy": [],
+    "approvedAt": "2026-02-11T10:30:00.000Z"
   },
   "implementation": {
     "issues": [
