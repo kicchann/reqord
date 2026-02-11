@@ -1,10 +1,10 @@
 id: req-000023
 version: 3.0.0
 title: Feedback管理 (GitHub Issue連携)
-status: pending_approval
+status: approved
 priority: medium
 createdAt: 2026-02-09T10:00:00Z
-updatedAt: 2026-02-11T14:03:07.122Z
+updatedAt: 2026-02-11T14:30:00Z
 versionHistory:
   - version: 2.0.0
     status: draft
@@ -16,6 +16,11 @@ versionHistory:
     gitCommit: 285558a
     changedAt: 2026-02-11T14:03:07.124Z
     summary: Status changed from draft to pending_approval
+  - version: 3.0.0
+    status: approved
+    gitCommit: 97b3a7c
+    changedAt: 2026-02-11T14:30:00Z
+    summary: Status changed from pending_approval to approved
 files:
   description: requirements/req-000023/description.md
   supplementary: []
@@ -61,6 +66,7 @@ currentApproval:
   prNumber: 207
   prUrl: https://github.com/kicchann/reqord/pull/207
   approvedBy: []
+  approvedAt: 2026-02-11T14:30:00Z
 flags:
   - type: feedback-review
     reason: 'Feedback from issue #23'
