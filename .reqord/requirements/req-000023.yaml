@@ -1,7 +1,7 @@
 id: req-000023
 version: 2.0.0
 title: Feedback管理 (GitHub Issue連携)
-status: draft
+status: pending_approval
 priority: medium
 createdAt: 2026-02-09T10:00:00Z
 updatedAt: 2026-02-09T11:57:46Z
@@ -10,6 +10,10 @@ versionHistory:
     status: draft
     changedAt: 2026-02-11T12:00:00Z
     summary: "flagライフサイクル管理を追加: flagは一時的マーカーとして対応完了後に削除、index.yamlがトレーサビリティのSOT"
+  - version: 2.0.0
+    status: pending_approval
+    changedAt: 2026-02-11T13:00:00Z
+    summary: Status changed from draft to pending_approval
 files:
   description: requirements/req-000023/description.md
   supplementary: []
