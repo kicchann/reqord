@@ -1,12 +1,29 @@
 {
   "id": "req-000027",
-  "version": "1.0.0",
+  "version": "3.0.0",
   "title": "データ形式のYAML移行",
-  "status": "draft",
+  "status": "approved",
   "priority": "medium",
   "createdAt": "2026-02-11T07:25:06.280Z",
-  "updatedAt": "2026-02-11T07:57:09.135Z",
-  "versionHistory": [],
+  "updatedAt": "2026-02-11T08:05:06.278Z",
+  "versionHistory": [
+    {
+      "version": "2.0.0",
+      "status": "pending_approval",
+      "gitCommit": "4a1fcac",
+      "changedAt": "2026-02-11T08:05:06.094Z",
+      "summary": "Status changed from draft to pending_approval"
+    },
+    {
+      "version": "3.0.0",
+      "status": "approved",
+      "gitCommit": "4a1fcac",
+      "changedAt": "2026-02-11T08:05:06.279Z",
+      "summary": "Status changed from pending_approval to approved",
+      "approvedAt": "2026-02-11T08:05:06.279Z",
+      "approvedBy": []
+    }
+  ],
   "files": {
     "description": "requirements/req-000027/description.md",
     "supplementary": []

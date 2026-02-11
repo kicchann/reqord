@@ -1,12 +1,29 @@
 {
   "id": "req-000025",
-  "version": "1.0.0",
+  "version": "3.0.0",
   "title": "reqord ui CLIコマンド",
-  "status": "draft",
+  "status": "approved",
   "priority": "medium",
   "createdAt": "2026-02-11T12:00:00Z",
-  "updatedAt": "2026-02-11T07:57:05.155Z",
-  "versionHistory": [],
+  "updatedAt": "2026-02-11T08:05:05.493Z",
+  "versionHistory": [
+    {
+      "version": "2.0.0",
+      "status": "pending_approval",
+      "gitCommit": "4a1fcac",
+      "changedAt": "2026-02-11T08:05:05.307Z",
+      "summary": "Status changed from draft to pending_approval"
+    },
+    {
+      "version": "3.0.0",
+      "status": "approved",
+      "gitCommit": "4a1fcac",
+      "changedAt": "2026-02-11T08:05:05.494Z",
+      "summary": "Status changed from pending_approval to approved",
+      "approvedAt": "2026-02-11T08:05:05.494Z",
+      "approvedBy": []
+    }
+  ],
   "files": {
     "description": "requirements/req-000025/description.md",
     "supplementary": []
