@@ -1,0 +1,39 @@
+{
+  "id": "req-000026",
+  "version": "1.0.0",
+  "title": "PRテンプレート・状態遷移ワークフロー整備",
+  "status": "draft",
+  "priority": "medium",
+  "createdAt": "2026-02-11T07:25:04.815Z",
+  "updatedAt": "2026-02-11T07:25:04.815Z",
+  "versionHistory": [],
+  "files": {
+    "description": "requirements/req-000026/description.md",
+    "supplementary": []
+  },
+  "successCriteria": [],
+  "format": {
+    "type": "user-story",
+    "userStory": {
+      "as": "",
+      "iWant": "",
+      "soThat": ""
+    }
+  },
+  "dependencies": {
+    "blockedBy": [],
+    "blocks": [],
+    "relatedTo": []
+  },
+  "flags": [
+    {
+      "type": "feedback-review",
+      "reason": "Feedback from issue #110",
+      "createdAt": "2026-02-11T07:25:11.151Z",
+      "relatedIssues": [
+        110
+      ],
+      "severity": "low"
+    }
+  ]
+}

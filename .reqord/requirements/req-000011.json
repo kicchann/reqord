@@ -70,5 +70,33 @@
     "prUrl": "https://github.com/kicchann/reqord/pull/107",
     "approvedBy": []
   },
-  "flags": []
+  "flags": [
+    {
+      "type": "feedback-review",
+      "reason": "Feedback from issue #109",
+      "createdAt": "2026-02-11T07:19:05.404Z",
+      "relatedIssues": [
+        109
+      ],
+      "severity": "medium"
+    },
+    {
+      "type": "feedback-review",
+      "reason": "Feedback from issue #111",
+      "createdAt": "2026-02-11T07:19:27.720Z",
+      "relatedIssues": [
+        111
+      ],
+      "severity": "low"
+    },
+    {
+      "type": "feedback-review",
+      "reason": "Feedback from issue #161",
+      "createdAt": "2026-02-11T07:19:30.971Z",
+      "relatedIssues": [
+        161
+      ],
+      "severity": "medium"
+    }
+  ]
 }

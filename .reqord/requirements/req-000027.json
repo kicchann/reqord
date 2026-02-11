@@ -1,0 +1,39 @@
+{
+  "id": "req-000027",
+  "version": "1.0.0",
+  "title": "データ形式のYAML移行",
+  "status": "draft",
+  "priority": "medium",
+  "createdAt": "2026-02-11T07:25:06.280Z",
+  "updatedAt": "2026-02-11T07:25:06.280Z",
+  "versionHistory": [],
+  "files": {
+    "description": "requirements/req-000027/description.md",
+    "supplementary": []
+  },
+  "successCriteria": [],
+  "format": {
+    "type": "user-story",
+    "userStory": {
+      "as": "",
+      "iWant": "",
+      "soThat": ""
+    }
+  },
+  "dependencies": {
+    "blockedBy": [],
+    "blocks": [],
+    "relatedTo": []
+  },
+  "flags": [
+    {
+      "type": "feedback-review",
+      "reason": "Feedback from issue #159",
+      "createdAt": "2026-02-11T07:25:14.787Z",
+      "relatedIssues": [
+        159
+      ],
+      "severity": "medium"
+    }
+  ]
+}
