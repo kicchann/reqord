@@ -702,6 +702,76 @@ describe("resolveFeedback", () => {
     });
   });
 
+  it("createdRequirementsに含まれるアーティファクトもresolve可能", async () => {
+    const feedback = makeFeedbackEntry({
+      githubIssue: 17,
+      linkedTo: {
+        requirements: [],
+        createdRequirements: ["req-000002"],
+        specifications: [],
+        createdSpecifications: [],
+      },
+    });
+    mockFeedbackRepo.loadIndex.mockResolvedValue(makeFeedbackIndex([feedback]));
+    const requirement = makeRequirement({
+      id: "req-000002",
+      flags: [
+        {
+          type: "feedback-review",
+          reason: "Feedback from issue #17",
+          createdAt: "2026-01-01T00:00:00.000Z",
+          relatedIssues: [17],
+          severity: "medium",
+        },
+      ],
+    });
+    mockReqRepo.findByIdOrThrow.mockResolvedValue(requirement);
+
+    await resolveFeedback("/test/cwd", {
+      issueNumber: 17,
+      artifactId: "req-000002",
+    });
+
+    expect(mockReqRepo.save).toHaveBeenCalled();
+    const savedIndex = mockFeedbackRepo.saveIndex.mock.calls[0][1];
+    expect(savedIndex.feedbacks[0].linkedTo.resolved?.requirements).toContain("req-000002");
+  });
+
+  it("createdSpecificationsに含まれるアーティファクトもresolve可能", async () => {
+    const feedback = makeFeedbackEntry({
+      githubIssue: 17,
+      linkedTo: {
+        requirements: [],
+        createdRequirements: [],
+        specifications: [],
+        createdSpecifications: ["spec-000002"],
+      },
+    });
+    mockFeedbackRepo.loadIndex.mockResolvedValue(makeFeedbackIndex([feedback]));
+    const specification = makeSpecification({
+      id: "spec-000002",
+      flags: [
+        {
+          type: "feedback-review",
+          reason: "Feedback from issue #17",
+          createdAt: "2026-01-01T00:00:00.000Z",
+          relatedIssues: [17],
+          severity: "high",
+        },
+      ],
+    });
+    mockSpecRepo.findByIdOrThrow.mockResolvedValue(specification);
+
+    await resolveFeedback("/test/cwd", {
+      issueNumber: 17,
+      artifactId: "spec-000002",
+    });
+
+    expect(mockSpecRepo.save).toHaveBeenCalled();
+    const savedIndex = mockFeedbackRepo.saveIndex.mock.calls[0][1];
+    expect(savedIndex.feedbacks[0].linkedTo.resolved?.specifications).toContain("spec-000002");
+  });
+
   it("linkedToに含まれないartifact-idでエラーを投げる", async () => {
     const feedback = makeFeedbackEntry({
       githubIssue: 17,

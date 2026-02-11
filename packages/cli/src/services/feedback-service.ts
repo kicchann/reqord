@@ -263,6 +263,9 @@ function buildImpactSummary(feedback: FeedbackEntry): string {
   if (feedback.linkedTo.specifications.length > 0) {
     lines.push(`- Linked Specifications: ${feedback.linkedTo.specifications.join(", ")}`);
   }
+  if (feedback.linkedTo.createdSpecifications.length > 0) {
+    lines.push(`- Created Specifications: ${feedback.linkedTo.createdSpecifications.join(", ")}`);
+  }
 
   lines.push("", "Flags remain on linked artifacts. Use `reqord feedback resolve` to remove when resolved.");
 
@@ -299,11 +302,15 @@ export async function resolveFeedback(
     );
   }
 
-  // Verify artifact is linked
+  // Verify artifact is linked (check both linked and created lists)
   const linkedList = isReq
     ? feedback.linkedTo.requirements
     : feedback.linkedTo.specifications;
-  if (!linkedList.includes(options.artifactId)) {
+  const createdList = isReq
+    ? feedback.linkedTo.createdRequirements
+    : feedback.linkedTo.createdSpecifications;
+
+  if (!linkedList.includes(options.artifactId) && !createdList.includes(options.artifactId)) {
     throw new Error(
       `${options.artifactId} is not linked to feedback #${options.issueNumber}`,
     );

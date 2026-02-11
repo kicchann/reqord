@@ -12,8 +12,10 @@ export const resolveCommand = new Command("resolve")
       const cwd = process.cwd();
       const issueNumber = parseInt(options.issue, 10);
 
-      if (isNaN(issueNumber)) {
-        throw new Error(`Invalid issue number: ${options.issue}`);
+      if (isNaN(issueNumber) || issueNumber <= 0) {
+        throw new Error(
+          `Invalid GitHub issue number (must be a positive integer): ${options.issue}`,
+        );
       }
 
       await resolveFeedback(cwd, { issueNumber, artifactId });
