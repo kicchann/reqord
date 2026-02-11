@@ -7,19 +7,19 @@ export class LocalSpecificationRepository implements SpecificationRepository {
   async findAll(): Promise<Specification[]> {
     const specDir = getSpecificationsDir();
     const files = await fs.readdirFiles(specDir, (name) =>
-      /^spec-\d{6}\.json$/.test(name),
+      /^spec-\d{6}\.yaml$/.test(name),
     );
 
     const specifications: Specification[] = [];
     for (const file of files.sort()) {
       try {
-        const raw = await fs.readJSON<unknown>(fs.joinPath(specDir, file));
+        const raw = await fs.readYAML<unknown>(fs.joinPath(specDir, file));
         const result = SpecificationSchema.safeParse(raw);
         if (result.success) {
           specifications.push(result.data);
         }
       } catch {
-        // Skip files with invalid JSON
+        // Skip files with invalid YAML
       }
     }
     return specifications;
@@ -27,13 +27,13 @@ export class LocalSpecificationRepository implements SpecificationRepository {
 
   async findById(id: string): Promise<Specification | null> {
     const specDir = getSpecificationsDir();
-    const jsonPath = fs.joinPath(specDir, `${id}.json`);
+    const yamlPath = fs.joinPath(specDir, `${id}.yaml`);
 
-    if (!(await fs.exists(jsonPath))) {
+    if (!(await fs.exists(yamlPath))) {
       return null;
     }
 
-    const raw = await fs.readJSON<unknown>(jsonPath);
+    const raw = await fs.readYAML<unknown>(yamlPath);
     const result = SpecificationSchema.safeParse(raw);
     if (!result.success) {
       throw new Error(`Invalid specification ${id}: ${result.error.message}`);
