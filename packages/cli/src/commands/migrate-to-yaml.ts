@@ -15,6 +15,10 @@ export const migrateToYamlCommand = new Command("migrate-to-yaml")
       });
 
       if (options.dryRun) {
+        if (result.plan.length === 0) {
+          console.log(chalk.gray("移行対象のJSONファイルが見つかりませんでした。"));
+          return;
+        }
         console.log(chalk.yellow("プレビューモード（実際の変換は行いません）"));
         console.log("");
         console.log(chalk.bold("変換対象ファイル:"));
@@ -26,7 +30,16 @@ export const migrateToYamlCommand = new Command("migrate-to-yaml")
         return;
       }
 
-      console.log(chalk.green("YAML移行が完了しました"));
+      if (result.plan.length === 0) {
+        console.log(chalk.gray("移行対象のJSONファイルが見つかりませんでした。"));
+        return;
+      }
+
+      if (result.errors.length > 0) {
+        console.log(chalk.yellow("YAML移行が完了しました（一部エラーあり）"));
+      } else {
+        console.log(chalk.green("YAML移行が完了しました"));
+      }
       console.log(`  変換成功: ${result.success.length}ファイル`);
       if (result.errors.length > 0) {
         console.log(chalk.red(`  変換失敗: ${result.errors.length}ファイル`));

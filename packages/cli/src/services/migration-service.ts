@@ -1,5 +1,5 @@
 import { readFile, readdir, rename, mkdir } from "node:fs/promises";
-import { join, basename } from "node:path";
+import { join, relative } from "node:path";
 import { dump as yamlDump, JSON_SCHEMA } from "js-yaml";
 import {
   REQORD_DIR,
@@ -113,8 +113,11 @@ export async function migrateToYaml(
     return { plan, success: [], errors: [] };
   }
 
-  // Create backup directory
-  const backupDir = join(reqordPath, ".backup", new Date().toISOString().split("T")[0]);
+  // Create backup directory with timestamp to allow multiple runs per day
+  const now = new Date();
+  const datePart = now.toISOString().split("T")[0];
+  const timePart = now.toTimeString().split(" ")[0].replace(/:/g, "-");
+  const backupDir = join(reqordPath, ".backup", `${datePart}_${timePart}`);
   await mkdir(backupDir, { recursive: true });
 
   const success: string[] = [];
@@ -128,8 +131,10 @@ export async function migrateToYaml(
 
       await fs.writeText(item.destination, yamlContent);
 
-      // Move original JSON to backup
-      const backupPath = join(backupDir, basename(item.source));
+      // Move original JSON to backup, preserving directory structure
+      const relPath = relative(reqordPath, item.source);
+      const backupPath = join(backupDir, relPath);
+      await mkdir(join(backupPath, ".."), { recursive: true });
       await rename(item.source, backupPath);
 
       success.push(item.destination);
