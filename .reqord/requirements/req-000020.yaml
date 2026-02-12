@@ -1,7 +1,7 @@
 id: req-000020
 version: 1.1.0
 title: コンテキスト統合出力
-status: approved
+status: deprecated
 priority: medium
 createdAt: 2026-02-07T12:00:00Z
 updatedAt: 2026-02-09T12:00:00Z
@@ -35,6 +35,9 @@ dependencies:
     - req-000013
 estimatedComplexity: small
 estimatedHours: 8
+deprecatedReason: >-
+  Claude Codeは直接ファイルを読めるため、CLI経由のコンテキスト集約コマンドは不要。
+  要件・仕様管理のコア機能に注力する方針（Feedback #17）
 flags:
   - type: feedback-review
     reason: 'LLM特化の表現を汎用化: コマンド名変更（context → context export）、トークン最適化をClaude Code側に、Gap Analysis統合を削除（deprecated）'

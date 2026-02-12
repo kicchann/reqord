@@ -1,9 +1,9 @@
 id: spec-000025
 requirementId: req-000022
 version: 1.0.0
-status: draft
+status: implemented
 createdAt: 2026-02-08T14:08:15.243Z
-updatedAt: 2026-02-10T22:45:11.142Z
+updatedAt: 2026-02-12T15:13:14.467Z
 versionHistory: []
 files:
   design: specifications/spec-000025/design.md
@@ -15,12 +15,12 @@ implementation:
       title: '[Task] spec-000025-2: Gantt SVG components & interactions'
       url: https://github.com/kicchann/reqord/issues/145
       priority: P1
-      status: open
+      status: closed
     - number: 144
       title: '[Task] spec-000025-1: Gantt data transformation'
       url: https://github.com/kicchann/reqord/issues/144
       priority: P1
-      status: open
+      status: closed
     - number: 139
       title: '[Task] spec-000025: Ganttチャート実装'
       url: https://github.com/kicchann/reqord/issues/139
@@ -30,6 +30,6 @@ implementation:
   createdAt: 2026-02-10T22:45:11.142Z
   progress:
     total: 3
-    completed: 1
-    percentage: 33
-    lastSyncedAt: 2026-02-10T22:45:11.142Z
+    completed: 3
+    percentage: 100
+    lastSyncedAt: 2026-02-12T15:13:14.467Z
