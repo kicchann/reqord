@@ -1,7 +1,7 @@
 id: req-000027
 version: 3.0.0
 title: データ形式のYAML移行
-status: approved
+status: implemented
 priority: medium
 createdAt: 2026-02-11T07:25:06.280Z
 updatedAt: 2026-02-11T08:05:06.278Z

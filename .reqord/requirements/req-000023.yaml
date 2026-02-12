@@ -1,7 +1,7 @@
 id: req-000023
 version: 3.0.0
 title: Feedback管理 (GitHub Issue連携)
-status: approved
+status: implemented
 priority: medium
 createdAt: 2026-02-09T10:00:00Z
 updatedAt: 2026-02-11T14:30:00Z

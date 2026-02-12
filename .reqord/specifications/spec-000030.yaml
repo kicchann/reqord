@@ -1,9 +1,9 @@
 id: spec-000030
 requirementId: req-000027
 version: 3.0.0
-status: approved
+status: implemented
 createdAt: 2026-02-11T09:00:00.000Z
-updatedAt: 2026-02-11T10:30:00.000Z
+updatedAt: 2026-02-12T15:13:23.397Z
 versionHistory:
   - version: 2.0.0
     status: pending_approval
@@ -32,26 +32,26 @@ implementation:
       title: '[Task] spec-000030-3: Web UI Repository層 YAML対応 + 統合テスト'
       url: https://github.com/kicchann/reqord/issues/177
       priority: P1
-      status: open
+      status: closed
     - number: 176
       title: '[Task] spec-000030-2: CLI Repository層 YAML対応'
       url: https://github.com/kicchann/reqord/issues/176
       priority: P1
-      status: open
+      status: closed
     - number: 175
       title: '[Task] spec-000030-1: FileSystem層 - readYAML/writeYAML + js-yaml依存追加'
       url: https://github.com/kicchann/reqord/issues/175
       priority: P1
-      status: open
+      status: closed
     - number: 173
       title: '[Task] spec-000030: YAML変換レイヤー実装'
       url: https://github.com/kicchann/reqord/issues/173
       priority: P1
-      status: open
+      status: closed
   totalEstimatedHours: 14
   createdAt: 2026-02-11T09:30:00.000Z
   progress:
     total: 4
-    completed: 0
-    percentage: 0
-    lastSyncedAt: 2026-02-11T09:30:00.000Z
+    completed: 4
+    percentage: 100
+    lastSyncedAt: 2026-02-12T15:13:23.397Z

@@ -1,9 +1,9 @@
 id: spec-000031
 requirementId: req-000027
 version: 3.0.0
-status: approved
+status: implemented
 createdAt: 2026-02-11T09:00:00.000Z
-updatedAt: 2026-02-11T10:30:00.000Z
+updatedAt: 2026-02-12T15:13:25.599Z
 versionHistory:
   - version: 2.0.0
     status: pending_approval
@@ -32,21 +32,21 @@ implementation:
       title: '[Task] spec-000031-2: CLIコマンド migrate-to-yaml + dry-run + 統合テスト'
       url: https://github.com/kicchann/reqord/issues/179
       priority: P2
-      status: open
+      status: closed
     - number: 178
       title: '[Task] spec-000031-1: MigrationService - createMigrationPlan + convertToYaml + バックアップ'
       url: https://github.com/kicchann/reqord/issues/178
       priority: P2
-      status: open
+      status: closed
     - number: 174
       title: '[Task] spec-000031: migrate-to-yamlコマンド実装'
       url: https://github.com/kicchann/reqord/issues/174
       priority: P2
-      status: open
+      status: closed
   totalEstimatedHours: 10
   createdAt: 2026-02-11T09:30:00.000Z
   progress:
     total: 3
-    completed: 0
-    percentage: 0
-    lastSyncedAt: 2026-02-11T09:30:00.000Z
+    completed: 3
+    percentage: 100
+    lastSyncedAt: 2026-02-12T15:13:25.599Z

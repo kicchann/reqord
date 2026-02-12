@@ -1,9 +1,9 @@
 id: spec-000026
 requirementId: req-000022
 version: 1.0.0
-status: draft
+status: implemented
 createdAt: 2026-02-08T14:08:15.325Z
-updatedAt: 2026-02-10T22:45:11.137Z
+updatedAt: 2026-02-12T15:13:17.785Z
 versionHistory: []
 files:
   design: specifications/spec-000026/design.md
@@ -25,12 +25,12 @@ implementation:
       title: '[Task] spec-000026-2: Spec detail - Coverage/Issues/History tabs'
       url: https://github.com/kicchann/reqord/issues/147
       priority: P1
-      status: open
+      status: closed
     - number: 146
       title: '[Task] spec-000026-1: Spec detail - tabs + Design/Research'
       url: https://github.com/kicchann/reqord/issues/146
       priority: P1
-      status: open
+      status: closed
     - number: 140
       title: '[Task] spec-000026: 依存グラフ拡張・Spec詳細実装'
       url: https://github.com/kicchann/reqord/issues/140
@@ -40,6 +40,6 @@ implementation:
   createdAt: 2026-02-10T22:45:11.136Z
   progress:
     total: 5
-    completed: 3
-    percentage: 60
-    lastSyncedAt: 2026-02-10T22:45:11.137Z
+    completed: 5
+    percentage: 100
+    lastSyncedAt: 2026-02-12T15:13:17.785Z
