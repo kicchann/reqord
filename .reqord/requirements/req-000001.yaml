@@ -47,3 +47,9 @@ flags:
     relatedIssues:
       - 19
     severity: medium
+  - type: feedback-review
+    reason: 'Feedback from issue #196'
+    createdAt: 2026-02-12T22:05:36.323Z
+    relatedIssues:
+      - 196
+    severity: low

@@ -1,10 +1,10 @@
 id: req-000011
-version: 4.0.0
+version: 5.0.0
 title: Requirement承認フロー (GitHub PR連携)
-status: implemented
+status: draft
 priority: high
 createdAt: 2026-02-07T12:00:00Z
-updatedAt: 2026-02-10T01:19:51.255Z
+updatedAt: 2026-02-13T00:00:00.000Z
 versionHistory:
   - version: 2.0.0
     status: pending_approval
@@ -23,15 +23,24 @@ versionHistory:
     gitCommit: fd38137
     changedAt: 2026-02-10T01:19:51.256Z
     summary: Status changed from approved to implemented
+  - version: 5.0.0
+    status: draft
+    changedAt: 2026-02-13T00:00:00.000Z
+    summary: Reverted to draft for revision based on feedback (#109, #111, #161, #209)
 files:
   description: requirements/req-000011/description.md
   supplementary: []
 successCriteria:
-  - reqord req approve <id> でGitブランチが作成される
-  - 承認依頼PRが自動生成される
+  - reqord req draft <id> でflag付きのreq/specをdraft状態に戻せる（--major/--minor/--patchでバージョン指定）
+  - reqord req approve <id> でGitブランチが作成され、承認依頼PRが自動生成される
+  - PR本文にreqordメタデータコメントタグが埋め込まれる
   - CODEOWNERSで指定されたレビュアーがPRに自動アサインされる
   - PRマージ時にRequirementのstatusがapprovedに更新される
   - currentApproval情報（version, phase, prNumber, approvedBy）が記録される
+  - approve実行時にバージョンをインクリメントしない（バージョンアップはdraft化時に行う）
+  - approve実行時にstatusをapprovedに設定し、PRマージで承認完了（pending_approvalは使用しない）
+  - reqord req implement <id> でapproved状態のreqをimplementedに遷移できる
+  - コマンドのヘルプ・出力が各コマンドの実際の動作を正確に伝える
 format:
   type: user-story
   userStory:
@@ -54,22 +63,4 @@ currentApproval:
   prNumber: 107
   prUrl: https://github.com/kicchann/reqord/pull/107
   approvedBy: []
-flags:
-  - type: feedback-review
-    reason: 'Feedback from issue #109'
-    createdAt: 2026-02-11T07:19:05.404Z
-    relatedIssues:
-      - 109
-    severity: medium
-  - type: feedback-review
-    reason: 'Feedback from issue #111'
-    createdAt: 2026-02-11T07:19:27.720Z
-    relatedIssues:
-      - 111
-    severity: low
-  - type: feedback-review
-    reason: 'Feedback from issue #161'
-    createdAt: 2026-02-11T07:19:30.971Z
-    relatedIssues:
-      - 161
-    severity: medium
+flags: []
