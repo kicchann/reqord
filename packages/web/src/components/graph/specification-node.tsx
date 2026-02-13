@@ -5,7 +5,6 @@ import { Handle, Position, type NodeProps } from "@xyflow/react";
 
 const STATUS_COLORS: Record<string, string> = {
   draft: "bg-blue-200",
-  pending_approval: "bg-purple-200",
   approved: "bg-green-200",
   implemented: "bg-emerald-300",
   deprecated: "bg-red-200",

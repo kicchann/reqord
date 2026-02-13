@@ -13,7 +13,7 @@ export interface ApprovalTarget {
 export interface ApprovalHandler {
   /** Re-validate entity state from disk before making changes */
   revalidate(cwd: string, target: ApprovalTarget): Promise<void>;
-  /** Update entity status to pending_approval, returns new version */
+  /** Update entity status to approved, returns new version */
   updateStatus(cwd: string, target: ApprovalTarget): Promise<string>;
   /** Save currentApproval field on entity */
   saveCurrentApproval(cwd: string, target: ApprovalTarget, newVersion: string): Promise<void>;
@@ -58,7 +58,7 @@ export async function startApproval(
   if (options?.dryRun) {
     const prTitle = handler.buildPrTitle(target);
     console.log(`[dry-run] ブランチ作成: ${branchName}`);
-    console.log(`[dry-run] ステータス変更: draft → pending_approval`);
+    console.log(`[dry-run] ステータス変更: draft → approved`);
     console.log(`[dry-run] PR作成: ${prTitle}`);
     return { branchName, prNumber: 0, prUrl: "" };
   }

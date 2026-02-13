@@ -3,7 +3,6 @@ import type { Status, Priority, Complexity } from "@reqord/shared";
 
 const STATUS_STYLES: Record<Status, string> = {
   draft: "bg-gray-100 text-gray-700",
-  pending_approval: "bg-yellow-100 text-yellow-800",
   approved: "bg-green-100 text-green-800",
   implemented: "bg-blue-100 text-blue-800",
   deprecated: "bg-red-100 text-red-700",
@@ -11,7 +10,6 @@ const STATUS_STYLES: Record<Status, string> = {
 
 const STATUS_LABELS: Record<Status, string> = {
   draft: "Draft",
-  pending_approval: "Pending",
   approved: "Approved",
   implemented: "Implemented",
   deprecated: "Deprecated",

@@ -154,7 +154,7 @@ export async function analyzeRequirementCoverage(
 
 **カバレッジ判定ロジック:**
 - `covered`: approved状態のSpecificationが1件以上存在
-- `partial`: draft/pending_approval状態のSpecificationのみ存在
+- `partial`: draft/approved状態のSpecificationのみ存在
 - `not-covered`: Specificationが0件
 
 ### 3.5 SpecificationSchema拡張

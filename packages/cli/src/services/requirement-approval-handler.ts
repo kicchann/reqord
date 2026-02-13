@@ -18,7 +18,7 @@ export const requirementHandler: ApprovalHandler = {
   },
 
   async updateStatus(cwd, target) {
-    const { after } = await updateRequirement(cwd, target.id, { status: "pending_approval" });
+    const { after } = await updateRequirement(cwd, target.id, { status: "approved" });
     return after.version;
   },
 
@@ -65,7 +65,7 @@ export const requirementHandler: ApprovalHandler = {
 | バージョン | ${target.version} |
 
 ### 変更内容
-status: draft → pending_approval
+status: draft → approved
 
 > マージ後、\`reqord req update ${target.id} --status approved\` でステータスを更新してください。`;
   },

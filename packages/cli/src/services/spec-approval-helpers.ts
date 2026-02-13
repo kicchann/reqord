@@ -44,7 +44,7 @@ export function buildSpecApprovalPrBody(params: SpecApprovalPrBodyParams): strin
 ${params.designSummary}
 
 ### 変更内容
-status: draft → pending_approval
+status: draft → approved
 
 ### 設計ファイル
 - \`specifications/${params.specId}/design.md\`

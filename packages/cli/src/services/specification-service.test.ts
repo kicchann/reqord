@@ -38,6 +38,8 @@ import {
   updateSpecDesign,
   checkSpecApprovalPrerequisites,
   updateSpecificationStatus,
+  updateSpecification,
+  hasSpecMetadataChanges,
 } from "./specification-service.js";
 
 const mockSpecRepo = vi.mocked(specRepo);
@@ -90,44 +92,51 @@ beforeEach(() => {
 
 describe("createSpecification", () => {
   it("要件に紐づくSpecificationを生成する", async () => {
-    mockReqRepo.findByIdOrThrow.mockResolvedValue(makeRequirement());
-    mockGenerateNextSpecId.mockResolvedValue("spec-000001");
+    const mockReq = makeRequirement();
+    mockReqRepo.findByIdOrThrow.mockResolvedValue(mockReq);
+    mockGenerateNextSpecId.mockResolvedValue("spec-000010");
     mockLoadProjectTemplate.mockResolvedValue(null);
 
-    const result = await createSpecification("/cwd", {
-      requirementId: "req-000001",
-    });
+    const result = await createSpecification("/cwd", { requirementId: "req-000001" });
 
+    expect(result.specification.id).toBe("spec-000010");
     expect(result.specification.requirementId).toBe("req-000001");
     expect(result.specification.status).toBe("draft");
     expect(result.specification.version).toBe("1.0.0");
-    expect(result.specification.files.design).toBe(
-      "specifications/spec-000001/design.md",
+    expect(mockSpecRepo.save).toHaveBeenCalled();
+    expect(mockSpecRepo.saveFile).toHaveBeenCalledWith(
+      "/cwd",
+      "spec-000010",
+      "design.md",
+      expect.stringContaining("spec-000010")
     );
-    expect(result.specification.files.supplementary).toEqual([]);
   });
 
   it("存在しない要件IDでエラーを投げる", async () => {
-    mockReqRepo.findByIdOrThrow.mockRejectedValue(new Error("Requirement req-999999 not found."));
+    mockReqRepo.findByIdOrThrow.mockRejectedValue(
+      new Error("Requirement not found")
+    );
 
     await expect(
-      createSpecification("/cwd", { requirementId: "req-999999" }),
-    ).rejects.toThrow("Requirement req-999999 not found.");
+      createSpecification("/cwd", { requirementId: "req-999999" })
+    ).rejects.toThrow("Requirement not found");
   });
 
   it("テンプレートからdesign.mdを生成する", async () => {
-    mockReqRepo.findByIdOrThrow.mockResolvedValue(makeRequirement());
-    mockGenerateNextSpecId.mockResolvedValue("spec-000001");
-    mockLoadProjectTemplate.mockResolvedValue(null);
+    const mockReq = makeRequirement();
+    mockReqRepo.findByIdOrThrow.mockResolvedValue(mockReq);
+    mockGenerateNextSpecId.mockResolvedValue("spec-000010");
+    mockLoadProjectTemplate.mockResolvedValue(
+      "# {{id}}\n\n要件: {{requirementId}}\n"
+    );
 
     await createSpecification("/cwd", { requirementId: "req-000001" });
 
-    // Communication-based: saveFile is a Command (external write)
     expect(mockSpecRepo.saveFile).toHaveBeenCalledWith(
       "/cwd",
-      "spec-000001",
+      "spec-000010",
       "design.md",
-      expect.stringContaining("spec-000001"),
+      "# spec-000010\n\n要件: req-000001\n"
     );
   });
 });
@@ -138,15 +147,14 @@ describe("listSpecifications", () => {
   it("全仕様を一覧できる", async () => {
     const specs = [
       makeSpecification({ id: "spec-000001" }),
-      makeSpecification({ id: "spec-000002", requirementId: "req-000002" }),
+      makeSpecification({ id: "spec-000002" }),
     ];
     mockSpecRepo.findAll.mockResolvedValue(specs);
 
     const result = await listSpecifications("/cwd");
 
-    expect(result).toHaveLength(2);
-    expect(result[0].id).toBe("spec-000001");
-    expect(result[1].id).toBe("spec-000002");
+    expect(result).toEqual(specs);
+    expect(mockSpecRepo.findAll).toHaveBeenCalledWith("/cwd");
   });
 
   it("statusでフィルタできる", async () => {
@@ -159,22 +167,21 @@ describe("listSpecifications", () => {
     const result = await listSpecifications("/cwd", { status: "draft" });
 
     expect(result).toHaveLength(1);
-    expect(result[0].status).toBe("draft");
+    expect(result[0].id).toBe("spec-000001");
   });
 
   it("requirementIdでフィルタできる", async () => {
     const specs = [
       makeSpecification({ id: "spec-000001", requirementId: "req-000001" }),
       makeSpecification({ id: "spec-000002", requirementId: "req-000002" }),
+      makeSpecification({ id: "spec-000003", requirementId: "req-000001" }),
     ];
     mockSpecRepo.findAll.mockResolvedValue(specs);
 
-    const result = await listSpecifications("/cwd", {
-      requirementId: "req-000001",
-    });
+    const result = await listSpecifications("/cwd", { requirementId: "req-000001" });
 
-    expect(result).toHaveLength(1);
-    expect(result[0].requirementId).toBe("req-000001");
+    expect(result).toHaveLength(2);
+    expect(result.map((s) => s.id)).toEqual(["spec-000001", "spec-000003"]);
   });
 
   it("仕様がない場合空配列を返す", async () => {
@@ -183,6 +190,7 @@ describe("listSpecifications", () => {
     const result = await listSpecifications("/cwd");
 
     expect(result).toEqual([]);
+    expect(result).toHaveLength(0);
   });
 });
 
@@ -190,27 +198,30 @@ describe("listSpecifications", () => {
 
 describe("showSpecification", () => {
   it("仕様とファイル内容を返す", async () => {
-    const spec = makeSpecification();
+    const spec = makeSpecification({ id: "spec-000001" });
+    const design = "# Design content";
     mockSpecRepo.findByIdOrThrow.mockResolvedValue(spec);
-    mockSpecRepo.loadFile.mockImplementation(
-      async (_cwd: string, _id: string, filename: string) => {
-        if (filename === "design.md") return "# Design content";
-        return null;
-      },
-    );
+    mockSpecRepo.loadFile.mockResolvedValue(design);
 
     const result = await showSpecification("/cwd", "spec-000001");
 
-    expect(result.specification.id).toBe("spec-000001");
-    expect(result.design).toBe("# Design content");
+    expect(result.specification).toEqual(spec);
+    expect(result.design).toBe(design);
+    expect(mockSpecRepo.loadFile).toHaveBeenCalledWith(
+      "/cwd",
+      "spec-000001",
+      "design.md"
+    );
   });
 
   it("存在しない仕様でエラーを投げる", async () => {
-    mockSpecRepo.findByIdOrThrow.mockRejectedValue(new Error("Specification spec-999999 not found."));
+    mockSpecRepo.findByIdOrThrow.mockRejectedValue(
+      new Error("Specification not found")
+    );
 
     await expect(
-      showSpecification("/cwd", "spec-999999"),
-    ).rejects.toThrow("Specification spec-999999 not found.");
+      showSpecification("/cwd", "spec-999999")
+    ).rejects.toThrow("Specification not found");
   });
 });
 
@@ -218,21 +229,25 @@ describe("showSpecification", () => {
 
 describe("updateSpecDesign", () => {
   it("コンテンツ未指定時はファイルパスを返す", async () => {
-    const spec = makeSpecification();
+    const spec = makeSpecification({ id: "spec-000001" });
     mockSpecRepo.findByIdOrThrow.mockResolvedValue(spec);
 
-    const result = await updateSpecDesign("/cwd", "spec-000001");
+    const result = await updateSpecDesign("/cwd", "spec-000001", {});
 
-    expect(result.filePath).toBe("specifications/spec-000001/design.md");
     expect(result.updated).toBe(false);
+    expect(result.filePath).toBe("specifications/spec-000001/design.md");
+    expect(mockSpecRepo.saveFile).not.toHaveBeenCalled();
   });
 
   it("contentFileで内容を更新できる", async () => {
-    const spec = makeSpecification();
+    const spec = makeSpecification({
+      id: "spec-000001",
+      updatedAt: "2025-01-01T00:00:00.000Z",
+    });
     mockSpecRepo.findByIdOrThrow.mockResolvedValue(spec);
 
     const result = await updateSpecDesign("/cwd", "spec-000001", {
-      content: "# Updated design",
+      content: "# New design",
     });
 
     expect(result.updated).toBe(true);
@@ -240,23 +255,25 @@ describe("updateSpecDesign", () => {
       "/cwd",
       "spec-000001",
       "design.md",
-      "# Updated design",
+      "# New design"
     );
     expect(mockSpecRepo.save).toHaveBeenCalledWith(
       "/cwd",
       expect.objectContaining({
         id: "spec-000001",
-        updatedAt: expect.any(String),
-      }),
+        updatedAt: expect.not.stringContaining("2025-01-01T00:00:00.000Z"),
+      })
     );
   });
 
   it("存在しない仕様でエラーを投げる", async () => {
-    mockSpecRepo.findByIdOrThrow.mockRejectedValue(new Error("Specification spec-999999 not found."));
+    mockSpecRepo.findByIdOrThrow.mockRejectedValue(
+      new Error("Specification not found")
+    );
 
     await expect(
-      updateSpecDesign("/cwd", "spec-999999"),
-    ).rejects.toThrow("Specification spec-999999 not found.");
+      updateSpecDesign("/cwd", "spec-999999", { content: "new" })
+    ).rejects.toThrow("Specification not found");
   });
 });
 
@@ -264,157 +281,146 @@ describe("updateSpecDesign", () => {
 
 describe("checkSpecApprovalPrerequisites", () => {
   it("Specificationがdraftで関連Requirementがapprovedで設計済みの場合は成功", async () => {
-    mockSpecRepo.findByIdOrThrow.mockResolvedValue(makeSpecification({ status: "draft" }));
-    mockReqRepo.findById.mockResolvedValue(makeRequirement({ status: "approved" }));
-    mockSpecRepo.loadFile.mockResolvedValue("# 実際の設計内容\n\n設計の詳細...");
+    const spec = makeSpecification({ status: "draft" });
+    const req = makeRequirement({ id: "req-000001", status: "approved" });
+    mockSpecRepo.findByIdOrThrow.mockResolvedValue(spec);
+    mockReqRepo.findById.mockResolvedValue(req);
+    mockSpecRepo.loadFile.mockResolvedValue("# Design content");
 
     const result = await checkSpecApprovalPrerequisites("/cwd", "spec-000001");
+
     expect(result.ok).toBe(true);
-    expect(result.errors).toEqual([]);
+    expect(result.errors).toHaveLength(0);
   });
 
   it("Specificationがdraft以外の場合はエラー", async () => {
-    mockSpecRepo.findByIdOrThrow.mockResolvedValue(makeSpecification({ status: "approved" }));
-    mockReqRepo.findById.mockResolvedValue(makeRequirement({ status: "approved" }));
-    mockSpecRepo.loadFile.mockResolvedValue("# 設計内容");
+    const spec = makeSpecification({ status: "approved" });
+    const req = makeRequirement({ status: "approved" });
+    mockSpecRepo.findByIdOrThrow.mockResolvedValue(spec);
+    mockReqRepo.findById.mockResolvedValue(req);
+    mockSpecRepo.loadFile.mockResolvedValue("# Design");
 
     const result = await checkSpecApprovalPrerequisites("/cwd", "spec-000001");
+
     expect(result.ok).toBe(false);
-    expect(result.errors).toContainEqual(expect.stringContaining("draft ではありません"));
+    expect(result.errors).toContain("Specificationのステータスが draft ではありません（現在: approved）");
   });
 
   it("関連Requirementがapprovedの場合は成功", async () => {
-    // same as first test but explicit about requirement being approved
-    mockSpecRepo.findByIdOrThrow.mockResolvedValue(makeSpecification({ status: "draft" }));
-    mockReqRepo.findById.mockResolvedValue(makeRequirement({ status: "approved" }));
-    mockSpecRepo.loadFile.mockResolvedValue("# 設計内容");
+    const spec = makeSpecification({ status: "draft" });
+    const req = makeRequirement({ status: "approved" });
+    mockSpecRepo.findByIdOrThrow.mockResolvedValue(spec);
+    mockReqRepo.findById.mockResolvedValue(req);
+    mockSpecRepo.loadFile.mockResolvedValue("# Design");
 
     const result = await checkSpecApprovalPrerequisites("/cwd", "spec-000001");
-    expect(result.ok).toBe(true);
-  });
 
-  it("関連Requirementがpending_approvalの場合は成功", async () => {
-    mockSpecRepo.findByIdOrThrow.mockResolvedValue(makeSpecification({ status: "draft" }));
-    mockReqRepo.findById.mockResolvedValue(makeRequirement({ status: "pending_approval" }));
-    mockSpecRepo.loadFile.mockResolvedValue("# 設計内容");
-
-    const result = await checkSpecApprovalPrerequisites("/cwd", "spec-000001");
     expect(result.ok).toBe(true);
   });
 
   it("関連Requirementがdraftの場合はエラー", async () => {
-    mockSpecRepo.findByIdOrThrow.mockResolvedValue(makeSpecification({ status: "draft" }));
-    mockReqRepo.findById.mockResolvedValue(makeRequirement({ status: "draft" }));
-    mockSpecRepo.loadFile.mockResolvedValue("# 設計内容");
+    const spec = makeSpecification({ status: "draft" });
+    const req = makeRequirement({ status: "draft" });
+    mockSpecRepo.findByIdOrThrow.mockResolvedValue(spec);
+    mockReqRepo.findById.mockResolvedValue(req);
+    mockSpecRepo.loadFile.mockResolvedValue("# Design");
 
     const result = await checkSpecApprovalPrerequisites("/cwd", "spec-000001");
+
     expect(result.ok).toBe(false);
-    expect(result.errors).toContainEqual(expect.stringContaining("未承認"));
+    expect(result.errors).toContain("関連要件 req-000001 が未承認です（現在: draft）");
   });
 
   it("design.mdがテンプレートのままの場合はエラー", async () => {
-    mockSpecRepo.findByIdOrThrow.mockResolvedValue(makeSpecification({ status: "draft" }));
-    mockReqRepo.findById.mockResolvedValue(makeRequirement({ status: "approved" }));
-    mockSpecRepo.loadFile.mockResolvedValue("# {{id}} - Design\n\n## 対象要件: {{requirementId}}\n\n## 設計概要\n\n{{設計の目的とスコープを記述}}");
+    const spec = makeSpecification({ status: "draft" });
+    const req = makeRequirement({ status: "approved" });
+    mockSpecRepo.findByIdOrThrow.mockResolvedValue(spec);
+    mockReqRepo.findById.mockResolvedValue(req);
+    mockSpecRepo.loadFile.mockResolvedValue("# {{id}} - Design");
 
     const result = await checkSpecApprovalPrerequisites("/cwd", "spec-000001");
+
     expect(result.ok).toBe(false);
-    expect(result.errors).toContainEqual(expect.stringContaining("テンプレートのまま"));
+    expect(result.errors).toContain("design.mdがテンプレートのままです。プレースホルダを編集して設計内容を記述してください。");
   });
 
   it("design.mdがnullの場合はエラー", async () => {
-    mockSpecRepo.findByIdOrThrow.mockResolvedValue(makeSpecification({ status: "draft" }));
-    mockReqRepo.findById.mockResolvedValue(makeRequirement({ status: "approved" }));
+    const spec = makeSpecification({ status: "draft" });
+    const req = makeRequirement({ status: "approved" });
+    mockSpecRepo.findByIdOrThrow.mockResolvedValue(spec);
+    mockReqRepo.findById.mockResolvedValue(req);
     mockSpecRepo.loadFile.mockResolvedValue(null);
 
     const result = await checkSpecApprovalPrerequisites("/cwd", "spec-000001");
+
     expect(result.ok).toBe(false);
-    expect(result.errors).toContainEqual(expect.stringContaining("存在しないか読み込めません"));
+    expect(result.errors).toContain("design.mdが存在しないか読み込めません。design.mdを作成し、設計内容を記述してください。");
   });
 
   it("design.mdが空白のみの場合はエラー", async () => {
-    mockSpecRepo.findByIdOrThrow.mockResolvedValue(makeSpecification({ status: "draft" }));
-    mockReqRepo.findById.mockResolvedValue(makeRequirement({ status: "approved" }));
-    mockSpecRepo.loadFile.mockResolvedValue("  \n  \n  ");
+    const spec = makeSpecification({ status: "draft" });
+    const req = makeRequirement({ status: "approved" });
+    mockSpecRepo.findByIdOrThrow.mockResolvedValue(spec);
+    mockReqRepo.findById.mockResolvedValue(req);
+    mockSpecRepo.loadFile.mockResolvedValue("   \n  ");
 
     const result = await checkSpecApprovalPrerequisites("/cwd", "spec-000001");
+
     expect(result.ok).toBe(false);
-    expect(result.errors).toContainEqual(expect.stringContaining("空です"));
+    expect(result.errors).toContain("design.mdが空です。設計内容を記述してください。");
   });
 
   it("関連Requirementが見つからない場合はエラー", async () => {
-    mockSpecRepo.findByIdOrThrow.mockResolvedValue(makeSpecification({ status: "draft" }));
+    const spec = makeSpecification({ status: "draft" });
+    mockSpecRepo.findByIdOrThrow.mockResolvedValue(spec);
     mockReqRepo.findById.mockResolvedValue(null);
-    mockSpecRepo.loadFile.mockResolvedValue("# 設計内容");
+    mockSpecRepo.loadFile.mockResolvedValue("# Design");
 
     const result = await checkSpecApprovalPrerequisites("/cwd", "spec-000001");
+
     expect(result.ok).toBe(false);
-    expect(result.errors).toContainEqual(expect.stringContaining("が見つかりません"));
+    expect(result.errors).toContain("関連要件 req-000001 が見つかりません");
   });
 
   it("Specificationが存在しない場合はエラーをthrow", async () => {
-    mockSpecRepo.findByIdOrThrow.mockRejectedValue(new Error("Specification spec-999999 not found."));
+    mockSpecRepo.findByIdOrThrow.mockRejectedValue(new Error("Specification not found"));
 
     await expect(
       checkSpecApprovalPrerequisites("/cwd", "spec-999999")
-    ).rejects.toThrow("Specification spec-999999 not found.");
+    ).rejects.toThrow("Specification not found");
   });
 });
 
 // --- Cycle 6: updateSpecificationStatus ---
 
 describe("updateSpecificationStatus", () => {
-  it("正常系: draft → pending_approval でバージョンをmajor bump", async () => {
+  it("ステータスのみ変更でバージョン据え置き", async () => {
     const before = makeSpecification({
       status: "draft",
-      version: "1.0.0",
-      versionHistory: [],
+      version: "1.2.3",
     });
     mockSpecRepo.findByIdOrThrow.mockResolvedValue(before);
 
-    const result = await updateSpecificationStatus("/cwd", "spec-000001", "pending_approval");
+    const result = await updateSpecificationStatus("/cwd", "spec-000001", "approved");
 
-    expect(result.before.status).toBe("draft");
-    expect(result.before.version).toBe("1.0.0");
-    expect(result.after.status).toBe("pending_approval");
-    expect(result.after.version).toBe("2.0.0");
+    expect(result.before.version).toBe("1.2.3");
+    expect(result.after.version).toBe("1.2.3");
+    expect(result.after.status).toBe("approved");
     expect(result.after.versionHistory).toHaveLength(1);
-    expect(result.after.versionHistory[0]).toMatchObject({
-      version: "2.0.0",
-      status: "pending_approval",
-      summary: "Status changed from draft to pending_approval",
-    });
+    expect(result.after.versionHistory[0].version).toBe("1.2.3");
   });
 
-  it("バージョンがすでに高い場合でも正しくmajor bump", async () => {
-    const before = makeSpecification({
-      status: "draft",
-      version: "3.5.2",
-    });
+  it("バージョンがすでに高い場合でもステータス変更のみならバージョン据え置き", async () => {
+    const before = makeSpecification({ status: "draft", version: "5.0.0" });
     mockSpecRepo.findByIdOrThrow.mockResolvedValue(before);
 
-    const result = await updateSpecificationStatus("/cwd", "spec-000001", "pending_approval");
+    const result = await updateSpecificationStatus("/cwd", "spec-000001", "approved");
 
-    expect(result.after.version).toBe("4.0.0");
+    expect(result.after.version).toBe("5.0.0");
   });
 
-  it("invalid transition: approved → draft でエラー", async () => {
-    const before = makeSpecification({
-      status: "approved",
-      version: "2.0.0",
-    });
-    mockSpecRepo.findByIdOrThrow.mockResolvedValue(before);
-
-    await expect(
-      updateSpecificationStatus("/cwd", "spec-000001", "draft")
-    ).rejects.toThrow(/Invalid status transition/);
-  });
-
-  it("invalid transition: pending_approval → implemented でエラー", async () => {
-    const before = makeSpecification({
-      status: "pending_approval",
-      version: "2.0.0",
-    });
+  it("invalid transition: draft → implemented でエラー", async () => {
+    const before = makeSpecification({ status: "draft" });
     mockSpecRepo.findByIdOrThrow.mockResolvedValue(before);
 
     await expect(
@@ -422,30 +428,32 @@ describe("updateSpecificationStatus", () => {
     ).rejects.toThrow(/Invalid status transition/);
   });
 
-  it("Specificationが存在しない場合はエラー", async () => {
-    mockSpecRepo.findByIdOrThrow.mockRejectedValue(new Error("Specification spec-999999 not found."));
+  it("invalid transition: implemented → approved でエラー", async () => {
+    const before = makeSpecification({ status: "implemented" });
+    mockSpecRepo.findByIdOrThrow.mockResolvedValue(before);
 
     await expect(
-      updateSpecificationStatus("/cwd", "spec-999999", "pending_approval")
-    ).rejects.toThrow("Specification spec-999999 not found.");
+      updateSpecificationStatus("/cwd", "spec-000001", "approved")
+    ).rejects.toThrow(/Invalid status transition/);
+  });
+
+  it("Specificationが存在しない場合はエラー", async () => {
+    mockSpecRepo.findByIdOrThrow.mockRejectedValue(new Error("Specification not found"));
+
+    await expect(
+      updateSpecificationStatus("/cwd", "spec-999999", "approved")
+    ).rejects.toThrow("Specification not found");
   });
 
   it("saveが呼ばれる", async () => {
-    const before = makeSpecification({
-      status: "draft",
-      version: "1.0.0",
-    });
+    const before = makeSpecification({ status: "draft" });
     mockSpecRepo.findByIdOrThrow.mockResolvedValue(before);
 
-    await updateSpecificationStatus("/cwd", "spec-000001", "pending_approval");
+    await updateSpecificationStatus("/cwd", "spec-000001", "approved");
 
     expect(mockSpecRepo.save).toHaveBeenCalledWith(
       "/cwd",
-      expect.objectContaining({
-        id: "spec-000001",
-        status: "pending_approval",
-        version: "2.0.0",
-      })
+      expect.objectContaining({ status: "approved" })
     );
   });
 
@@ -457,8 +465,276 @@ describe("updateSpecificationStatus", () => {
     });
     mockSpecRepo.findByIdOrThrow.mockResolvedValue(before);
 
-    const result = await updateSpecificationStatus("/cwd", "spec-000001", "pending_approval");
+    const result = await updateSpecificationStatus("/cwd", "spec-000001", "approved");
 
     expect(result.after.updatedAt).not.toBe(before.updatedAt);
+  });
+});
+
+// --- Cycle 7: hasSpecMetadataChanges ---
+
+describe("hasSpecMetadataChanges", () => {
+  it("supplementary追加を検出", () => {
+    const before = makeSpecification({ files: { design: "d.md", supplementary: [] } });
+    const after = makeSpecification({ files: { design: "d.md", supplementary: ["new.md"] } });
+    expect(hasSpecMetadataChanges(before, after)).toBe(true);
+  });
+
+  it("supplementary削除を検出", () => {
+    const before = makeSpecification({ files: { design: "d.md", supplementary: ["old.md"] } });
+    const after = makeSpecification({ files: { design: "d.md", supplementary: [] } });
+    expect(hasSpecMetadataChanges(before, after)).toBe(true);
+  });
+
+  it("designパス変更を検出", () => {
+    const before = makeSpecification({ files: { design: "old.md", supplementary: [] } });
+    const after = makeSpecification({ files: { design: "new.md", supplementary: [] } });
+    expect(hasSpecMetadataChanges(before, after)).toBe(true);
+  });
+
+  it("status変更は検出しない（内容変更ではない）", () => {
+    const before = makeSpecification({ status: "draft" });
+    const after = makeSpecification({ status: "approved" });
+    expect(hasSpecMetadataChanges(before, after)).toBe(false);
+  });
+
+  it("flags変更は検出しない", () => {
+    const before = makeSpecification({ flags: [] });
+    const after = makeSpecification({
+      flags: [
+        {
+          type: "feedback-review",
+          reason: "test",
+          createdAt: "2026-01-01T00:00:00Z",
+          relatedIssues: [],
+          severity: "medium",
+        },
+      ],
+    });
+    expect(hasSpecMetadataChanges(before, after)).toBe(false);
+  });
+
+  it("currentApproval変更は検出しない", () => {
+    const before = makeSpecification({ currentApproval: undefined });
+    const after = makeSpecification({
+      currentApproval: {
+        version: "1.0.0",
+        phase: "specification",
+        prNumber: 123,
+        prUrl: "https://github.com/user/repo/pull/123",
+        approvedBy: ["user1"],
+      },
+    });
+    expect(hasSpecMetadataChanges(before, after)).toBe(false);
+  });
+
+  it("updatedAt変更は検出しない", () => {
+    const before = makeSpecification({ updatedAt: "2025-01-01T00:00:00.000Z" });
+    const after = makeSpecification({ updatedAt: "2025-01-02T00:00:00.000Z" });
+    expect(hasSpecMetadataChanges(before, after)).toBe(false);
+  });
+
+  it("versionHistory変更は検出しない", () => {
+    const before = makeSpecification({ versionHistory: [] });
+    const after = makeSpecification({
+      versionHistory: [
+        {
+          version: "1.0.0",
+          status: "draft",
+          gitCommit: "abc123",
+          changedAt: "2025-01-01T00:00:00.000Z",
+          summary: "test",
+        },
+      ],
+    });
+    expect(hasSpecMetadataChanges(before, after)).toBe(false);
+  });
+
+  it("変更なしの場合はfalse", () => {
+    const spec = makeSpecification();
+    expect(hasSpecMetadataChanges(spec, spec)).toBe(false);
+  });
+});
+
+// --- Cycle 8: updateSpecification ---
+
+describe("updateSpecification", () => {
+  it("パッチデータでsupplementaryを更新", async () => {
+    const before = makeSpecification({
+      version: "1.0.0",
+      files: { design: "d.md", supplementary: ["old.md"] },
+    });
+    mockSpecRepo.findByIdOrThrow.mockResolvedValue(before);
+
+    const result = await updateSpecification("/cwd", "spec-000001", {
+      patchData: { files: { design: "d.md", supplementary: ["old.md", "new.md"] } },
+    });
+
+    expect(result.after.files.supplementary).toEqual(["old.md", "new.md"]);
+    expect(result.after.version).toBe("1.1.0"); // minor bump for supplementary change
+  });
+
+  it("ステータスのみ変更でバージョン据え置き", async () => {
+    const before = makeSpecification({ status: "draft", version: "1.2.3" });
+    mockSpecRepo.findByIdOrThrow.mockResolvedValue(before);
+
+    const result = await updateSpecification("/cwd", "spec-000001", {
+      status: "approved",
+    });
+
+    expect(result.after.status).toBe("approved");
+    expect(result.after.version).toBe("1.2.3");
+  });
+
+  it("不正な状態遷移でエラー", async () => {
+    const before = makeSpecification({ status: "draft" });
+    mockSpecRepo.findByIdOrThrow.mockResolvedValue(before);
+
+    await expect(
+      updateSpecification("/cwd", "spec-000001", { status: "implemented" })
+    ).rejects.toThrow(/Invalid status transition/);
+  });
+
+  it("明示的majorバンプ指定", async () => {
+    const before = makeSpecification({ version: "1.2.3" });
+    mockSpecRepo.findByIdOrThrow.mockResolvedValue(before);
+
+    const result = await updateSpecification("/cwd", "spec-000001", {
+      versionBump: "major",
+    });
+
+    expect(result.after.version).toBe("2.0.0");
+  });
+
+  it("明示的minorバンプ指定", async () => {
+    const before = makeSpecification({ version: "1.2.3" });
+    mockSpecRepo.findByIdOrThrow.mockResolvedValue(before);
+
+    const result = await updateSpecification("/cwd", "spec-000001", {
+      versionBump: "minor",
+    });
+
+    expect(result.after.version).toBe("1.3.0");
+  });
+
+  it("明示的patchバンプ指定", async () => {
+    const before = makeSpecification({ version: "1.2.3" });
+    mockSpecRepo.findByIdOrThrow.mockResolvedValue(before);
+
+    const result = await updateSpecification("/cwd", "spec-000001", {
+      versionBump: "patch",
+    });
+
+    expect(result.after.version).toBe("1.2.4");
+  });
+
+  it("design.md更新 + パッチデータでファイル保存とバージョンアップ", async () => {
+    const before = makeSpecification({
+      version: "1.0.0",
+      files: { design: "d.md", supplementary: [] },
+    });
+    mockSpecRepo.findByIdOrThrow.mockResolvedValue(before);
+
+    const result = await updateSpecification("/cwd", "spec-000001", {
+      designContent: "# New design",
+      patchData: { files: { design: "d.md", supplementary: ["new.md"] } },
+    });
+
+    expect(mockSpecRepo.saveFile).toHaveBeenCalledWith(
+      "/cwd",
+      "spec-000001",
+      "design.md",
+      "# New design"
+    );
+    expect(result.after.version).toBe("1.1.0");
+  });
+
+  it("design.mdのみ更新でpatchバンプ", async () => {
+    const before = makeSpecification({ version: "1.0.0" });
+    mockSpecRepo.findByIdOrThrow.mockResolvedValue(before);
+
+    const result = await updateSpecification("/cwd", "spec-000001", {
+      designContent: "# Updated design",
+    });
+
+    expect(mockSpecRepo.saveFile).toHaveBeenCalled();
+    expect(result.after.version).toBe("1.0.1");
+  });
+
+  it("versionHistoryが自動記録される", async () => {
+    const before = makeSpecification({ version: "1.0.0", versionHistory: [] });
+    mockSpecRepo.findByIdOrThrow.mockResolvedValue(before);
+
+    const result = await updateSpecification("/cwd", "spec-000001", {
+      patchData: { files: { design: "specifications/spec-000001/design.md", supplementary: ["new.md"] } },
+    });
+
+    expect(result.after.versionHistory).toHaveLength(1);
+    expect(result.after.versionHistory[0].version).toBe("1.1.0");
+    expect(result.after.versionHistory[0].summary).toContain("supplementary");
+  });
+
+  it("ステータス+内容変更で内容変更のバージョンアップを適用", async () => {
+    const before = makeSpecification({
+      status: "draft",
+      version: "1.0.0",
+      files: { design: "d.md", supplementary: [] },
+    });
+    mockSpecRepo.findByIdOrThrow.mockResolvedValue(before);
+
+    const result = await updateSpecification("/cwd", "spec-000001", {
+      status: "approved",
+      patchData: { files: { design: "d.md", supplementary: ["new.md"] } },
+    });
+
+    expect(result.after.status).toBe("approved");
+    expect(result.after.version).toBe("1.1.0"); // minor for supplementary
+  });
+
+  it("明示的バージョン指定が自動バージョニングより優先される", async () => {
+    const before = makeSpecification({
+      version: "1.0.0",
+      files: { design: "d.md", supplementary: [] },
+    });
+    mockSpecRepo.findByIdOrThrow.mockResolvedValue(before);
+
+    const result = await updateSpecification("/cwd", "spec-000001", {
+      patchData: { files: { design: "d.md", supplementary: ["new.md"] } }, // normally minor
+      versionBump: "major", // explicit major
+    });
+
+    expect(result.after.version).toBe("2.0.0");
+  });
+
+  it("updatedAtが更新される", async () => {
+    const before = makeSpecification({ updatedAt: "2025-01-01T00:00:00.000Z" });
+    mockSpecRepo.findByIdOrThrow.mockResolvedValue(before);
+
+    const result = await updateSpecification("/cwd", "spec-000001", {
+      status: "approved",
+    });
+
+    expect(result.after.updatedAt).not.toBe(before.updatedAt);
+  });
+
+  it("saveが呼ばれる", async () => {
+    const before = makeSpecification();
+    mockSpecRepo.findByIdOrThrow.mockResolvedValue(before);
+
+    await updateSpecification("/cwd", "spec-000001", { status: "approved" });
+
+    expect(mockSpecRepo.save).toHaveBeenCalledWith(
+      "/cwd",
+      expect.objectContaining({ status: "approved" })
+    );
+  });
+
+  it("無効なステータス遷移の場合はエラー", async () => {
+    const before = makeSpecification({ status: "draft" });
+    mockSpecRepo.findByIdOrThrow.mockResolvedValue(before);
+
+    await expect(
+      updateSpecification("/cwd", "spec-000001", { status: "implemented" })
+    ).rejects.toThrow(/Invalid status transition: draft → implemented/);
   });
 });

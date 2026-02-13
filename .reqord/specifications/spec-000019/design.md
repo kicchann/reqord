@@ -269,10 +269,10 @@ function renderProgressBar(percentage: number, width: number = 20): string {
       → reqRepo.findAll(cwd) → 全要件取得
       → specRepo.findAll(cwd) → 全仕様取得
       → Requirements集計:
-        → byStatus: { draft: 3, approved: 6, pending_approval: 1 }
+        → byStatus: { draft: 3, approved: 6, approved: 1 }
         → approvedPercentage: 60%
       → Specifications集計:
-        → byStatus: { draft: 2, approved: 4, pending_approval: 2 }
+        → byStatus: { draft: 2, approved: 4, approved: 2 }
         → approvedPercentage: 50%
       → Issues集計（各specのimplementationフィールドから）:
         → total: 20, closed: 16, closedPercentage: 80%

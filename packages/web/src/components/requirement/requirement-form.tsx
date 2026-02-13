@@ -162,8 +162,8 @@ export function RequirementForm({ mode, requirement, description, allRequirement
             className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm"
           >
             <option value="draft">Draft</option>
-            <option value="pending_approval">Pending Approval</option>
             <option value="approved">Approved</option>
+            <option value="implemented">Implemented</option>
             <option value="deprecated">Deprecated</option>
           </select>
         </div>

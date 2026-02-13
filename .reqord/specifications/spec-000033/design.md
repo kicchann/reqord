@@ -453,7 +453,7 @@ draft ──approve──→ approved ──implement──→ implemented
   └── draft (flag解決) ←───────────────────────┘
 ```
 
-> `pending_approval` は廃止（#208）。PRマージ自体が承認行為となる。
+> `approved` は廃止（#208）。PRマージ自体が承認行為となる。
 > すべての状態遷移はPR経由で行う。
 
 許可される遷移（既存の `getStateTransitions()` で定義済み）:
@@ -659,9 +659,9 @@ spec-000005と共通のスキーマ（`@reqord/shared` の `VersionHistoryEntryS
 - req-000005の要件（"specification contentの変更でversionをincrement"）は `--major/--minor/--patch` オプションによる明示指定で担保
 - これにより、Gitの細かい変更履歴とYAMLメタデータの粗い変更履歴の二重管理を実現
 
-### pending_approvalの廃止
+### approvedの廃止
 
-**決定:** `pending_approval` ステータスを廃止し、`draft → approved → implemented` の3状態とする
+**決定:** `approved` ステータスを廃止し、`draft → approved → implemented` の3状態とする
 
 **理由:** PRマージ自体が承認行為であり、別途「承認待ち」状態を設ける意味がない。ワークフローの簡素化。（#208 フィードバック反映、spec-000005と共通）
 
@@ -707,4 +707,4 @@ spec-000005と共通のスキーマ（`@reqord/shared` の `VersionHistoryEntryS
 | バージョン | 日付 | 変更内容 |
 |-----------|------|---------|
 | v1.0.0 | 2026-02-13 | 初版（Specificationバージョン管理）。spec-000005のRequirementバージョン管理に対応する設計 |
-| v1.1.0 | 2026-02-13 | spec-000005との整合性修正: (1) 状態遷移を専用コマンド化 (2) pending_approval除去 (3) VersionHistoryEntry定義統一 (4) draft差し戻し時のバージョン見直し記載追加 (5) コンテンツファイルと自動バージョニングの関係を明確化 |
+| v1.1.0 | 2026-02-13 | spec-000005との整合性修正: (1) 状態遷移を専用コマンド化 (2) approved除去 (3) VersionHistoryEntry定義統一 (4) draft差し戻し時のバージョン見直し記載追加 (5) コンテンツファイルと自動バージョニングの関係を明確化 |

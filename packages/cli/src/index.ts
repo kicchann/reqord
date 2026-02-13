@@ -10,6 +10,8 @@ import { deleteCommand } from "./commands/req/delete.js";
 import { validateCommand } from "./commands/req/validate.js";
 import { historyCommand } from "./commands/req/history.js";
 import { approveCommand } from "./commands/req/approve.js";
+import { draftCommand } from "./commands/req/draft.js";
+import { implementedCommand } from "./commands/req/implemented.js";
 import { contextInitCommand } from "./commands/context/init.js";
 import { contextShowCommand } from "./commands/context/show.js";
 import { contextUpdateCommand } from "./commands/context/update.js";
@@ -18,6 +20,10 @@ import { specListCommand } from "./commands/spec/list.js";
 import { specShowCommand } from "./commands/spec/show.js";
 import { specDesignCommand } from "./commands/spec/design.js";
 import { specApproveCommand } from "./commands/spec/approve.js";
+import { updateCommand as specUpdateCommand } from "./commands/spec/update.js";
+import { draftCommand as specDraftCommand } from "./commands/spec/draft.js";
+import { implementedCommand as specImplementedCommand } from "./commands/spec/implemented.js";
+import { historyCommand as specHistoryCommand } from "./commands/spec/history.js";
 import { feedbackCommand } from "./commands/feedback/index.js";
 import { issueCommand } from "./commands/issue/index.js";
 import { migrateToYamlCommand } from "./commands/migrate-to-yaml.js";
@@ -43,6 +49,8 @@ reqCommand.addCommand(deleteCommand);
 reqCommand.addCommand(validateCommand);
 reqCommand.addCommand(historyCommand);
 reqCommand.addCommand(approveCommand);
+reqCommand.addCommand(draftCommand);
+reqCommand.addCommand(implementedCommand);
 
 reqCommand.hook("preAction", async () => {
   await ensureReqordInitialized(process.cwd());
@@ -69,8 +77,12 @@ const specCommand = new Command("spec").description(
 specCommand.addCommand(specCreateCommand);
 specCommand.addCommand(specListCommand);
 specCommand.addCommand(specShowCommand);
+specCommand.addCommand(specUpdateCommand);
 specCommand.addCommand(specDesignCommand);
 specCommand.addCommand(specApproveCommand);
+specCommand.addCommand(specDraftCommand);
+specCommand.addCommand(specImplementedCommand);
+specCommand.addCommand(specHistoryCommand);
 
 specCommand.hook("preAction", async () => {
   await ensureReqordInitialized(process.cwd());

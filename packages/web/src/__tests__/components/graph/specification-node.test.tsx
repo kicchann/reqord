@@ -69,17 +69,17 @@ describe("SpecificationNode", () => {
     expect(nodeDiv).toBeInTheDocument();
   });
 
-  it("renders pending_approval status with purple background class", () => {
+  it("renders implemented status with emerald background class", () => {
     const { container } = render(
       <SpecificationNode
         {...defaultNodeProps}
         id="spec-000003"
-        data={{ label: "spec-000003", status: "pending_approval" }}
+        data={{ label: "spec-000003", status: "implemented" }}
         type="specification"
       />
     );
 
-    const nodeDiv = container.querySelector(".bg-purple-200");
+    const nodeDiv = container.querySelector(".bg-emerald-300");
     expect(nodeDiv).toBeInTheDocument();
   });
 

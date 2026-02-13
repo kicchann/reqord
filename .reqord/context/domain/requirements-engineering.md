@@ -32,7 +32,7 @@ When [trigger], the system shall [action].
 While [state], the system shall [action].
 ```
 
-例: `While a requirement is in "pending_approval" status, the system shall prevent direct edits.`
+例: `While a requirement is in "approved" status, the system shall prevent direct edits.`
 
 ### 4. Optional（オプション）
 
@@ -110,7 +110,7 @@ As a [role], I want [action], so that [benefit].
 ## バージョン管理フロー
 
 1. **draft** - 作成・編集中
-2. **pending_approval** - レビュー依頼中（PR作成済み）
+2. **approved** - レビュー依頼中（PR作成済み）
 3. **approved** - 承認済み（PRマージ済み）
 4. **deprecated** - 非推奨（新バージョンで置き換え済み）
 

@@ -82,7 +82,7 @@ draft ──approve──→ approved ──implement──→ implemented
   └── draft (flag解決) ←───────────────────────┘
 ```
 
-> `pending_approval` は廃止（#208）。PRマージ自体が承認行為となる。
+> `approved` は廃止（#208）。PRマージ自体が承認行為となる。
 > すべての状態遷移はPR経由で行う。
 
 許可される遷移:
@@ -189,9 +189,9 @@ draft ──approve──→ approved ──implement──→ implemented
 **決定:** ステータス変更のみではバージョンをインクリメントしない
 **理由:** ステータスはワークフローの進行状態を表し、内容の変更を意味しない。バージョンは「何が書かれているか」の変更を追跡するものであり、「どの段階にあるか」とは無関係にすべき。（#109 フィードバック反映）
 
-### pending_approvalの廃止
+### approvedの廃止
 
-**決定:** `pending_approval` ステータスを廃止し、`draft → approved → implemented` の3状態とする
+**決定:** `approved` ステータスを廃止し、`draft → approved → implemented` の3状態とする
 **理由:** PRマージ自体が承認行為であり、別途「承認待ち」状態を設ける意味がない。ワークフローの簡素化。（#208 フィードバック反映）
 
 ### Gitコミットハッシュの必須化
@@ -204,4 +204,4 @@ draft ──approve──→ approved ──implement──→ implemented
 | バージョン | 日付 | 変更内容 |
 |-----------|------|---------|
 | v1.0.0 | 2026-02-08 | 初版（Requirementバージョン管理） |
-| v2.0.0 | 2026-02-13 | #109: ステータス変更でバージョンを上げない方針に変更。#208: pending_approval廃止。#209: --major/--minor/--patchオプション明記 |
+| v2.0.0 | 2026-02-13 | #109: ステータス変更でバージョンを上げない方針に変更。#208: approved廃止。#209: --major/--minor/--patchオプション明記 |

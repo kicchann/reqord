@@ -12,7 +12,7 @@ versionHistory:
     changedAt: 2026-02-11T12:00:00Z
     summary: 'flagライフサイクル管理を追加: flagは一時的マーカーとして対応完了後に削除、index.yamlがトレーサビリティのSOT'
   - version: 3.0.0
-    status: pending_approval
+    status: approved
     gitCommit: 285558a
     changedAt: 2026-02-11T14:03:07.124Z
     summary: Status changed from draft to pending_approval

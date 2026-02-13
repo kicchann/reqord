@@ -7,7 +7,7 @@ createdAt: 2026-02-07T12:00:00Z
 updatedAt: 2026-02-13T00:00:00.000Z
 versionHistory:
   - version: 2.0.0
-    status: pending_approval
+    status: approved
     gitCommit: f97b4fc
     changedAt: 2026-02-10T01:17:59.304Z
     summary: Status changed from draft to pending_approval
@@ -33,7 +33,7 @@ files:
 successCriteria:
   - reqord spec draft <id> でflag付きのspecをdraft状態に戻せる（--major/--minor/--patchでバージョン指定）
   - reqord spec approve <id> でGitブランチが作成され、承認依頼PRが自動生成される
-  - approve実行時にstatusをapprovedに設定し、PRマージで承認完了（pending_approvalは使用しない）
+  - approve実行時にstatusをapprovedに設定し、PRマージで承認完了
   - PR本文にreqordメタデータコメントタグが埋め込まれる
   - CODEOWNERSからレビュアーが自動アサインされる
   - currentApproval情報が記録される
