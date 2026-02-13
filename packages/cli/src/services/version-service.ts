@@ -34,6 +34,24 @@ export function formatVersion(major: number, minor: number, patch: number): stri
 }
 
 /**
+ * Apply explicit version bump to a version string
+ */
+export function applyVersionBump(
+  currentVersion: string,
+  bumpType: "major" | "minor" | "patch",
+): string {
+  const { major, minor, patch } = parseVersion(currentVersion);
+  switch (bumpType) {
+    case "major":
+      return formatVersion(major + 1, 0, 0);
+    case "minor":
+      return formatVersion(major, minor + 1, 0);
+    case "patch":
+      return formatVersion(major, minor, patch + 1);
+  }
+}
+
+/**
  * Determine next version based on changes between requirements
  */
 export function determineNextVersion(before: Requirement, after: Requirement): string {
@@ -76,7 +94,7 @@ export function getCurrentGitCommit(): string {
     });
     return result.trim();
   } catch {
-    return "";
+    return "unknown";
   }
 }
 
@@ -198,6 +216,12 @@ function countSupplementaryDiff(before: Specification, after: Specification): { 
 
 /**
  * Determine next version based on changes between specifications
+ *
+ * Version bump priority (checked in order):
+ * 1. 3+ supplementary file changes → major bump (X.0.0)
+ * 2. 1-2 supplementary file changes → minor bump (0.X.0)
+ * 3. Design file path changed → patch bump (0.0.X)
+ * 4. All other changes (status, flags, design content, etc.) → no version bump
  */
 export function determineNextVersionForSpec(before: Specification, after: Specification): string {
   const { major, minor, patch } = parseVersion(before.version);
@@ -226,13 +250,12 @@ export function determineNextVersionForSpec(before: Specification, after: Specif
 
 /**
  * Generate change summary from specification differences
+ *
+ * Note: Status changes are NOT included here to prevent duplicate messages,
+ * as they are already handled by the caller (specification-service.ts).
  */
 export function generateSpecChangeSummary(before: Specification, after: Specification): string {
   const changes: string[] = [];
-
-  if (before.status !== after.status) {
-    changes.push(`Status changed from ${before.status} to ${after.status}`);
-  }
 
   const { added, removed } = countSupplementaryDiff(before, after);
 

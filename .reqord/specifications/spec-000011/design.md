@@ -72,7 +72,7 @@ export async function startApproval(
 
 **処理フロー:**
 1. 前提条件チェック（status === "draft"）
-2. ステータスをpending_approvalに更新
+2. ステータスをapprovedに更新
 3. Gitブランチ作成（命名規則に従う）
 4. 変更をコミット
 5. ブランチをプッシュ
@@ -155,7 +155,7 @@ currentApproval: z.object({
 {successCriteria}
 
 ### 変更内容
-status: draft → pending_approval
+status: draft → approved
 
 > このPRをマージすると、要件のステータスが `approved` に更新されます。
 ```
@@ -172,7 +172,7 @@ status: draft → pending_approval
     → 前提条件チェック: status === "draft" → OK
     → ApprovalTarget構築
     → approvalService.startApproval(cwd, target)
-      → requirementService.updateRequirement(cwd, id, { status: "pending_approval" })
+      → requirementService.updateRequirement(cwd, id, { status: "approved" })
       → gitRepo.createBranch("reqord/req-000011-approve-v1.0.0")
       → gitRepo.checkout("reqord/req-000011-approve-v1.0.0")
       → gitRepo.add([".reqord/requirements/req-000011.yaml"])

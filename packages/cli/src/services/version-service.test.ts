@@ -255,7 +255,7 @@ describe("createHistoryEntry", () => {
     expect(entry.gitCommit).toBe("def5678");
   });
 
-  it("execSyncが失敗した場合に空文字列", () => {
+  it("execSyncが失敗した場合に'unknown'", () => {
     mockExecSync.mockImplementation(() => {
       throw new Error("not a git repo");
     });
@@ -263,7 +263,7 @@ describe("createHistoryEntry", () => {
     const req = makeRequirement();
     const entry = createHistoryEntry(req);
 
-    expect(entry.gitCommit).toBe("");
+    expect(entry.gitCommit).toBe("unknown");
   });
 
   it("approved状態でapprovedAt/approvedByが設定される", () => {
@@ -288,11 +288,11 @@ describe("getCurrentGitCommit", () => {
     expect(getCurrentGitCommit()).toBe("abc1234");
   });
 
-  it("失敗時に空文字列を返す", () => {
+  it("失敗時に'unknown'を返す", () => {
     mockExecSync.mockImplementation(() => {
       throw new Error("not a git repo");
     });
-    expect(getCurrentGitCommit()).toBe("");
+    expect(getCurrentGitCommit()).toBe("unknown");
   });
 });
 
@@ -511,11 +511,11 @@ describe("determineNextVersionForSpec", () => {
 });
 
 describe("generateSpecChangeSummary", () => {
-  it("ステータス変更時のサマリー", () => {
+  it("ステータスのみ変更時は変更なし扱い", () => {
     const before = makeSpecification({ status: "draft" });
     const after = makeSpecification({ status: "approved" });
     const summary = generateSpecChangeSummary(before, after);
-    expect(summary).toBe("Status changed from draft to approved");
+    expect(summary).toBe("Specification updated");
   });
 
   it("supplementary追加時のサマリー", () => {
@@ -573,10 +573,11 @@ describe("generateSpecChangeSummary", () => {
       },
     });
     const summary = generateSpecChangeSummary(before, after);
-    expect(summary).toContain("Status changed from draft to approved");
     expect(summary).toContain("1 supplementary file(s) added");
     expect(summary).toContain("Design file path updated");
     expect(summary).toContain(", ");
+    // Status changes are handled by caller, not included in this summary
+    expect(summary).not.toContain("Status changed");
   });
 
   it("変更なしの場合", () => {

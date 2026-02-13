@@ -44,7 +44,7 @@ export function formatZodIssue(issue: ZodIssue): string;
 
 **出力形式:**
 ```
-- status: 不正な値 'unknown'（期待値: draft, approved, pending_approval, deprecated）
+- status: 不正な値 'unknown'（期待値: draft, approved, approved, deprecated）
 - dependencies.blockedBy[0]: 文字列が必要です（実際の型: number）
 - title: 1文字以上の文字列が必要です
 - estimatedHours: 正の数値が必要です
@@ -111,7 +111,7 @@ throw new Error(`バリデーションエラー:\n${formatZodError(parseResult.e
       → { success: false, error: ZodError }
     → formatZodError(error) → 日本語メッセージ文字列生成
       → issues[0]: { code: "invalid_enum_value", path: ["status"], received: "unknown", options: [...] }
-        → "- status: 不正な値 'unknown'（期待値: draft, approved, pending_approval, deprecated）"
+        → "- status: 不正な値 'unknown'（期待値: draft, approved, approved, deprecated）"
       → issues[1]: { code: "too_small", path: ["title"], minimum: 1, type: "string" }
         → "- title: 1文字以上の文字列が必要です"
     → throw Error("バリデーションエラー:\n- status: ...\n- title: ...")

@@ -117,7 +117,7 @@ export async function ensureReqordInitialized(cwd: string): Promise<void> {
 | `VALIDATION_ERROR` | Zodバリデーション失敗 | `バリデーションエラー: title は1文字以上必要です。` |
 | `FILE_READ_ERROR` | ファイル読み込み失敗 | `ファイルの読み込みに失敗しました: {path}` |
 | `FILE_WRITE_ERROR` | ファイル書き込み失敗 | `ファイルの書き込みに失敗しました: {path}` |
-| `INVALID_ARGUMENT` | 不正な引数 | `不正な引数です: status は draft, pending_approval, approved, deprecated のいずれかを指定してください。` |
+| `INVALID_ARGUMENT` | 不正な引数 | `不正な引数です: status は draft, approved, approved, deprecated のいずれかを指定してください。` |
 | `ALREADY_EXISTS` | 既に存在する | `context.yaml は既に存在します。` |
 | `DEPENDENCY_ERROR` | 依存関係エラー | `存在しない要件 req-999999 を参照しています。` |
 

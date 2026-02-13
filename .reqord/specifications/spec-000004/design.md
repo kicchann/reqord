@@ -48,7 +48,7 @@ cli と web は shared に依存するが、shared は他パッケージに依�
 
 | スキーマ | 値 | 用途 |
 |---------|-----|------|
-| `StatusSchema` | `"draft" \| "pending_approval" \| "approved" \| "deprecated"` | 要件・仕様の状態管理 |
+| `StatusSchema` | `"draft" \| "approved" \| "approved" \| "deprecated"` | 要件・仕様の状態管理 |
 | `PrioritySchema` | `"low" \| "medium" \| "high"` | 要件の優先度 |
 | `ComplexitySchema` | `"small" \| "medium" \| "large" \| "xlarge"` | 実装複雑度 |
 | `FormatTypeSchema` | `"user-story" \| "ears" \| "free-form"` | 要件記述形式 |

@@ -7,7 +7,7 @@ createdAt: 2026-02-07T12:00:00Z
 updatedAt: 2026-02-13T00:00:00.000Z
 versionHistory:
   - version: 2.0.0
-    status: pending_approval
+    status: approved
     gitCommit: f97b4fc
     changedAt: 2026-02-10T01:17:47.684Z
     summary: Status changed from draft to pending_approval
@@ -38,7 +38,7 @@ successCriteria:
   - PRマージ時にRequirementのstatusがapprovedに更新される
   - currentApproval情報（version, phase, prNumber, approvedBy）が記録される
   - approve実行時にバージョンをインクリメントしない（バージョンアップはdraft化時に行う）
-  - approve実行時にstatusをapprovedに設定し、PRマージで承認完了（pending_approvalは使用しない）
+  - approve実行時にstatusをapprovedに設定し、PRマージで承認完了
   - reqord req implement <id> でapproved状態のreqをimplementedに遷移できる
   - コマンドのヘルプ・出力が各コマンドの実際の動作を正確に伝える
 format:

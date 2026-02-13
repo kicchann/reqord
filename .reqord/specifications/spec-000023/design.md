@@ -85,7 +85,7 @@ interface DependencyGraphProps {
 // 既存のステータス色マッピング
 const STATUS_COLORS: Record<string, string> = {
   draft: "border-gray-300 bg-gray-50",
-  pending_approval: "border-yellow-300 bg-yellow-50",
+  approved: "border-yellow-300 bg-yellow-50",
   approved: "border-green-300 bg-green-50",
   deprecated: "border-red-300 bg-red-50",
 };
@@ -105,7 +105,7 @@ interface GraphLegendProps {
 }
 ```
 
-- 各ステータス（draft / pending_approval / approved / deprecated）の色サンプルとラベル
+- 各ステータス（draft / approved / approved / deprecated）の色サンプルとラベル
 - グラフ右下にオーバーレイ表示
 - Tailwind CSSによるコンパクトなカード表示
 

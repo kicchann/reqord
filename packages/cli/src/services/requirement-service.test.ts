@@ -19,6 +19,7 @@ vi.mock("./version-service.js", () => ({
   getStateTransitions: vi.fn(),
   parseVersion: vi.fn(),
   formatVersion: vi.fn(),
+  applyVersionBump: vi.fn(),
 }));
 
 import * as reqRepo from "../repositories/requirement.js";
@@ -377,42 +378,42 @@ describe("updateRequirement - バージョン明示的指定", () => {
   it("--major指定でメジャーバージョンが上がる", async () => {
     const before = makeRequirement({ version: "1.0.0", status: "draft" });
     vi.mocked(reqRepo.findByIdOrThrow).mockResolvedValue(before);
+    vi.mocked(versionService.applyVersionBump).mockReturnValue("2.0.0");
 
     const result = await updateRequirement("/test/cwd", "req-000001", {
       title: "新しいタイトル",
       versionBump: "major",
     });
 
-    expect(versionService.parseVersion).toHaveBeenCalledWith("1.0.0");
-    expect(versionService.formatVersion).toHaveBeenCalledWith(2, 0, 0);
+    expect(versionService.applyVersionBump).toHaveBeenCalledWith("1.0.0", "major");
     expect(result.after.version).toBe("2.0.0");
   });
 
   it("--minor指定でマイナーバージョンが上がる", async () => {
     const before = makeRequirement({ version: "1.0.0", status: "draft" });
     vi.mocked(reqRepo.findByIdOrThrow).mockResolvedValue(before);
+    vi.mocked(versionService.applyVersionBump).mockReturnValue("1.1.0");
 
     const result = await updateRequirement("/test/cwd", "req-000001", {
       title: "新しいタイトル",
       versionBump: "minor",
     });
 
-    expect(versionService.parseVersion).toHaveBeenCalledWith("1.0.0");
-    expect(versionService.formatVersion).toHaveBeenCalledWith(1, 1, 0);
+    expect(versionService.applyVersionBump).toHaveBeenCalledWith("1.0.0", "minor");
     expect(result.after.version).toBe("1.1.0");
   });
 
   it("--patch指定でパッチバージョンが上がる", async () => {
     const before = makeRequirement({ version: "1.0.0", status: "draft" });
     vi.mocked(reqRepo.findByIdOrThrow).mockResolvedValue(before);
+    vi.mocked(versionService.applyVersionBump).mockReturnValue("1.0.1");
 
     const result = await updateRequirement("/test/cwd", "req-000001", {
       priority: "high",
       versionBump: "patch",
     });
 
-    expect(versionService.parseVersion).toHaveBeenCalledWith("1.0.0");
-    expect(versionService.formatVersion).toHaveBeenCalledWith(1, 0, 1);
+    expect(versionService.applyVersionBump).toHaveBeenCalledWith("1.0.0", "patch");
     expect(result.after.version).toBe("1.0.1");
   });
 
@@ -420,7 +421,7 @@ describe("updateRequirement - バージョン明示的指定", () => {
     const before = makeRequirement({ version: "1.2.3", status: "approved" });
     vi.mocked(reqRepo.findByIdOrThrow).mockResolvedValue(before);
     vi.mocked(versionService.determineNextVersion).mockReturnValue("1.3.0");
-    vi.mocked(versionService.parseVersion).mockReturnValue({ major: 1, minor: 2, patch: 3 });
+    vi.mocked(versionService.applyVersionBump).mockReturnValue("2.0.0");
 
     const result = await updateRequirement("/test/cwd", "req-000001", {
       priority: "high",
@@ -428,7 +429,7 @@ describe("updateRequirement - バージョン明示的指定", () => {
     });
 
     expect(versionService.determineNextVersion).toHaveBeenCalled();
-    expect(versionService.formatVersion).toHaveBeenCalledWith(2, 0, 0);
+    expect(versionService.applyVersionBump).toHaveBeenCalledWith("1.2.3", "major");
     expect(result.after.version).toBe("2.0.0");
   });
 });

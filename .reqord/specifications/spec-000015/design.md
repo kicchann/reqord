@@ -45,7 +45,7 @@ reqord spec approve <id> [--dry-run]
 Specification承認の前提条件は、Requirement承認より厳格:
 
 1. **Specificationのステータスがdraft**であること
-2. **関連Requirementのステータスがapprovedまたはpending_approval**であること
+2. **関連Requirementのステータスがapprovedまたはapproved**であること
    - 未承認の要件に対する仕様承認は整合性に問題がある
 3. **design.mdが空でない（テンプレートのままではない）**こと
    - 設計文書が実際に記述されている必要がある
@@ -65,7 +65,7 @@ async function checkSpecApprovalPrerequisites(
 
   // 2. 関連Requirementのステータスチェック
   const req = await reqRepo.findById(cwd, spec.requirementId);
-  if (req && req.status !== "approved" && req.status !== "pending_approval") {
+  if (req && req.status !== "approved" && req.status !== "approved") {
     errors.push(`関連要件 ${spec.requirementId} が未承認です（現在: ${req.status}）`);
   }
 
@@ -137,7 +137,7 @@ currentApproval: z.object({
 {designSummary}
 
 ### 変更内容
-status: draft → pending_approval
+status: draft → approved
 
 ### 設計ファイル
 - `specifications/{specId}/design.md`
@@ -162,7 +162,7 @@ status: draft → pending_approval
       → design.md内容チェック: テンプレートでない → OK
     → ApprovalTarget構築
     → approvalService.startApproval(cwd, target)
-      → specificationService.updateSpec(cwd, id, { status: "pending_approval" })
+      → specificationService.updateSpec(cwd, id, { status: "approved" })
       → gitRepo.createBranch("reqord/spec-000015-approve-v1.0.0")
       → gitRepo.checkout("reqord/spec-000015-approve-v1.0.0")
       → gitRepo.add([".reqord/specifications/spec-000015.yaml", ".reqord/specifications/spec-000015/design.md"])
@@ -189,7 +189,7 @@ status: draft → pending_approval
 - **前提条件チェック**:
   - Specificationがdraftのときに成功すること
   - Specificationがdraft以外のときにエラーメッセージが返ること
-  - 関連Requirementがapproved/pending_approvalのときに成功すること
+  - 関連Requirementがapproved/approvedのときに成功すること
   - 関連Requirementがdraftのときにエラーメッセージが返ること
   - design.mdがテンプレートのままのときにエラーメッセージが返ること
 - **ApprovalTarget構築**: type="specification"、files配列にdesign.mdが含まれること
@@ -211,8 +211,8 @@ status: draft → pending_approval
 
 ### Requirement承認の前提条件化
 
-**決定:** Specification承認時に関連Requirementのapproved/pending_approvalステータスを前提条件とする
-**理由:** 未承認の要件に対して仕様を承認しても、要件自体が変更される可能性がある。要件→仕様の承認順序を強制することで、手戻りリスクを最小化する。pending_approvalも許容するのは、要件承認と仕様承認を並行して進められるようにするため。
+**決定:** Specification承認時に関連Requirementのapproved/approvedステータスを前提条件とする
+**理由:** 未承認の要件に対して仕様を承認しても、要件自体が変更される可能性がある。要件→仕様の承認順序を強制することで、手戻りリスクを最小化する。approvedも許容するのは、要件承認と仕様承認を並行して進められるようにするため。
 
 ### design.mdの空チェック
 

@@ -17,7 +17,7 @@ draft ──approve(PR作成)──→ PRマージ ──→ approved ──impl
   └──────────── draft (flag解決) ←── flagged ←┘
 ```
 
-> `pending_approval`は廃止。PRマージ自体が承認行為となる（#208）。
+> `approved`は廃止。PRマージ自体が承認行為となる（#208）。
 
 ## CLIコマンド仕様
 
@@ -82,5 +82,5 @@ reqord spec implement spec-000011
 
 | Issue | 反映内容 |
 |-------|---------|
-| #208 | pending_approval廃止。approveでstatusをapprovedに設定し、PRマージで完了 |
+| #208 | approved廃止。approveでstatusをapprovedに設定し、PRマージで完了 |
 | #209 | `reqord spec draft`と`reqord spec implement`をスコープに含める |

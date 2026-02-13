@@ -2,11 +2,11 @@
 
 ## 1. 設計概要
 
-`reqord spec/req approve` コマンドで作成された承認PRがマージされた際に、対象エンティティ（`req-NNNNNN` / `spec-NNNNNN`）のステータスを `pending_approval` から `approved` に自動更新するGitHub Actionsワークフローを実装する。
+`reqord spec/req approve` コマンドで作成された承認PRがマージされた際に、対象エンティティ（`req-NNNNNN` / `spec-NNNNNN`）のステータスを `approved` から `approved` に自動更新するGitHub Actionsワークフローを実装する。
 
 ### 背景
 
-- 現在、承認PRマージ後の `pending_approval` → `approved` 更新は手作業
+- 現在、承認PRマージ後の `approved` → `approved` 更新は手作業
 - ブランチ保護があるリポジトリではオーナー以外がmainに直pushできない
 - GitHub Actionsの `contents: write` 権限を使用して自動化する
 
@@ -47,7 +47,7 @@ PR Merged (reqord/*-approve-v*)
   │     spec-NNNNNN → .reqord/specifications/spec-NNNNNN.{yaml,json}
   │
   ├─ 4. ステータス確認（冪等性チェック）
-  │     pending_approval 以外ならスキップ
+  │     approved 以外ならスキップ
   │
   ├─ 5. データ更新（jq/yq）
   │     - status → "approved"
@@ -91,7 +91,7 @@ jq --arg now "$NOW" \
      status: "approved",
      gitCommit: $commit,
      changedAt: $now,
-     summary: "Status changed from pending_approval to approved"
+     summary: "Status changed from approved to approved"
    }]
    ' "$FILE_PATH" > tmp && mv tmp "$FILE_PATH"
 ```
@@ -109,7 +109,7 @@ yq -i "
     \"status\": \"approved\",
     \"gitCommit\": \"$COMMIT_SHA\",
     \"changedAt\": \"$NOW\",
-    \"summary\": \"Status changed from pending_approval to approved\"
+    \"summary\": \"Status changed from approved to approved\"
   }]
 " "$FILE_PATH"
 ```
@@ -135,7 +135,7 @@ git config user.email "github-actions[bot]@users.noreply.github.com"
 
 ### 5.1 冪等性
 
-- `pending_approval` 以外のステータスの場合はスキップ（ログ出力のみ）
+- `approved` 以外のステータスの場合はスキップ（ログ出力のみ）
 - ワークフローの再実行が安全に行える
 
 ### 5.2 エラーハンドリング

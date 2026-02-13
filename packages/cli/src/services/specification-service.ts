@@ -174,14 +174,23 @@ export async function checkSpecApprovalPrerequisites(
   return { ok: errors.length === 0, errors };
 }
 
-// --- Helper: Content Change Detection ---
+// --- Helper: Metadata Change Detection ---
 
 /**
- * Check if specification has content changes (excluding status, flags, metadata)
+ * Check if specification has metadata changes (file paths, not file content).
+ *
+ * This function checks for changes in specification metadata fields such as:
+ * - files.design path
+ * - files.supplementary array
+ *
+ * Note: This does NOT check actual file content. Design file content changes
+ * should be detected separately via the designContent option.
+ *
+ * Excludes: status, flags, updatedAt, versionHistory, currentApproval, implementation
  */
-export function hasSpecContentChanges(before: Specification, after: Specification): boolean {
-  // Extract content fields only (exclude status, flags, updatedAt, versionHistory, currentApproval, implementation)
-  const contentBefore = {
+export function hasSpecMetadataChanges(before: Specification, after: Specification): boolean {
+  // Extract metadata fields only (file paths, not content)
+  const metadataBefore = {
     id: before.id,
     requirementId: before.requirementId,
     version: before.version,
@@ -189,7 +198,7 @@ export function hasSpecContentChanges(before: Specification, after: Specificatio
     files: before.files,
   };
 
-  const contentAfter = {
+  const metadataAfter = {
     id: after.id,
     requirementId: after.requirementId,
     version: after.version,
@@ -197,7 +206,7 @@ export function hasSpecContentChanges(before: Specification, after: Specificatio
     files: after.files,
   };
 
-  return JSON.stringify(contentBefore) !== JSON.stringify(contentAfter);
+  return JSON.stringify(metadataBefore) !== JSON.stringify(metadataAfter);
 }
 
 // --- Update Specification ---
@@ -241,29 +250,24 @@ export async function updateSpecification(
   }
 
   // Detect content changes (for auto-versioning)
-  const hasContentChanges = hasSpecContentChanges(before, merged);
+  const hasContentChanges = hasSpecMetadataChanges(before, merged);
 
   // Determine next version
   let nextVersion = before.version;
 
   if (options.versionBump) {
-    // Explicit version bump takes priority
-    const { major, minor, patch } = versionService.parseVersion(before.version);
-    if (options.versionBump === "major") {
-      nextVersion = versionService.formatVersion(major + 1, 0, 0);
-    } else if (options.versionBump === "minor") {
-      nextVersion = versionService.formatVersion(major, minor + 1, 0);
-    } else if (options.versionBump === "patch") {
-      nextVersion = versionService.formatVersion(major, minor, patch + 1);
-    }
+    // Explicit version bump takes priority over auto-versioning
+    nextVersion = versionService.applyVersionBump(before.version, options.versionBump);
   } else {
     // Auto-versioning based on content changes
-    // Priority: supplementary changes > design content changes
+    // Priority order: metadata changes (supplementary files) > design content changes > status-only
+    // When both supplementary and design content change, supplementary takes precedence
     if (hasContentChanges) {
-      // Supplementary or other content changes (may trigger major/minor/patch)
+      // Metadata changes (supplementary files, etc.) - may trigger major/minor/patch
       nextVersion = versionService.determineNextVersionForSpec(before, merged);
     } else if (options.designContent !== undefined) {
       // Design content-only change (patch bump)
+      // Note: This only applies when metadata hasn't changed
       const { major, minor, patch } = versionService.parseVersion(before.version);
       nextVersion = versionService.formatVersion(major, minor, patch + 1);
     }

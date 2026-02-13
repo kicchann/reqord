@@ -74,7 +74,7 @@ Description:
 **入力:**
 - `<id>`: 必須引数
 - `-t, --title <title>`: タイトル更新
-- `-s, --status <status>`: ステータス更新（draft/pending_approval/approved/deprecated）
+- `-s, --status <status>`: ステータス更新（draft/approved/approved/deprecated）
 - `-p, --priority <priority>`: 優先度更新（low/medium/high）
 - `--patch-file <path>`: JSONファイルによる一括更新
 - `--description-file <path>`: Markdownファイルによるdescription.md更新

@@ -37,7 +37,7 @@ draft ──approve──→ approved ──implement──→ implemented
   └── draft (flag解決) ←┘
 ```
 
-> 注: `pending_approval`は廃止方針（#208）。PRマージ自体が承認行為となる。
+> 注: `approved`は廃止方針（#208）。PRマージ自体が承認行為となる。
 
 ## コマンド仕様
 
@@ -84,5 +84,5 @@ if (before.status !== after.status) {
 | Issue | 反映内容 |
 |-------|---------|
 | #109 | ステータス変更ではバージョンをインクリメントしない方針に変更 |
-| #208 | pending_approval廃止に伴い状態遷移図を更新 |
+| #208 | approved廃止に伴い状態遷移図を更新 |
 | #209 | draft化時のバージョン指定（--major/--minor/--patch）を明記。Specificationも対象に拡大 |

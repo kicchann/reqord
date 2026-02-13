@@ -194,18 +194,7 @@ export async function updateRequirement(
 
   // Override with explicit version bump if specified
   if (options.versionBump) {
-    const { major, minor, patch } = versionService.parseVersion(before.version);
-    switch (options.versionBump) {
-      case "major":
-        nextVersion = versionService.formatVersion(major + 1, 0, 0);
-        break;
-      case "minor":
-        nextVersion = versionService.formatVersion(major, minor + 1, 0);
-        break;
-      case "patch":
-        nextVersion = versionService.formatVersion(major, minor, patch + 1);
-        break;
-    }
+    nextVersion = versionService.applyVersionBump(before.version, options.versionBump);
   }
 
   merged.version = nextVersion;

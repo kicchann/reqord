@@ -39,7 +39,7 @@ import {
   checkSpecApprovalPrerequisites,
   updateSpecificationStatus,
   updateSpecification,
-  hasSpecContentChanges,
+  hasSpecMetadataChanges,
 } from "./specification-service.js";
 
 const mockSpecRepo = vi.mocked(specRepo);
@@ -318,17 +318,6 @@ describe("checkSpecApprovalPrerequisites", () => {
     expect(result.ok).toBe(true);
   });
 
-  it("関連Requirementがapprovedの場合は成功（重複確認）", async () => {
-    const spec = makeSpecification({ status: "draft" });
-    const req = makeRequirement({ status: "approved" });
-    mockSpecRepo.findByIdOrThrow.mockResolvedValue(spec);
-    mockReqRepo.findById.mockResolvedValue(req);
-    mockSpecRepo.loadFile.mockResolvedValue("# Design");
-
-    const result = await checkSpecApprovalPrerequisites("/cwd", "spec-000001");
-    expect(result.ok).toBe(true);
-  });
-
   it("関連Requirementがdraftの場合はエラー", async () => {
     const spec = makeSpecification({ status: "draft" });
     const req = makeRequirement({ status: "draft" });
@@ -482,31 +471,31 @@ describe("updateSpecificationStatus", () => {
   });
 });
 
-// --- Cycle 7: hasSpecContentChanges ---
+// --- Cycle 7: hasSpecMetadataChanges ---
 
-describe("hasSpecContentChanges", () => {
+describe("hasSpecMetadataChanges", () => {
   it("supplementary追加を検出", () => {
     const before = makeSpecification({ files: { design: "d.md", supplementary: [] } });
     const after = makeSpecification({ files: { design: "d.md", supplementary: ["new.md"] } });
-    expect(hasSpecContentChanges(before, after)).toBe(true);
+    expect(hasSpecMetadataChanges(before, after)).toBe(true);
   });
 
   it("supplementary削除を検出", () => {
     const before = makeSpecification({ files: { design: "d.md", supplementary: ["old.md"] } });
     const after = makeSpecification({ files: { design: "d.md", supplementary: [] } });
-    expect(hasSpecContentChanges(before, after)).toBe(true);
+    expect(hasSpecMetadataChanges(before, after)).toBe(true);
   });
 
   it("designパス変更を検出", () => {
     const before = makeSpecification({ files: { design: "old.md", supplementary: [] } });
     const after = makeSpecification({ files: { design: "new.md", supplementary: [] } });
-    expect(hasSpecContentChanges(before, after)).toBe(true);
+    expect(hasSpecMetadataChanges(before, after)).toBe(true);
   });
 
   it("status変更は検出しない（内容変更ではない）", () => {
     const before = makeSpecification({ status: "draft" });
     const after = makeSpecification({ status: "approved" });
-    expect(hasSpecContentChanges(before, after)).toBe(false);
+    expect(hasSpecMetadataChanges(before, after)).toBe(false);
   });
 
   it("flags変更は検出しない", () => {
@@ -522,7 +511,7 @@ describe("hasSpecContentChanges", () => {
         },
       ],
     });
-    expect(hasSpecContentChanges(before, after)).toBe(false);
+    expect(hasSpecMetadataChanges(before, after)).toBe(false);
   });
 
   it("currentApproval変更は検出しない", () => {
@@ -536,13 +525,13 @@ describe("hasSpecContentChanges", () => {
         approvedBy: ["user1"],
       },
     });
-    expect(hasSpecContentChanges(before, after)).toBe(false);
+    expect(hasSpecMetadataChanges(before, after)).toBe(false);
   });
 
   it("updatedAt変更は検出しない", () => {
     const before = makeSpecification({ updatedAt: "2025-01-01T00:00:00.000Z" });
     const after = makeSpecification({ updatedAt: "2025-01-02T00:00:00.000Z" });
-    expect(hasSpecContentChanges(before, after)).toBe(false);
+    expect(hasSpecMetadataChanges(before, after)).toBe(false);
   });
 
   it("versionHistory変更は検出しない", () => {
@@ -558,12 +547,12 @@ describe("hasSpecContentChanges", () => {
         },
       ],
     });
-    expect(hasSpecContentChanges(before, after)).toBe(false);
+    expect(hasSpecMetadataChanges(before, after)).toBe(false);
   });
 
   it("変更なしの場合はfalse", () => {
     const spec = makeSpecification();
-    expect(hasSpecContentChanges(spec, spec)).toBe(false);
+    expect(hasSpecMetadataChanges(spec, spec)).toBe(false);
   });
 });
 
@@ -738,5 +727,14 @@ describe("updateSpecification", () => {
       "/cwd",
       expect.objectContaining({ status: "approved" })
     );
+  });
+
+  it("無効なステータス遷移の場合はエラー", async () => {
+    const before = makeSpecification({ status: "draft" });
+    mockSpecRepo.findByIdOrThrow.mockResolvedValue(before);
+
+    await expect(
+      updateSpecification("/cwd", "spec-000001", { status: "implemented" })
+    ).rejects.toThrow(/Invalid status transition: draft → implemented/);
   });
 });

@@ -311,7 +311,7 @@ interface MultiLevelEdge {
 
 const SPEC_STATUS_COLORS: Record<string, string> = {
   draft: "border-blue-300 bg-blue-50",
-  pending_approval: "border-purple-300 bg-purple-50",
+  approved: "border-purple-300 bg-purple-50",
   approved: "border-green-300 bg-green-50",
   deprecated: "border-red-300 bg-red-50",
 };
