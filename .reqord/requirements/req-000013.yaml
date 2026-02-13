@@ -54,3 +54,9 @@ flags:
     relatedIssues:
       - 157
     severity: medium
+  - type: feedback-review
+    reason: 'Feedback from issue #220'
+    createdAt: 2026-02-12T22:05:48.336Z
+    relatedIssues:
+      - 220
+    severity: medium

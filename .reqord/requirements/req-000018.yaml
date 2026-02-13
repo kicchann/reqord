@@ -42,4 +42,10 @@ dependencies:
   relatedTo: []
 estimatedComplexity: medium
 estimatedHours: 12
-flags: []
+flags:
+  - type: feedback-review
+    reason: 'Feedback from issue #221'
+    createdAt: 2026-02-12T22:05:51.814Z
+    relatedIssues:
+      - 221
+    severity: medium

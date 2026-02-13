@@ -8,7 +8,7 @@ feedbacks:
       createdRequirements: []
       specifications: []
     syncedAt: 2026-02-11T07:21:23.639Z
-    status: open
+    status: closed
   - githubIssue: 23
     type: requirement-gap
     severity: low
@@ -18,7 +18,7 @@ feedbacks:
       createdRequirements: []
       specifications: []
     syncedAt: 2026-02-11T07:21:23.634Z
-    status: resolved
+    status: closed
   - githubIssue: 30
     type: improvement
     severity: low
@@ -28,7 +28,7 @@ feedbacks:
       createdRequirements: []
       specifications: []
     syncedAt: 2026-02-11T07:21:23.631Z
-    status: open
+    status: closed
   - githubIssue: 22
     type: spec-mismatch
     linkedTo:
@@ -37,7 +37,7 @@ feedbacks:
       createdRequirements: []
       specifications: []
     syncedAt: 2026-02-09T07:40:21.228Z
-    status: resolved
+    status: closed
   - githubIssue: 19
     type: improvement
     severity: low
@@ -47,7 +47,7 @@ feedbacks:
       createdRequirements: []
       specifications: []
     syncedAt: 2026-02-11T07:21:23.642Z
-    status: open
+    status: closed
   - githubIssue: 161
     type: bug
     severity: medium
@@ -57,7 +57,7 @@ feedbacks:
       createdRequirements: []
       specifications: []
     syncedAt: 2026-02-11T07:21:23.599Z
-    status: open
+    status: closed
   - githubIssue: 159
     type: improvement
     severity: medium
@@ -67,7 +67,7 @@ feedbacks:
       createdRequirements: []
       specifications: []
     syncedAt: 2026-02-11T07:21:23.602Z
-    status: open
+    status: closed
   - githubIssue: 157
     type: improvement
     severity: medium
@@ -77,7 +77,7 @@ feedbacks:
       createdRequirements: []
       specifications: []
     syncedAt: 2026-02-11T07:21:23.617Z
-    status: open
+    status: closed
   - githubIssue: 111
     type: improvement
     severity: low
@@ -87,7 +87,7 @@ feedbacks:
       createdRequirements: []
       specifications: []
     syncedAt: 2026-02-11T07:21:23.620Z
-    status: open
+    status: closed
   - githubIssue: 110
     type: improvement
     severity: low
@@ -97,7 +97,7 @@ feedbacks:
       createdRequirements: []
       specifications: []
     syncedAt: 2026-02-11T07:21:23.623Z
-    status: open
+    status: closed
   - githubIssue: 109
     type: bug
     severity: medium
@@ -107,7 +107,7 @@ feedbacks:
       createdRequirements: []
       specifications: []
     syncedAt: 2026-02-11T07:21:23.627Z
-    status: open
+    status: closed
   - githubIssue: 167
     type: bug
     severity: medium
@@ -117,7 +117,7 @@ feedbacks:
       createdRequirements: []
       specifications: []
     syncedAt: 2026-02-11T07:21:23.589Z
-    status: resolved
+    status: closed
   - githubIssue: 170
     type: improvement
     severity: low
@@ -139,3 +139,65 @@ feedbacks:
       specifications: []
     syncedAt: 2026-02-11T07:42:10.958Z
     status: closed
+  - githubIssue: 221
+    type: requirement-gap
+    severity: medium
+    linkedTo:
+      requirements:
+        - req-000018
+      createdRequirements: []
+      specifications: []
+    syncedAt: 2026-02-12T21:57:49.440Z
+    status: open
+  - githubIssue: 220
+    type: requirement-gap
+    severity: medium
+    linkedTo:
+      requirements:
+        - req-000013
+      createdRequirements: []
+      specifications: []
+    syncedAt: 2026-02-12T21:57:49.453Z
+    status: open
+  - githubIssue: 209
+    type: requirement-gap
+    severity: medium
+    linkedTo:
+      requirements:
+        - req-000011
+        - req-000005
+      createdRequirements: []
+      specifications: []
+    syncedAt: 2026-02-12T21:57:49.467Z
+    status: open
+  - githubIssue: 208
+    type: bug
+    severity: medium
+    linkedTo:
+      requirements: []
+      createdRequirements: []
+      specifications:
+        - spec-000011
+        - spec-000015
+    syncedAt: 2026-02-12T21:57:49.473Z
+    status: open
+  - githubIssue: 196
+    type: improvement
+    severity: low
+    linkedTo:
+      requirements:
+        - req-000001
+      createdRequirements: []
+      specifications: []
+    syncedAt: 2026-02-12T21:57:49.479Z
+    status: open
+  - githubIssue: 172
+    type: spec-mismatch
+    severity: medium
+    linkedTo:
+      requirements: []
+      createdRequirements: []
+      specifications:
+        - spec-000011
+    syncedAt: 2026-02-12T21:57:49.486Z
+    status: open

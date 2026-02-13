@@ -8,7 +8,13 @@ versionHistory: []
 files:
   design: specifications/spec-000015/design.md
   supplementary: []
-flags: []
+flags:
+  - type: feedback-review
+    reason: 'Feedback from issue #208'
+    createdAt: 2026-02-12T22:13:07.934Z
+    relatedIssues:
+      - 208
+    severity: medium
 implementation:
   issues:
     - number: 85
