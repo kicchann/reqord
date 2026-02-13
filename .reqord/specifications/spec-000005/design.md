@@ -46,7 +46,7 @@ reqord req history <id> [--json]
   - **minor** (0.x.0): 要件の追加・拡張（successCriteria追加、dependencies変更、title変更等）
   - **patch** (0.0.x): 記述の修正（description.mdの誤字修正、明確化、priority変更）
   - **変更なし**: ステータス変更のみ、flag変更のみの場合はバージョンを変えない
-- `createHistoryEntry(requirement, gitCommit?)`: VersionHistoryEntryの生成
+- `createHistoryEntry(requirement, gitCommit)`: VersionHistoryEntryの生成
 - `getStateTransitions()`: 許可される状態遷移マップの提供
 - `--major`, `--minor`, `--patch` オプションで明示的にバージョン種別を指定可能
 
@@ -154,10 +154,10 @@ draft ──approve──→ approved ──implement──→ implemented
   → showRequirement(cwd, id)
     → requirement.versionHistory取得
   → テーブル表示:
-    | Version | Status    | Date       | Summary              |
-    | 1.0.0   | draft     | 2025-01-01 | Initial              |
-    | 1.1.0   | draft     | 2025-01-05 | 成功基準追加          |
-    | 2.0.0   | approved  | 2025-01-10 | スコープ変更          |
+    | Version | Status    | Git Commit | Date       | Summary              |
+    | 1.0.0   | draft     | abc1234    | 2025-01-01 | Initial              |
+    | 1.1.0   | draft     | def5678    | 2025-01-05 | 成功基準追加          |
+    | 2.0.0   | approved  | 9ab0cde    | 2025-01-10 | スコープ変更          |
 ```
 
 ## 5. テスト方針
@@ -175,7 +175,7 @@ draft ──approve──→ approved ──implement──→ implemented
 
 - create → update(title変更) → update(status変更) → history表示の一連フロー
 - ステータス変更のみでバージョンが変わらないことの確認
-- 不正な状態遷移（implemented → draft）のエラーハンドリング
+- 不正な状態遷移（draft → implemented など許可されていない遷移）のエラーハンドリング
 
 ## 6. 技術的決定事項
 

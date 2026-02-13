@@ -7,6 +7,7 @@ updatedAt: 2026-02-13T00:00:00.000Z
 versionHistory:
   - version: 1.0.0
     status: implemented
+    gitCommit: aa7e3b6
     changedAt: 2026-02-12T15:12:54.066Z
     summary: Initial implementation (Requirement versioning only)
 files:
