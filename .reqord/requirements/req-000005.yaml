@@ -8,10 +8,12 @@ updatedAt: 2026-02-13T00:00:00.000Z
 versionHistory:
   - version: 1.0.0
     status: implemented
+    gitCommit: ff72679
     changedAt: 2026-02-09T12:00:00Z
     summary: Initial implementation (Requirement only)
   - version: 2.0.0
     status: draft
+    gitCommit: a3583e7
     changedAt: 2026-02-13T00:00:00.000Z
     summary: Reverted to draft for revision based on feedback (#109, #208, #209). Expanded scope to include Specification
 files:
