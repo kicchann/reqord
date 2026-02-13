@@ -13,7 +13,7 @@ versionHistory:
     gitCommit: legacy
   - version: 1.1.0
     changedAt: 2026-02-09T10:00:00Z
-    summary: 'Feedback #17: blocksからdeprecated要件を除去'
+    summary: "Feedback #17: blocksからdeprecated要件を除去"
     status: implemented
     gitCommit: legacy
 files:
@@ -49,10 +49,4 @@ dependencies:
     - req-000003
 estimatedComplexity: medium
 estimatedHours: 16
-flags:
-  - type: feedback-review
-    reason: 'v1.1.0: blocksからdeprecated要件を除去。v1.2.0: req-000008（Show/Update/Delete）を吸収、成功基準を詳細化'
-    createdAt: 2026-02-09T10:00:00Z
-    relatedIssues:
-      - 17
-    severity: low
+flags: []

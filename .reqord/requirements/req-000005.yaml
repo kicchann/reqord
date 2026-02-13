@@ -15,7 +15,7 @@ versionHistory:
     status: draft
     gitCommit: a3583e7
     changedAt: 2026-02-13T00:00:00.000Z
-    summary: Reverted to draft for revision based on feedback (#109, #208, #209). Expanded scope to include Specification
+    summary: Reverted to draft for revision based on feedback (#109,
 files:
   description: requirements/req-000005/description.md
   supplementary: []
@@ -43,4 +43,10 @@ dependencies:
     - req-000006
 estimatedComplexity: medium
 estimatedHours: 12
-flags: []
+flags:
+  - type: feedback-review
+    reason: 'Feedback from issue #247'
+    createdAt: 2026-02-13T15:49:24.303Z
+    relatedIssues:
+      - 247
+    severity: low
