@@ -1,0 +1,16 @@
+id: spec-000033
+requirementId: req-000005
+version: 1.0.0
+status: approved
+createdAt: 2026-02-13T01:52:26.669Z
+updatedAt: 2026-02-13T03:30:00.000Z
+versionHistory:
+  - version: 1.0.0
+    status: approved
+    gitCommit: 63e4c1b
+    changedAt: 2026-02-13T03:30:00.000Z
+    summary: Initial design approved (Specification versioning)
+files:
+  design: specifications/spec-000033/design.md
+  supplementary: []
+flags: []

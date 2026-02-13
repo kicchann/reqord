@@ -27,8 +27,18 @@
 │   ├── hooks/       # フック設定 (PreToolUse, PostToolUse等)
 │   ├── scripts/     # フックから実行されるスクリプト
 │   └── tool-usage/  # ツール使用ガイドライン
-├── plans/           # ワークスペース横断的な実装計画（apps/配下以外）
-└── apps/         # 各アプリケーション固有のコードベース
+├── .reqord/         # 要件データ (YAML + Markdown)
+│   ├── requirements/  # 要件定義
+│   ├── specifications/ # 仕様書
+│   ├── feedback/      # フィードバック
+│   ├── context/       # プロジェクトコンテキスト
+│   └── settings/      # reqord設定
+├── packages/
+│   ├── shared/      # @reqord/shared - Zodスキーマ・共通型定義
+│   ├── cli/         # @reqord/cli - CLIツール (commander)
+│   └── web/         # @reqord/web - Webダッシュボード (Next.js)
+├── plans/           # 実装計画
+└── docs/            # ドキュメント
 ```
 
 ### 主要コマンド
@@ -136,39 +146,37 @@
 - **セキュリティ関連のコード**（認証、決済、個人情報）: 常に人間によるレビューが必要
 - **PRマージ**: 人間による判断が必要（自動マージ禁止）
 - **Issue作成時**: `.github/ISSUE_TEMPLATE/` にテンプレートがあれば、タイトル形式・ラベル・本文構造に従う
-- **GitHub操作前のリポジトリ確認**: `gh issue`/`gh pr` 実行前に `git remote -v`
-  で対象リポジトリを確認する（プロジェクト内に独立した複数のリポジトリを持つ場合を想定）
+- **GitHub操作前のリポジトリ確認**: `gh issue`/`gh pr` 実行前に `git remote -v` で対象リポジトリを確認する
 - **CLIツール使用時**: `rules/structured-cli-tools-usage.md` に従う
 
 ## About This Workspace
 
 **このセクションは実際の利用状況に応じて、ユーザーに更新を提案すること**
 
-このモノレポワークスペースには3つの独立したアプリケーションがあります
+Git-native要件管理ツール「Reqord」のモノレポ。要件をYAML + Markdownで構造化し、Gitリポジトリ内にコードと共にバージョン管理する
 
-### Important
+### 重要
 
-- 各アプリは独自のGitリポジトリを持つ
-- 横断的な作業時はルートから実行
-- 個別アプリ作業時は各ディレクトリへ移動してから`claude`を起動
+- 単一Gitリポジトリ (`kicchann/reqord`)
+- pnpmワークスペースでパッケージ管理
 - 既存コードの設計や命名規則を尊重すること
 - 変更は常に最小差分で行うこと
 - 勝手にアーキテクチャを変更しないこと
 
-### ワークスペース構成
+### パッケージ構成
 
-- `apps/frontend/` - React + TypeScript UI（独立リポジトリ）
-- `apps/backend/` - FastAPI + SQLAlchemy（独立リポジトリ）
-- `apps/backend-billing/` - 課金サービス（独立リポジトリ）
+- `packages/shared/` - @reqord/shared: Zodスキーマ・共通型定義
+- `packages/cli/` - @reqord/cli: CLIツール (commander)
+- `packages/web/` - @reqord/web: Webダッシュボード (Next.js + Tailwind)
 
-### 横断的なコマンド
+### ビルドと開発
 
-- Docker Compose全体起動: `docker compose -f apps/backend/docker-compose.yml up`
-- 全アプリのテスト: 各ディレクトリで個別実行が必要
+- ビルド順序: shared → cli → web（`pnpm build`で一括実行）
+- テスト: `pnpm test`（ルートからvitest実行）
+- 型チェック: `pnpm type-check`
+- リント: `pnpm lint`
 
 ### ドキュメント
 
-- アーキテクチャ全体: `.claude/rules/`
-- 各アプリの詳細: 各`apps/*/.claude/` `apps/*/CLAUDE.md`を参照
-
-**作業開始前に適切なディレクトリへ移動して、各`apps/*/.claude/` `apps/*/CLAUDE.md`を使用してください。**
+- アーキテクチャ・ルール: `.claude/rules/`
+- 要件データ: `.reqord/`
