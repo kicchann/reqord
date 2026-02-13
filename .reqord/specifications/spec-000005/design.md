@@ -2,7 +2,9 @@
 
 ## 1. 設計概要
 
-要件のライフサイクル管理として、セマンティックバージョニング（major/minor/patch）による変更追跡と状態遷移（draft → pending_approval → approved → deprecated）を実装する。要件更新時にversionHistoryへ自動的に履歴エントリを追加し、`reqord req history <id>` コマンドで変更履歴を表示する。本機能は未実装であり、既存のRequirementスキーマに定義済みの `version` / `versionHistory` フィールドを活用する。
+要件のライフサイクル管理として、セマンティックバージョニング（major/minor/patch）による変更追跡と状態遷移（draft → approved → implemented）を実装する。バージョンインクリメントは**内容変更時のみ**行い、ステータス遷移ではバージョンを変更しない。要件更新時にversionHistoryへ自動的に履歴エントリを追加し、`reqord req history <id>` コマンドで変更履歴を表示する。既存のRequirementスキーマに定義済みの `version` / `versionHistory` フィールドを活用する。
+
+> **v2.0.0改訂:** フィードバック(#109, #208, #209)に基づき、バージョニングルールと状態遷移を改訂。
 
 ## 2. アーキテクチャ
 
@@ -32,50 +34,69 @@ Shared:         @reqord/shared
 reqord req history <id> [--json]
 ```
 
-- テーブル形式: version, status, gitCommit(短縮), approvedAt, approvedBy
+- テーブル形式: version, status, gitCommit(短縮), changedAt, summary
 - `--json`: ValidationResult同様のJSON出力
 
 ### 3.2 VersionService (`services/version-service.ts` - 新規)
 
 **責務:** バージョン管理ロジックの提供。
 
-- `determineNextVersion(before, after)`: 変更内容に基づくバージョン番号決定
-  - **major**: status変更（draft → approved等の状態遷移）
-  - **minor**: title, format, dependencies, successCriteria等の構造変更
-  - **patch**: description.mdのみの変更、priority変更
-- `createHistoryEntry(requirement, gitCommit?)`: VersionHistoryEntryの生成
+- `determineNextVersion(before, after)`: **内容フィールド**の変更に基づくバージョン番号決定
+  - **major** (x.0.0): 要件の根本的な変更（スコープ変更、EARS format変更）
+  - **minor** (0.x.0): 要件の追加・拡張（successCriteria追加、dependencies変更、title変更等）
+  - **patch** (0.0.x): 記述の修正（description.mdの誤字修正、明確化、priority変更）
+  - **変更なし**: ステータス変更のみ、flag変更のみの場合はバージョンを変えない
+- `createHistoryEntry(requirement, gitCommit)`: VersionHistoryEntryの生成
 - `getStateTransitions()`: 許可される状態遷移マップの提供
+- `--major`, `--minor`, `--patch` オプションで明示的にバージョン種別を指定可能
+
+#### バージョン変更トリガー判定
+
+| 変更内容 | バージョン変更 | 備考 |
+|---------|--------------|------|
+| title, successCriteria, format, dependencies等 | する | 内容変更 = バージョンアップ |
+| status変更（draft → approved → implemented等） | **しない** | ワークフロー進行はバージョンと無関係 |
+| flagの追加・削除 | **しない** | メタ情報の変更 |
 
 ### 3.3 RequirementService 拡張
 
 **変更点:** updateRequirement内でのバージョン自動インクリメント。
 
 ```typescript
-// draft状態ではバージョンインクリメントしない
-if (before.status !== "draft" || after.status !== "draft") {
+// 内容フィールドに変更がある場合のみバージョンインクリメント
+const contentChanged = hasContentChanges(before, after);
+if (contentChanged) {
   const nextVersion = determineNextVersion(before, after);
   after.version = nextVersion;
   after.versionHistory.push(createHistoryEntry(after, gitCommit));
 }
+// ステータスのみの変更ではバージョンを変えない
 ```
 
 ### 3.4 状態遷移ルール
 
 ```
-draft ──→ pending_approval ──→ approved ──→ deprecated
-  ↑            │
-  └────────────┘ (差し戻し)
+draft ──approve──→ approved ──implement──→ implemented
+  ↑                    │                       │
+  ├── draft (flag解決) ←┘                       │
+  └── draft (flag解決) ←───────────────────────┘
 ```
 
-許可される遷移:
-- `draft` → `pending_approval`
-- `pending_approval` → `approved`
-- `pending_approval` → `draft`（差し戻し）
-- `approved` → `deprecated`
+> `pending_approval` は廃止（#208）。PRマージ自体が承認行為となる。
+> すべての状態遷移はPR経由で行う。
 
-禁止される遷移:
-- `approved` → `draft`（承認済みを直接ドラフトに戻すことは不可）
-- `deprecated` → いずれの状態にも戻せない
+許可される遷移:
+- `draft` → `approved`
+- `approved` → `implemented`
+- `approved` → `draft`（flag対応による差し戻し。draftに戻る際にバージョン見直し）
+- `implemented` → `draft`（flag対応による差し戻し。draftに戻る際にバージョン見直し）
+
+状態遷移コマンド:
+- `reqord req draft <id>` / `reqord spec draft <id>`
+- `reqord req approve <id>` / `reqord spec approve <id>`
+- `reqord req implemented <id>` / `reqord spec implemented <id>`
+
+各コマンド実行時にversionHistoryへ履歴エントリを記録する。
 
 ### 3.5 VersionHistoryEntry（既存スキーマ）
 
@@ -83,25 +104,47 @@ draft ──→ pending_approval ──→ approved ──→ deprecated
 {
   version: string,      // "1.2.3"
   status: Status,       // 記録時点の状態
-  gitCommit: string,    // Gitコミットハッシュ（空文字列許容）
-  approvedAt: string,   // ISO 8601タイムスタンプ
-  approvedBy: string[], // 承認者リスト
+  gitCommit: string,    // Gitコミットハッシュ（必須。PR経由のため常に取得可能）
+  changedAt: string,    // ISO 8601タイムスタンプ
+  summary: string,      // 変更概要
 }
 ```
 
 ## 4. データフロー
 
-### 更新時の自動バージョニング
+### 更新時の自動バージョニング（内容変更あり）
 
 ```
-ユーザー → reqord req update req-000001 --status approved
-  → updateRequirement(cwd, id, { status: "approved" })
-    → before取得（status: "pending_approval", version: "1.0.0"）
-    → 状態遷移チェック: pending_approval → approved（許可）
-    → determineNextVersion(before, after) → "2.0.0"（status変更=major）
+ユーザー → reqord req update req-000001 --title "新しいタイトル"
+  → updateRequirement(cwd, id, { title: "新しいタイトル" })
+    → before取得（title: "旧タイトル", version: "1.0.0"）
+    → hasContentChanges(before, after) → true（title変更）
+    → determineNextVersion(before, after) → "1.1.0"（構造変更=minor）
     → createHistoryEntry(after, gitCommit)
     → versionHistory.push(entry)
     → reqRepo.save(cwd, after)
+```
+
+### 状態遷移（バージョン据え置き、履歴は記録）
+
+```
+ユーザー → reqord req approve req-000001
+  → before取得（status: "draft", version: "1.1.0"）
+  → 状態遷移チェック: draft → approved（許可）
+  → バージョンインクリメントなし
+  → versionHistory.push({ version: "1.1.0", status: "approved", gitCommit, ... })
+  → reqRepo.save(cwd, after)
+```
+
+### flag対応によるdraft差し戻し
+
+```
+ユーザー → reqord req draft req-000001
+  → before取得（status: "implemented", version: "1.1.0"）
+  → 状態遷移チェック: implemented → draft（許可）
+  → バージョン見直し（必要に応じて内容変更時にインクリメント）
+  → versionHistory.push({ version: "1.1.0", status: "draft", gitCommit, ... })
+  → reqRepo.save(cwd, after)
 ```
 
 ### 履歴表示
@@ -111,10 +154,10 @@ draft ──→ pending_approval ──→ approved ──→ deprecated
   → showRequirement(cwd, id)
     → requirement.versionHistory取得
   → テーブル表示:
-    | Version | Status           | Commit  | Date       |
-    | 1.0.0   | draft            | abc1234 | 2025-01-01 |
-    | 1.1.0   | pending_approval | def5678 | 2025-01-05 |
-    | 2.0.0   | approved         | ghi9012 | 2025-01-10 |
+    | Version | Status    | Git Commit | Date       | Summary              |
+    | 1.0.0   | draft     | abc1234    | 2025-01-01 | Initial              |
+    | 1.1.0   | draft     | def5678    | 2025-01-05 | 成功基準追加          |
+    | 2.0.0   | approved  | 9ab0cde    | 2025-01-10 | スコープ変更          |
 ```
 
 ## 5. テスト方針
@@ -122,28 +165,43 @@ draft ──→ pending_approval ──→ approved ──→ deprecated
 ### ユニットテスト
 
 - **version-service**: バージョン番号決定ロジック（major/minor/patch各ケース）
+- **hasContentChanges**: 内容フィールド変更 vs ステータスのみ変更の判定
 - **状態遷移**: 許可/禁止される遷移パターンの網羅テスト
 - **createHistoryEntry**: エントリ生成の各フィールド検証
-- **draft状態での更新**: バージョンインクリメントされないことの確認
+- **ステータスのみ変更**: バージョンインクリメントされないことの確認
+- **明示的バージョン指定**: `--major`/`--minor`/`--patch` オプションの動作
 
 ### 統合テスト
 
 - create → update(title変更) → update(status変更) → history表示の一連フロー
-- 不正な状態遷移（approved → draft）のエラーハンドリング
+- ステータス変更のみでバージョンが変わらないことの確認
+- 不正な状態遷移（draft → implemented など許可されていない遷移）のエラーハンドリング
 
 ## 6. 技術的決定事項
 
 ### セマンティックバージョニングの粒度
 
-**決定:** major=状態遷移、minor=構造変更、patch=軽微な変更
-**理由:** npmのsemverとは異なるが、要件管理の文脈では「状態が変わった」が最も重要な変更。構造的な内容変更はminor、文書的な修正はpatchとすることで、変更の重要度が直感的に分かる。
+**決定:** major=スコープの根本変更、minor=内容の追加・拡張、patch=記述の軽微な修正
+**理由:** ステータス変更はワークフロー進行であり、要件の「内容」が変わったわけではない。バージョンは内容の変更度合いを示す指標とし、ワークフロー状態とは独立させる。
 
-### draft状態でのバージョンスキップ
+### ステータス変更とバージョンの分離
 
-**決定:** draft状態での更新ではバージョンをインクリメントしない
-**理由:** draft段階は試行錯誤のフェーズであり、すべての編集を履歴に残すとノイズが大きい。pending_approval以降の変更のみを正式な履歴として記録する。
+**決定:** ステータス変更のみではバージョンをインクリメントしない
+**理由:** ステータスはワークフローの進行状態を表し、内容の変更を意味しない。バージョンは「何が書かれているか」の変更を追跡するものであり、「どの段階にあるか」とは無関係にすべき。（#109 フィードバック反映）
 
-### Gitコミットハッシュの取得
+### pending_approvalの廃止
 
-**決定:** 環境変数またはgitコマンド実行で現在のHEADコミットを取得。取得失敗時は空文字列
-**理由:** Git管理下でない環境でも動作する必要がある。コミットハッシュは参考情報であり、必須ではない。
+**決定:** `pending_approval` ステータスを廃止し、`draft → approved → implemented` の3状態とする
+**理由:** PRマージ自体が承認行為であり、別途「承認待ち」状態を設ける意味がない。ワークフローの簡素化。（#208 フィードバック反映）
+
+### Gitコミットハッシュの必須化
+
+**決定:** すべての状態遷移・バージョン変更時にGitコミットハッシュを記録する（必須）
+**理由:** すべての状態遷移はPR経由で行われるため、コミットハッシュは常に取得可能。変更の追跡性を担保するために必須とする。
+
+## 7. 改訂履歴
+
+| バージョン | 日付 | 変更内容 |
+|-----------|------|---------|
+| v1.0.0 | 2026-02-08 | 初版（Requirementバージョン管理） |
+| v2.0.0 | 2026-02-13 | #109: ステータス変更でバージョンを上げない方針に変更。#208: pending_approval廃止。#209: --major/--minor/--patchオプション明記 |
