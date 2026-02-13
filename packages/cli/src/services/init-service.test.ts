@@ -43,23 +43,22 @@ describe("initProject", () => {
     expect(fs.writeText).not.toHaveBeenCalled();
   });
 
-  it("必要な6つのディレクトリが作成される", async () => {
+  it("必要な6つのディレクトリと.github/workflowsが作成される", async () => {
     vi.mocked(fs.exists).mockResolvedValue(false);
     vi.mocked(fs.readText).mockResolvedValue("workflow-content");
 
     const result = await initProject("/cwd");
 
     const mkdirCalls = vi.mocked(fs.mkdirp).mock.calls.map(([p]) => p);
-    expect(mkdirCalls).toContainEqual(expect.stringContaining(CONTEXT_DIR + "/" + DOMAIN_DIR));
-    expect(mkdirCalls).toContainEqual(expect.stringContaining(REQUIREMENTS_DIR));
-    expect(mkdirCalls).toContainEqual(expect.stringContaining(SPECIFICATIONS_DIR));
-    expect(mkdirCalls).toContainEqual(
-      expect.stringContaining(SETTINGS_DIR + "/" + TEMPLATES_DIR + "/" + ISSUE_TEMPLATES_DIR),
-    );
-    expect(mkdirCalls).toContainEqual(
-      expect.stringContaining(SETTINGS_DIR + "/" + RULES_DIR),
-    );
-    expect(mkdirCalls).toContainEqual(expect.stringContaining(ASSETS_DIR));
+    // .reqord/ 配下のディレクトリ
+    expect(mkdirCalls).toContainEqual("/cwd/.reqord/context/domain");
+    expect(mkdirCalls).toContainEqual("/cwd/.reqord/requirements");
+    expect(mkdirCalls).toContainEqual("/cwd/.reqord/specifications");
+    expect(mkdirCalls).toContainEqual("/cwd/.reqord/settings/templates/issue-templates");
+    expect(mkdirCalls).toContainEqual("/cwd/.reqord/settings/rules");
+    expect(mkdirCalls).toContainEqual("/cwd/.reqord/assets");
+    // GitHub Actions ワークフロー用ディレクトリ
+    expect(mkdirCalls).toContainEqual("/cwd/.github/workflows");
     expect(result.alreadyExists).toBe(false);
   });
 
@@ -114,16 +113,16 @@ describe("initProject", () => {
   });
 
   it("GitHub Actions ワークフローが既に存在する場合はスキップされる", async () => {
-    vi.mocked(fs.exists)
-      .mockResolvedValueOnce(false) // .reqord/ は存在しない
-      .mockResolvedValueOnce(true); // finalize-approval.yml は存在する
+    vi.mocked(fs.exists).mockImplementation(async (path) => {
+      if (path.includes("finalize-approval.yml")) return true;
+      return false;
+    });
+    vi.mocked(fs.readText).mockResolvedValue("workflow-content");
 
     const result = await initProject("/cwd");
 
     const writeCalls = vi.mocked(fs.writeText).mock.calls;
-    const workflowWrite = writeCalls.find(
-      ([path]) => path.includes("finalize-approval.yml"),
-    );
+    const workflowWrite = writeCalls.find(([path]) => path.includes("finalize-approval.yml"));
     expect(workflowWrite).toBeUndefined();
     expect(result.created.every((p) => !p.includes("finalize-approval.yml"))).toBe(true);
   });
@@ -134,10 +133,11 @@ describe("initProject", () => {
 
     const result = await initProject("/cwd");
 
-    // 6 dirs + template + rules + workflow = 9
-    expect(result.created).toHaveLength(9);
+    // 6 dirs + template + rules + 2 gitkeeps + workflow = 11
+    expect(result.created).toHaveLength(11);
     expect(result.created.some((p) => p.includes("requirement-description.md"))).toBe(true);
     expect(result.created.some((p) => p.includes("requirement-quality.md"))).toBe(true);
+    expect(result.created.filter((p) => p.endsWith(".gitkeep"))).toHaveLength(2);
     expect(result.created.some((p) => p.includes("finalize-approval.yml"))).toBe(true);
   });
 });

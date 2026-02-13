@@ -71,7 +71,9 @@ export async function initProject(cwd: string): Promise<InitResult> {
     fs.joinPath(reqordRoot, ASSETS_DIR),
   ];
   for (const dir of gitkeepDirs) {
-    await fs.writeText(fs.joinPath(dir, ".gitkeep"), "");
+    const gitkeepPath = fs.joinPath(dir, ".gitkeep");
+    await fs.writeText(gitkeepPath, "");
+    created.push(gitkeepPath);
   }
 
   // Write GitHub Actions workflow for finalize-approval
