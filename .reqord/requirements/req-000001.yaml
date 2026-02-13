@@ -40,16 +40,4 @@ dependencies:
   relatedTo: []
 estimatedComplexity: small
 estimatedHours: 8
-flags:
-  - type: feedback-review
-    reason: 'Feedback from issue #19'
-    createdAt: 2026-02-09T07:44:24.565Z
-    relatedIssues:
-      - 19
-    severity: medium
-  - type: feedback-review
-    reason: 'Feedback from issue #196'
-    createdAt: 2026-02-12T22:05:36.323Z
-    relatedIssues:
-      - 196
-    severity: low
+flags: []
