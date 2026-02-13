@@ -83,8 +83,8 @@ jobs:
             CURRENT_STATUS=$(jq -r '.status' "$FILE_PATH")
           fi
 
-          if [ "$CURRENT_STATUS" != "pending_approval" ]; then
-            echo "Current status is '$CURRENT_STATUS', not 'pending_approval'. Skipping."
+          if [ "$CURRENT_STATUS" != "approved" ]; then
+            echo "Current status is '$CURRENT_STATUS', not 'approved'. Skipping."
             exit 0
           fi
 
@@ -100,7 +100,7 @@ jobs:
                 \"status\": \"approved\",
                 \"gitCommit\": \"$COMMIT_SHA\",
                 \"changedAt\": \"$NOW\",
-                \"summary\": \"Status changed from pending_approval to approved\"
+                \"summary\": \"Approval finalized\"
               }]
             " "$FILE_PATH"
           else
@@ -118,7 +118,7 @@ jobs:
                  status: "approved",
                  gitCommit: $commit,
                  changedAt: $now,
-                 summary: "Status changed from pending_approval to approved"
+                 summary: "Approval finalized"
                }]
                ' "$FILE_PATH" > tmp.$$ && mv tmp.$$ "$FILE_PATH"
           fi

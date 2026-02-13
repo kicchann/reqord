@@ -1,5 +1,5 @@
 import { execSync } from "node:child_process";
-import type { Requirement, Status, VersionHistoryEntry } from "@reqord/shared";
+import type { Requirement, Specification, Status, VersionHistoryEntry } from "@reqord/shared";
 
 /**
  * Compare two values for equality, using JSON serialization for objects
@@ -44,11 +44,6 @@ export function determineNextVersion(before: Requirement, after: Requirement): s
 
   const { major, minor, patch } = parseVersion(before.version);
 
-  // Check for major changes (status change)
-  if (before.status !== after.status) {
-    return formatVersion(major + 1, 0, 0);
-  }
-
   // Check for minor changes (title, format, dependencies, successCriteria)
   const hasMinorChange =
     hasChanged(before.title, after.title) ||
@@ -65,7 +60,8 @@ export function determineNextVersion(before: Requirement, after: Requirement): s
     return formatVersion(major, minor, patch + 1);
   }
 
-  // No changes detected
+  // Status and flags changes don't affect version
+  // No content changes detected
   return before.version;
 }
 
@@ -117,10 +113,9 @@ export function createHistoryEntry(
  */
 export function getStateTransitions(): Map<Status, Status[]> {
   return new Map([
-    ["draft", ["pending_approval"]],
-    ["pending_approval", ["approved", "draft"]],
-    ["approved", ["implemented", "deprecated", "pending_approval"]],
-    ["implemented", ["pending_approval"]],
+    ["draft", ["approved"]],
+    ["approved", ["implemented", "draft"]],
+    ["implemented", ["draft"]],
     ["deprecated", []],
   ]);
 }
@@ -135,9 +130,9 @@ export function isValidTransition(from: Status, to: Status): boolean {
 }
 
 /**
- * Determine if requirement should revert to pending_approval due to content changes
+ * Determine if requirement should revert to draft due to content changes
  */
-export function shouldRevertToPendingApproval(
+export function shouldRevertToDraft(
   currentStatus: Status,
   hasContentChanges: boolean,
 ): boolean {
@@ -175,4 +170,87 @@ export function generateChangeSummary(before: Requirement, after: Requirement): 
   }
 
   return changes.length > 0 ? changes.join(", ") : "Requirement updated";
+}
+
+/**
+ * Count supplementary file differences between two Specification snapshots
+ */
+function countSupplementaryDiff(before: Specification, after: Specification): { added: number; removed: number } {
+  const beforeSet = new Set(before.files.supplementary);
+  const afterSet = new Set(after.files.supplementary);
+
+  let added = 0;
+  for (const file of afterSet) {
+    if (!beforeSet.has(file)) {
+      added++;
+    }
+  }
+
+  let removed = 0;
+  for (const file of beforeSet) {
+    if (!afterSet.has(file)) {
+      removed++;
+    }
+  }
+
+  return { added, removed };
+}
+
+/**
+ * Determine next version based on changes between specifications
+ */
+export function determineNextVersionForSpec(before: Specification, after: Specification): string {
+  const { major, minor, patch } = parseVersion(before.version);
+
+  const { added, removed } = countSupplementaryDiff(before, after);
+  const totalSupplementaryChanges = added + removed;
+
+  // 3+ supplementary file changes → major bump
+  if (totalSupplementaryChanges >= 3) {
+    return formatVersion(major + 1, 0, 0);
+  }
+
+  // 1-2 supplementary file changes → minor bump
+  if (totalSupplementaryChanges >= 1) {
+    return formatVersion(major, minor + 1, 0);
+  }
+
+  // Design file path changed → patch bump
+  if (before.files.design !== after.files.design) {
+    return formatVersion(major, minor, patch + 1);
+  }
+
+  // All other changes (status, flags, design content, etc.) → no version bump
+  return before.version;
+}
+
+/**
+ * Generate change summary from specification differences
+ */
+export function generateSpecChangeSummary(before: Specification, after: Specification): string {
+  const changes: string[] = [];
+
+  if (before.status !== after.status) {
+    changes.push(`Status changed from ${before.status} to ${after.status}`);
+  }
+
+  const { added, removed } = countSupplementaryDiff(before, after);
+
+  if (added > 0) {
+    changes.push(`${added} supplementary file(s) added`);
+  }
+
+  if (removed > 0) {
+    changes.push(`${removed} supplementary file(s) removed`);
+  }
+
+  if (before.files.design !== after.files.design) {
+    changes.push("Design file path updated");
+  }
+
+  if (hasChanged(before.flags, after.flags)) {
+    changes.push("Flags updated");
+  }
+
+  return changes.length > 0 ? changes.join(", ") : "Specification updated";
 }

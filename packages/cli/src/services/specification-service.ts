@@ -157,7 +157,7 @@ export async function checkSpecApprovalPrerequisites(
   const req = await reqRepo.findById(cwd, spec.requirementId);
   if (!req) {
     errors.push(`関連要件 ${spec.requirementId} が見つかりません`);
-  } else if (req.status !== "approved" && req.status !== "pending_approval") {
+  } else if (req.status !== "approved") {
     errors.push(`関連要件 ${spec.requirementId} が未承認です（現在: ${req.status}）`);
   }
 
@@ -174,6 +174,147 @@ export async function checkSpecApprovalPrerequisites(
   return { ok: errors.length === 0, errors };
 }
 
+// --- Helper: Content Change Detection ---
+
+/**
+ * Check if specification has content changes (excluding status, flags, metadata)
+ */
+export function hasSpecContentChanges(before: Specification, after: Specification): boolean {
+  // Extract content fields only (exclude status, flags, updatedAt, versionHistory, currentApproval, implementation)
+  const contentBefore = {
+    id: before.id,
+    requirementId: before.requirementId,
+    version: before.version,
+    createdAt: before.createdAt,
+    files: before.files,
+  };
+
+  const contentAfter = {
+    id: after.id,
+    requirementId: after.requirementId,
+    version: after.version,
+    createdAt: after.createdAt,
+    files: after.files,
+  };
+
+  return JSON.stringify(contentBefore) !== JSON.stringify(contentAfter);
+}
+
+// --- Update Specification ---
+
+export interface UpdateSpecOptions {
+  status?: Status;
+  patchData?: Partial<Specification>;
+  designContent?: string;
+  versionBump?: "major" | "minor" | "patch";
+}
+
+export interface UpdateSpecResult {
+  before: Specification;
+  after: Specification;
+}
+
+export async function updateSpecification(
+  cwd: string,
+  id: string,
+  options: UpdateSpecOptions = {},
+): Promise<UpdateSpecResult> {
+  const before = await specRepo.findByIdOrThrow(cwd, id);
+
+  // Apply patch data
+  let merged: Specification = { ...before };
+  if (options.patchData) {
+    merged = { ...merged, ...options.patchData };
+  }
+
+  // Update status if specified
+  if (options.status !== undefined) {
+    // Validate status transition
+    if (!versionService.isValidTransition(before.status, options.status)) {
+      const transitions = versionService.getStateTransitions();
+      const allowed = (transitions.get(before.status) ?? []).join(", ");
+      throw new Error(
+        `Invalid status transition: ${before.status} → ${options.status}. Allowed: ${allowed}`
+      );
+    }
+    merged.status = options.status;
+  }
+
+  // Detect content changes (for auto-versioning)
+  const hasContentChanges = hasSpecContentChanges(before, merged);
+
+  // Determine next version
+  let nextVersion = before.version;
+
+  if (options.versionBump) {
+    // Explicit version bump takes priority
+    const { major, minor, patch } = versionService.parseVersion(before.version);
+    if (options.versionBump === "major") {
+      nextVersion = versionService.formatVersion(major + 1, 0, 0);
+    } else if (options.versionBump === "minor") {
+      nextVersion = versionService.formatVersion(major, minor + 1, 0);
+    } else if (options.versionBump === "patch") {
+      nextVersion = versionService.formatVersion(major, minor, patch + 1);
+    }
+  } else {
+    // Auto-versioning based on content changes
+    // Priority: supplementary changes > design content changes
+    if (hasContentChanges) {
+      // Supplementary or other content changes (may trigger major/minor/patch)
+      nextVersion = versionService.determineNextVersionForSpec(before, merged);
+    } else if (options.designContent !== undefined) {
+      // Design content-only change (patch bump)
+      const { major, minor, patch } = versionService.parseVersion(before.version);
+      nextVersion = versionService.formatVersion(major, minor, patch + 1);
+    }
+    // Status-only changes keep version unchanged
+  }
+
+  // Generate summary
+  const changes: string[] = [];
+  if (before.status !== merged.status) {
+    changes.push(`status: ${before.status} → ${merged.status}`);
+  }
+  if (options.designContent !== undefined) {
+    changes.push("design.md updated");
+  }
+  if (hasContentChanges) {
+    const summary = versionService.generateSpecChangeSummary(before, merged);
+    if (summary && !changes.includes(summary)) {
+      changes.push(summary);
+    }
+  }
+  const summary = changes.length > 0 ? changes.join(", ") : "Specification updated";
+
+  // Create version history entry
+  const now = new Date().toISOString();
+  const historyEntry: VersionHistoryEntry = {
+    version: nextVersion,
+    status: merged.status,
+    gitCommit: versionService.getCurrentGitCommit(),
+    changedAt: now,
+    summary,
+  };
+
+  // Build final specification
+  const after: Specification = {
+    ...merged,
+    version: nextVersion,
+    updatedAt: now,
+    versionHistory: [...before.versionHistory, historyEntry],
+  };
+
+  // Save design file if provided
+  if (options.designContent !== undefined) {
+    await specRepo.saveFile(cwd, id, "design.md", options.designContent);
+  }
+
+  // Save specification
+  await specRepo.save(cwd, after);
+
+  return { before, after };
+}
+
 // --- Update Specification Status ---
 
 export interface UpdateSpecStatusResult {
@@ -186,39 +327,6 @@ export async function updateSpecificationStatus(
   id: string,
   newStatus: Status,
 ): Promise<UpdateSpecStatusResult> {
-  const before = await specRepo.findByIdOrThrow(cwd, id);
-
-  // Validate status transition
-  if (!versionService.isValidTransition(before.status, newStatus)) {
-    const transitions = versionService.getStateTransitions();
-    const allowed = (transitions.get(before.status) ?? []).join(", ");
-    throw new Error(
-      `Invalid status transition: ${before.status} → ${newStatus}. Allowed: ${allowed}`
-    );
-  }
-
-  // Version bump: status change = major bump
-  const { major } = versionService.parseVersion(before.version);
-  const nextVersion = versionService.formatVersion(major + 1, 0, 0);
-
-  const now = new Date().toISOString();
-  const summary = `Status changed from ${before.status} to ${newStatus}`;
-  const historyEntry: VersionHistoryEntry = {
-    version: nextVersion,
-    status: newStatus,
-    gitCommit: versionService.getCurrentGitCommit(),
-    changedAt: now,
-    summary,
-  };
-
-  const after: Specification = {
-    ...before,
-    status: newStatus,
-    version: nextVersion,
-    updatedAt: now,
-    versionHistory: [...before.versionHistory, historyEntry],
-  };
-
-  await specRepo.save(cwd, after);
-  return { before, after };
+  // Delegate to updateSpecification
+  return updateSpecification(cwd, id, { status: newStatus });
 }

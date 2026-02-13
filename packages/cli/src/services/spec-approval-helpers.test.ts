@@ -89,7 +89,7 @@ describe("buildSpecApprovalPrBody", () => {
     expect(result).toContain("| 要件タイトル | 承認フロー実装 |");
     expect(result).toContain("| バージョン | 1.0.0 |");
     expect(result).toContain("### 設計概要\n設計の概要説明。");
-    expect(result).toContain("status: draft → pending_approval");
+    expect(result).toContain("status: draft → approved");
     expect(result).toContain("`specifications/spec-000015/design.md`");
   });
 

@@ -19,7 +19,7 @@ export const specificationHandler: ApprovalHandler = {
   },
 
   async updateStatus(cwd, target) {
-    const { after } = await updateSpecificationStatus(cwd, target.id, "pending_approval");
+    const { after } = await updateSpecificationStatus(cwd, target.id, "approved");
     return after.version;
   },
 

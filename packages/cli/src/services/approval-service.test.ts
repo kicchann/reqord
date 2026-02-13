@@ -46,7 +46,7 @@ function makeMockHandler(): ApprovalHandler {
 | バージョン | ${target.version} |
 
 ### 変更内容
-status: draft → pending_approval
+status: draft → approved
 
 > マージ後、\`reqord req update ${target.id} --status approved\` でステータスを更新してください。`),
   };
@@ -125,7 +125,7 @@ describe("startApproval", () => {
     expect(gitRepo.createBranch).not.toHaveBeenCalled();
   });
 
-  it("エラー: pending_approval以外の非draftステータスでもエラー", async () => {
+  it("エラー: implemented等の非draftステータスでもエラー", async () => {
     const target = makeApprovalTarget({ status: "implemented" });
     const mockHandler = makeMockHandler();
 

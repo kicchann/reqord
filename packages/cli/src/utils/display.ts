@@ -2,7 +2,6 @@ import chalk from "chalk";
 
 export const STATUS_COLORS: Record<string, (s: string) => string> = {
   draft: chalk.blue,
-  pending_approval: chalk.yellow,
   approved: chalk.green,
   implemented: chalk.cyan,
   deprecated: chalk.gray,

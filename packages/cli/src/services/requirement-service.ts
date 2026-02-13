@@ -162,12 +162,12 @@ export async function updateRequirement(
   const statusExplicitlyChanged =
     options.status !== undefined || (options.patchData != null && "status" in options.patchData);
   if (!statusExplicitlyChanged) {
-    const shouldRevert = versionService.shouldRevertToPendingApproval(
+    const shouldRevert = versionService.shouldRevertToDraft(
       before.status as Status,
       hasContentChanges,
     );
     if (shouldRevert) {
-      merged.status = "pending_approval";
+      merged.status = "draft";
     }
   }
 

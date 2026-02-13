@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 
 const STATUS_COLORS: Record<string, string> = {
   draft: "border-gray-300 bg-gray-50",
-  pending_approval: "border-yellow-300 bg-yellow-50",
   approved: "border-green-300 bg-green-50",
   implemented: "border-blue-300 bg-blue-50",
   deprecated: "border-red-300 bg-red-50",

@@ -11,8 +11,8 @@ type SortDir = "asc" | "desc";
 const STATUS_OPTIONS: { value: Status | "all"; label: string }[] = [
   { value: "all", label: "All Status" },
   { value: "draft", label: "Draft" },
-  { value: "pending_approval", label: "Pending" },
   { value: "approved", label: "Approved" },
+  { value: "implemented", label: "Implemented" },
   { value: "deprecated", label: "Deprecated" },
 ];
 

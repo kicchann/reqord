@@ -2,7 +2,6 @@ import { z } from "zod";
 
 export const StatusSchema = z.enum([
   "draft",
-  "pending_approval",
   "approved",
   "implemented",
   "deprecated",

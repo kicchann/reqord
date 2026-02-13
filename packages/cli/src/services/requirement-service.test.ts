@@ -12,7 +12,7 @@ vi.mock("../repositories/requirement.js", () => ({
 
 vi.mock("./version-service.js", () => ({
   isValidTransition: vi.fn(),
-  shouldRevertToPendingApproval: vi.fn(),
+  shouldRevertToDraft: vi.fn(),
   determineNextVersion: vi.fn(),
   createHistoryEntry: vi.fn(),
   generateChangeSummary: vi.fn(),
@@ -49,7 +49,7 @@ describe("updateRequirement - 状態遷移バリデーション", () => {
     // Default: valid transitions
     vi.mocked(versionService.isValidTransition).mockReturnValue(true);
     // Default: no auto-revert
-    vi.mocked(versionService.shouldRevertToPendingApproval).mockReturnValue(false);
+    vi.mocked(versionService.shouldRevertToDraft).mockReturnValue(false);
     // Default: no version change
     vi.mocked(versionService.determineNextVersion).mockReturnValue("1.0.0");
     // Default: save resolves
@@ -62,12 +62,12 @@ describe("updateRequirement - 状態遷移バリデーション", () => {
     vi.mocked(reqRepo.findByIdOrThrow).mockResolvedValue(before);
     vi.mocked(versionService.isValidTransition).mockReturnValue(false);
     vi.mocked(versionService.getStateTransitions).mockReturnValue(
-      new Map([["draft", ["pending_approval"]]]),
+      new Map([["draft", ["approved"]]]),
     );
 
     await expect(
-      updateRequirement("/test/cwd", "req-000001", { status: "approved" }),
-    ).rejects.toThrow(/Invalid status transition: draft → approved/);
+      updateRequirement("/test/cwd", "req-000001", { status: "implemented" }),
+    ).rejects.toThrow(/Invalid status transition: draft → implemented/);
   });
 
   it("有効な状態遷移を受け入れる", async () => {
@@ -77,11 +77,11 @@ describe("updateRequirement - 状態遷移バリデーション", () => {
     vi.mocked(versionService.determineNextVersion).mockReturnValue("2.0.0");
 
     const result = await updateRequirement("/test/cwd", "req-000001", {
-      status: "pending_approval",
+      status: "approved",
     });
 
-    expect(result.after.status).toBe("pending_approval");
-    expect(versionService.isValidTransition).toHaveBeenCalledWith("draft", "pending_approval");
+    expect(result.after.status).toBe("approved");
+    expect(versionService.isValidTransition).toHaveBeenCalledWith("draft", "approved");
   });
 
   it("同じstatusへの更新はバリデーションをスキップする", async () => {
@@ -98,35 +98,35 @@ describe("updateRequirement - 自動リバートロジック", () => {
   beforeEach(() => {
     vi.resetAllMocks();
     vi.mocked(versionService.isValidTransition).mockReturnValue(true);
-    vi.mocked(versionService.shouldRevertToPendingApproval).mockReturnValue(false);
+    vi.mocked(versionService.shouldRevertToDraft).mockReturnValue(false);
     vi.mocked(versionService.determineNextVersion).mockReturnValue("1.0.0");
     vi.mocked(reqRepo.save).mockResolvedValue(undefined);
   });
 
-  it("approved状態でtitle変更時にpending_approvalに戻す", async () => {
+  it("approved状態でtitle変更時にdraftに戻す", async () => {
     const before = makeRequirement({ status: "approved", version: "2.0.0" });
     vi.mocked(reqRepo.findByIdOrThrow).mockResolvedValue(before);
-    vi.mocked(versionService.shouldRevertToPendingApproval).mockReturnValue(true);
+    vi.mocked(versionService.shouldRevertToDraft).mockReturnValue(true);
     vi.mocked(versionService.determineNextVersion).mockReturnValue("3.0.0");
 
     const result = await updateRequirement("/test/cwd", "req-000001", {
       title: "新しいタイトル",
     });
 
-    expect(versionService.shouldRevertToPendingApproval).toHaveBeenCalledWith("approved", true);
-    expect(result.after.status).toBe("pending_approval");
+    expect(versionService.shouldRevertToDraft).toHaveBeenCalledWith("approved", true);
+    expect(result.after.status).toBe("draft");
   });
 
   it("draft状態では内容変更時もリバートしない", async () => {
     const before = makeRequirement({ status: "draft" });
     vi.mocked(reqRepo.findByIdOrThrow).mockResolvedValue(before);
-    vi.mocked(versionService.shouldRevertToPendingApproval).mockReturnValue(false);
+    vi.mocked(versionService.shouldRevertToDraft).mockReturnValue(false);
 
     const result = await updateRequirement("/test/cwd", "req-000001", {
       title: "新しいタイトル",
     });
 
-    expect(versionService.shouldRevertToPendingApproval).toHaveBeenCalledWith("draft", true);
+    expect(versionService.shouldRevertToDraft).toHaveBeenCalledWith("draft", true);
     expect(result.after.status).toBe("draft");
   });
 
@@ -151,7 +151,7 @@ describe("updateRequirement - 自動リバートロジック", () => {
       status: "deprecated",
     });
 
-    expect(versionService.shouldRevertToPendingApproval).not.toHaveBeenCalled();
+    expect(versionService.shouldRevertToDraft).not.toHaveBeenCalled();
     expect(result.after.status).toBe("deprecated");
   });
 });
@@ -160,7 +160,7 @@ describe("updateRequirement - バージョンインクリメント", () => {
   beforeEach(() => {
     vi.resetAllMocks();
     vi.mocked(versionService.isValidTransition).mockReturnValue(true);
-    vi.mocked(versionService.shouldRevertToPendingApproval).mockReturnValue(false);
+    vi.mocked(versionService.shouldRevertToDraft).mockReturnValue(false);
     vi.mocked(reqRepo.save).mockResolvedValue(undefined);
   });
 
@@ -183,17 +183,17 @@ describe("updateRequirement - バージョンインクリメント", () => {
     vi.mocked(versionService.determineNextVersion).mockReturnValue("2.0.0");
     vi.mocked(versionService.createHistoryEntry).mockReturnValue({
       version: "2.0.0",
-      status: "pending_approval",
+      status: "approved",
       gitCommit: "abc123",
       changedAt: "2026-01-02T00:00:00Z",
-      summary: "Status changed from draft to pending_approval",
+      summary: "Status changed from draft to approved",
     });
     vi.mocked(versionService.generateChangeSummary).mockReturnValue(
-      "Status changed from draft to pending_approval",
+      "Status changed from draft to approved",
     );
 
     const result = await updateRequirement("/test/cwd", "req-000001", {
-      status: "pending_approval",
+      status: "approved",
     });
 
     expect(result.after.version).toBe("2.0.0");
@@ -206,7 +206,7 @@ describe("updateRequirement - バージョンインクリメント", () => {
     vi.mocked(versionService.determineNextVersion).mockReturnValue("2.0.0");
     vi.mocked(versionService.createHistoryEntry).mockReturnValue({
       version: "2.0.0",
-      status: "pending_approval",
+      status: "approved",
       gitCommit: "abc123",
       changedAt: "2026-01-02T00:00:00Z",
       summary: "Status changed",
@@ -214,7 +214,7 @@ describe("updateRequirement - バージョンインクリメント", () => {
     vi.mocked(versionService.generateChangeSummary).mockReturnValue("Status changed");
 
     const result = await updateRequirement("/test/cwd", "req-000001", {
-      status: "pending_approval",
+      status: "approved",
     });
 
     expect(result).toHaveProperty("versionChanged", true);
@@ -225,7 +225,7 @@ describe("updateRequirement - バージョン履歴", () => {
   beforeEach(() => {
     vi.resetAllMocks();
     vi.mocked(versionService.isValidTransition).mockReturnValue(true);
-    vi.mocked(versionService.shouldRevertToPendingApproval).mockReturnValue(false);
+    vi.mocked(versionService.shouldRevertToDraft).mockReturnValue(false);
     vi.mocked(reqRepo.save).mockResolvedValue(undefined);
   });
 
@@ -236,20 +236,20 @@ describe("updateRequirement - バージョン履歴", () => {
     vi.mocked(versionService.generateChangeSummary).mockReturnValue("Status changed");
     vi.mocked(versionService.createHistoryEntry).mockReturnValue({
       version: "2.0.0",
-      status: "pending_approval",
+      status: "approved",
       gitCommit: "abc123",
       changedAt: "2026-01-02T00:00:00Z",
       summary: "Status changed",
     });
 
     const result = await updateRequirement("/test/cwd", "req-000001", {
-      status: "pending_approval",
+      status: "approved",
     });
 
     expect(result.after.versionHistory).toHaveLength(1);
     expect(result.after.versionHistory[0]).toMatchObject({
       version: "2.0.0",
-      status: "pending_approval",
+      status: "approved",
       summary: "Status changed",
     });
   });
@@ -287,21 +287,21 @@ describe("updateRequirement - バージョン履歴", () => {
     vi.mocked(versionService.generateChangeSummary).mockReturnValue("Status changed");
     vi.mocked(versionService.createHistoryEntry).mockReturnValue({
       version: "2.0.0",
-      status: "pending_approval",
+      status: "approved",
       gitCommit: "new456",
       changedAt: "2026-01-02T00:00:00Z",
       summary: "Status changed",
     });
 
     const result = await updateRequirement("/test/cwd", "req-000001", {
-      status: "pending_approval",
+      status: "approved",
     });
 
     expect(result.after.versionHistory).toHaveLength(2);
     expect(result.after.versionHistory[0]).toEqual(existingHistory[0]);
     expect(result.after.versionHistory[1]).toMatchObject({
       version: "2.0.0",
-      status: "pending_approval",
+      status: "approved",
     });
   });
 });
@@ -310,7 +310,7 @@ describe("updateRequirement - 統合シナリオ", () => {
   beforeEach(() => {
     vi.resetAllMocks();
     vi.mocked(versionService.isValidTransition).mockReturnValue(true);
-    vi.mocked(versionService.shouldRevertToPendingApproval).mockReturnValue(false);
+    vi.mocked(versionService.shouldRevertToDraft).mockReturnValue(false);
     vi.mocked(reqRepo.save).mockResolvedValue(undefined);
   });
 
@@ -357,7 +357,7 @@ describe("updateRequirement - バージョン明示的指定", () => {
   beforeEach(() => {
     vi.resetAllMocks();
     vi.mocked(versionService.isValidTransition).mockReturnValue(true);
-    vi.mocked(versionService.shouldRevertToPendingApproval).mockReturnValue(false);
+    vi.mocked(versionService.shouldRevertToDraft).mockReturnValue(false);
     vi.mocked(versionService.determineNextVersion).mockReturnValue("1.1.0");
     vi.mocked(versionService.parseVersion).mockReturnValue({ major: 1, minor: 0, patch: 0 });
     vi.mocked(versionService.formatVersion).mockImplementation((major, minor, patch) => {
@@ -437,7 +437,7 @@ describe("updateRequirement - description変更のバージョニング", () => 
   beforeEach(() => {
     vi.resetAllMocks();
     vi.mocked(versionService.isValidTransition).mockReturnValue(true);
-    vi.mocked(versionService.shouldRevertToPendingApproval).mockReturnValue(false);
+    vi.mocked(versionService.shouldRevertToDraft).mockReturnValue(false);
     vi.mocked(reqRepo.save).mockResolvedValue(undefined);
     vi.mocked(reqRepo.saveDescription).mockResolvedValue(undefined);
   });
@@ -451,7 +451,7 @@ describe("updateRequirement - description変更のバージョニング", () => 
     vi.mocked(versionService.generateChangeSummary).mockReturnValue("Description updated");
     vi.mocked(versionService.createHistoryEntry).mockReturnValue({
       version: "1.0.1",
-      status: "pending_approval",
+      status: "approved",
       gitCommit: "abc123",
       changedAt: "2026-01-02T00:00:00Z",
       summary: "Description updated",
@@ -483,12 +483,12 @@ describe("updateRequirement - description変更のバージョニング", () => 
   it("description変更がauto-revertをトリガーする", async () => {
     const before = makeRequirement({ version: "1.0.0", status: "approved" });
     vi.mocked(reqRepo.findByIdOrThrow).mockResolvedValue(before);
-    vi.mocked(versionService.shouldRevertToPendingApproval).mockReturnValue(true);
+    vi.mocked(versionService.shouldRevertToDraft).mockReturnValue(true);
     vi.mocked(versionService.determineNextVersion).mockReturnValue("2.0.0");
     vi.mocked(versionService.generateChangeSummary).mockReturnValue("Status changed");
     vi.mocked(versionService.createHistoryEntry).mockReturnValue({
       version: "2.0.0",
-      status: "pending_approval",
+      status: "draft",
       gitCommit: "abc123",
       changedAt: "2026-01-02T00:00:00Z",
       summary: "Status changed",
@@ -498,7 +498,7 @@ describe("updateRequirement - description変更のバージョニング", () => 
       descriptionContent: "変更された説明文",
     });
 
-    expect(versionService.shouldRevertToPendingApproval).toHaveBeenCalledWith("approved", true);
-    expect(result.after.status).toBe("pending_approval");
+    expect(versionService.shouldRevertToDraft).toHaveBeenCalledWith("approved", true);
+    expect(result.after.status).toBe("draft");
   });
 });
