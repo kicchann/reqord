@@ -2,16 +2,7 @@
 
 ## 1. 設計概要
 
-仕様（Specification）のライフサイクル管理として、セマンティックバージョニング（major/minor/patch）による変更追跡と状態遷移（draft → approved → implemented）を実装する。バージョンインクリメントは**内容変更時のみ**行い、ステータス遷移ではバージョンを変更しない。仕様更新時にversionHistoryへ自動的に履歴エントリを追加し、`reqord spec history <id>` コマンドで変更履歴を表示する。既存のSpecificationスキーマに定義済みの `version` / `versionHistory` フィールドを活用する。
-
-**実装状況:** PARTIALLY IMPLEMENTED
-- ✅ スキーマ（version, versionHistory）定義済み
-- ✅ `updateSpecificationStatus()` による状態遷移時のバージョニング（ただしspec-000005要件に不整合あり）
-- ❌ `updateSpecification()` メソッド未実装
-- ❌ `spec update` コマンド未実装
-- ❌ `spec history` コマンド未実装
-- ❌ `spec draft` / `spec implemented` コマンド未実装
-- ❌ Version Service のspec対応不足（`determineNextVersion()` は requirement 専用）
+仕様（Specification）のライフサイクル管理として、シンプルなX.Y形式のバージョニング（1.0, 2.0, 1.1...）による変更追跡と状態遷移（draft → approved → implemented）を実装する。通常は X.0 形式を使い、typoなど軽微な修正でどうしても必要な時のみ .Y を使用する。バージョンインクリメントは**内容変更時のみ**行い、ステータス遷移ではバージョンを変更しない。仕様更新時にversionHistoryへ自動的に履歴エントリを追加し、`reqord spec history <id>` コマンドで変更履歴を表示する。既存のSpecificationスキーマに定義済みの `version` / `versionHistory` フィールドを活用する。
 
 **設計方針:** req-000005（spec-000005でRequirement側実装済み）と同一のバージョニングルールを適用し、RequirementとSpecificationで一貫した履歴管理を実現する。実装パターンは `req update` / `req history` を踏襲し、コード重複を最小化する。
 
@@ -83,7 +74,7 @@ export const specHistoryCommand = new Command("history")
 reqord spec update <id> [options]
   --patch-file <path>            YAMLパッチファイル適用
   --design-file <path>           design.md更新
-  --major/--minor/--patch        明示的バージョン指定
+  --major/--patch        明示的バージョン指定
 ```
 
 **実装パターン:** `commands/req/update.ts` から適用。削除する requirement 専用オプション:
@@ -95,7 +86,7 @@ reqord spec update <id> [options]
 保持するオプション:
 - `--patch-file` - YAML直接編集
 - `--design-file` - design.md更新（既存 `--content-file` の別名として提供）
-- `--major/--minor/--patch` - 明示的バージョン指定
+- `--major/--patch` - 明示的バージョン指定
 
 **ファイルパス:** `packages/cli/src/commands/spec/update.ts`
 
@@ -106,14 +97,13 @@ export const specUpdateCommand = new Command("update")
   .argument("<id>", "Specification ID (e.g. spec-000001)")
   .option("--patch-file <path>", "YAML patch file to merge into specification")
   .option("--design-file <path>", "Path to design.md content file")
-  .option("--major", "Force major version bump (x.0.0)")
-  .option("--minor", "Force minor version bump (0.x.0)")
-  .option("--patch", "Force patch version bump (0.0.x)")
+  .option("--major", "Force major version bump (X.0)")
+  .option("--patch", "Force patch version bump (.Y)")
   .action(async (id: string, options: UpdateCommandOptions) => {
     const result = await specService.updateSpecification(process.cwd(), id, {
       patchData: options.patchFile ? loadYamlFile(options.patchFile) : undefined,
       designContent: options.designFile ? readFile(options.designFile) : undefined,
-      versionBump: options.major ? "major" : options.minor ? "minor" : options.patch ? "patch" : undefined,
+      versionBump: options.major ? "major" : options.patch ? "patch" : undefined,
     });
     console.log(`Updated specification: ${result.id} (v${result.version})`);
   });
@@ -133,10 +123,10 @@ spec-000005と同様に、状態遷移は専用コマンドで提供する。各
 **責務:** flag対応等によるdraft差し戻し。
 
 ```
-reqord spec draft <id> [--major/--minor/--patch]
+reqord spec draft <id> [--patch]
 ```
 
-- 差し戻し時にバージョン見直しが必要な場合、`--major/--minor/--patch` で明示指定可能
+- 差し戻し時にバージョン見直しが必要な場合、`--patch` で明示指定可能（デフォルトは`--major`）
 - 差し戻し前にflag状況を表示
 
 **ファイルパス:** `packages/cli/src/commands/spec/draft.ts`
@@ -164,80 +154,59 @@ reqord spec implemented <id>
 
 **ファイルパス:** `packages/cli/src/services/version-service.ts`
 
-#### 3.4.1 `determineNextVersionForSpec()` (新規)
+#### 3.4.1 `determineNextVersionForSpec()` (新規) - Issue #247改訂
 
-**責務:** Specificationの内容変更に基づくバージョン番号決定。
+**責務:** `reqord spec draft`コマンド実行時のバージョン番号決定。
 
-Requirementの `determineNextVersion()` はYAMLメタデータフィールド（title, successCriteria, format, dependencies, priority）の変更を検出する。Specificationでも同じ原則を適用し、**YAMLメタデータの変更**でバージョンを判定する。
-
-> **注: コンテンツファイル（design.md）と自動バージョニングの関係**
->
-> Requirementの `determineNextVersion()` も、description.md のファイル内容変更は自動検出の対象外である（YAMLメタデータフィールドのみ監視）。Specificationでも同様に、design.md のファイル内容変更は自動バージョニングの対象外とする。
->
-> ただし、req-000005の要件（"specification content の変更で version を increment する"）との整合性を担保するため、design.md の大幅改訂時にはユーザーが `--major/--minor/--patch` で明示的にバージョンを上げる運用とする。これはRequirementの description.md 改訂時と同じ運用ルールである。
+新しいバージョニングルール（Issue #247）では、approved/implemented → draft 遷移時にバージョンをインクリメントする方式に変更。
 
 ```typescript
 export function determineNextVersionForSpec(
-  before: Specification,
-  after: Specification,
+  currentVersion: string,
+  options: { patch?: boolean },
 ): string {
-  const { major, minor, patch } = parseVersion(before.version);
+  const { major, minor } = parseVersion(currentVersion);
 
-  // ステータス変更のみではバージョンを変えない（spec-000005要件）
-  if (before.status !== after.status) {
-    const beforeNoStatus = { ...before, status: before.status };
-    const afterNoStatus = { ...after, status: before.status };
-    if (JSON.stringify(beforeNoStatus) === JSON.stringify(afterNoStatus)) {
-      return before.version; // ステータス以外に変更なし → バージョン据え置き
-    }
+  // デフォルト（--patchなし）: メジャーバージョンアップ
+  if (!options.patch) {
+    return formatVersion(major + 1, 0);  // "1.5" → "2.0"
   }
 
-  // 内容フィールドの変更判定
-  const designChanged = before.files.design !== after.files.design; // ファイルパス変更（稀）
-  const supplementaryChanged = JSON.stringify(before.files.supplementary) !== JSON.stringify(after.files.supplementary);
-  const flagsChanged = JSON.stringify(before.flags) !== JSON.stringify(after.flags);
-
-  // Major bump: supplementaryファイルの大幅変更（追加/削除が3ファイル以上）
-  if (supplementaryChanged) {
-    const beforeCount = before.files.supplementary.length;
-    const afterCount = after.files.supplementary.length;
-    if (Math.abs(beforeCount - afterCount) >= 3) {
-      return formatVersion(major + 1, 0, 0);
-    }
-  }
-
-  // Minor bump: supplementaryファイルの追加/削除（1〜2ファイル）
-  if (supplementaryChanged) {
-    return formatVersion(major, minor + 1, 0);
-  }
-
-  // Patch bump: designファイルパス変更（リネーム等）
-  if (designChanged) {
-    return formatVersion(major, minor, patch + 1);
-  }
-
-  // Flags変更のみ → バージョン据え置き
-  if (flagsChanged) {
-    return before.version;
-  }
-
-  // 変更なし
-  return before.version;
+  // --patch 指定: マイナーバージョンアップ
+  return formatVersion(major, minor + 1);  // "1.5" → "1.6"
 }
 ```
 
-**バージョン変更トリガー判定:**
+**バージョン番号フォーマット:**
 
-| 変更内容 | バージョン変更 | 備考 |
-|---------|--------------|------|
-| supplementary 3ファイル以上追加/削除 | major | 設計の大幅な変更 |
-| supplementary 1〜2ファイル追加/削除 | minor | 補足資料の追加 |
-| design.md ファイルパス変更 | patch | リネーム等の軽微な変更 |
-| design.md **内容**変更 | `--major/--minor/--patch` で明示指定 | Gitで差分管理。大幅改訂時はユーザーが手動でバージョンアップ |
-| status変更のみ | **しない** | ワークフロー進行はバージョンと無関係 |
-| flagの追加・削除 | **しない** | メタ情報の変更 |
+形式は `X.Y` (X: 整数、Y: 0または正の整数)
 
-> **Requirementとの対称性:** Requirementのdescription.md内容変更も `determineNextVersion()` の自動検出対象外であり、同じ運用ルール（明示指定）が適用される。
+有効な例: `1.0`, `2.0`, `3.0`, `1.1`, `1.2`, `1.10`, `10.0`
+
+無効な例: `1` (X.Y形式必須), `1.0.0` (旧形式), `v1.0` (プレフィックス付き)
+
+**バージョン変更トリガー判定 (Issue #247改訂):**
+
+Specificationのバージョニングも、Requirementと同様に`reqord spec draft`コマンドで、approved/implementedからdraftに戻す際に行う:
+
+- `reqord spec draft`（デフォルト） → **X.0インクリメント** (1.0→2.0: approved/implemented → draft)
+- `reqord spec draft --patch`（軽微な修正） → **.Yインクリメント** (1.0→1.1: typo修正など例外的に使用)
+- approved/implementedでの軽微な修正 → **.Yインクリメント** (1.0→1.1: draftに戻さずマイナーバージョンのみ更新)
+
+**バージョン変更トリガー:**
+
+| 操作 | バージョン変更 | 新バージョン例 | 備考 |
+|------|--------------|--------------|------|
+| `reqord spec draft`（approved/implemented → draft） | **する（X.0）** | 1.0 (approved) → 2.0 (draft) | デフォルトでメジャーバージョンアップ |
+| `reqord spec draft --patch`（軽微な修正の場合） | **する（.Y）** | 1.0 (approved) → 1.1 (draft) | typoなど例外的に使用 |
+| approved/implementedでの軽微な修正 | **する（.Y）** | 1.0 → 1.1 | draftに戻さずマイナーバージョンのみ更新 |
+| `reqord spec approve`（draft → approved） | **しない** | 1.0 (draft) → 1.0 (approved) | ステータス遷移のみ |
+| `reqord spec implemented`（approved → implemented） | **しない** | 1.0 (approved) → 1.0 (implemented) | ステータス遷移のみ |
+| flagの追加・削除 | **しない** | - | メタ情報の変更 |
+
+**注**: supplementaryファイルやdesign.mdの変更による自動判定は行わない。`reqord spec draft`実行時にデフォルトでX.0、`--patch`指定時に.Yをインクリメント
+
+> **Requirementとの対称性:** Requirementと同じバージョニング原則を適用し、一貫性を確保。
 
 #### 3.4.2 `generateSpecChangeSummary()` (新規)
 
@@ -305,118 +274,15 @@ export interface UpdateSpecResult {
 
 #### 3.5.2 `updateSpecification()` メソッド (新規)
 
-**責務:** 仕様の更新、自動バージョニング、履歴記録。
+**責務:** 仕様の更新、バージョニング、履歴記録。
 
-```typescript
-export async function updateSpecification(
-  cwd: string,
-  id: string,
-  options: UpdateSpecOptions,
-): Promise<UpdateSpecResult> {
-  const before = await specRepo.findById(cwd, id);
-  if (!before) {
-    throw new AppError(`Specification ${id} not found`, ErrorCode.NOT_FOUND);
-  }
+> **注:** 新しいバージョニングルール（X.Y形式）に基づく実装の詳細は、Phase 2（Issue #247実装時）で確定します。
 
-  // 1. パッチデータのマージ
-  let after = { ...before };
-  if (options.patchData) {
-    after = { ...after, ...options.patchData };
-  }
-
-  // 2. ステータス更新（個別指定時）
-  if (options.status) {
-    if (!versionService.isValidTransition(before.status, options.status)) {
-      throw new AppError(
-        `Invalid status transition: ${before.status} → ${options.status}`,
-        ErrorCode.VALIDATION_ERROR,
-      );
-    }
-    after.status = options.status;
-  }
-
-  // 3. 内容変更の検出
-  const contentChanged = hasSpecContentChanges(before, after);
-  const statusOnlyChange = before.status !== after.status && !contentChanged;
-
-  // 4. バージョン決定
-  let nextVersion: string;
-  if (options.versionBump) {
-    // 明示的指定
-    const { major, minor, patch } = versionService.parseVersion(before.version);
-    nextVersion =
-      options.versionBump === "major" ? versionService.formatVersion(major + 1, 0, 0) :
-      options.versionBump === "minor" ? versionService.formatVersion(major, minor + 1, 0) :
-      versionService.formatVersion(major, minor, patch + 1);
-  } else if (statusOnlyChange) {
-    // ステータスのみ変更 → バージョン据え置き
-    nextVersion = before.version;
-  } else if (contentChanged) {
-    // 内容変更 → 自動判定
-    nextVersion = versionService.determineNextVersionForSpec(before, after);
-  } else {
-    // 変更なし
-    nextVersion = before.version;
-  }
-
-  after.version = nextVersion;
-  after.updatedAt = new Date().toISOString();
-
-  // 5. バージョン履歴エントリ作成（バージョン変更時またはステータス変更時）
-  if (nextVersion !== before.version || before.status !== after.status) {
-    const summary = versionService.generateSpecChangeSummary(before, after);
-    const historyEntry: VersionHistoryEntry = {
-      version: nextVersion,
-      status: after.status,
-      gitCommit: versionService.getCurrentGitCommit(),
-      changedAt: after.updatedAt,
-      summary,
-    };
-    // approvedAt/approvedBy はapproveコマンドで別途設定
-    after.versionHistory = [...after.versionHistory, historyEntry];
-  }
-
-  // 6. Zodバリデーション
-  const validated = SpecificationSchema.parse(after);
-
-  // 7. 保存
-  await specRepo.save(cwd, validated);
-
-  // 8. design.md更新（指定時）
-  if (options.designContent) {
-    await specRepo.saveFile(cwd, id, "design.md", options.designContent);
-  }
-
-  return {
-    id: validated.id,
-    version: validated.version,
-    previousVersion: before.version,
-    status: validated.status,
-    previousStatus: before.status,
-    updatedAt: validated.updatedAt,
-  };
-}
-
-function hasSpecContentChanges(before: Specification, after: Specification): boolean {
-  // ステータス、updatedAt、versionHistory、flags を除外して比較
-  // flags変更はバージョニング対象外（メタ情報）
-  const normalize = (spec: Specification) => ({
-    ...spec,
-    status: "normalized",
-    updatedAt: "normalized",
-    versionHistory: [],
-    flags: [],
-    currentApproval: undefined,
-    implementation: undefined,
-  });
-  return JSON.stringify(normalize(before)) !== JSON.stringify(normalize(after));
-}
-```
-
-**実装パターン:** `updateRequirement()` から90%再利用。以下の違い:
-- `shouldRevertToPendingApproval()` チェックを削除（Specification独自の差し戻しルールは未定義）
-- `determineNextVersionForSpec()` を使用
-- `generateSpecChangeSummary()` を使用
+**実装方針:**
+- `reqord spec draft`コマンド実行時にバージョンをインクリメント
+- デフォルトでX.0インクリメント、`--patch`指定時に.Yインクリメント
+- ステータス遷移のみではバージョンを変更しない
+- `updateRequirement()` のパターンを踏襲
 
 #### 3.5.3 `updateSpecificationStatus()` 修正
 
@@ -489,83 +355,32 @@ spec-000005と共通のスキーマ（`@reqord/shared` の `VersionHistoryEntryS
 
 ## 4. データフロー
 
-### 更新時の自動バージョニング（内容変更あり）
+> **注:** 新しいバージョニングルール（X.Y形式）に基づくデータフローの詳細は、Phase 2（Issue #247実装時）で確定します。
 
-```
-ユーザー → reqord spec update spec-000001 --design-file design.md
-  → updateSpecification(cwd, id, { designContent: "..." })
-    → before取得（version: "1.0.0"）
-    → hasSpecContentChanges(before, after) → false（design.md内容変更はメタデータ外）
-    → バージョン据え置き（1.0.0）
-    → updatedAt更新のみ
-    → specRepo.save(cwd, after)
-    → specRepo.saveFile(cwd, id, "design.md", designContent)
-```
+### 主要フロー概要
 
-```
-ユーザー → reqord spec update spec-000001 --design-file design.md --major
-  → updateSpecification(cwd, id, { designContent: "...", versionBump: "major" })
-    → 明示的指定により強制的にmajorバンプ
-    → "1.0.0" → "2.0.0"
-    → versionHistory.push({ version: "2.0.0", status: "draft", ... })
-    → specRepo.saveFile(cwd, id, "design.md", designContent)
-```
-
-```
-ユーザー → reqord spec update spec-000001 --patch-file patch.yaml
-  # patch.yaml: { files: { supplementary: ["diagrams/architecture.mmd"] } }
-  → updateSpecification(cwd, id, { patchData: { files: { supplementary: [...] } } })
-    → before取得（supplementary: []）
-    → hasSpecContentChanges(before, after) → true（supplementary配列変更）
-    → determineNextVersionForSpec(before, after) → "1.1.0"（minor: 1ファイル追加）
-    → versionHistory.push(entry)
-    → specRepo.save(cwd, after)
-```
-
-### 状態遷移（バージョン据え置き、履歴は記録）
-
-```
-ユーザー → reqord spec approve spec-000001
-  → updateSpecificationStatus(cwd, id, "approved")
-    → updateSpecification(cwd, id, { status: "approved" })
-      → before取得（status: "draft", version: "1.1.0"）
-      → 状態遷移チェック: draft → approved（許可）
-      → バージョンインクリメントなし（ステータスのみ変更）
-      → versionHistory.push({ version: "1.1.0", status: "approved", gitCommit, ... })
-      → specRepo.save(cwd, after)
-```
-
-### flag対応によるdraft差し戻し
-
+**draft化とバージョンインクリメント:**
 ```
 ユーザー → reqord spec draft spec-000001
-  → updateSpecificationStatus(cwd, id, "draft")
-    → updateSpecification(cwd, id, { status: "draft" })
-      → before取得（status: "implemented", version: "1.1.0"）
-      → 状態遷移チェック: implemented → draft（許可）
-      → バージョン見直し（必要に応じて内容変更時にインクリメント）
-      → versionHistory.push({ version: "1.1.0", status: "draft", gitCommit, ... })
-      → specRepo.save(cwd, after)
+  → approved/implemented → draft 遷移
+  → デフォルト: X.0インクリメント（1.0 → 2.0）
+  → --patch指定: .Yインクリメント（1.0 → 1.1）
+  → versionHistory.push(entry)
 ```
 
+**状態遷移（バージョン据え置き）:**
 ```
-ユーザー → reqord spec draft spec-000001 --minor
-  → 差し戻しと同時にminorバージョンアップ
-    → "1.1.0" → "1.2.0"
-    → versionHistory.push({ version: "1.2.0", status: "draft", ... })
+ユーザー → reqord spec approve spec-000001
+  → draft → approved 遷移
+  → バージョンインクリメントなし
+  → versionHistory.push({ version: "1.0", status: "approved", ... })
 ```
 
-### 履歴表示
-
+**履歴表示:**
 ```
 ユーザー → reqord spec history spec-000001
-  → showSpecification(cwd, id)
-    → specification.versionHistory取得
-  → テーブル表示:
-    | Version | Status    | Git Commit | Date       | Summary                       |
-    | 1.0.0   | draft     | abc1234    | 2025-01-01 | Initial                       |
-    | 1.1.0   | draft     | def5678    | 2025-01-05 | 補足資料追加: diagrams/...     |
-    | 1.1.0   | approved  | 9ab0cde    | 2025-01-10 | ステータス変更: draft → approved |
+  → specification.versionHistory取得
+  → テーブル表示
 ```
 
 ## 5. テスト方針
@@ -592,7 +407,7 @@ spec-000005と共通のスキーマ（`@reqord/shared` の `VersionHistoryEntryS
 - **`updateSpecification()`**
   - パッチファイルマージの正常動作
   - 不正な状態遷移のエラー
-  - 明示的バージョン指定（--major/--minor/--patch）の動作
+  - 明示的バージョン指定（--major/--patch）の動作
   - ステータスのみ変更時のバージョン据え置き
   - 内容変更時の自動バージョンインクリメント
   - design.md更新時のファイル保存（バージョン据え置き確認）
@@ -620,27 +435,26 @@ spec-000005と共通のスキーマ（`@reqord/shared` の `VersionHistoryEntryS
 - 存在しないspecのエラーハンドリング
 
 **spec-update.test.ts** (新規):
-- 各オプション（--patch-file, --design-file, --major/--minor/--patch）の動作
+- 各オプション（--patch-file, --design-file, --major/--patch）の動作
 - オプション組み合わせ時の優先順位
 - バリデーションエラーの表示
 
 **spec-draft.test.ts / spec-implemented.test.ts** (新規):
 - 正常な状態遷移の動作
 - 不正な遷移のエラーハンドリング
-- draft差し戻し時の --major/--minor/--patch オプション動作
+- draft差し戻し時の --major/--patch オプション動作
 
 ## 6. 技術的決定事項
 
 ### セマンティックバージョニングの粒度
 
-**決定:** major=supplementary大幅変更、minor=supplementary追加・削除、patch=ファイルパス変更。design.md内容変更は自動バージョニング対象外（明示的指定で対応）
+**決定 (Issue #247改訂):** 整数+小数点形式（X.Y）による簡素化。バージョニングは`reqord spec draft`コマンドで、approved/implementedからdraftに戻す際に行う。デフォルトでX.0インクリメント、`--patch`指定時に.Yインクリメント。
 
 **理由:**
-- Specificationの「構造」変化を追跡することに特化
-- design.md内容変更はGitコミットログで詳細追跡できるため、YAMLメタデータのバージョンからは除外
-- 補足資料（supplementary）の増減は設計の拡張度合いを示す重要な指標
-- RequirementとSpecificationでバージョニング対象が異なるが、「ステータス変更のみではバージョンを変えない」原則は共通
-- Requirementのdescription.md内容変更も `determineNextVersion()` の自動検出対象外であり、**Requirement側と対称的な設計**
+- セマンティックバージョニングは複雑すぎて運用コストが高い
+- supplementaryファイル数による自動判定は廃止し、ユーザーが明示的にバージョン種別を指定する方式に変更
+- 基本は X.0 形式を使い、typoなど軽微な修正時のみ .Y を使用
+- Requirementと同じバージョニング原則を適用し、一貫性を確保
 
 ### ステータス変更とバージョンの分離
 
@@ -650,13 +464,13 @@ spec-000005と共通のスキーマ（`@reqord/shared` の `VersionHistoryEntryS
 
 ### コンテンツファイル内容変更とバージョンの関係
 
-**決定:** design.md内容変更ではバージョンを自動インクリメントしない。大幅改訂時は `--major/--minor/--patch` で明示指定する運用
+**決定:** design.md内容変更ではバージョンを自動インクリメントしない。大幅改訂時は `--major/--patch` で明示指定する運用
 
 **理由:**
 - design.mdはGit管理下にあり、詳細な変更履歴はGitコミットログで追跡可能
 - 軽微な誤字修正や表現改善でバージョン番号が頻繁に増えることを防ぐ
 - Requirementのdescription.mdも同じ扱い（自動検出対象外）であり、両者で一貫した運用ルール
-- req-000005の要件（"specification contentの変更でversionをincrement"）は `--major/--minor/--patch` オプションによる明示指定で担保
+- req-000005の要件（"specification contentの変更でversionをincrement"）は `--major/--patch` オプションによる明示指定で担保
 - これにより、Gitの細かい変更履歴とYAMLメタデータの粗い変更履歴の二重管理を実現
 
 ### approvedの廃止
