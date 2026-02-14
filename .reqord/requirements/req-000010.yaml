@@ -1,5 +1,5 @@
 id: req-000010
-version: 1.0.0
+version: '1.0'
 title: Zodバリデーションエラー詳細表示
 status: implemented
 priority: low

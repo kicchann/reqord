@@ -70,7 +70,7 @@ function makeSpecification(overrides: Partial<Specification> = {}): Specificatio
   return {
     id: "spec-000001",
     requirementId: "req-000001",
-    version: "1.0.0",
+    version: "1.0",
     status: "draft",
     createdAt: "2025-01-01T00:00:00.000Z",
     updatedAt: "2025-01-01T00:00:00.000Z",
@@ -102,7 +102,7 @@ describe("createSpecification", () => {
     expect(result.specification.id).toBe("spec-000010");
     expect(result.specification.requirementId).toBe("req-000001");
     expect(result.specification.status).toBe("draft");
-    expect(result.specification.version).toBe("1.0.0");
+    expect(result.specification.version).toBe("1.0");
     expect(mockSpecRepo.save).toHaveBeenCalled();
     expect(mockSpecRepo.saveFile).toHaveBeenCalledWith(
       "/cwd",
@@ -397,26 +397,26 @@ describe("updateSpecificationStatus", () => {
   it("ステータスのみ変更でバージョン据え置き", async () => {
     const before = makeSpecification({
       status: "draft",
-      version: "1.2.3",
+      version: "1.2",
     });
     mockSpecRepo.findByIdOrThrow.mockResolvedValue(before);
 
     const result = await updateSpecificationStatus("/cwd", "spec-000001", "approved");
 
-    expect(result.before.version).toBe("1.2.3");
-    expect(result.after.version).toBe("1.2.3");
+    expect(result.before.version).toBe("1.2");
+    expect(result.after.version).toBe("1.2");
     expect(result.after.status).toBe("approved");
     expect(result.after.versionHistory).toHaveLength(1);
-    expect(result.after.versionHistory[0].version).toBe("1.2.3");
+    expect(result.after.versionHistory[0].version).toBe("1.2");
   });
 
   it("バージョンがすでに高い場合でもステータス変更のみならバージョン据え置き", async () => {
-    const before = makeSpecification({ status: "draft", version: "5.0.0" });
+    const before = makeSpecification({ status: "draft", version: "5.0" });
     mockSpecRepo.findByIdOrThrow.mockResolvedValue(before);
 
     const result = await updateSpecificationStatus("/cwd", "spec-000001", "approved");
 
-    expect(result.after.version).toBe("5.0.0");
+    expect(result.after.version).toBe("5.0");
   });
 
   it("invalid transition: draft → implemented でエラー", async () => {
@@ -460,7 +460,7 @@ describe("updateSpecificationStatus", () => {
   it("updatedAtが更新される", async () => {
     const before = makeSpecification({
       status: "draft",
-      version: "1.0.0",
+      version: "1.0",
       updatedAt: "2025-01-01T00:00:00.000Z",
     });
     mockSpecRepo.findByIdOrThrow.mockResolvedValue(before);
@@ -518,7 +518,7 @@ describe("hasSpecMetadataChanges", () => {
     const before = makeSpecification({ currentApproval: undefined });
     const after = makeSpecification({
       currentApproval: {
-        version: "1.0.0",
+        version: "1.0",
         phase: "specification",
         prNumber: 123,
         prUrl: "https://github.com/user/repo/pull/123",
@@ -539,7 +539,7 @@ describe("hasSpecMetadataChanges", () => {
     const after = makeSpecification({
       versionHistory: [
         {
-          version: "1.0.0",
+          version: "1.0",
           status: "draft",
           gitCommit: "abc123",
           changedAt: "2025-01-01T00:00:00.000Z",
@@ -559,9 +559,9 @@ describe("hasSpecMetadataChanges", () => {
 // --- Cycle 8: updateSpecification ---
 
 describe("updateSpecification", () => {
-  it("パッチデータでsupplementaryを更新", async () => {
+  it("パッチデータでsupplementaryを更新（バージョン据え置き）", async () => {
     const before = makeSpecification({
-      version: "1.0.0",
+      version: "1.0",
       files: { design: "d.md", supplementary: ["old.md"] },
     });
     mockSpecRepo.findByIdOrThrow.mockResolvedValue(before);
@@ -571,11 +571,11 @@ describe("updateSpecification", () => {
     });
 
     expect(result.after.files.supplementary).toEqual(["old.md", "new.md"]);
-    expect(result.after.version).toBe("1.1.0"); // minor bump for supplementary change
+    expect(result.after.version).toBe("1.0"); // no auto-bump
   });
 
   it("ステータスのみ変更でバージョン据え置き", async () => {
-    const before = makeSpecification({ status: "draft", version: "1.2.3" });
+    const before = makeSpecification({ status: "draft", version: "1.2" });
     mockSpecRepo.findByIdOrThrow.mockResolvedValue(before);
 
     const result = await updateSpecification("/cwd", "spec-000001", {
@@ -583,7 +583,7 @@ describe("updateSpecification", () => {
     });
 
     expect(result.after.status).toBe("approved");
-    expect(result.after.version).toBe("1.2.3");
+    expect(result.after.version).toBe("1.2");
   });
 
   it("不正な状態遷移でエラー", async () => {
@@ -596,48 +596,36 @@ describe("updateSpecification", () => {
   });
 
   it("明示的majorバンプ指定", async () => {
-    const before = makeSpecification({ version: "1.2.3" });
+    const before = makeSpecification({ version: "1.2" });
     mockSpecRepo.findByIdOrThrow.mockResolvedValue(before);
 
     const result = await updateSpecification("/cwd", "spec-000001", {
       versionBump: "major",
     });
 
-    expect(result.after.version).toBe("2.0.0");
-  });
-
-  it("明示的minorバンプ指定", async () => {
-    const before = makeSpecification({ version: "1.2.3" });
-    mockSpecRepo.findByIdOrThrow.mockResolvedValue(before);
-
-    const result = await updateSpecification("/cwd", "spec-000001", {
-      versionBump: "minor",
-    });
-
-    expect(result.after.version).toBe("1.3.0");
+    expect(result.after.version).toBe("2.0");
   });
 
   it("明示的patchバンプ指定", async () => {
-    const before = makeSpecification({ version: "1.2.3" });
+    const before = makeSpecification({ version: "1.2" });
     mockSpecRepo.findByIdOrThrow.mockResolvedValue(before);
 
     const result = await updateSpecification("/cwd", "spec-000001", {
       versionBump: "patch",
     });
 
-    expect(result.after.version).toBe("1.2.4");
+    expect(result.after.version).toBe("1.3");
   });
 
-  it("design.md更新 + パッチデータでファイル保存とバージョンアップ", async () => {
+  it("design.md更新でもバージョン据え置き（自動バンプ廃止）", async () => {
     const before = makeSpecification({
-      version: "1.0.0",
+      version: "1.0",
       files: { design: "d.md", supplementary: [] },
     });
     mockSpecRepo.findByIdOrThrow.mockResolvedValue(before);
 
     const result = await updateSpecification("/cwd", "spec-000001", {
       designContent: "# New design",
-      patchData: { files: { design: "d.md", supplementary: ["new.md"] } },
     });
 
     expect(mockSpecRepo.saveFile).toHaveBeenCalledWith(
@@ -646,23 +634,11 @@ describe("updateSpecification", () => {
       "design.md",
       "# New design"
     );
-    expect(result.after.version).toBe("1.1.0");
-  });
-
-  it("design.mdのみ更新でpatchバンプ", async () => {
-    const before = makeSpecification({ version: "1.0.0" });
-    mockSpecRepo.findByIdOrThrow.mockResolvedValue(before);
-
-    const result = await updateSpecification("/cwd", "spec-000001", {
-      designContent: "# Updated design",
-    });
-
-    expect(mockSpecRepo.saveFile).toHaveBeenCalled();
-    expect(result.after.version).toBe("1.0.1");
+    expect(result.after.version).toBe("1.0");
   });
 
   it("versionHistoryが自動記録される", async () => {
-    const before = makeSpecification({ version: "1.0.0", versionHistory: [] });
+    const before = makeSpecification({ version: "1.0", versionHistory: [] });
     mockSpecRepo.findByIdOrThrow.mockResolvedValue(before);
 
     const result = await updateSpecification("/cwd", "spec-000001", {
@@ -670,14 +646,14 @@ describe("updateSpecification", () => {
     });
 
     expect(result.after.versionHistory).toHaveLength(1);
-    expect(result.after.versionHistory[0].version).toBe("1.1.0");
+    expect(result.after.versionHistory[0].version).toBe("1.0");
     expect(result.after.versionHistory[0].summary).toContain("supplementary");
   });
 
-  it("ステータス+内容変更で内容変更のバージョンアップを適用", async () => {
+  it("ステータス+内容変更でバージョン据え置き（自動判定廃止）", async () => {
     const before = makeSpecification({
       status: "draft",
-      version: "1.0.0",
+      version: "1.0",
       files: { design: "d.md", supplementary: [] },
     });
     mockSpecRepo.findByIdOrThrow.mockResolvedValue(before);
@@ -688,22 +664,22 @@ describe("updateSpecification", () => {
     });
 
     expect(result.after.status).toBe("approved");
-    expect(result.after.version).toBe("1.1.0"); // minor for supplementary
+    expect(result.after.version).toBe("1.0");
   });
 
-  it("明示的バージョン指定が自動バージョニングより優先される", async () => {
+  it("明示的バージョン指定でバージョンアップ", async () => {
     const before = makeSpecification({
-      version: "1.0.0",
+      version: "1.0",
       files: { design: "d.md", supplementary: [] },
     });
     mockSpecRepo.findByIdOrThrow.mockResolvedValue(before);
 
     const result = await updateSpecification("/cwd", "spec-000001", {
-      patchData: { files: { design: "d.md", supplementary: ["new.md"] } }, // normally minor
-      versionBump: "major", // explicit major
+      patchData: { files: { design: "d.md", supplementary: ["new.md"] } },
+      versionBump: "major",
     });
 
-    expect(result.after.version).toBe("2.0.0");
+    expect(result.after.version).toBe("2.0");
   });
 
   it("updatedAtが更新される", async () => {

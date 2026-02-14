@@ -17,7 +17,7 @@ function makeSpecification(overrides: Partial<Specification> = {}): Specificatio
   return {
     id: "spec-000001",
     requirementId: "req-000001",
-    version: "1.0.0",
+    version: "1.0",
     status: "approved",
     createdAt: "2026-01-01T00:00:00Z",
     updatedAt: "2026-01-01T00:00:00Z",
@@ -42,14 +42,13 @@ describe("spec draft command", () => {
     consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     // Reset Commander option state
     draftCommand.setOptionValue("major", undefined);
-    draftCommand.setOptionValue("minor", undefined);
     draftCommand.setOptionValue("patch", undefined);
     draftCommand.setOptionValue("json", undefined);
   });
 
   it("approved → draftへの差し戻し", async () => {
-    const before = makeSpecification({ status: "approved", version: "2.0.0" });
-    const after = makeSpecification({ status: "draft", version: "2.0.0" });
+    const before = makeSpecification({ status: "approved", version: "2.0" });
+    const after = makeSpecification({ status: "draft", version: "2.0" });
 
     mockShowSpecification.mockResolvedValue({ specification: before, design: null });
     mockUpdateSpecification.mockResolvedValue({ before, after });
@@ -70,8 +69,8 @@ describe("spec draft command", () => {
   });
 
   it("implemented → draftへの差し戻し", async () => {
-    const before = makeSpecification({ status: "implemented", version: "3.0.0" });
-    const after = makeSpecification({ status: "draft", version: "3.0.0" });
+    const before = makeSpecification({ status: "implemented", version: "3.0" });
+    const after = makeSpecification({ status: "draft", version: "3.0" });
 
     mockShowSpecification.mockResolvedValue({ specification: before, design: null });
     mockUpdateSpecification.mockResolvedValue({ before, after });
@@ -110,8 +109,8 @@ describe("spec draft command", () => {
   });
 
   it("--major指定でmajorバージョンアップ", async () => {
-    const before = makeSpecification({ status: "approved", version: "1.2.3" });
-    const after = makeSpecification({ status: "draft", version: "2.0.0" });
+    const before = makeSpecification({ status: "approved", version: "1.2" });
+    const after = makeSpecification({ status: "draft", version: "2.0" });
 
     mockShowSpecification.mockResolvedValue({ specification: before, design: null });
     mockUpdateSpecification.mockResolvedValue({ before, after });
@@ -126,30 +125,12 @@ describe("spec draft command", () => {
         versionBump: "major",
       }),
     );
-    expect(consoleLogSpy).toHaveBeenCalledWith("  version: 1.2.3 → 2.0.0");
-  });
-
-  it("--minor指定でminorバージョンアップ", async () => {
-    const before = makeSpecification({ status: "approved", version: "1.2.3" });
-    const after = makeSpecification({ status: "draft", version: "1.3.0" });
-
-    mockShowSpecification.mockResolvedValue({ specification: before, design: null });
-    mockUpdateSpecification.mockResolvedValue({ before, after });
-
-    await draftCommand.parseAsync(["node", "test", "spec-000001", "--minor"]);
-
-    expect(mockUpdateSpecification).toHaveBeenCalledWith(
-      process.cwd(),
-      "spec-000001",
-      expect.objectContaining({
-        versionBump: "minor",
-      }),
-    );
+    expect(consoleLogSpy).toHaveBeenCalledWith("  version: 1.2 → 2.0");
   });
 
   it("--patch指定でpatchバージョンアップ", async () => {
-    const before = makeSpecification({ status: "approved", version: "1.2.3" });
-    const after = makeSpecification({ status: "draft", version: "1.2.4" });
+    const before = makeSpecification({ status: "approved", version: "1.2" });
+    const after = makeSpecification({ status: "draft", version: "1.3" });
 
     mockShowSpecification.mockResolvedValue({ specification: before, design: null });
     mockUpdateSpecification.mockResolvedValue({ before, after });
@@ -165,21 +146,21 @@ describe("spec draft command", () => {
     );
   });
 
-  it("--major/--minor/--patchの複数指定でエラー", async () => {
+  it("--major/--patchの複数指定でエラー", async () => {
     const specification = makeSpecification({ status: "approved" });
     mockShowSpecification.mockResolvedValue({ specification, design: null });
 
-    await draftCommand.parseAsync(["node", "test", "spec-000001", "--major", "--minor"]);
+    await draftCommand.parseAsync(["node", "test", "spec-000001", "--major", "--patch"]);
 
     expect(process.exitCode).toBe(1);
     expect(consoleErrorSpy).toHaveBeenCalledWith(
-      expect.stringContaining("Only one of --major, --minor, or --patch can be specified"),
+      expect.stringContaining("Only one of --major or --patch can be specified"),
     );
   });
 
   it("--jsonオプションでJSON出力", async () => {
-    const before = makeSpecification({ status: "approved", version: "2.0.0" });
-    const after = makeSpecification({ status: "draft", version: "2.0.0" });
+    const before = makeSpecification({ status: "approved", version: "2.0" });
+    const after = makeSpecification({ status: "draft", version: "2.0" });
 
     mockShowSpecification.mockResolvedValue({ specification: before, design: null });
     mockUpdateSpecification.mockResolvedValue({ before, after });
@@ -196,15 +177,15 @@ describe("spec draft command", () => {
   it("versionHistoryエントリが記録される", async () => {
     const before = makeSpecification({
       status: "approved",
-      version: "2.0.0",
+      version: "2.0",
       versionHistory: [],
     });
     const after = makeSpecification({
       status: "draft",
-      version: "2.0.0",
+      version: "2.0",
       versionHistory: [
         {
-          version: "2.0.0",
+          version: "2.0",
           status: "draft",
           gitCommit: "abc123",
           changedAt: "2026-01-01T00:00:00Z",

@@ -5,7 +5,7 @@ status: approved
 createdAt: 2026-02-08T14:08:06.961Z
 updatedAt: 2026-02-14T00:32:00.804Z
 versionHistory:
-  - version: 1.0.0
+  - version: '1.0'
     status: implemented
     gitCommit: aa7e3b6
     changedAt: 2026-02-12T15:12:54.066Z

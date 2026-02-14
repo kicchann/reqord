@@ -49,7 +49,7 @@ import {
 function makeRequirement(overrides: Partial<Requirement> = {}): Requirement {
   return {
     id: "req-000001",
-    version: "1.0.0",
+    version: "1.0",
     title: "Test Requirement",
     status: "approved",
     priority: "medium",
@@ -72,7 +72,7 @@ function makeSpecification(overrides: Partial<Specification> = {}): Specificatio
   return {
     id: "spec-000001",
     requirementId: "req-000001",
-    version: "1.0.0",
+    version: "1.0",
     status: "draft",
     createdAt: "2026-01-01T00:00:00Z",
     updatedAt: "2026-01-01T00:00:00Z",
@@ -115,7 +115,7 @@ describe("specApproveCommand", () => {
     vi.mocked(buildSpecApprovalPrBody).mockReturnValue("PR Body");
 
     const approvalResult: ApprovalResult = {
-      branchName: "reqord/spec-000001-approve-v1.0.0",
+      branchName: "reqord/spec-000001-approve-v1.0",
       prNumber: 123,
       prUrl: "https://github.com/owner/repo/pull/123",
     };
@@ -141,7 +141,7 @@ describe("specApproveCommand", () => {
       {
         type: "specification",
         id: "spec-000001",
-        version: "1.0.0",
+        version: "1.0",
         status: "draft",
         title: "Specification spec-000001 (Test Requirement)",
         files: [
@@ -158,7 +158,7 @@ describe("specApproveCommand", () => {
       expect.stringContaining("Approval PR created for spec-000001")
     );
     expect(consoleLogSpy).toHaveBeenCalledWith(
-      expect.stringContaining("Branch: reqord/spec-000001-approve-v1.0.0")
+      expect.stringContaining("Branch: reqord/spec-000001-approve-v1.0")
     );
     expect(consoleLogSpy).toHaveBeenCalledWith(
       expect.stringContaining("PR: https://github.com/owner/repo/pull/123")
@@ -237,7 +237,7 @@ describe("specApproveCommand", () => {
     vi.mocked(buildSpecApprovalPrBody).mockReturnValue("PR Body");
 
     const approvalResult: ApprovalResult = {
-      branchName: "reqord/spec-000001-approve-v1.0.0",
+      branchName: "reqord/spec-000001-approve-v1.0",
       prNumber: 0,
       prUrl: "",
     };
@@ -263,7 +263,7 @@ describe("specApproveCommand", () => {
   });
 
   it("ApprovalTargetが正しいtype/filesを持つ", async () => {
-    const specification = makeSpecification({ id: "spec-000042", version: "2.1.0" });
+    const specification = makeSpecification({ id: "spec-000042", version: "2.1" });
     const requirement = makeRequirement({ id: "req-000010", title: "Feature X" });
 
     vi.mocked(checkSpecApprovalPrerequisites).mockResolvedValue({
@@ -282,7 +282,7 @@ describe("specApproveCommand", () => {
     vi.mocked(buildSpecApprovalPrBody).mockReturnValue("body");
 
     const approvalResult: ApprovalResult = {
-      branchName: "reqord/spec-000042-approve-v2.1.0",
+      branchName: "reqord/spec-000042-approve-v2.1",
       prNumber: 99,
       prUrl: "https://github.com/owner/repo/pull/99",
     };
@@ -296,7 +296,7 @@ describe("specApproveCommand", () => {
     expect(callArgs[1]).toEqual({
       type: "specification",
       id: "spec-000042",
-      version: "2.1.0",
+      version: "2.1",
       status: "draft",
       title: "Specification spec-000042 (Feature X)",
       files: [
@@ -338,7 +338,7 @@ describe("specApproveCommand", () => {
     vi.mocked(buildSpecApprovalPrBody).mockReturnValue("body");
 
     const approvalResult: ApprovalResult = {
-      branchName: "reqord/spec-000001-approve-v1.0.0",
+      branchName: "reqord/spec-000001-approve-v1.0",
       prNumber: 99,
       prUrl: "https://github.com/owner/repo/pull/99",
     };
@@ -388,7 +388,7 @@ describe("specApproveCommand", () => {
     vi.mocked(buildSpecApprovalPrBody).mockReturnValue("body");
 
     const approvalResult: ApprovalResult = {
-      branchName: "reqord/spec-000001-approve-v1.0.0",
+      branchName: "reqord/spec-000001-approve-v1.0",
       prNumber: 99,
       prUrl: "https://github.com/owner/repo/pull/99",
     };

@@ -40,7 +40,7 @@ export const specApproveCommand = new Command("approve")
       const { specification, design } = await showSpecification(cwd, id);
       const { requirement } = await showRequirement(cwd, specification.requirementId);
 
-      // v2.0.0: Flag warning before approval
+      // Flag warning before approval
       if (specification.flags.length > 0) {
         console.log(
           chalk.yellow(

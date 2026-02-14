@@ -1,12 +1,12 @@
 id: req-000013
-version: 1.1.0
+version: '1.0'
 title: Specification CRUD
 status: implemented
 priority: high
 createdAt: 2026-02-07T12:00:00Z
 updatedAt: 2026-02-09T11:57:46Z
 versionHistory:
-  - version: 1.0.0
+  - version: '1.0'
     status: implemented
     gitCommit: legacy
     changedAt: 2026-02-07T12:00:00Z

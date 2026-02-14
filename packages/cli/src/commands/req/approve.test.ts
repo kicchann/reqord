@@ -32,7 +32,7 @@ import { requirementHandler } from "../../services/requirement-approval-handler.
 function makeRequirement(overrides: Partial<Requirement> = {}): Requirement {
   return {
     id: "req-000001",
-    version: "1.0.0",
+    version: "1.0",
     title: "Test Requirement",
     status: "draft",
     priority: "medium",
@@ -68,7 +68,7 @@ describe("approveCommand", () => {
     });
 
     const approvalResult: ApprovalResult = {
-      branchName: "reqord/req-000001-approve-v1.0.0",
+      branchName: "reqord/req-000001-approve-v1.0",
       prNumber: 42,
       prUrl: "https://github.com/owner/repo/pull/42",
     };
@@ -87,7 +87,7 @@ describe("approveCommand", () => {
       {
         type: "requirement",
         id: "req-000001",
-        version: "1.0.0",
+        version: "1.0",
         status: "draft",
         title: "Test Requirement",
         files: [".reqord/requirements/req-000001.yaml"],
@@ -101,7 +101,7 @@ describe("approveCommand", () => {
       expect.stringContaining("Approval PR created for req-000001")
     );
     expect(consoleLogSpy).toHaveBeenCalledWith(
-      expect.stringContaining("Branch: reqord/req-000001-approve-v1.0.0")
+      expect.stringContaining("Branch: reqord/req-000001-approve-v1.0")
     );
     expect(consoleLogSpy).toHaveBeenCalledWith(
       expect.stringContaining("PR: https://github.com/owner/repo/pull/42")
@@ -138,7 +138,7 @@ describe("approveCommand", () => {
   it("ApprovalTarget構築", async () => {
     const requirement = makeRequirement({
       id: "req-000042",
-      version: "2.1.0",
+      version: "2.1",
       title: "Another Requirement",
       status: "draft",
     });
@@ -148,7 +148,7 @@ describe("approveCommand", () => {
     });
 
     const approvalResult: ApprovalResult = {
-      branchName: "reqord/req-000042-approve-v2.1.0",
+      branchName: "reqord/req-000042-approve-v2.1",
       prNumber: 100,
       prUrl: "https://github.com/owner/repo/pull/100",
     };
@@ -164,7 +164,7 @@ describe("approveCommand", () => {
     expect(callArgs[1]).toEqual({
       type: "requirement",
       id: "req-000042",
-      version: "2.1.0",
+      version: "2.1",
       status: "draft",
       title: "Another Requirement",
       files: [".reqord/requirements/req-000042.yaml"],
@@ -184,7 +184,7 @@ describe("approveCommand", () => {
     });
 
     const approvalResult: ApprovalResult = {
-      branchName: "reqord/req-000001-approve-v1.0.0",
+      branchName: "reqord/req-000001-approve-v1.0",
       prNumber: 0,
       prUrl: "",
     };
@@ -228,7 +228,7 @@ describe("approveCommand", () => {
     });
 
     const approvalResult: ApprovalResult = {
-      branchName: "reqord/req-000001-approve-v1.0.0",
+      branchName: "reqord/req-000001-approve-v1.0",
       prNumber: 42,
       prUrl: "https://github.com/owner/repo/pull/42",
     };
@@ -266,7 +266,7 @@ describe("approveCommand", () => {
     });
 
     const approvalResult: ApprovalResult = {
-      branchName: "reqord/req-000001-approve-v1.0.0",
+      branchName: "reqord/req-000001-approve-v1.0",
       prNumber: 42,
       prUrl: "https://github.com/owner/repo/pull/42",
     };

@@ -15,7 +15,7 @@ function makeSpecification(overrides: Partial<Specification> = {}): Specificatio
   return {
     id: "spec-000001",
     requirementId: "req-000001",
-    version: "1.0.0",
+    version: "1.0",
     status: "draft",
     createdAt: "2026-01-01T00:00:00Z",
     updatedAt: "2026-01-01T00:00:00Z",
@@ -46,14 +46,14 @@ describe("spec history command", () => {
     const spec = makeSpecification({
       versionHistory: [
         {
-          version: "1.0.0",
+          version: "1.0",
           status: "draft",
           gitCommit: "abc123",
           changedAt: "2026-01-01T00:00:00Z",
           summary: "Initial version",
         },
         {
-          version: "2.0.0",
+          version: "2.0",
           status: "approved",
           gitCommit: "def456",
           changedAt: "2026-01-02T00:00:00Z",
@@ -89,7 +89,7 @@ describe("spec history command", () => {
   it("--jsonオプションでJSON出力", async () => {
     const versionHistory = [
       {
-        version: "1.0.0",
+        version: "1.0",
         status: "draft" as const,
         gitCommit: "abc123",
         changedAt: "2026-01-01T00:00:00Z",
@@ -133,7 +133,7 @@ describe("spec history command", () => {
     const spec = makeSpecification({
       versionHistory: [
         {
-          version: "1.0.0",
+          version: "1.0",
           status: "draft",
           gitCommit: "abc123",
           changedAt: "2026-01-01T00:00:00Z",
@@ -155,21 +155,21 @@ describe("spec history command", () => {
     const spec = makeSpecification({
       versionHistory: [
         {
-          version: "1.0.0",
+          version: "1.0",
           status: "draft" as const,
           gitCommit: "abc123",
           changedAt: "2026-01-01T00:00:00Z",
           summary: "Initial version",
         },
         {
-          version: "2.0.0",
+          version: "2.0",
           status: "approved" as const,
           gitCommit: "def456",
           changedAt: "2026-01-02T00:00:00Z",
           summary: "Approved",
         },
         {
-          version: "2.0.0",
+          version: "2.0",
           status: "implemented" as const,
           gitCommit: "ghi789",
           changedAt: "2026-01-03T00:00:00Z",

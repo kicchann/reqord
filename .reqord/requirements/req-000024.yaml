@@ -1,17 +1,17 @@
 id: req-000024
-version: 3.0.0
+version: '3.0'
 title: Web UIからのCLIジョブ実行 (Agent API)
 status: approved
 priority: high
 createdAt: 2026-02-10T12:00:00Z
 updatedAt: 2026-02-11T08:05:05.129Z
 versionHistory:
-  - version: 2.0.0
+  - version: '2.0'
     status: approved
     gitCommit: 4a1fcac
     changedAt: 2026-02-11T08:05:04.942Z
     summary: Status changed from draft to pending_approval
-  - version: 3.0.0
+  - version: '3.0'
     status: approved
     gitCommit: 4a1fcac
     changedAt: 2026-02-11T08:05:05.130Z

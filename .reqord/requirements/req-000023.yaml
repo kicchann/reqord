@@ -1,22 +1,22 @@
 id: req-000023
-version: 3.0.0
+version: '3.0'
 title: Feedback管理 (GitHub Issue連携)
 status: implemented
 priority: medium
 createdAt: 2026-02-09T10:00:00Z
 updatedAt: 2026-02-11T14:30:00Z
 versionHistory:
-  - version: 2.0.0
+  - version: '2.0'
     status: draft
     gitCommit: f855fae
     changedAt: 2026-02-11T12:00:00Z
     summary: 'flagライフサイクル管理を追加: flagは一時的マーカーとして対応完了後に削除、index.yamlがトレーサビリティのSOT'
-  - version: 3.0.0
+  - version: '3.0'
     status: approved
     gitCommit: 285558a
     changedAt: 2026-02-11T14:03:07.124Z
     summary: Status changed from draft to pending_approval
-  - version: 3.0.0
+  - version: '3.0'
     status: approved
     gitCommit: 97b3a7c
     changedAt: 2026-02-11T14:30:00Z
@@ -29,22 +29,14 @@ successCriteria:
   - reqord feedback sync --from-local で index.yaml の紐付け情報を元にGitHub Issueのラベルが同期される
   - reqord feedback list でfeedbackラベル付きGitHub Issueの一覧が表示される（index.yamlから取得）
   - reqord feedback show <issue-number> でFeedbackの詳細（種別・関連アーティファクト・深刻度）が表示される（GitHub + index.yamlのマージデータ）
-  - >-
-    reqord feedback link <issue-number> --req <id> で既存Requirementに紐付けられ、feedback-reviewフラグが追加され、index.yamlとGitHub
-    Issueラベルが更新される
+  - reqord feedback link <issue-number> --req <id> で既存Requirementに紐付けられ、feedback-reviewフラグが追加され、index.yamlとGitHub Issueラベルが更新される
   - reqord feedback link <issue-number> --created-req でFeedbackから新Requirementが自動採番で作成され、index.yamlとGitHub Issueラベルが更新される
-  - >-
-    reqord feedback link <issue-number> --spec <id> でSpecificationに紐付けられ、index.yamlとGitHub Issueラベルが更新される（Requirement
-    flagなし）
+  - reqord feedback link <issue-number> --spec <id> でSpecificationに紐付けられ、index.yamlとGitHub Issueラベルが更新される（Requirement flagなし）
   - reqord feedback close <issue-number> で影響範囲確定後にFeedbackがクローズされ、index.yamlとGitHub Issueが更新される
   - '@reqord/sharedパッケージにFeedbackIndexのZodスキーマが定義され、index.yamlバリデーションが実行される'
   - reqord feedback link実行時に--type, --severityオプションでFeedbackのメタデータを設定できる
-  - >-
-    reqord feedback resolve <req-id> --issue <number> でRequirement/Specificationからflagが削除され、
-    index.yamlのstatusがresolvedに更新される
-  - >-
-    reqord feedback sync 実行時、既存エントリの手動設定メタデータ（type, severity, linkedTo）は保持され、 GitHub Issueから取得可能な情報（status,
-    syncedAt）のみ更新される（マージ更新）
+  - reqord feedback resolve <req-id> --issue <number> でRequirement/Specificationからflagが削除され、 index.yamlのstatusがresolvedに更新される
+  - reqord feedback sync 実行時、既存エントリの手動設定メタデータ（type, severity, linkedTo）は保持され、 GitHub Issueから取得可能な情報（status, syncedAt）のみ更新される（マージ更新）
   - flags配列が空でないRequirement/Specificationに対して承認操作を行う場合、警告が表示される
 format:
   type: user-story

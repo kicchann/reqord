@@ -1,17 +1,17 @@
 id: req-000027
-version: 3.0.0
+version: '3.0'
 title: データ形式のYAML移行
 status: implemented
 priority: medium
 createdAt: 2026-02-11T07:25:06.280Z
 updatedAt: 2026-02-11T08:05:06.278Z
 versionHistory:
-  - version: 2.0.0
+  - version: '2.0'
     status: approved
     gitCommit: 4a1fcac
     changedAt: 2026-02-11T08:05:06.094Z
     summary: Status changed from draft to pending_approval
-  - version: 3.0.0
+  - version: '3.0'
     status: approved
     gitCommit: 4a1fcac
     changedAt: 2026-02-11T08:05:06.279Z
@@ -24,9 +24,7 @@ files:
 successCriteria:
   - .reqord/requirements/req-NNNNNN.yaml 形式でRequirementを保存・読み込みできる
   - .reqord/specifications/spec-NNNNNN.yaml 形式でSpecificationを保存・読み込みできる
-  - >-
-    .reqord/context/ 配下の product.json, technical.json, structure.json が product.yaml, technical.yaml, structure.yaml
-    に変換され、読み込み・書き込みができる
+  - .reqord/context/ 配下の product.json, technical.json, structure.json が product.yaml, technical.yaml, structure.yaml に変換され、読み込み・書き込みができる
   - 既存のJSONファイルをYAMLに一括変換する reqord migrate-to-yaml コマンドが実装される
   - Zod スキーマは変更せず、JSON-YAML変換レイヤーでフォーマット変換が行われる
   - CLI・Web UI の既存機能がすべてYAML形式で正常動作する（後方互換性維持は不要）

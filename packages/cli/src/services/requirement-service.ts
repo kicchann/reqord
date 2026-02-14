@@ -32,7 +32,7 @@ export async function createRequirement(
 
   const requirement: Requirement = {
     id,
-    version: "1.0.0",
+    version: "1.0",
     title: options.title,
     status: "draft",
     priority,
@@ -107,7 +107,7 @@ export interface UpdateOptions {
   priority?: Priority;
   patchData?: Record<string, unknown>;
   descriptionContent?: string;
-  versionBump?: "major" | "minor" | "patch";
+  versionBump?: "major" | "patch";
 }
 
 export interface UpdateResult {
@@ -184,16 +184,20 @@ export async function updateRequirement(
   }
 
   // 7. Determine version
-  let nextVersion = versionService.determineNextVersion(before, merged as Requirement);
+  let nextVersion = before.version; // Default: version preserved
 
-  // Ensure at least patch bump for description-only changes (outside draft)
-  if (hasDescriptionChange && nextVersion === before.version && before.status !== "draft") {
-    const { major, minor, patch } = versionService.parseVersion(before.version);
-    nextVersion = versionService.formatVersion(major, minor, patch + 1);
-  }
-
-  // Override with explicit version bump if specified
-  if (options.versionBump) {
+  // approved/implemented → draft transition triggers version increment
+  if (
+    (before.status === "approved" || before.status === "implemented") &&
+    merged.status === "draft"
+  ) {
+    if (options.versionBump === "patch") {
+      nextVersion = versionService.applyVersionBump(before.version, "patch");
+    } else {
+      nextVersion = versionService.applyVersionBump(before.version, "major");
+    }
+  } else if (options.versionBump) {
+    // Explicit version bump outside draft transition
     nextVersion = versionService.applyVersionBump(before.version, options.versionBump);
   }
 

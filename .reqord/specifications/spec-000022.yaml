@@ -1,6 +1,6 @@
 id: spec-000022
 requirementId: req-000022
-version: 1.0.0
+version: '1.0'
 status: implemented
 createdAt: 2026-02-08T14:08:08.410Z
 updatedAt: 2026-02-12T15:13:08.865Z

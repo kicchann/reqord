@@ -11,16 +11,14 @@ import { AppError, ErrorCode } from "../../utils/errors.js";
 export const draftCommand = new Command("draft")
   .description("Revert a requirement to draft status")
   .argument("<id>", "Requirement ID (e.g. req-000001)")
-  .option("--major", "Force major version increment (X.0.0)")
-  .option("--minor", "Force minor version increment (0.X.0)")
-  .option("--patch", "Force patch version increment (0.0.X)")
+  .option("--major", "Force major version increment (X.0)")
+  .option("--patch", "Force minor version increment (.Y)")
   .option("--json", "Output result as JSON")
   .action(
     async (
       id: string,
       options: {
         major?: boolean;
-        minor?: boolean;
         patch?: boolean;
         json?: boolean;
       },
@@ -29,10 +27,10 @@ export const draftCommand = new Command("draft")
 
       try {
         // Check for mutually exclusive version bump options
-        const versionBumpCount = [options.major, options.minor, options.patch].filter(Boolean).length;
+        const versionBumpCount = [options.major, options.patch].filter(Boolean).length;
         if (versionBumpCount > 1) {
           throw new AppError(
-            "Only one of --major, --minor, or --patch can be specified.",
+            "Only one of --major or --patch can be specified.",
             ErrorCode.INVALID_ARGUMENT,
           );
         }
@@ -64,7 +62,6 @@ export const draftCommand = new Command("draft")
 
         // Version bump override
         if (options.major) updateOpts.versionBump = "major";
-        if (options.minor) updateOpts.versionBump = "minor";
         if (options.patch) updateOpts.versionBump = "patch";
 
         const { before, after } = await updateRequirement(cwd, id, updateOpts);

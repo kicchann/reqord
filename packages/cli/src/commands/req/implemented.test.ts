@@ -22,7 +22,7 @@ const mockListSpecifications = vi.mocked(listSpecifications);
 function makeRequirement(overrides: Partial<Requirement> = {}): Requirement {
   return {
     id: "req-000001",
-    version: "2.0.0",
+    version: "2.0",
     title: "Test Requirement",
     status: "approved",
     priority: "medium",
@@ -45,7 +45,7 @@ function makeSpecification(overrides: Partial<Specification> = {}): Specificatio
   return {
     id: "spec-000001",
     requirementId: "req-000001",
-    version: "1.0.0",
+    version: "1.0",
     status: "approved",
     createdAt: "2026-01-01T00:00:00Z",
     updatedAt: "2026-01-01T00:00:00Z",
@@ -73,8 +73,8 @@ describe("req implemented command", () => {
   });
 
   it("approved → implementedへの遷移", async () => {
-    const before = makeRequirement({ status: "approved", version: "2.0.0" });
-    const after = makeRequirement({ status: "implemented", version: "2.0.0" });
+    const before = makeRequirement({ status: "approved", version: "2.0" });
+    const after = makeRequirement({ status: "implemented", version: "2.0" });
 
     mockShowRequirement.mockResolvedValue({ requirement: before, description: null });
     mockListSpecifications.mockResolvedValue([]);
@@ -96,8 +96,8 @@ describe("req implemented command", () => {
   });
 
   it("バージョンが据え置かれる（ステータスのみ変更）", async () => {
-    const before = makeRequirement({ status: "approved", version: "2.0.0" });
-    const after = makeRequirement({ status: "implemented", version: "2.0.0" });
+    const before = makeRequirement({ status: "approved", version: "2.0" });
+    const after = makeRequirement({ status: "implemented", version: "2.0" });
 
     mockShowRequirement.mockResolvedValue({ requirement: before, description: null });
     mockListSpecifications.mockResolvedValue([]);
@@ -115,8 +115,8 @@ describe("req implemented command", () => {
     const before = makeRequirement({ status: "approved" });
     const after = makeRequirement({ status: "implemented" });
     const specs = [
-      makeSpecification({ id: "spec-000001", status: "approved", version: "1.0.0" }),
-      makeSpecification({ id: "spec-000002", status: "implemented", version: "1.1.0" }),
+      makeSpecification({ id: "spec-000001", status: "approved", version: "1.0" }),
+      makeSpecification({ id: "spec-000002", status: "implemented", version: "1.1" }),
     ];
 
     mockShowRequirement.mockResolvedValue({ requirement: before, description: null });
@@ -128,8 +128,8 @@ describe("req implemented command", () => {
     expect(consoleLogSpy).toHaveBeenCalledWith(
       expect.stringContaining("Related specifications (2)"),
     );
-    expect(consoleLogSpy).toHaveBeenCalledWith("  - spec-000001: approved (v1.0.0)");
-    expect(consoleLogSpy).toHaveBeenCalledWith("  - spec-000002: implemented (v1.1.0)");
+    expect(consoleLogSpy).toHaveBeenCalledWith("  - spec-000001: approved (v1.0)");
+    expect(consoleLogSpy).toHaveBeenCalledWith("  - spec-000002: implemented (v1.1)");
   });
 
   it("関連Specificationがない場合", async () => {
@@ -150,15 +150,15 @@ describe("req implemented command", () => {
   it("versionHistoryエントリが記録される", async () => {
     const before = makeRequirement({
       status: "approved",
-      version: "2.0.0",
+      version: "2.0",
       versionHistory: [],
     });
     const after = makeRequirement({
       status: "implemented",
-      version: "2.0.0",
+      version: "2.0",
       versionHistory: [
         {
-          version: "2.0.0",
+          version: "2.0",
           status: "implemented",
           gitCommit: "abc123",
           changedAt: "2026-01-01T00:00:00Z",
@@ -179,8 +179,8 @@ describe("req implemented command", () => {
   });
 
   it("--jsonオプションでJSON出力", async () => {
-    const before = makeRequirement({ status: "approved", version: "2.0.0" });
-    const after = makeRequirement({ status: "implemented", version: "2.0.0" });
+    const before = makeRequirement({ status: "approved", version: "2.0" });
+    const after = makeRequirement({ status: "implemented", version: "2.0" });
 
     mockShowRequirement.mockResolvedValue({ requirement: before, description: null });
     mockListSpecifications.mockResolvedValue([]);
