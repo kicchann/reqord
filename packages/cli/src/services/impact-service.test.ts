@@ -9,10 +9,15 @@ vi.mock("../repositories/specification.js", () => ({
   findAll: vi.fn(),
   findById: vi.fn(),
 }));
+vi.mock("../repositories/github.js", () => ({
+  createIssueComment: vi.fn(),
+  createPrComment: vi.fn(),
+}));
 
 import * as reqRepo from "../repositories/requirement.js";
 import * as specRepo from "../repositories/specification.js";
-import { analyzeImpact } from "./impact-service.js";
+import * as github from "../repositories/github.js";
+import { analyzeImpact, notifyImpact, type NotifyResult } from "./impact-service.js";
 
 function makeRequirement(overrides: Partial<Requirement> = {}): Requirement {
   return {
@@ -346,5 +351,124 @@ describe("analyzeImpact", () => {
 
       await expect(analyzeImpact("/cwd", "spec-999999")).rejects.toThrow();
     });
+  });
+});
+
+describe("notifyImpact", () => {
+  function setupMocksForNotify(options?: {
+    issueStatus?: string;
+    customBlocks?: string[];
+  }) {
+    const sourceReq = makeRequirement({
+      id: "req-000001",
+      title: "ユーザー認証機能",
+      dependencies: {
+        blockedBy: [],
+        blocks: options?.customBlocks ?? ["req-000002"],
+        relatedTo: [],
+      },
+    });
+    const targetReq = makeRequirement({
+      id: "req-000002",
+      title: "Target Requirement",
+      dependencies: { blockedBy: ["req-000001"], blocks: [], relatedTo: [] },
+    });
+    const spec = makeSpecification({
+      id: "spec-000001",
+      requirementId: "req-000002",
+      status: "approved",
+      implementation: {
+        issues: [
+          {
+            number: 42,
+            title: "Implement feature",
+            url: "https://github.com/test/42",
+            priority: "P1",
+            status: options?.issueStatus ?? "open",
+          },
+        ],
+        totalEstimatedHours: 8,
+        createdAt: "2024-01-01T00:00:00Z",
+      },
+    });
+
+    vi.mocked(reqRepo.findAll).mockResolvedValue([sourceReq, targetReq]);
+    vi.mocked(reqRepo.findById).mockResolvedValue(sourceReq);
+    vi.mocked(specRepo.findAll).mockResolvedValue([spec]);
+    vi.mocked(github.createIssueComment).mockResolvedValue(undefined);
+
+    return { sourceReq, targetReq, spec };
+  }
+
+  it("通知メッセージテンプレートの変数置換", async () => {
+    setupMocksForNotify();
+
+    await notifyImpact("/cwd", "req-000001");
+
+    expect(github.createIssueComment).toHaveBeenCalledOnce();
+    const body = vi.mocked(github.createIssueComment).mock.calls[0][1];
+    expect(body).toContain("req-000001");
+    expect(body).toContain("ユーザー認証機能");
+    expect(body).toContain("blocks");
+    expect(body).toContain("req-000001");
+    expect(body).toContain("req-000002");
+  });
+
+  it("dryRun=true で GitHub API が呼ばれないこと", async () => {
+    setupMocksForNotify();
+
+    const result = await notifyImpact("/cwd", "req-000001", { dryRun: true });
+
+    expect(github.createIssueComment).not.toHaveBeenCalled();
+    expect(result.dryRun).toBe(true);
+    expect(result.notified).toHaveLength(1);
+    expect(result.notified[0]).toEqual({
+      type: "issue",
+      number: 42,
+      title: "Implement feature",
+    });
+  });
+
+  it("open Issue のみ通知対象になること（closed はスキップ）", async () => {
+    setupMocksForNotify({ issueStatus: "closed" });
+
+    const result = await notifyImpact("/cwd", "req-000001");
+
+    expect(github.createIssueComment).not.toHaveBeenCalled();
+    expect(result.notified).toHaveLength(0);
+    expect(result.skipped).toHaveLength(1);
+    expect(result.skipped[0]).toEqual({
+      type: "issue",
+      number: 42,
+      reason: "closed",
+    });
+  });
+
+  it("カスタムメッセージが通知に含まれること", async () => {
+    setupMocksForNotify();
+
+    await notifyImpact("/cwd", "req-000001", {
+      message: "緊急の変更です",
+    });
+
+    const body = vi.mocked(github.createIssueComment).mock.calls[0][1];
+    expect(body).toContain("緊急の変更です");
+  });
+
+  it("影響先0件で空の NotifyResult が返ること", async () => {
+    const sourceReq = makeRequirement({
+      id: "req-000001",
+      title: "Isolated Requirement",
+    });
+    vi.mocked(reqRepo.findAll).mockResolvedValue([sourceReq]);
+    vi.mocked(reqRepo.findById).mockResolvedValue(sourceReq);
+    vi.mocked(specRepo.findAll).mockResolvedValue([]);
+
+    const result = await notifyImpact("/cwd", "req-000001");
+
+    expect(result.notified).toEqual([]);
+    expect(result.skipped).toEqual([]);
+    expect(result.dryRun).toBe(false);
+    expect(github.createIssueComment).not.toHaveBeenCalled();
   });
 });
