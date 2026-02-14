@@ -8,10 +8,4 @@ versionHistory: []
 files:
   design: specifications/spec-000027/design.md
   supplementary: []
-flags:
-  - type: feedback-review
-    reason: 'Feedback from issue #248'
-    createdAt: 2026-02-13T15:49:21.073Z
-    relatedIssues:
-      - 248
-    severity: medium
+flags: []
