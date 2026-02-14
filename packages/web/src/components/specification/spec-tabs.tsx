@@ -25,20 +25,15 @@ const TABS = [
   { id: "history", label: "History" },
 ];
 
+const TAB_IDS = new Set(TABS.map((tab) => tab.id));
+const DEFAULT_TAB = "design";
+
 function getInitialTab(): string {
-  if (typeof window !== "undefined") {
-    const hash = window.location.hash.slice(1);
-    if (
-      hash === "design" ||
-      hash === "research" ||
-      hash === "coverage" ||
-      hash === "issues" ||
-      hash === "history"
-    ) {
-      return hash;
-    }
+  if (typeof window === "undefined") {
+    return DEFAULT_TAB;
   }
-  return "design";
+  const hash = window.location.hash.slice(1);
+  return TAB_IDS.has(hash) ? hash : DEFAULT_TAB;
 }
 
 export function SpecTabs({
