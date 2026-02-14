@@ -26,7 +26,7 @@ successCriteria:
   - reqord impact notify <id> で影響先に通知（Issue/PRコメント）が送信される
   - 依存グラフに基づく波及分析が正確に動作し、循環依存が検出される
   - analyze コマンドで --json オプションが利用可能で、構造化された影響分析結果が出力される
-  - GitHub APIのレート制限を考慮し、通知は100件/時以下のバッチ処理で実行される
+  - 通知スパム防止のため、通知は100件/時以下のバッチ処理で実行される
 format:
   type: user-story
   userStory:
