@@ -22,11 +22,10 @@ files:
   description: requirements/req-000012/description.md
   supplementary: []
 successCriteria:
-  - reqord impact analyze <id> で影響を受けるSpecification・Issue・Requirementが一覧表示される
+  - reqord impact analyze <id> で、指定したRequirementまたはSpecificationに関連するSpecification・Issue・Requirementが一覧表示される
   - reqord impact notify <id> で影響先に通知（Issue/PRコメント）が送信される
-  - Requirement更新時にimpactフィールドが自動計算され、JSONファイルに保存される
   - 依存グラフに基づく波及分析が正確に動作し、循環依存が検出される
-  - analyze/notify コマンドで --json オプションが利用可能で、構造化された影響分析結果が出力される
+  - analyze コマンドで --json オプションが利用可能で、構造化された影響分析結果が出力される
   - GitHub APIのレート制限を考慮し、通知は100件/時以下のバッチ処理で実行される
 format:
   type: user-story
