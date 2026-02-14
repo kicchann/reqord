@@ -1,9 +1,9 @@
 id: spec-000005
 requirementId: req-000005
 version: '3.0'
-status: draft
+status: approved
 createdAt: 2026-02-08T14:08:06.961Z
-updatedAt: 2026-02-14T12:00:00.000Z
+updatedAt: 2026-02-14T13:01:02.544Z
 versionHistory:
   - version: 1.0.0
     status: implemented
@@ -16,14 +16,20 @@ versionHistory:
     changedAt: 2026-02-14T00:00:00.000Z
     summary: 'Simplified versioning: semantic versioning → integer-based (X.Y) format (Issue #247)'
   - version: '3.0'
-    status: draft
-    gitCommit: pending
-    changedAt: 2026-02-14T12:00:00.000Z
-    summary: 'Expand to unified Requirement/Specification versioning, add reqord version command design (Issue #263)'
+    status: approved
+    gitCommit: d990b37
+    changedAt: 2026-02-14T13:01:02.544Z
+    summary: 'Unified Requirement/Specification versioning design. Added reqord version command architecture, separated versioning from status transitions. Status: draft → approved (Issue #263)'
 files:
   design: specifications/spec-000005/design.md
   supplementary: []
 flags: []
+currentApproval:
+  version: '3.0'
+  phase: specification
+  prNumber: 274
+  prUrl: https://github.com/kicchann/reqord/pull/274
+  approvedBy: []
 implementation:
   issues:
     - number: 255
