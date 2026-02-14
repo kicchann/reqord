@@ -42,4 +42,4 @@ jobs:
           track_progress: true
           plugin_marketplaces: "https://github.com/anthropics/claude-code.git"
           plugins: "code-review@claude-code-plugins"
-          prompt: ${{ github.event_name == 'pull_request' && format('/code-review:code-review {0}/pull/{1}', github.repository, github.event.pull_request.number) || '' }}
+          prompt: ${{ github.event_name == 'pull_request' && format('/code-review:code-review {0}/pull/{1} review結果は日本語でお願いします', github.repository, github.event.pull_request.number) || '' }}
