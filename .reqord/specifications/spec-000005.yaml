@@ -16,15 +16,10 @@ versionHistory:
     changedAt: 2026-02-14T00:00:00.000Z
     summary: 'Simplified versioning: semantic versioning → integer-based (X.Y) format (Issue #247)'
   - version: '3.0'
-    status: draft
-    gitCommit: pending
-    changedAt: 2026-02-14T12:00:00.000Z
-    summary: 'Expand to unified Requirement/Specification versioning, add reqord version command design (Issue #263)'
-  - version: '3.0'
     status: approved
-    gitCommit: f629e6a
+    gitCommit: d990b37
     changedAt: 2026-02-14T13:01:02.544Z
-    summary: 'status: draft → approved'
+    summary: 'Unified Requirement/Specification versioning design. Added reqord version command architecture, separated versioning from status transitions. Status: draft → approved (Issue #263)'
 files:
   design: specifications/spec-000005/design.md
   supplementary: []
