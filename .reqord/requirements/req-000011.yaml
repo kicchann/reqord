@@ -51,7 +51,6 @@ format:
 dependencies:
   blockedBy:
     - req-000002
-    - req-000005
   blocks:
     - req-000012
     - req-000015
@@ -71,3 +70,9 @@ flags:
     relatedIssues:
       - 263
     severity: medium
+  - type: feedback-review
+    reason: 'Feedback from issue #279'
+    createdAt: 2026-02-14T21:47:28.602Z
+    relatedIssues:
+      - 279
+    severity: low

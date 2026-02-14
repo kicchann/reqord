@@ -1,10 +1,10 @@
 id: req-000005
 version: '4.0'
 title: Requirement/Specificationバージョン管理
-status: approved
+status: implemented
 priority: medium
 createdAt: 2026-02-07T10:00:00Z
-updatedAt: 2026-02-14T12:47:18.431Z
+updatedAt: 2026-02-14T21:22:43.333Z
 versionHistory:
   - version: 1.0.0
     status: implemented
@@ -25,7 +25,9 @@ versionHistory:
     status: draft
     gitCommit: pending
     changedAt: 2026-02-14T12:00:00.000Z
-    summary: 'Major design change: Add reqord version command, fully separate versioning from status transitions. Removes --major/--patch from draft command. Backward incompatible with v3.0 (Issue #263)'
+    summary: >-
+      Major design change: Add reqord version command, fully separate versioning from status transitions. Removes
+      --major/--patch from draft command. Backward incompatible with v3.0 (Issue #263)
 files:
   description: requirements/req-000005/description.md
   supplementary: []
@@ -49,10 +51,10 @@ format:
 dependencies:
   blockedBy:
     - req-000002
-  blocks:
-    - req-000011
+  blocks: []
   relatedTo:
     - req-000006
+    - req-000011
 estimatedComplexity: medium
 estimatedHours: 12
 currentApproval:
