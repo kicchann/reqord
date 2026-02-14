@@ -1,9 +1,9 @@
 id: spec-000005
 requirementId: req-000005
 version: '3.0'
-status: approved
+status: implemented
 createdAt: 2026-02-08T14:08:06.961Z
-updatedAt: 2026-02-14T13:01:02.544Z
+updatedAt: 2026-02-14T21:22:47.041Z
 versionHistory:
   - version: 1.0.0
     status: implemented
@@ -19,7 +19,14 @@ versionHistory:
     status: approved
     gitCommit: d990b37
     changedAt: 2026-02-14T13:01:02.544Z
-    summary: 'Unified Requirement/Specification versioning design. Added reqord version command architecture, separated versioning from status transitions. Status: draft → approved (Issue #263)'
+    summary: >-
+      Unified Requirement/Specification versioning design. Added reqord version command architecture, separated
+      versioning from status transitions. Status: draft → approved (Issue #263)
+  - version: '3.0'
+    status: implemented
+    gitCommit: bfc2d7a
+    changedAt: 2026-02-14T21:22:47.041Z
+    summary: 'status: approved → implemented'
 files:
   design: specifications/spec-000005/design.md
   supplementary: []
