@@ -1,10 +1,10 @@
 id: req-000005
-version: '3.0'
+version: '4.0'
 title: Requirement/Specificationバージョン管理
 status: draft
 priority: medium
 createdAt: 2026-02-07T10:00:00Z
-updatedAt: 2026-02-14T00:00:00.000Z
+updatedAt: 2026-02-14T12:00:00.000Z
 versionHistory:
   - version: 1.0.0
     status: implemented
@@ -21,11 +21,18 @@ versionHistory:
     gitCommit: pending
     changedAt: 2026-02-14T00:00:00.000Z
     summary: 'Simplified versioning: semantic versioning → integer-based (X.Y) format (Issue #247)'
+  - version: '4.0'
+    status: draft
+    gitCommit: pending
+    changedAt: 2026-02-14T12:00:00.000Z
+    summary: 'Add reqord version command specification, separate versioning from status transitions (Issue #263)'
 files:
   description: requirements/req-000005/description.md
   supplementary: []
 successCriteria:
-  - approved/implementedからdraftに戻す際にバージョンがインクリメントされる（req/spec共通）
+  - reqord version <id> --major/--patch でバージョンを明示的にインクリメントできる
+  - 任意のステータス（draft/approved/implemented）でバージョンをインクリメントできる
+  - バージョン変更とステータス遷移が完全に分離されている
   - ステータス変更のみではバージョンをインクリメントしない
   - X.Y形式のバージョン番号をサポートする（1.0, 2.0, 1.1など）
   - versionHistory にバージョン履歴が記録される
@@ -48,10 +55,4 @@ dependencies:
     - req-000006
 estimatedComplexity: medium
 estimatedHours: 12
-flags:
-  - type: feedback-review
-    reason: 'Feedback from issue #263'
-    createdAt: 2026-02-14T07:46:04.513Z
-    relatedIssues:
-      - 263
-    severity: medium
+flags: []

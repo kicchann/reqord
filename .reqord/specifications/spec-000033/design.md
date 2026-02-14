@@ -1,5 +1,17 @@
 # Specificationバージョン管理 - 技術設計書
 
+> **⚠ DEPRECATED**
+>
+> このSpecificationは **spec-000005** に統合されました。
+>
+> **理由:** `reqord version` コマンドは Requirement と Specification の両方に対応する共通コマンドであり、別々のspecificationを維持する必要がありません。バージョン管理の仕組みは両エンティティで同一です。
+>
+> **移行先:** [spec-000005 - Requirement/Specificationバージョン管理](../spec-000005/design.md)
+>
+> **日付:** 2026-02-14
+>
+> **詳細:** Version Serviceは既に共通ロジックを提供しており（`applyVersionBump()`、`parseVersion()`等）、`determineNextVersion()`と`determineNextVersionForSpec()`の実装内容は同じです。spec-000005一つで両方をカバーできるため、重複したドキュメントを維持する必要がありません。
+
 ## 1. 設計概要
 
 仕様（Specification）のライフサイクル管理として、シンプルなX.Y形式のバージョニング（1.0, 2.0, 1.1...）による変更追跡と状態遷移（draft → approved → implemented）を実装する。通常は X.0 形式を使い、typoなど軽微な修正でどうしても必要な時のみ .Y を使用する。バージョンインクリメントは**内容変更時のみ**行い、ステータス遷移ではバージョンを変更しない。仕様更新時にversionHistoryへ自動的に履歴エントリを追加し、`reqord spec history <id>` コマンドで変更履歴を表示する。既存のSpecificationスキーマに定義済みの `version` / `versionHistory` フィールドを活用する。

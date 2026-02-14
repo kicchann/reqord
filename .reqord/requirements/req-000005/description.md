@@ -21,23 +21,23 @@ the system shall NOT increment the version.
 - **X.Y形式** (1.1, 1.2, 1.10...): 軽微な修正（typoなど、どうしても必要な時のみ）
 
 **例:**
-- 1.0 (approved) → 2.0 (draft): `reqord req draft`でdraftに戻す（デフォルト）
-- 1.0 (approved) → 1.1 (draft): `reqord req draft --patch`で軽微な修正
-- 1.0 (approved) → 1.1 (approved): approved状態のまま軽微な修正を適用（draftに戻さない）
-- 1.1 → 1.2: さらに軽微な修正を重ねる場合
-- 1.2 (approved) → 2.0 (draft): `reqord req draft`でdraftに戻す
+- 1.0 → 2.0: `reqord version req-000001 --major`でメジャーバージョンアップ
+- 1.0 → 1.1: `reqord version req-000001 --patch`で軽微な修正
+- 1.1 → 1.2: `reqord version req-000001 --patch`でさらに軽微な修正
+- 1.2 → 2.0: `reqord version req-000001 --major`でメジャーバージョンアップ
 
 **重要**:
 - 基本は `X.0` 形式を使い、`.Y` は例外的にのみ使用すること
-- バージョニングは`reqord req draft`コマンドで、approved/implementedからdraftに戻す際に行う
+- バージョニングは`reqord version`コマンドで、明示的に実行する
+- ステータス遷移（`reqord req draft/approve/implemented`）ではバージョンを変更しない
 
 ### バージョン変更のトリガー
 
 | 操作 | バージョン変更 | 新バージョン例 | 備考 |
 |------|--------------|--------------|------|
-| `reqord req draft`（approved/implemented → draft） | **する（X.0）** | 1.0 (approved) → 2.0 (draft) | デフォルトでメジャーバージョンアップ |
-| `reqord req draft --patch`（軽微な修正の場合） | **する（.Y）** | 1.0 (approved) → 1.1 (draft) | typoなど例外的に使用 |
-| approved/implementedでの軽微な修正 | **する（.Y）** | 1.0 → 1.1 | draftに戻さずマイナーバージョンのみ更新 |
+| `reqord version --major` | **する（X.0）** | 1.0 → 2.0 | 任意のステータスで実行可能 |
+| `reqord version --patch` | **する（.Y）** | 1.0 → 1.1 | 任意のステータスで実行可能 |
+| `reqord req draft` | **しない** | - | ステータス遷移のみ |
 | `reqord req approve`（draft → approved） | **しない** | 1.0 (draft) → 1.0 (approved) | ステータス遷移のみ |
 | `reqord req implemented`（approved → implemented） | **しない** | 1.0 (approved) → 1.0 (implemented) | ステータス遷移のみ |
 | flagの追加・削除 | **しない** | - | メタ情報の変更 |
@@ -55,6 +55,32 @@ draft ──approve──→ approved ──implement──→ implemented
 
 ## コマンド仕様
 
+### reqord version \<id\> [--major | --patch] [--summary \<text\>]
+
+任意のステータスでバージョンを明示的にインクリメントする。
+
+**オプション:**
+- `--major`: X.0形式でインクリメント（1.0 → 2.0）
+- `--patch`: .Y形式でインクリメント（1.0 → 1.1）
+- `--summary <text>`: バージョン履歴に記録する変更概要（省略時は自動生成）
+
+**動作:**
+- バージョン履歴に自動記録
+- ステータスは変更しない
+- RequirementとSpecificationの両方に対応
+
+**使用例:**
+```bash
+# 自動生成されたsummaryでメジャーバージョンアップ
+reqord version req-000001 --major
+
+# カスタムsummaryでメジャーバージョンアップ
+reqord version req-000001 --major --summary "Refactor success criteria for clarity"
+
+# Specificationのパッチバージョンアップ
+reqord version spec-000001 --patch --summary "Fix typo in design document"
+```
+
 ### reqord req history \<id\> / reqord spec history \<id\>
 
 - バージョン履歴をタイムライン表示
@@ -62,48 +88,9 @@ draft ──approve──→ approved ──implement──→ implemented
 
 ### バージョニングのタイミング
 
-- `reqord req draft` コマンドで、approved/implementedからdraftに戻す際にバージョンをインクリメント
-- `reqord req approve` / `reqord req implemented` ではバージョンを変更しない（ステータス遷移のみ）
-- approved/implementedでの軽微な修正はマイナーバージョンのみ更新（draftに戻さない）
-
-### draftコマンドのバージョン指定オプション
-
-```bash
-# デフォルト: メジャーバージョンアップ（X.0）
-reqord req draft req-000001
-# 1.0 (approved) → 2.0 (draft)
-
-# 軽微な修正: マイナーバージョンアップ（.Y）
-reqord req draft req-000001 --patch
-# 1.0 (approved) → 1.1 (draft)
-```
-
-### determineNextVersion の改修方針
-
-新しいバージョニングルールでは、`reqord req draft`コマンド実行時に以下のロジックでバージョンを決定する:
-
-```typescript
-// approved/implemented → draft 遷移時のバージョニング
-
-// オプション指定なし（デフォルト）: メジャーバージョンアップ
-if (!options.patch) {
-  const {major} = parseVersion(currentVersion);
-  return formatVersion(major + 1, 0);  // "1.5" → "2.0"
-}
-
-// --patch 指定: マイナーバージョンアップ
-if (options.patch) {
-  const {major, minor} = parseVersion(currentVersion);
-  return formatVersion(major, minor + 1);  // "1.5" → "1.6"
-}
-```
-
-**オプション:**
-- **指定なし**: デフォルトで`--major`適用（X.0インクリメント）
-- **--patch**: マイナーバージョンインクリメント（.Y）
-- **--major**: 明示的にメジャーバージョンインクリメント（`--major`は省略可能）
-
-**注**: `--minor` オプションは廃止
+- `reqord version` コマンドでのみバージョンをインクリメント
+- `reqord req draft` / `reqord req approve` / `reqord req implemented` ではバージョンを変更しない（ステータス遷移のみ）
+- バージョン変更とステータス遷移を完全に分離
 
 ## 適用対象
 
