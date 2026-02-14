@@ -1,10 +1,10 @@
 id: req-000005
 version: '4.0'
 title: Requirement/Specificationバージョン管理
-status: draft
+status: approved
 priority: medium
 createdAt: 2026-02-07T10:00:00Z
-updatedAt: 2026-02-14T12:00:00.000Z
+updatedAt: 2026-02-14T12:47:18.431Z
 versionHistory:
   - version: 1.0.0
     status: implemented
@@ -56,3 +56,9 @@ dependencies:
 estimatedComplexity: medium
 estimatedHours: 12
 flags: []
+currentApproval:
+  version: '4.0'
+  phase: requirement
+  prNumber: 0
+  prUrl: ''
+  approvedBy: []
