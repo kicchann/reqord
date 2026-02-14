@@ -1,10 +1,10 @@
 id: req-000012
-version: "3.0"
+version: '3.1'
 title: 影響範囲分析
 status: approved
 priority: medium
 createdAt: 2026-02-07T12:00:00Z
-updatedAt: 2026-02-11T08:05:04.024Z
+updatedAt: 2026-02-14T12:17:47.372Z
 versionHistory:
   - version: 2.0.0
     status: approved
@@ -18,6 +18,11 @@ versionHistory:
     summary: Status changed from pending_approval to approved
     approvedAt: 2026-02-11T08:05:04.025Z
     approvedBy: []
+  - version: '3.1'
+    status: draft
+    gitCommit: 2cda4bb
+    changedAt: 2026-02-14T12:17:44.286Z
+    summary: Status changed from approved to draft
 files:
   description: requirements/req-000012/description.md
   supplementary: []
@@ -42,3 +47,9 @@ dependencies:
 estimatedComplexity: medium
 estimatedHours: 12
 flags: []
+currentApproval:
+  version: '3.1'
+  phase: requirement
+  prNumber: 0
+  prUrl: ''
+  approvedBy: []
