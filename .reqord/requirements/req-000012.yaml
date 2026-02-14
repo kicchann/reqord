@@ -1,10 +1,10 @@
 id: req-000012
-version: 3.0
+version: '3.1'
 title: 影響範囲分析
 status: approved
 priority: medium
 createdAt: 2026-02-07T12:00:00Z
-updatedAt: 2026-02-11T08:05:04.024Z
+updatedAt: 2026-02-14T12:17:47.372Z
 versionHistory:
   - version: 2.0.0
     status: approved
@@ -18,15 +18,19 @@ versionHistory:
     summary: Status changed from pending_approval to approved
     approvedAt: 2026-02-11T08:05:04.025Z
     approvedBy: []
+  - version: '3.1'
+    status: draft
+    gitCommit: 2cda4bb
+    changedAt: 2026-02-14T12:17:44.286Z
+    summary: Status changed from approved to draft
 files:
   description: requirements/req-000012/description.md
   supplementary: []
 successCriteria:
-  - reqord impact analyze <id> で影響を受けるSpecification・Issue・Requirementが一覧表示される
+  - reqord impact analyze <id> で、指定したRequirementまたはSpecificationに関連するSpecification・Issue・Requirementが一覧表示される
   - reqord impact notify <id> で影響先に通知（Issue/PRコメント）が送信される
-  - Requirement更新時にimpactフィールドが自動計算され、JSONファイルに保存される
   - 依存グラフに基づく波及分析が正確に動作し、循環依存が検出される
-  - analyze/notify コマンドで --json オプションが利用可能で、構造化された影響分析結果が出力される
+  - analyze コマンドで --json オプションが利用可能で、構造化された影響分析結果が出力される
   - GitHub APIのレート制限を考慮し、通知は100件/時以下のバッチ処理で実行される
 format:
   type: user-story
@@ -42,4 +46,10 @@ dependencies:
     - req-000005
 estimatedComplexity: medium
 estimatedHours: 12
+currentApproval:
+  version: '3.1'
+  phase: requirement
+  prNumber: 264
+  prUrl: https://github.com/kicchann/reqord/pull/264
+  approvedBy: []
 flags: []

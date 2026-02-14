@@ -2,7 +2,7 @@
 
 ## 概要
 
-Requirementが変更・バージョンアップされた際に、関連するSpecification、GitHub Issue、他のRequirementへの影響を自動分析・通知する機能。
+指定したRequirementまたはSpecificationに関連するSpecification、GitHub Issue、他のRequirementを即座に分析・一覧表示し、必要に応じて影響先に通知する機能。
 
 ## ユーザーストーリー
 
@@ -13,12 +13,17 @@ Requirementが変更・バージョンアップされた際に、関連するSpe
 
 ### reqord impact analyze \<id\>
 
-- 対象Requirementの依存関係（blockedBy, blocks, relatedTo）を走査
-- `requirementId` で紐づく関連Specificationを検索
-- 生成済みGitHub Issueを検索
+- 対象はRequirement（req-NNNNNN）またはSpecification（spec-NNNNNN）
+- Requirementの場合:
+  - 依存関係（blockedBy, blocks, relatedTo）を走査し、関連Requirementを検出
+  - `requirementId` で紐づく関連Specificationを検索
+  - Specificationの `implementation.issues` から関連GitHub Issueを取得
+- Specificationの場合:
+  - `implementation.issues` から関連GitHub Issueを取得
+  - 同一Requirementに紐づく他のSpecificationを検索
 - 出力:
   - 直接影響: blocks先のRequirement
-  - Spec影響: 紐づくSpecification（outdatedフラグ）
+  - Spec影響: 紐づくSpecification
   - Issue影響: 関連する未完了Issue
   - `--json` オプションで構造化出力
 
@@ -28,20 +33,6 @@ Requirementが変更・バージョンアップされた際に、関連するSpe
 - 関連IssueにGitHubコメントを追加
 - 関連PRにレビューリクエストを送信
 - `--dry-run` で通知内容のプレビュー
-
-## impactフィールド自動計算
-
-Requirement更新時（`reqord req update`）に `impact` フィールドを自動再計算:
-
-```json
-{
-  "impact": {
-    "specifications": ["spec-001"],
-    "issues": [123, 124],
-    "requirements": ["req-003"]
-  }
-}
-```
 
 ## 技術的制約
 
