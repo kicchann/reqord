@@ -21,6 +21,8 @@ vi.mock("node:util", () => {
 import {
   createPullRequest,
   getPullRequest,
+  createIssueComment,
+  createPrComment,
 } from "./github.js";
 import * as util from "node:util";
 import * as childProcess from "node:child_process";
@@ -182,5 +184,45 @@ describe("getPullRequest", () => {
     mockExecFileAsync.mockRejectedValue(new Error("PR not found"));
 
     await expect(getPullRequest(999)).rejects.toThrow("PR not found");
+  });
+});
+
+describe("createIssueComment", () => {
+  it("gh issue commentを正しい引数で呼び出しbodyをstdinで渡す", async () => {
+    createMockSpawnInstance(0);
+
+    await createIssueComment(123, "test comment");
+
+    expect(mockSpawn).toHaveBeenCalledWith("gh", [
+      "issue", "comment", "123", "--body-file", "-",
+    ]);
+  });
+
+  it("ghコマンド失敗時にエラーを投げる", async () => {
+    createMockSpawnInstance(1);
+
+    await expect(createIssueComment(42, "fail")).rejects.toThrow(
+      "gh issue comment failed",
+    );
+  });
+});
+
+describe("createPrComment", () => {
+  it("gh pr commentを正しい引数で呼び出しbodyをstdinで渡す", async () => {
+    createMockSpawnInstance(0);
+
+    await createPrComment(456, "pr comment body");
+
+    expect(mockSpawn).toHaveBeenCalledWith("gh", [
+      "pr", "comment", "456", "--body-file", "-",
+    ]);
+  });
+
+  it("ghコマンド失敗時にエラーを投げる", async () => {
+    createMockSpawnInstance(1);
+
+    await expect(createPrComment(99, "fail")).rejects.toThrow(
+      "gh pr comment failed",
+    );
   });
 });
