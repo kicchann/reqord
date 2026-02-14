@@ -6,6 +6,7 @@ import * as github from "../repositories/github.js";
 export interface ImpactAnalysis {
   sourceId: string;
   sourceType: "requirement" | "specification";
+  parentRequirement?: { id: string; title: string };
   directImpacts: ImpactEntry[];
   indirectImpacts: ImpactEntry[];
   relatedSpecifications: SpecificationRef[];
@@ -55,6 +56,11 @@ async function analyzeFromRequirement(
   const allRequirements = await reqRepo.findAll(cwd);
   const allSpecifications = await specRepo.findAll(cwd);
   const reqMap = new Map(allRequirements.map((r) => [r.id, r]));
+
+  if (!reqMap.has(id)) {
+    throw new Error(`Requirement ${id} not found.`);
+  }
+
   const maxDepth = options?.maxDepth ?? Infinity;
 
   const directImpacts: ImpactEntry[] = [];
@@ -120,18 +126,7 @@ async function analyzeFromRequirement(
         });
       }
     }
-    // Enqueue relatedTo (but mark as fromRelatedTo to prevent further traversal)
-    for (const relId of targetReq.dependencies.relatedTo) {
-      if (!visited.has(relId)) {
-        queue.push({
-          targetId: relId,
-          relation: "relatedTo",
-          depth: item.depth + 1,
-          path: [...item.path, relId],
-          fromRelatedTo: true,
-        });
-      }
-    }
+    // relatedTo is only enqueued from the source node (handled above)
   }
 
   // Circular dependency detection via DFS on blocks
@@ -177,6 +172,7 @@ async function analyzeFromSpecification(cwd: string, id: string): Promise<Impact
   }
 
   const allSpecifications = await specRepo.findAll(cwd);
+  const parentReq = await reqRepo.findById(cwd, spec.requirementId);
 
   // Related specs for the same requirement (excluding self)
   const relatedSpecifications: SpecificationRef[] = allSpecifications
@@ -200,6 +196,9 @@ async function analyzeFromSpecification(cwd: string, id: string): Promise<Impact
   return {
     sourceId: id,
     sourceType: "specification",
+    parentRequirement: parentReq
+      ? { id: parentReq.id, title: parentReq.title }
+      : { id: spec.requirementId, title: spec.requirementId },
     directImpacts: [],
     indirectImpacts: [],
     relatedSpecifications,
@@ -253,6 +252,7 @@ export interface NotifiedEntry {
   type: "issue" | "pr";
   number: number;
   title: string;
+  comment?: string;
 }
 
 export interface SkippedEntry {
@@ -269,67 +269,92 @@ export async function notifyImpact(
   const dryRun = options?.dryRun ?? false;
   const analysis = await analyzeImpact(cwd, id);
 
-  // Collect all related issues from direct + indirect impacts
-  const impactedIds = new Set([
-    ...analysis.directImpacts.map((e) => e.id),
-    ...analysis.indirectImpacts.map((e) => e.id),
-  ]);
-
-  // Build a map from requirement ID to impact entry for template generation
-  const impactMap = new Map<string, ImpactEntry>();
-  for (const entry of [...analysis.directImpacts, ...analysis.indirectImpacts]) {
-    impactMap.set(entry.id, entry);
-  }
-
-  // Get all specs for impacted requirements
-  const allSpecs = await specRepo.findAll(cwd);
   const issuesWithContext: Array<{
     number: number;
     title: string;
     status: string;
-    requirementId: string;
+    relation: string;
+    path: string;
   }> = [];
 
-  for (const spec of allSpecs) {
-    if (impactedIds.has(spec.requirementId) && spec.implementation) {
-      for (const issue of spec.implementation.issues) {
-        issuesWithContext.push({
-          number: issue.number,
-          title: issue.title,
-          status: issue.status,
-          requirementId: spec.requirementId,
-        });
+  if (analysis.sourceType === "specification") {
+    // Spec起点: relatedIssues から通知対象を収集
+    for (const issue of analysis.relatedIssues) {
+      issuesWithContext.push({
+        number: issue.number,
+        title: issue.title,
+        status: issue.status,
+        relation: "specification",
+        path: id,
+      });
+    }
+  } else {
+    // Requirement起点: direct/indirect impacts の関連Issueを収集
+    const impactedIds = new Set([
+      ...analysis.directImpacts.map((e) => e.id),
+      ...analysis.indirectImpacts.map((e) => e.id),
+    ]);
+
+    const impactMap = new Map<string, ImpactEntry>();
+    for (const entry of [...analysis.directImpacts, ...analysis.indirectImpacts]) {
+      impactMap.set(entry.id, entry);
+    }
+
+    const allSpecs = await specRepo.findAll(cwd);
+    for (const spec of allSpecs) {
+      if (impactedIds.has(spec.requirementId) && spec.implementation) {
+        for (const issue of spec.implementation.issues) {
+          const impact = impactMap.get(spec.requirementId);
+          issuesWithContext.push({
+            number: issue.number,
+            title: issue.title,
+            status: issue.status,
+            relation: impact?.relation ?? "unknown",
+            path: impact?.path.join(" → ") ?? "",
+          });
+        }
       }
     }
   }
 
+  // Dedupe by issue number
+  const seen = new Set<number>();
+  const deduped = issuesWithContext.filter((issue) => {
+    if (seen.has(issue.number)) return false;
+    seen.add(issue.number);
+    return true;
+  });
+
   const BATCH_WARNING_THRESHOLD = 100;
-  if (issuesWithContext.length > BATCH_WARNING_THRESHOLD) {
-    console.warn(`Warning: ${issuesWithContext.length} issues found. This may take a while.`);
+  if (deduped.length > BATCH_WARNING_THRESHOLD) {
+    console.warn(`Warning: ${deduped.length} issues found. This may take a while.`);
   }
 
-  // Get source requirement title
-  const sourceReq = await reqRepo.findById(cwd, id);
-  const sourceTitle = sourceReq?.title ?? id;
+  // Get source title
+  const sourceLabel = analysis.sourceType === "specification" ? "仕様" : "要件";
+  let sourceTitle = id;
+  if (analysis.sourceType === "specification" && analysis.parentRequirement) {
+    sourceTitle = analysis.parentRequirement.title;
+  } else {
+    const sourceReq = await reqRepo.findById(cwd, id);
+    sourceTitle = sourceReq?.title ?? id;
+  }
 
   const notified: NotifiedEntry[] = [];
   const skipped: SkippedEntry[] = [];
 
-  for (const issue of issuesWithContext) {
+  for (const issue of deduped) {
     if (issue.status !== "open") {
       skipped.push({ type: "issue", number: issue.number, reason: issue.status });
       continue;
     }
 
-    const impact = impactMap.get(issue.requirementId);
-    const relation: "blocks" | "relatedTo" | "unknown" = impact?.relation ?? "unknown";
-    const path = impact?.path.join(" → ") ?? "";
-
     const comment = buildNotificationComment({
       sourceId: id,
+      sourceLabel,
       title: sourceTitle,
-      relation,
-      path,
+      relation: issue.relation,
+      path: issue.path,
       customMessage: options?.message ?? "",
     });
 
@@ -337,7 +362,12 @@ export async function notifyImpact(
       await github.createIssueComment(issue.number, comment);
     }
 
-    notified.push({ type: "issue", number: issue.number, title: issue.title });
+    notified.push({
+      type: "issue",
+      number: issue.number,
+      title: issue.title,
+      ...(dryRun ? { comment } : {}),
+    });
   }
 
   return { notified, skipped, dryRun };
@@ -345,6 +375,7 @@ export async function notifyImpact(
 
 function buildNotificationComment(params: {
   sourceId: string;
+  sourceLabel: string;
   title: string;
   relation: string;
   path: string;
@@ -353,7 +384,7 @@ function buildNotificationComment(params: {
   const lines = [
     "**reqord影響範囲通知**",
     "",
-    `要件 \`${params.sourceId}\` (${params.title}) が変更されました。`,
+    `${params.sourceLabel} \`${params.sourceId}\` (${params.title}) が変更されました。`,
     "このissueは影響を受ける可能性があります。",
     "",
     `**関係:** ${params.relation}`,

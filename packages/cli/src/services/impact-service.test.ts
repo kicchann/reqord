@@ -373,10 +373,36 @@ describe("analyzeImpact", () => {
       ]);
     });
 
+    it("parentRequirementが返される", async () => {
+      const parentReq = makeRequirement({ id: "req-000001", title: "親要件" });
+      const spec1 = makeSpecification({
+        id: "spec-000001",
+        requirementId: "req-000001",
+      });
+      vi.mocked(specRepo.findById).mockResolvedValue(spec1);
+      vi.mocked(specRepo.findAll).mockResolvedValue([spec1]);
+      vi.mocked(reqRepo.findById).mockResolvedValue(parentReq);
+
+      const result = await analyzeImpact("/cwd", "spec-000001");
+
+      expect(result.parentRequirement).toEqual({ id: "req-000001", title: "親要件" });
+    });
+
     it("存在しないSpecificationでエラーを投げる", async () => {
       vi.mocked(specRepo.findById).mockResolvedValue(null);
 
       await expect(analyzeImpact("/cwd", "spec-999999")).rejects.toThrow();
+    });
+  });
+
+  describe("存在チェック", () => {
+    it("存在しないRequirementでエラーを投げる", async () => {
+      vi.mocked(reqRepo.findAll).mockResolvedValue([]);
+      vi.mocked(specRepo.findAll).mockResolvedValue([]);
+
+      await expect(analyzeImpact("/cwd", "req-999999")).rejects.toThrow(
+        "Requirement req-999999 not found.",
+      );
     });
   });
 });
@@ -437,8 +463,7 @@ describe("notifyImpact", () => {
     expect(body).toContain("req-000001");
     expect(body).toContain("ユーザー認証機能");
     expect(body).toContain("blocks");
-    expect(body).toContain("req-000001");
-    expect(body).toContain("req-000002");
+    expect(body).toContain("要件");
   });
 
   it("dryRun=true で GitHub API が呼ばれないこと", async () => {
@@ -449,11 +474,11 @@ describe("notifyImpact", () => {
     expect(github.createIssueComment).not.toHaveBeenCalled();
     expect(result.dryRun).toBe(true);
     expect(result.notified).toHaveLength(1);
-    expect(result.notified[0]).toEqual({
-      type: "issue",
-      number: 42,
-      title: "Implement feature",
-    });
+    expect(result.notified[0].type).toBe("issue");
+    expect(result.notified[0].number).toBe(42);
+    expect(result.notified[0].title).toBe("Implement feature");
+    expect(result.notified[0].comment).toBeDefined();
+    expect(result.notified[0].comment).toContain("reqord影響範囲通知");
   });
 
   it("open Issue のみ通知対象になること（closed はスキップ）", async () => {
@@ -511,6 +536,72 @@ describe("notifyImpact", () => {
     expect(body).toContain("req-000001");
     // タイトルがnullの場合、IDがフォールバックとして使われる
     expect(body).toContain("(req-000001)");
+  });
+
+  it("Specification起点で relatedIssues から通知される", async () => {
+    const spec = makeSpecification({
+      id: "spec-000001",
+      requirementId: "req-000001",
+      implementation: {
+        issues: [
+          { number: 50, title: "Spec Issue", url: "https://github.com/test/50", priority: "P1" as const, status: "open" as const },
+        ],
+        totalEstimatedHours: 4,
+        createdAt: "2024-01-01T00:00:00Z",
+      },
+    });
+    const parentReq = makeRequirement({ id: "req-000001", title: "親要件" });
+    vi.mocked(specRepo.findById).mockResolvedValue(spec);
+    vi.mocked(specRepo.findAll).mockResolvedValue([spec]);
+    vi.mocked(reqRepo.findById).mockResolvedValue(parentReq);
+    vi.mocked(github.createIssueComment).mockResolvedValue(undefined);
+
+    const result = await notifyImpact("/cwd", "spec-000001");
+
+    expect(result.notified).toHaveLength(1);
+    expect(result.notified[0].number).toBe(50);
+    expect(github.createIssueComment).toHaveBeenCalledOnce();
+    const body = vi.mocked(github.createIssueComment).mock.calls[0][1];
+    expect(body).toContain("仕様");
+    expect(body).toContain("spec-000001");
+  });
+
+  it("同一Issueが複数Specから参照されても1回だけ通知される", async () => {
+    const sourceReq = makeRequirement({
+      id: "req-000001",
+      dependencies: { blockedBy: [], blocks: ["req-000002"], relatedTo: [] },
+    });
+    const targetReq = makeRequirement({
+      id: "req-000002",
+      dependencies: { blockedBy: ["req-000001"], blocks: [], relatedTo: [] },
+    });
+    const spec1 = makeSpecification({
+      id: "spec-000001",
+      requirementId: "req-000002",
+      implementation: {
+        issues: [{ number: 42, title: "Shared Issue", url: "https://github.com/test/42", priority: "P1" as const, status: "open" as const }],
+        totalEstimatedHours: 4,
+        createdAt: "2024-01-01T00:00:00Z",
+      },
+    });
+    const spec2 = makeSpecification({
+      id: "spec-000002",
+      requirementId: "req-000002",
+      implementation: {
+        issues: [{ number: 42, title: "Shared Issue", url: "https://github.com/test/42", priority: "P1" as const, status: "open" as const }],
+        totalEstimatedHours: 2,
+        createdAt: "2024-01-01T00:00:00Z",
+      },
+    });
+    vi.mocked(reqRepo.findAll).mockResolvedValue([sourceReq, targetReq]);
+    vi.mocked(reqRepo.findById).mockResolvedValue(sourceReq);
+    vi.mocked(specRepo.findAll).mockResolvedValue([spec1, spec2]);
+    vi.mocked(github.createIssueComment).mockResolvedValue(undefined);
+
+    const result = await notifyImpact("/cwd", "req-000001");
+
+    expect(result.notified).toHaveLength(1);
+    expect(github.createIssueComment).toHaveBeenCalledOnce();
   });
 
   it("影響先0件で空の NotifyResult が返ること", async () => {

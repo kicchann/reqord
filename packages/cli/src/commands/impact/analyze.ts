@@ -5,11 +5,19 @@ import { analyzeImpact } from "../../services/impact-service.js";
 import type { ImpactAnalysis } from "../../services/impact-service.js";
 import { handleError } from "../../utils/error-handler.js";
 
+function parsePositiveInt(value: string): number {
+  const n = Number.parseInt(value, 10);
+  if (!Number.isInteger(n) || n <= 0) {
+    throw new Error("Depth must be a positive integer");
+  }
+  return n;
+}
+
 export const analyzeCommand = new Command("analyze")
   .description("Analyze impact of requirement/specification changes")
   .argument("<id>", "Target ID (req-NNNNNN or spec-NNNNNN)")
   .option("--json", "Output as JSON")
-  .option("--depth <n>", "Maximum traversal depth", parseInt)
+  .option("--depth <n>", "Maximum traversal depth", parsePositiveInt)
   .action(async (id: string, options: { json?: boolean; depth?: number }) => {
     try {
       const result = await analyzeImpact(process.cwd(), id, {
@@ -77,6 +85,10 @@ function displayRequirementResult(result: ImpactAnalysis): void {
 }
 
 function displaySpecificationResult(result: ImpactAnalysis): void {
+  if (result.parentRequirement) {
+    console.log(chalk.bold("親Requirement:"));
+    console.log(`  ${result.parentRequirement.id} (${result.parentRequirement.title})\n`);
+  }
   displaySpecifications(result);
   displayIssues(result);
 }

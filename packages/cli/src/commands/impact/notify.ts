@@ -54,6 +54,14 @@ function displayDryRunResult(id: string, result: NotifyResult): void {
     console.log("");
   }
 
+  // Show notification message preview
+  const firstWithComment = result.notified.find((e) => e.comment);
+  if (firstWithComment?.comment) {
+    console.log(chalk.bold("通知メッセージ:"));
+    console.log(firstWithComment.comment);
+    console.log("");
+  }
+
   console.log("実際に通知するには --dry-run を外して再実行してください。");
 }
 

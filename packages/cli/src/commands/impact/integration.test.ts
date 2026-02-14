@@ -180,15 +180,14 @@ describe("impact analyze → notify integration", () => {
     expect(analysis.relatedIssues).toHaveLength(1);
     expect(analysis.relatedIssues[0].number).toBe(200);
 
-    // Notify from specification - spec起点ではdirectImpacts/indirectImpactsが空なので
-    // 影響先issueは0件になる
+    // Notify from specification - spec起点では relatedIssues から通知対象を収集
     const reqA = makeRequirement({ id: "req-000001", title: "A" });
     vi.mocked(reqRepo.findAll).mockResolvedValue([reqA]);
     vi.mocked(reqRepo.findById).mockResolvedValue(reqA);
 
     const notifyResult = await notifyImpact("/cwd", "spec-000001");
-    expect(notifyResult.notified).toEqual([]);
-    expect(notifyResult.skipped).toEqual([]);
-    expect(github.createIssueComment).not.toHaveBeenCalled();
+    expect(notifyResult.notified).toHaveLength(1);
+    expect(notifyResult.notified[0].number).toBe(200);
+    expect(github.createIssueComment).toHaveBeenCalledOnce();
   });
 });
