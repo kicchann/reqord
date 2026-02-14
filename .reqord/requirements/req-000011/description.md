@@ -21,21 +21,31 @@ draft ──approve(PR作成)──→ PRマージ ──→ approved ──impl
 
 ## CLIコマンド仕様
 
-### reqord req draft \<id\> [--major|--patch]
+### reqord req draft \<id\>
 
 flag付き、またはapproved/implementedのreqをdraft状態に戻し、再編集を可能にする。
 
 1. 対象Requirementのstatusが `draft` 以外であることを検証
-2. `status` を `draft` に更新
-3. バージョンを引数に応じてインクリメント（デフォルト: `--major`）
-4. `versionHistory` にエントリを追加
-5. flagsがある場合、draft化の理由として記録
+2. `status` を `draft` に更新（**バージョンはインクリメントしない**）
+3. `versionHistory` にエントリを追加
+4. flagsがある場合、draft化の理由として記録
+5. approved/implementedからの差し戻し時、影響範囲（`blocks`で依存する要件）を表示する
+
+> バージョン変更が必要な場合は `reqord version` コマンドを使用する（req-000005参照）。
 
 ```bash
-reqord req draft req-000011           # 1.0 → 2.0 (デフォルト: major)
-reqord req draft req-000011 --major   # 1.0 → 2.0
-reqord req draft req-000011 --patch   # 1.0 → 1.1
+reqord req draft req-000011
 ```
+
+#### draft差し戻し時のPR作成フロー
+
+approved/implementedからdraftに差し戻す場合、影響範囲を含めたPRを作成してレビュー可能にする。
+
+1. `impact-service.analyzeImpact()` で影響範囲（blocksで依存する要件）を分析
+2. Gitブランチを作成: `reqord/req-<id>-revert-to-draft`
+3. ステータス変更をコミット
+4. PRを作成し、影響範囲をPR本文に記載
+5. PRマージで差し戻しが確定
 
 ### reqord req approve \<id\>
 
@@ -44,7 +54,7 @@ reqord req draft req-000011 --patch   # 1.0 → 1.1
 1. 対象Requirementのstatusが `draft` であることを検証
 2. Gitブランチを作成: `reqord/req-<id>-approve-v<version>`
 3. Requirement YAMLの `status` を `approved` に更新してコミット
-   - **バージョンはインクリメントしない**（バージョンアップはdraft化時に行う）
+   - **バージョンはインクリメントしない**（バージョン変更は `reqord version` コマンドで行う）
 4. GitHub PRを作成:
    - タイトル: `[Reqord] Approve req-<id>: <title> v<version>`
    - CODEOWNERSからレビュアーを自動アサイン
@@ -95,13 +105,15 @@ reqord req implement req-000011
 - GitHub Actionsでマージイベントを検知し、コメントタグをパースして自動ステータス更新
 - 将来的な自動化の基盤として、現時点ではタグ埋め込みのみを実装
 
-## バージョニングルール（承認フロー内）
+## バージョニングとステータス遷移の分離
 
-- `reqord req draft` 実行時: **引数に応じてバージョンをインクリメント**（唯一のバージョン変更ポイント）
-- `reqord req approve` 実行時: **バージョンをインクリメントしない**
-- ステータス遷移（draft → approved → implemented）: **バージョンをインクリメントしない**
+すべてのステータス遷移コマンドはバージョンを変更しない:
 
-> 注: バージョニングルール全体の見直し（`version-service.ts`の`determineNextVersion`改修）はreq-000005で対応。
+- `reqord req draft` 実行時: **バージョンをインクリメントしない**（ステータス変更のみ）
+- `reqord req approve` 実行時: **バージョンをインクリメントしない**（ステータス変更のみ）
+- `reqord req implement` 実行時: **バージョンをインクリメントしない**（ステータス変更のみ）
+
+バージョン変更は `reqord version` コマンドで明示的に行う（req-000005参照）。
 
 ## CODEOWNERS連携
 
@@ -124,3 +136,5 @@ reqord req implement req-000011
 | #161 | コマンドの動作説明を明確化（「承認依頼PR作成」であることを明示） |
 | #208 | approved廃止。approveでstatusをapprovedに設定し、PRマージで完了 |
 | #209 | `reqord req draft`と`reqord req implement`をスコープに含める |
+| #263 | バージョニングとステータス遷移を完全分離（req-000005 v4.0に準拠） |
+| #279 | draft差し戻し時のPR運用ルール（影響範囲をまとめてPRで管理） |
