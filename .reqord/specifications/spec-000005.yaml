@@ -29,6 +29,12 @@ files:
   design: specifications/spec-000005/design.md
   supplementary: []
 flags: []
+currentApproval:
+  version: '3.0'
+  phase: specification
+  prNumber: 274
+  prUrl: https://github.com/kicchann/reqord/pull/274
+  approvedBy: []
 implementation:
   issues:
     - number: 255
@@ -53,9 +59,3 @@ implementation:
       status: open
   totalEstimatedHours: 20
   createdAt: 2026-02-14T00:32:00.801Z
-currentApproval:
-  version: '3.0'
-  phase: specification
-  prNumber: 0
-  prUrl: ''
-  approvedBy: []
