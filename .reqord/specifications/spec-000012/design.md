@@ -211,7 +211,7 @@ function traverseDependencyGraph(
 }
 ```
 
-**循環依存検出:** 既存のvalidation-serviceの `checkCircularDependencies` ロジック（DFS）を再利用。
+**循環依存検出:** 既存のvalidation-serviceの `checkCircularDependencies` ロジック（DFS）を再利用。BFS走査中のvisitedセットは無限ループ防止が目的であり、具体的な循環パス（A→B→C→A）の報告はできない。循環パスの詳細表示には既存DFSロジックを併用する。
 
 ### 3.5 Issue発見メカニズム
 
