@@ -60,8 +60,8 @@ estimatedHours: 12
 currentApproval:
   version: '5.0'
   phase: requirement
-  prNumber: 0
-  prUrl: ''
+  prNumber: 280
+  prUrl: https://github.com/kicchann/reqord/pull/280
   approvedBy: []
 flags:
   - type: feedback-review
