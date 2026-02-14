@@ -17,7 +17,7 @@ vi.mock("../repositories/github.js", () => ({
 import * as reqRepo from "../repositories/requirement.js";
 import * as specRepo from "../repositories/specification.js";
 import * as github from "../repositories/github.js";
-import { analyzeImpact, notifyImpact, type NotifyResult } from "./impact-service.js";
+import { analyzeImpact, notifyImpact } from "./impact-service.js";
 
 function makeRequirement(overrides: Partial<Requirement> = {}): Requirement {
   return {
@@ -347,7 +347,7 @@ describe("analyzeImpact", () => {
     });
 
     it("存在しないSpecificationでエラーを投げる", async () => {
-      vi.mocked(specRepo.findById).mockResolvedValue(undefined);
+      vi.mocked(specRepo.findById).mockResolvedValue(null);
 
       await expect(analyzeImpact("/cwd", "spec-999999")).rejects.toThrow();
     });
@@ -356,7 +356,7 @@ describe("analyzeImpact", () => {
 
 describe("notifyImpact", () => {
   function setupMocksForNotify(options?: {
-    issueStatus?: string;
+    issueStatus?: "open" | "in_progress" | "closed";
     customBlocks?: string[];
   }) {
     const sourceReq = makeRequirement({
