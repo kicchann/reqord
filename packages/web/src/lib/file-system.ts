@@ -18,18 +18,6 @@ export async function exists(path: string): Promise<boolean> {
   }
 }
 
-export async function readJSON<T>(path: string): Promise<T> {
-  const content = await readFile(path, "utf-8");
-  return JSON.parse(content) as T;
-}
-
-export async function writeJSON(
-  path: string,
-  data: unknown,
-): Promise<void> {
-  await writeFile(path, JSON.stringify(data, null, 2) + "\n", "utf-8");
-}
-
 export async function readText(path: string): Promise<string> {
   return readFile(path, "utf-8");
 }
