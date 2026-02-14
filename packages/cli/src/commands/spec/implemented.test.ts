@@ -33,13 +33,11 @@ function makeSpecification(overrides: Partial<Specification> = {}): Specificatio
 
 describe("spec implemented command", () => {
   let consoleLogSpy: ReturnType<typeof vi.spyOn>;
-  let consoleErrorSpy: ReturnType<typeof vi.spyOn>;
 
   beforeEach(() => {
     vi.clearAllMocks();
     process.exitCode = 0;
     consoleLogSpy = vi.spyOn(console, "log").mockImplementation(() => {});
-    consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     // Reset Commander option state
     implementedCommand.setOptionValue("json", undefined);
   });

@@ -19,7 +19,6 @@ vi.mock("next/navigation", () => ({
 vi.mock("next/dynamic", () => ({
   default: (loader: () => Promise<any>) => {
     // Execute loader synchronously and return the component
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let Component: any = () => <div data-testid="loading" />;
     loader().then((mod: any) => {
       Component = mod.default || mod.DependencyGraph || mod.DrillDownGraph || mod;

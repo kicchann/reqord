@@ -22,8 +22,8 @@ export const implementedCommand = new Command("implemented")
       const cwd = process.cwd();
 
       try {
-        // Show current requirement
-        const { requirement } = await showRequirement(cwd, id);
+        // Validate requirement exists
+        await showRequirement(cwd, id);
 
         // Show related specifications
         const specs = await listSpecifications(cwd, { requirementId: id });
