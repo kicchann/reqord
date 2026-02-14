@@ -30,9 +30,15 @@ interface YamlData {
  * - x.y.z → X.0 (discard minor/patch)
  */
 function convertVersion(oldVersion: string): string {
+  // Check if already X.Y format
+  if (/^\d+\.\d+$/.test(oldVersion)) {
+    return oldVersion;
+  }
+
+  // Try x.y.z format
   const match = oldVersion.match(/^(\d+)\.(\d+)\.(\d+)$/);
   if (!match) {
-    // Already X.Y format or invalid format
+    console.warn(`  WARNING: Unrecognized version format: ${oldVersion}`);
     return oldVersion;
   }
 

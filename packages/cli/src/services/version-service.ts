@@ -34,6 +34,14 @@ export function formatVersion(major: number, minor: number): string {
 
 /**
  * Apply explicit version bump to a version string
+ *
+ * In X.Y format:
+ * - "major": X.0 (breaking changes, major feature additions)
+ * - "patch": .Y (all other changes, equivalent to MINOR+PATCH in semver)
+ *
+ * @param currentVersion - Current version in X.Y format
+ * @param bumpType - Type of version bump to apply
+ * @returns New version string in X.Y format
  */
 export function applyVersionBump(
   currentVersion: string,
@@ -53,6 +61,10 @@ export function applyVersionBump(
  *
  * Version is always preserved here. Version changes are handled
  * explicitly by the reqord req draft command.
+ *
+ * @param before - Previous requirement state
+ * @param _after - New requirement state (unused, version changes are explicit)
+ * @returns The preserved version from before
  */
 export function determineNextVersion(before: Requirement, _after: Requirement): string {
   return before.version;
@@ -194,6 +206,10 @@ function countSupplementaryDiff(before: Specification, after: Specification): { 
  *
  * Version is always preserved here. Version changes are handled
  * explicitly by the reqord spec draft command.
+ *
+ * @param before - Previous specification state
+ * @param _after - New specification state (unused, version changes are explicit)
+ * @returns The preserved version from before
  */
 export function determineNextVersionForSpec(before: Specification, _after: Specification): string {
   return before.version;

@@ -12,7 +12,7 @@ export const draftCommand = new Command("draft")
   .description("Revert a requirement to draft status")
   .argument("<id>", "Requirement ID (e.g. req-000001)")
   .option("--major", "Force major version increment (X.0)")
-  .option("--patch", "Force minor version increment (.Y)")
+  .option("--patch", "Force patch version increment (.Y)")
   .option("--json", "Output result as JSON")
   .action(
     async (
