@@ -30,7 +30,6 @@ function processYamlFileWithRegex(filePath: string, dryRun: boolean): boolean {
 
     // Pattern 2: - version: "X.Y.Z" (versionHistory entries)
     content = content.replace(/^(\s+version:\s+["']?)(\d+)\.(\d+)\.(\d+)(["']?)$/gm, (match, prefix, major, minor, patch, suffix) => {
-      changeCount++;
       if (!dryRun) {
         console.log(`  ${filePath}: versionHistory ${major}.${minor}.${patch} → ${major}.0`);
       } else {
