@@ -40,10 +40,4 @@ dependencies:
     - req-000011
 estimatedComplexity: small
 estimatedHours: 4
-flags:
-  - type: feedback-review
-    reason: 'Feedback from issue #110'
-    createdAt: 2026-02-11T07:25:11.151Z
-    relatedIssues:
-      - 110
-    severity: low
+flags: []

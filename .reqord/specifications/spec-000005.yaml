@@ -1,50 +1,45 @@
 id: spec-000005
 requirementId: req-000005
-version: 2.0
-status: draft
+version: '2.0'
+status: approved
 createdAt: 2026-02-08T14:08:06.961Z
-updatedAt: 2026-02-14T00:00:00.000Z
+updatedAt: 2026-02-14T00:32:00.804Z
 versionHistory:
   - version: 1.0.0
     status: implemented
     gitCommit: aa7e3b6
     changedAt: 2026-02-12T15:12:54.066Z
     summary: Initial implementation (Requirement versioning only)
-  - version: 2.0
+  - version: '2.0'
     status: draft
     gitCommit: pending
     changedAt: 2026-02-14T00:00:00.000Z
-    summary: "Simplified versioning: semantic versioning → integer-based (X.Y) format (Issue #247)"
+    summary: 'Simplified versioning: semantic versioning → integer-based (X.Y) format (Issue #247)'
 files:
   design: specifications/spec-000005/design.md
   supplementary: []
 flags: []
 implementation:
   issues:
-    - number: 48
-      title: "[Feature] updateコマンドにバージョン指定オプション追加（--major/--minor/--patch）"
-      url: https://github.com/kicchann/reqord/issues/48
+    - number: 255
+      title: '[spec-000005 v2.0] VersionService の X.Y 形式対応'
+      url: https://github.com/kicchann/reqord/issues/255
+      priority: P1
+      status: open
+    - number: 256
+      title: '[spec-000005 v2.0] RequirementService の X.Y 形式対応とバージョニングロジック改訂'
+      url: https://github.com/kicchann/reqord/issues/256
+      priority: P1
+      status: open
+    - number: 257
+      title: '[spec-000005 v2.0] コマンド層の X.Y 形式対応（update/draft/history）'
+      url: https://github.com/kicchann/reqord/issues/257
       priority: P2
-      status: closed
-    - number: 47
-      title: "[Feature] reqord req historyコマンド新規作成"
-      url: https://github.com/kicchann/reqord/issues/47
+      status: open
+    - number: 258
+      title: '[spec-000005 v2.0] 既存データの X.Y 形式移行'
+      url: https://github.com/kicchann/reqord/issues/258
       priority: P2
-      status: closed
-    - number: 46
-      title: "[Feature] RequirementService拡張（状態遷移バリデーション＋自動バージョンインクリメント）"
-      url: https://github.com/kicchann/reqord/issues/46
-      priority: P2
-      status: closed
-    - number: 45
-      title: "[Feature] VersionService新規作成（バージョン決定・履歴エントリ生成・状態遷移ルール）"
-      url: https://github.com/kicchann/reqord/issues/45
-      priority: P2
-      status: closed
-  totalEstimatedHours: 0
-  createdAt: 2026-02-10T22:45:11.156Z
-  progress:
-    total: 4
-    completed: 4
-    percentage: 100
-    lastSyncedAt: 2026-02-12T15:12:54.066Z
+      status: open
+  totalEstimatedHours: 20
+  createdAt: 2026-02-14T00:32:00.801Z

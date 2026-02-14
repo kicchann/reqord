@@ -1,16 +1,16 @@
 id: spec-000033
 requirementId: req-000005
-version: 2.0
-status: draft
+version: '2.0'
+status: approved
 createdAt: 2026-02-13T01:52:26.669Z
-updatedAt: 2026-02-14T00:00:00.000Z
+updatedAt: 2026-02-14T00:21:07.022Z
 versionHistory:
   - version: 1.0.0
     status: approved
     gitCommit: 63e4c1b
     changedAt: 2026-02-13T03:30:00.000Z
     summary: Initial design approved (Specification versioning)
-  - version: 2.0
+  - version: '2.0'
     status: draft
     gitCommit: pending
     changedAt: 2026-02-14T00:00:00.000Z
@@ -19,3 +19,27 @@ files:
   design: specifications/spec-000033/design.md
   supplementary: []
 flags: []
+implementation:
+  issues:
+    - number: 251
+      title: '[spec-000033] VersionService拡張（Specification対応）'
+      url: https://github.com/kicchann/reqord/issues/251
+      priority: P1
+      status: open
+    - number: 252
+      title: '[spec-000033] SpecificationService拡張（バージョニングロジック統合）'
+      url: https://github.com/kicchann/reqord/issues/252
+      priority: P1
+      status: open
+    - number: 253
+      title: '[spec-000033] spec history + updateコマンド実装'
+      url: https://github.com/kicchann/reqord/issues/253
+      priority: P2
+      status: open
+    - number: 254
+      title: '[spec-000033] spec draft + implementedコマンド実装'
+      url: https://github.com/kicchann/reqord/issues/254
+      priority: P2
+      status: open
+  totalEstimatedHours: 20
+  createdAt: 2026-02-14T00:21:07.020Z
