@@ -19,6 +19,7 @@ import {
   generateChangeSummary,
   determineNextVersionForSpec,
   generateSpecChangeSummary,
+  applyVersionBump,
 } from "./version-service.js";
 import type { Requirement, Specification } from "@reqord/shared";
 
@@ -26,7 +27,7 @@ import type { Requirement, Specification } from "@reqord/shared";
 function makeRequirement(overrides: Partial<Requirement> = {}): Requirement {
   return {
     id: "req-000001",
-    version: "1.0.0",
+    version: "1.0",
     title: "テスト要件タイトル",
     status: "draft",
     priority: "medium",
@@ -42,155 +43,112 @@ function makeRequirement(overrides: Partial<Requirement> = {}): Requirement {
   };
 }
 
+// Factory function for Specification
+function makeSpecification(overrides: Partial<Specification> = {}): Specification {
+  return {
+    id: "spec-000001",
+    requirementId: "req-000001",
+    version: "1.0",
+    status: "draft",
+    createdAt: "2026-01-01T00:00:00Z",
+    updatedAt: "2026-01-01T00:00:00Z",
+    versionHistory: [],
+    files: {
+      design: "specifications/spec-000001/design.md",
+      supplementary: [],
+    },
+    flags: [],
+    ...overrides,
+  };
+}
+
 beforeEach(() => {
   vi.resetAllMocks();
 });
 
 describe("parseVersion", () => {
-  it('"1.2.3"を正しくパースできる', () => {
-    const result = parseVersion("1.2.3");
-    expect(result).toEqual({ major: 1, minor: 2, patch: 3 });
+  it('"1.0"を正しくパースできる', () => {
+    const result = parseVersion("1.0");
+    expect(result).toEqual({ major: 1, minor: 0 });
   });
 
-  it('"0.0.0"を正しくパースできる', () => {
-    const result = parseVersion("0.0.0");
-    expect(result).toEqual({ major: 0, minor: 0, patch: 0 });
+  it('"2.5"を正しくパースできる', () => {
+    const result = parseVersion("2.5");
+    expect(result).toEqual({ major: 2, minor: 5 });
   });
 
-  it("無効な形式でエラーを投げる", () => {
-    expect(() => parseVersion("1.2")).toThrow();
-    expect(() => parseVersion("abc")).toThrow();
-    expect(() => parseVersion("1.2.3.4")).toThrow();
+  it('"0.0"を正しくパースできる', () => {
+    const result = parseVersion("0.0");
+    expect(result).toEqual({ major: 0, minor: 0 });
+  });
+
+  it("旧形式x.y.zでエラーを投げる", () => {
+    expect(() => parseVersion("1.0.0")).toThrow("Must be X.Y format");
+  });
+
+  it("不正な形式でエラーを投げる", () => {
+    expect(() => parseVersion("abc")).toThrow("Must be X.Y format");
+    expect(() => parseVersion("1")).toThrow("Must be X.Y format");
+    expect(() => parseVersion("1.2.3.4")).toThrow("Must be X.Y format");
   });
 });
 
 describe("formatVersion", () => {
   it("正しい文字列形式を返す", () => {
-    expect(formatVersion(1, 2, 3)).toBe("1.2.3");
-    expect(formatVersion(0, 0, 0)).toBe("0.0.0");
-    expect(formatVersion(10, 20, 30)).toBe("10.20.30");
+    expect(formatVersion(1, 0)).toBe("1.0");
+    expect(formatVersion(0, 0)).toBe("0.0");
+    expect(formatVersion(10, 20)).toBe("10.20");
+    expect(formatVersion(2, 5)).toBe("2.5");
+  });
+});
+
+describe("applyVersionBump", () => {
+  it("majorバンプでX.0にインクリメント", () => {
+    expect(applyVersionBump("1.5", "major")).toBe("2.0");
+  });
+
+  it("patchバンプで.Yをインクリメント", () => {
+    expect(applyVersionBump("1.5", "patch")).toBe("1.6");
+  });
+
+  it("majorバンプで0.0からのインクリメント", () => {
+    expect(applyVersionBump("0.0", "major")).toBe("1.0");
+  });
+
+  it("patchバンプで0.0からのインクリメント", () => {
+    expect(applyVersionBump("0.0", "patch")).toBe("0.1");
   });
 });
 
 describe("determineNextVersion", () => {
-  it("draft→draftの場合、バージョン据え置き（title変更あり）", () => {
-    const before = makeRequirement({ version: "1.2.3", status: "draft", title: "旧タイトル" });
-    const after = makeRequirement({ version: "1.2.3", status: "draft", title: "新タイトル" });
-    expect(determineNextVersion(before, after)).toBe("1.2.3");
+  it("draft→draftの場合、バージョン据え置き", () => {
+    const before = makeRequirement({ version: "1.0", status: "draft", title: "旧タイトル" });
+    const after = makeRequirement({ version: "1.0", status: "draft", title: "新タイトル" });
+    expect(determineNextVersion(before, after)).toBe("1.0");
   });
 
-  it("draft→draftの場合、バージョン据え置き（priority変更あり）", () => {
-    const before = makeRequirement({ version: "1.2.3", status: "draft", priority: "low" });
-    const after = makeRequirement({ version: "1.2.3", status: "draft", priority: "high" });
-    expect(determineNextVersion(before, after)).toBe("1.2.3");
+  it("ステータス変更のみではバージョン据え置き", () => {
+    const before = makeRequirement({ version: "1.0", status: "draft" });
+    const after = makeRequirement({ version: "1.0", status: "approved" });
+    expect(determineNextVersion(before, after)).toBe("1.0");
   });
 
-  it("status変更のみではバージョン据え置き", () => {
-    const before = makeRequirement({ version: "1.2.3", status: "draft" });
-    const after = makeRequirement({ version: "1.2.3", status: "approved" });
-    expect(determineNextVersion(before, after)).toBe("1.2.3");
+  it("内容変更があってもバージョン据え置き", () => {
+    const before = makeRequirement({ version: "1.0", status: "approved", title: "旧タイトル" });
+    const after = makeRequirement({ version: "1.0", status: "approved", title: "新タイトル" });
+    expect(determineNextVersion(before, after)).toBe("1.0");
   });
 
-  it("title変更でminorバージョンを上げる", () => {
-    const before = makeRequirement({ version: "1.2.3", status: "approved", title: "旧タイトル" });
-    const after = makeRequirement({ version: "1.2.3", status: "approved", title: "新タイトル" });
-    expect(determineNextVersion(before, after)).toBe("1.3.0");
+  it("priority変更のみでもバージョン据え置き", () => {
+    const before = makeRequirement({ version: "1.0", status: "approved", priority: "low" });
+    const after = makeRequirement({ version: "1.0", status: "approved", priority: "high" });
+    expect(determineNextVersion(before, after)).toBe("1.0");
   });
 
-  it("format変更でminorバージョンを上げる", () => {
-    const before = makeRequirement({
-      version: "1.2.3",
-      status: "approved",
-      format: { type: "free-form" },
-    });
+  it("flagsのみ変更でもバージョン据え置き", () => {
+    const before = makeRequirement({ version: "2.3", status: "approved", flags: [] });
     const after = makeRequirement({
-      version: "1.2.3",
-      status: "approved",
-      format: { type: "user-story", userStory: { as: "u", iWant: "w", soThat: "s" } },
-    });
-    expect(determineNextVersion(before, after)).toBe("1.3.0");
-  });
-
-  it("dependencies変更でminorバージョンを上げる", () => {
-    const before = makeRequirement({
-      version: "1.2.3",
-      status: "approved",
-      dependencies: { blockedBy: [], blocks: [], relatedTo: [] },
-    });
-    const after = makeRequirement({
-      version: "1.2.3",
-      status: "approved",
-      dependencies: { blockedBy: ["req-000002"], blocks: [], relatedTo: [] },
-    });
-    expect(determineNextVersion(before, after)).toBe("1.3.0");
-  });
-
-  it("successCriteria変更でminorバージョンを上げる", () => {
-    const before = makeRequirement({
-      version: "1.2.3",
-      status: "approved",
-      successCriteria: ["基準1"],
-    });
-    const after = makeRequirement({
-      version: "1.2.3",
-      status: "approved",
-      successCriteria: ["基準1", "基準2"],
-    });
-    expect(determineNextVersion(before, after)).toBe("1.3.0");
-  });
-
-  it("priority変更のみでpatchバージョンを上げる", () => {
-    const before = makeRequirement({
-      version: "1.2.3",
-      status: "approved",
-      priority: "low",
-    });
-    const after = makeRequirement({
-      version: "1.2.3",
-      status: "approved",
-      priority: "high",
-    });
-    expect(determineNextVersion(before, after)).toBe("1.2.4");
-  });
-
-  it("status+title変更でtitle変更のminorを適用", () => {
-    const before = makeRequirement({
-      version: "1.2.3",
-      status: "draft",
-      title: "旧タイトル",
-    });
-    const after = makeRequirement({
-      version: "1.2.3",
-      status: "approved",
-      title: "新タイトル",
-    });
-    expect(determineNextVersion(before, after)).toBe("1.3.0");
-  });
-
-  it("title+priority変更でminorを優先", () => {
-    const before = makeRequirement({
-      version: "1.2.3",
-      status: "approved",
-      title: "旧タイトル",
-      priority: "low",
-    });
-    const after = makeRequirement({
-      version: "1.2.3",
-      status: "approved",
-      title: "新タイトル",
-      priority: "high",
-    });
-    expect(determineNextVersion(before, after)).toBe("1.3.0");
-  });
-
-  it("flagsのみ変更ではバージョン据え置き", () => {
-    const before = makeRequirement({
-      version: "1.2.3",
-      status: "approved",
-      flags: [],
-    });
-    const after = makeRequirement({
-      version: "1.2.3",
+      version: "2.3",
       status: "approved",
       flags: [
         {
@@ -202,38 +160,63 @@ describe("determineNextVersion", () => {
         },
       ],
     });
-    expect(determineNextVersion(before, after)).toBe("1.2.3");
+    expect(determineNextVersion(before, after)).toBe("2.3");
+  });
+});
+
+describe("determineNextVersionForSpec", () => {
+  it("ステータスのみ変更 → 据え置き", () => {
+    const before = makeSpecification({ version: "1.0", status: "draft" });
+    const after = makeSpecification({ version: "1.0", status: "approved" });
+    expect(determineNextVersionForSpec(before, after)).toBe("1.0");
   });
 
-  it("status+flags変更のみでもバージョン据え置き", () => {
-    const before = makeRequirement({
-      version: "1.2.3",
-      status: "draft",
-      flags: [],
+  it("supplementaryファイル追加 → 据え置き", () => {
+    const before = makeSpecification({ version: "1.0" });
+    const after = makeSpecification({
+      version: "1.0",
+      files: {
+        design: "specifications/spec-000001/design.md",
+        supplementary: ["a.md", "b.md", "c.md"],
+      },
     });
-    const after = makeRequirement({
-      version: "1.2.3",
-      status: "approved",
-      flags: [
-        {
-          type: "feedback-review",
-          reason: "要確認",
-          createdAt: "2026-01-01T00:00:00Z",
-          relatedIssues: [123],
-          severity: "medium",
-        },
-      ],
+    expect(determineNextVersionForSpec(before, after)).toBe("1.0");
+  });
+
+  it("designパス変更 → 据え置き", () => {
+    const before = makeSpecification({ version: "1.0" });
+    const after = makeSpecification({
+      version: "1.0",
+      files: {
+        design: "specifications/spec-000001/design-v2.md",
+        supplementary: [],
+      },
     });
-    expect(determineNextVersion(before, after)).toBe("1.2.3");
+    expect(determineNextVersionForSpec(before, after)).toBe("1.0");
+  });
+
+  it("flagsのみ変更 → 据え置き", () => {
+    const before = makeSpecification({ version: "1.0", flags: [] });
+    const after = makeSpecification({
+      version: "1.0",
+      flags: [{ type: "feedback-review", reason: "test", createdAt: "2026-01-01T00:00:00Z", relatedIssues: [], severity: "medium" }],
+    });
+    expect(determineNextVersionForSpec(before, after)).toBe("1.0");
+  });
+
+  it("変更なし → 据え置き", () => {
+    const before = makeSpecification({ version: "2.5" });
+    const after = makeSpecification({ version: "2.5" });
+    expect(determineNextVersionForSpec(before, after)).toBe("2.5");
   });
 });
 
 describe("createHistoryEntry", () => {
   it("正しいフィールドが設定される", () => {
-    const req = makeRequirement({ version: "1.2.3", status: "draft" });
+    const req = makeRequirement({ version: "1.0", status: "draft" });
     const entry = createHistoryEntry(req);
 
-    expect(entry.version).toBe("1.2.3");
+    expect(entry.version).toBe("1.0");
     expect(entry.status).toBe("draft");
     expect(entry.changedAt).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/);
     expect(entry.summary).toBeTruthy();
@@ -396,120 +379,6 @@ describe("generateChangeSummary", () => {
   });
 });
 
-// Factory function for Specification
-function makeSpecification(overrides: Partial<Specification> = {}): Specification {
-  return {
-    id: "spec-000001",
-    requirementId: "req-000001",
-    version: "1.0.0",
-    status: "draft",
-    createdAt: "2026-01-01T00:00:00Z",
-    updatedAt: "2026-01-01T00:00:00Z",
-    versionHistory: [],
-    files: {
-      design: "specifications/spec-000001/design.md",
-      supplementary: [],
-    },
-    flags: [],
-    ...overrides,
-  };
-}
-
-describe("determineNextVersionForSpec", () => {
-  it("supplementary大幅変更（3+ファイル追加）→ major", () => {
-    const before = makeSpecification({ version: "1.2.3" });
-    const after = makeSpecification({
-      version: "1.2.3",
-      files: {
-        design: "specifications/spec-000001/design.md",
-        supplementary: ["a.md", "b.md", "c.md"],
-      },
-    });
-    expect(determineNextVersionForSpec(before, after)).toBe("2.0.0");
-  });
-
-  it("supplementary小規模変更（1-2ファイル追加）→ minor", () => {
-    const before = makeSpecification({ version: "1.2.3" });
-    const after = makeSpecification({
-      version: "1.2.3",
-      files: {
-        design: "specifications/spec-000001/design.md",
-        supplementary: ["a.md"],
-      },
-    });
-    expect(determineNextVersionForSpec(before, after)).toBe("1.3.0");
-  });
-
-  it("supplementary 2ファイル追加 → minor", () => {
-    const before = makeSpecification({ version: "1.2.3" });
-    const after = makeSpecification({
-      version: "1.2.3",
-      files: {
-        design: "specifications/spec-000001/design.md",
-        supplementary: ["a.md", "b.md"],
-      },
-    });
-    expect(determineNextVersionForSpec(before, after)).toBe("1.3.0");
-  });
-
-  it("supplementary削除(1-2ファイル) → minor", () => {
-    const before = makeSpecification({
-      version: "1.2.3",
-      files: {
-        design: "specifications/spec-000001/design.md",
-        supplementary: ["a.md", "b.md"],
-      },
-    });
-    const after = makeSpecification({ version: "1.2.3" });
-    expect(determineNextVersionForSpec(before, after)).toBe("1.3.0");
-  });
-
-  it("supplementary大幅削除(3+ファイル) → major", () => {
-    const before = makeSpecification({
-      version: "1.2.3",
-      files: {
-        design: "specifications/spec-000001/design.md",
-        supplementary: ["a.md", "b.md", "c.md"],
-      },
-    });
-    const after = makeSpecification({ version: "1.2.3" });
-    expect(determineNextVersionForSpec(before, after)).toBe("2.0.0");
-  });
-
-  it("designパス変更 → patch", () => {
-    const before = makeSpecification({ version: "1.2.3" });
-    const after = makeSpecification({
-      version: "1.2.3",
-      files: {
-        design: "specifications/spec-000001/design-v2.md",
-        supplementary: [],
-      },
-    });
-    expect(determineNextVersionForSpec(before, after)).toBe("1.2.4");
-  });
-
-  it("ステータスのみ変更 → 据え置き", () => {
-    const before = makeSpecification({ version: "1.2.3", status: "draft" });
-    const after = makeSpecification({ version: "1.2.3", status: "approved" });
-    expect(determineNextVersionForSpec(before, after)).toBe("1.2.3");
-  });
-
-  it("flagsのみ変更 → 据え置き", () => {
-    const before = makeSpecification({ version: "1.2.3", flags: [] });
-    const after = makeSpecification({
-      version: "1.2.3",
-      flags: [{ type: "feedback-review", reason: "test", createdAt: "2026-01-01T00:00:00Z", relatedIssues: [], severity: "medium" }],
-    });
-    expect(determineNextVersionForSpec(before, after)).toBe("1.2.3");
-  });
-
-  it("変更なし → 据え置き", () => {
-    const before = makeSpecification({ version: "1.2.3" });
-    const after = makeSpecification({ version: "1.2.3" });
-    expect(determineNextVersionForSpec(before, after)).toBe("1.2.3");
-  });
-});
-
 describe("generateSpecChangeSummary", () => {
   it("ステータスのみ変更時は変更なし扱い", () => {
     const before = makeSpecification({ status: "draft" });
@@ -576,7 +445,6 @@ describe("generateSpecChangeSummary", () => {
     expect(summary).toContain("1 supplementary file(s) added");
     expect(summary).toContain("Design file path updated");
     expect(summary).toContain(", ");
-    // Status changes are handled by caller, not included in this summary
     expect(summary).not.toContain("Status changed");
   });
 

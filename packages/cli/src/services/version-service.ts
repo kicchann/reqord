@@ -12,74 +12,61 @@ function hasChanged(before: unknown, after: unknown): boolean {
 }
 
 /**
- * Parse semantic version string into components
+ * Parse X.Y version string into components
  */
-export function parseVersion(version: string): { major: number; minor: number; patch: number } {
-  const match = version.match(/^(\d+)\.(\d+)\.(\d+)$/);
+export function parseVersion(version: string): { major: number; minor: number } {
+  const match = version.match(/^(\d+)\.(\d+)$/);
   if (!match) {
-    throw new Error(`Invalid version format: ${version}`);
+    throw new Error(`Invalid version format: ${version}. Must be X.Y format`);
   }
   return {
     major: parseInt(match[1], 10),
     minor: parseInt(match[2], 10),
-    patch: parseInt(match[3], 10),
   };
 }
 
 /**
- * Format version components into semantic version string
+ * Format version components into X.Y version string
  */
-export function formatVersion(major: number, minor: number, patch: number): string {
-  return `${major}.${minor}.${patch}`;
+export function formatVersion(major: number, minor: number): string {
+  return `${major}.${minor}`;
 }
 
 /**
  * Apply explicit version bump to a version string
+ *
+ * In X.Y format:
+ * - "major": X.0 (breaking changes, major feature additions)
+ * - "patch": .Y (all other changes, equivalent to MINOR+PATCH in semver)
+ *
+ * @param currentVersion - Current version in X.Y format
+ * @param bumpType - Type of version bump to apply
+ * @returns New version string in X.Y format
  */
 export function applyVersionBump(
   currentVersion: string,
-  bumpType: "major" | "minor" | "patch",
+  bumpType: "major" | "patch",
 ): string {
-  const { major, minor, patch } = parseVersion(currentVersion);
+  const { major, minor } = parseVersion(currentVersion);
   switch (bumpType) {
     case "major":
-      return formatVersion(major + 1, 0, 0);
-    case "minor":
-      return formatVersion(major, minor + 1, 0);
+      return formatVersion(major + 1, 0);
     case "patch":
-      return formatVersion(major, minor, patch + 1);
+      return formatVersion(major, minor + 1);
   }
 }
 
 /**
  * Determine next version based on changes between requirements
+ *
+ * Version is always preserved here. Version changes are handled
+ * explicitly by the reqord req draft command.
+ *
+ * @param before - Previous requirement state
+ * @param _after - New requirement state (unused, version changes are explicit)
+ * @returns The preserved version from before
  */
-export function determineNextVersion(before: Requirement, after: Requirement): string {
-  // If both are draft, no version increment
-  if (before.status === "draft" && after.status === "draft") {
-    return before.version;
-  }
-
-  const { major, minor, patch } = parseVersion(before.version);
-
-  // Check for minor changes (title, format, dependencies, successCriteria)
-  const hasMinorChange =
-    hasChanged(before.title, after.title) ||
-    hasChanged(before.format, after.format) ||
-    hasChanged(before.dependencies, after.dependencies) ||
-    hasChanged(before.successCriteria, after.successCriteria);
-
-  if (hasMinorChange) {
-    return formatVersion(major, minor + 1, 0);
-  }
-
-  // Check for patch changes (priority only)
-  if (before.priority !== after.priority) {
-    return formatVersion(major, minor, patch + 1);
-  }
-
-  // Status and flags changes don't affect version
-  // No content changes detected
+export function determineNextVersion(before: Requirement, _after: Requirement): string {
   return before.version;
 }
 
@@ -217,34 +204,14 @@ function countSupplementaryDiff(before: Specification, after: Specification): { 
 /**
  * Determine next version based on changes between specifications
  *
- * Version bump priority (checked in order):
- * 1. 3+ supplementary file changes → major bump (X.0.0)
- * 2. 1-2 supplementary file changes → minor bump (0.X.0)
- * 3. Design file path changed → patch bump (0.0.X)
- * 4. All other changes (status, flags, design content, etc.) → no version bump
+ * Version is always preserved here. Version changes are handled
+ * explicitly by the reqord spec draft command.
+ *
+ * @param before - Previous specification state
+ * @param _after - New specification state (unused, version changes are explicit)
+ * @returns The preserved version from before
  */
-export function determineNextVersionForSpec(before: Specification, after: Specification): string {
-  const { major, minor, patch } = parseVersion(before.version);
-
-  const { added, removed } = countSupplementaryDiff(before, after);
-  const totalSupplementaryChanges = added + removed;
-
-  // 3+ supplementary file changes → major bump
-  if (totalSupplementaryChanges >= 3) {
-    return formatVersion(major + 1, 0, 0);
-  }
-
-  // 1-2 supplementary file changes → minor bump
-  if (totalSupplementaryChanges >= 1) {
-    return formatVersion(major, minor + 1, 0);
-  }
-
-  // Design file path changed → patch bump
-  if (before.files.design !== after.files.design) {
-    return formatVersion(major, minor, patch + 1);
-  }
-
-  // All other changes (status, flags, design content, etc.) → no version bump
+export function determineNextVersionForSpec(before: Specification, _after: Specification): string {
   return before.version;
 }
 

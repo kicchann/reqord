@@ -1,5 +1,5 @@
 id: req-000011
-version: 5.0.0
+version: 5.0
 title: Requirement承認フロー (GitHub PR連携)
 status: draft
 priority: high
@@ -58,7 +58,7 @@ dependencies:
 estimatedComplexity: medium
 estimatedHours: 12
 currentApproval:
-  version: 2.0.0
+  version: 2.0
   phase: requirement
   prNumber: 107
   prUrl: https://github.com/kicchann/reqord/pull/107

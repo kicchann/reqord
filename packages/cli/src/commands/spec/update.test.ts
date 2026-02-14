@@ -21,7 +21,7 @@ function makeSpecification(overrides: Partial<Specification> = {}): Specificatio
   return {
     id: "spec-000001",
     requirementId: "req-000001",
-    version: "1.0.0",
+    version: "1.0",
     status: "draft",
     createdAt: "2026-01-01T00:00:00Z",
     updatedAt: "2026-01-01T00:00:00Z",
@@ -48,15 +48,14 @@ describe("spec update command", () => {
     updateCommand.setOptionValue("patchFile", undefined);
     updateCommand.setOptionValue("designFile", undefined);
     updateCommand.setOptionValue("major", undefined);
-    updateCommand.setOptionValue("minor", undefined);
     updateCommand.setOptionValue("patch", undefined);
     updateCommand.setOptionValue("json", undefined);
   });
 
   it("--patch-file適用の正常動作", async () => {
-    const before = makeSpecification({ version: "1.0.0" });
+    const before = makeSpecification({ version: "1.0" });
     const after = makeSpecification({
-      version: "1.1.0",
+      version: "1.0",
       files: {
         design: "specifications/spec-000001/design.md",
         supplementary: ["new.md"],
@@ -80,8 +79,8 @@ describe("spec update command", () => {
   });
 
   it("--design-file更新の正常動作", async () => {
-    const before = makeSpecification({ version: "1.0.0" });
-    const after = makeSpecification({ version: "1.0.1" });
+    const before = makeSpecification({ version: "1.0" });
+    const after = makeSpecification({ version: "1.0" });
 
     mockReadText.mockResolvedValue("# Updated design");
     mockUpdateSpecification.mockResolvedValue({ before, after });
@@ -100,8 +99,8 @@ describe("spec update command", () => {
   });
 
   it("--major指定でmajorバージョンアップ", async () => {
-    const before = makeSpecification({ version: "1.2.3" });
-    const after = makeSpecification({ version: "2.0.0" });
+    const before = makeSpecification({ version: "1.2" });
+    const after = makeSpecification({ version: "2.0" });
 
     mockReadText.mockResolvedValue("files:\n  supplementary:\n    - new.md\n");
     mockUpdateSpecification.mockResolvedValue({ before, after });
@@ -122,37 +121,12 @@ describe("spec update command", () => {
         versionBump: "major",
       }),
     );
-    expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining("version: 1.2.3 → 2.0.0"));
-  });
-
-  it("--minor指定でminorバージョンアップ", async () => {
-    const before = makeSpecification({ version: "1.2.3" });
-    const after = makeSpecification({ version: "1.3.0" });
-
-    mockReadText.mockResolvedValue("files:\n  supplementary:\n    - new.md\n");
-    mockUpdateSpecification.mockResolvedValue({ before, after });
-
-    await updateCommand.parseAsync([
-      "node",
-      "test",
-      "spec-000001",
-      "--patch-file",
-      "patch.yaml",
-      "--minor",
-    ]);
-
-    expect(mockUpdateSpecification).toHaveBeenCalledWith(
-      process.cwd(),
-      "spec-000001",
-      expect.objectContaining({
-        versionBump: "minor",
-      }),
-    );
+    expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining("version: 1.2 → 2.0"));
   });
 
   it("--patch指定でpatchバージョンアップ", async () => {
-    const before = makeSpecification({ version: "1.2.3" });
-    const after = makeSpecification({ version: "1.2.4" });
+    const before = makeSpecification({ version: "1.2" });
+    const after = makeSpecification({ version: "1.3" });
 
     mockReadText.mockResolvedValue("files:\n  supplementary:\n    - new.md\n");
     mockUpdateSpecification.mockResolvedValue({ before, after });
@@ -175,7 +149,7 @@ describe("spec update command", () => {
     );
   });
 
-  it("--major/--minor/--patchの複数指定でエラー", async () => {
+  it("--major/--patchの複数指定でエラー", async () => {
     await updateCommand.parseAsync([
       "node",
       "test",
@@ -183,12 +157,12 @@ describe("spec update command", () => {
       "--patch-file",
       "patch.yaml",
       "--major",
-      "--minor",
+      "--patch",
     ]);
 
     expect(process.exitCode).toBe(1);
     expect(consoleErrorSpy).toHaveBeenCalledWith(
-      expect.stringContaining("Only one of --major, --minor, or --patch can be specified"),
+      expect.stringContaining("Only one of --major or --patch can be specified"),
     );
   });
 
@@ -213,8 +187,8 @@ describe("spec update command", () => {
   });
 
   it("--jsonオプションでJSON出力", async () => {
-    const before = makeSpecification({ version: "1.0.0" });
-    const after = makeSpecification({ version: "1.1.0" });
+    const before = makeSpecification({ version: "1.0" });
+    const after = makeSpecification({ version: "1.0" });
 
     mockReadText.mockResolvedValue("files:\n  supplementary:\n    - new.md\n");
     mockUpdateSpecification.mockResolvedValue({ before, after });
@@ -238,8 +212,8 @@ describe("spec update command", () => {
   });
 
   it("組み合わせ: --patch-file + --design-file", async () => {
-    const before = makeSpecification({ version: "1.0.0" });
-    const after = makeSpecification({ version: "1.1.0" });
+    const before = makeSpecification({ version: "1.0" });
+    const after = makeSpecification({ version: "1.0" });
 
     mockReadText.mockResolvedValueOnce("files:\n  supplementary:\n    - new.md\n");
     mockReadText.mockResolvedValueOnce("# Updated design");

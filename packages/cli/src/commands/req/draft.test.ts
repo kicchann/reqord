@@ -16,7 +16,7 @@ const mockShowRequirement = vi.mocked(showRequirement);
 function makeRequirement(overrides: Partial<Requirement> = {}): Requirement {
   return {
     id: "req-000001",
-    version: "1.0.0",
+    version: "1.0",
     title: "Test Requirement",
     status: "approved",
     priority: "medium",
@@ -46,14 +46,13 @@ describe("req draft command", () => {
     consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     // Reset Commander option state
     draftCommand.setOptionValue("major", undefined);
-    draftCommand.setOptionValue("minor", undefined);
     draftCommand.setOptionValue("patch", undefined);
     draftCommand.setOptionValue("json", undefined);
   });
 
   it("approved → draftへの差し戻し", async () => {
-    const before = makeRequirement({ status: "approved", version: "2.0.0" });
-    const after = makeRequirement({ status: "draft", version: "2.0.0" });
+    const before = makeRequirement({ status: "approved", version: "2.0" });
+    const after = makeRequirement({ status: "draft", version: "2.0" });
 
     mockShowRequirement.mockResolvedValue({ requirement: before, description: null });
     mockUpdateRequirement.mockResolvedValue({ before, after, descriptionUpdated: false });
@@ -74,8 +73,8 @@ describe("req draft command", () => {
   });
 
   it("implemented → draftへの差し戻し", async () => {
-    const before = makeRequirement({ status: "implemented", version: "3.0.0" });
-    const after = makeRequirement({ status: "draft", version: "3.0.0" });
+    const before = makeRequirement({ status: "implemented", version: "3.0" });
+    const after = makeRequirement({ status: "draft", version: "3.0" });
 
     mockShowRequirement.mockResolvedValue({ requirement: before, description: null });
     mockUpdateRequirement.mockResolvedValue({ before, after, descriptionUpdated: false });
@@ -114,8 +113,8 @@ describe("req draft command", () => {
   });
 
   it("--major指定でmajorバージョンアップ", async () => {
-    const before = makeRequirement({ status: "approved", version: "1.2.3" });
-    const after = makeRequirement({ status: "draft", version: "2.0.0" });
+    const before = makeRequirement({ status: "approved", version: "1.5" });
+    const after = makeRequirement({ status: "draft", version: "2.0" });
 
     mockShowRequirement.mockResolvedValue({ requirement: before, description: null });
     mockUpdateRequirement.mockResolvedValue({ before, after, descriptionUpdated: false });
@@ -130,30 +129,12 @@ describe("req draft command", () => {
         versionBump: "major",
       }),
     );
-    expect(consoleLogSpy).toHaveBeenCalledWith("  version: 1.2.3 → 2.0.0");
-  });
-
-  it("--minor指定でminorバージョンアップ", async () => {
-    const before = makeRequirement({ status: "approved", version: "1.2.3" });
-    const after = makeRequirement({ status: "draft", version: "1.3.0" });
-
-    mockShowRequirement.mockResolvedValue({ requirement: before, description: null });
-    mockUpdateRequirement.mockResolvedValue({ before, after, descriptionUpdated: false });
-
-    await draftCommand.parseAsync(["node", "test", "req-000001", "--minor"]);
-
-    expect(mockUpdateRequirement).toHaveBeenCalledWith(
-      process.cwd(),
-      "req-000001",
-      expect.objectContaining({
-        versionBump: "minor",
-      }),
-    );
+    expect(consoleLogSpy).toHaveBeenCalledWith("  version: 1.5 → 2.0");
   });
 
   it("--patch指定でpatchバージョンアップ", async () => {
-    const before = makeRequirement({ status: "approved", version: "1.2.3" });
-    const after = makeRequirement({ status: "draft", version: "1.2.4" });
+    const before = makeRequirement({ status: "approved", version: "1.5" });
+    const after = makeRequirement({ status: "draft", version: "1.6" });
 
     mockShowRequirement.mockResolvedValue({ requirement: before, description: null });
     mockUpdateRequirement.mockResolvedValue({ before, after, descriptionUpdated: false });
@@ -169,21 +150,21 @@ describe("req draft command", () => {
     );
   });
 
-  it("--major/--minor/--patchの複数指定でエラー", async () => {
+  it("--major/--patchの複数指定でエラー", async () => {
     const requirement = makeRequirement({ status: "approved" });
     mockShowRequirement.mockResolvedValue({ requirement, description: null });
 
-    await draftCommand.parseAsync(["node", "test", "req-000001", "--major", "--minor"]);
+    await draftCommand.parseAsync(["node", "test", "req-000001", "--major", "--patch"]);
 
     expect(process.exitCode).toBe(1);
     expect(consoleErrorSpy).toHaveBeenCalledWith(
-      expect.stringContaining("Only one of --major, --minor, or --patch can be specified"),
+      expect.stringContaining("Only one of --major or --patch can be specified"),
     );
   });
 
   it("--jsonオプションでJSON出力", async () => {
-    const before = makeRequirement({ status: "approved", version: "2.0.0" });
-    const after = makeRequirement({ status: "draft", version: "2.0.0" });
+    const before = makeRequirement({ status: "approved", version: "2.0" });
+    const after = makeRequirement({ status: "draft", version: "2.0" });
 
     mockShowRequirement.mockResolvedValue({ requirement: before, description: null });
     mockUpdateRequirement.mockResolvedValue({ before, after, descriptionUpdated: false });
@@ -191,7 +172,6 @@ describe("req draft command", () => {
     await draftCommand.parseAsync(["node", "test", "req-000001", "--json"]);
 
     expect(consoleLogSpy).toHaveBeenCalledWith(JSON.stringify(after, null, 2));
-    // JSON mode should not print other messages
     expect(consoleLogSpy).not.toHaveBeenCalledWith(
       expect.stringContaining("Reverted requirement to draft"),
     );
@@ -200,15 +180,15 @@ describe("req draft command", () => {
   it("versionHistoryエントリが記録される", async () => {
     const before = makeRequirement({
       status: "approved",
-      version: "2.0.0",
+      version: "2.0",
       versionHistory: [],
     });
     const after = makeRequirement({
       status: "draft",
-      version: "2.0.0",
+      version: "2.0",
       versionHistory: [
         {
-          version: "2.0.0",
+          version: "2.0",
           status: "draft",
           gitCommit: "abc123",
           changedAt: "2026-01-01T00:00:00Z",

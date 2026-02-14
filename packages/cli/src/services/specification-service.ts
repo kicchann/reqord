@@ -31,7 +31,7 @@ export async function createSpecification(
   const specification: Specification = {
     id,
     requirementId: options.requirementId,
-    version: "1.0.0",
+    version: "1.0",
     status: "draft",
     createdAt: now,
     updatedAt: now,
@@ -215,7 +215,7 @@ export interface UpdateSpecOptions {
   status?: Status;
   patchData?: Partial<Specification>;
   designContent?: string;
-  versionBump?: "major" | "minor" | "patch";
+  versionBump?: "major" | "patch";
 }
 
 export interface UpdateSpecResult {
@@ -249,30 +249,14 @@ export async function updateSpecification(
     merged.status = options.status;
   }
 
-  // Detect content changes (for auto-versioning)
+  // Detect content changes (for summary generation)
   const hasContentChanges = hasSpecMetadataChanges(before, merged);
 
   // Determine next version
-  let nextVersion = before.version;
-
-  if (options.versionBump) {
-    // Explicit version bump takes priority over auto-versioning
-    nextVersion = versionService.applyVersionBump(before.version, options.versionBump);
-  } else {
-    // Auto-versioning based on content changes
-    // Priority order: metadata changes (supplementary files) > design content changes > status-only
-    // When both supplementary and design content change, supplementary takes precedence
-    if (hasContentChanges) {
-      // Metadata changes (supplementary files, etc.) - may trigger major/minor/patch
-      nextVersion = versionService.determineNextVersionForSpec(before, merged);
-    } else if (options.designContent !== undefined) {
-      // Design content-only change (patch bump)
-      // Note: This only applies when metadata hasn't changed
-      const { major, minor, patch } = versionService.parseVersion(before.version);
-      nextVersion = versionService.formatVersion(major, minor, patch + 1);
-    }
-    // Status-only changes keep version unchanged
-  }
+  // Version changes only via explicit versionBump option (no auto-versioning)
+  const nextVersion = options.versionBump
+    ? versionService.applyVersionBump(before.version, options.versionBump)
+    : before.version;
 
   // Generate summary
   const changes: string[] = [];

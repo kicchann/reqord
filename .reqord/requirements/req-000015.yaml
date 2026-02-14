@@ -1,5 +1,5 @@
 id: req-000015
-version: 5.0.0
+version: 5.0
 title: Specification承認フロー
 status: draft
 priority: medium
@@ -56,7 +56,7 @@ dependencies:
 estimatedComplexity: small
 estimatedHours: 8
 currentApproval:
-  version: 2.0.0
+  version: 2.0
   phase: requirement
   prNumber: 108
   prUrl: https://github.com/kicchann/reqord/pull/108

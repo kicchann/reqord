@@ -1,5 +1,5 @@
 id: req-000009
-version: 1.0.0
+version: 1.0
 title: CLIエラーハンドリング統一
 status: implemented
 priority: medium

@@ -17,7 +17,7 @@ function makeSpecification(overrides: Partial<Specification> = {}): Specificatio
   return {
     id: "spec-000001",
     requirementId: "req-000001",
-    version: "2.0.0",
+    version: "2.0",
     status: "approved",
     createdAt: "2026-01-01T00:00:00Z",
     updatedAt: "2026-01-01T00:00:00Z",
@@ -45,8 +45,8 @@ describe("spec implemented command", () => {
   });
 
   it("approved → implementedへの遷移", async () => {
-    const before = makeSpecification({ status: "approved", version: "2.0.0" });
-    const after = makeSpecification({ status: "implemented", version: "2.0.0" });
+    const before = makeSpecification({ status: "approved", version: "2.0" });
+    const after = makeSpecification({ status: "implemented", version: "2.0" });
 
     mockShowSpecification.mockResolvedValue({ specification: before, design: null });
     mockUpdateSpecification.mockResolvedValue({ before, after });
@@ -67,8 +67,8 @@ describe("spec implemented command", () => {
   });
 
   it("バージョンが据え置かれる（ステータスのみ変更）", async () => {
-    const before = makeSpecification({ status: "approved", version: "2.0.0" });
-    const after = makeSpecification({ status: "implemented", version: "2.0.0" });
+    const before = makeSpecification({ status: "approved", version: "2.0" });
+    const after = makeSpecification({ status: "implemented", version: "2.0" });
 
     mockShowSpecification.mockResolvedValue({ specification: before, design: null });
     mockUpdateSpecification.mockResolvedValue({ before, after });
@@ -177,15 +177,15 @@ describe("spec implemented command", () => {
   it("versionHistoryエントリが記録される", async () => {
     const before = makeSpecification({
       status: "approved",
-      version: "2.0.0",
+      version: "2.0",
       versionHistory: [],
     });
     const after = makeSpecification({
       status: "implemented",
-      version: "2.0.0",
+      version: "2.0",
       versionHistory: [
         {
-          version: "2.0.0",
+          version: "2.0",
           status: "implemented",
           gitCommit: "abc123",
           changedAt: "2026-01-01T00:00:00Z",
@@ -205,8 +205,8 @@ describe("spec implemented command", () => {
   });
 
   it("--jsonオプションでJSON出力", async () => {
-    const before = makeSpecification({ status: "approved", version: "2.0.0" });
-    const after = makeSpecification({ status: "implemented", version: "2.0.0" });
+    const before = makeSpecification({ status: "approved", version: "2.0" });
+    const after = makeSpecification({ status: "implemented", version: "2.0" });
 
     mockShowSpecification.mockResolvedValue({ specification: before, design: null });
     mockUpdateSpecification.mockResolvedValue({ before, after });
