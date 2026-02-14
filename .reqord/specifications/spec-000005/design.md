@@ -2,9 +2,10 @@
 
 ## 1. 設計概要
 
-要件のライフサイクル管理として、セマンティックバージョニング（major/minor/patch）による変更追跡と状態遷移（draft → approved → implemented）を実装する。バージョンインクリメントは**内容変更時のみ**行い、ステータス遷移ではバージョンを変更しない。要件更新時にversionHistoryへ自動的に履歴エントリを追加し、`reqord req history <id>` コマンドで変更履歴を表示する。既存のRequirementスキーマに定義済みの `version` / `versionHistory` フィールドを活用する。
+要件のライフサイクル管理として、シンプルなX.Y形式のバージョニング（1.0, 2.0, 1.1...）による変更追跡と状態遷移（draft → approved → implemented）を実装する。通常は X.0 形式を使い、typoなど軽微な修正でどうしても必要な時のみ .Y を使用する。バージョンインクリメントは**内容変更時のみ**行い、ステータス遷移ではバージョンを変更しない。要件更新時にversionHistoryへ自動的に履歴エントリを追加し、`reqord req history <id>` コマンドで変更履歴を表示する。既存のRequirementスキーマに定義済みの `version` / `versionHistory` フィールドを活用する。
 
 > **v2.0.0改訂:** フィードバック(#109, #208, #209)に基づき、バージョニングルールと状態遷移を改訂。
+> **v3.0.0改訂 (Issue #247):** セマンティックバージョニングから整数+小数点形式（X.Y）に簡素化。
 
 ## 2. アーキテクチャ
 
@@ -41,37 +42,78 @@ reqord req history <id> [--json]
 
 **責務:** バージョン管理ロジックの提供。
 
-- `determineNextVersion(before, after)`: **内容フィールド**の変更に基づくバージョン番号決定
-  - **major** (x.0.0): 要件の根本的な変更（スコープ変更、EARS format変更）
-  - **minor** (0.x.0): 要件の追加・拡張（successCriteria追加、dependencies変更、title変更等）
-  - **patch** (0.0.x): 記述の修正（description.mdの誤字修正、明確化、priority変更）
-  - **変更なし**: ステータス変更のみ、flag変更のみの場合はバージョンを変えない
+- `determineNextVersion(currentVersion, options)`: draftコマンド実行時のバージョン番号決定
+  - **X.0インクリメント** (1.5→2.0): デフォルト（`--patch`なし）
+  - **.Yインクリメント** (1.5→1.6): `--patch`指定時
+  - **注**: approved/implemented → draft 遷移時にのみバージョン変更
 - `createHistoryEntry(requirement, gitCommit)`: VersionHistoryEntryの生成
 - `getStateTransitions()`: 許可される状態遷移マップの提供
-- `--major`, `--minor`, `--patch` オプションで明示的にバージョン種別を指定可能
+- `--major`, `--patch` オプションで明示的にバージョン種別を指定可能（`--minor` は廃止）
+- **デフォルトは`--major`**: オプション指定なしの場合、自動的に`--major`適用
+
+### バージョン番号フォーマット
+
+**形式:** `X.Y` (X: 整数、Y: 0または正の整数)
+
+**有効な例:**
+- `1.0`, `2.0`, `3.0` - 標準形式（X.0）
+- `1.1`, `1.2`, `2.1` - 軽微な修正（X.Y）
+- `1.10`, `1.11` - Yは2桁以上も可
+- `10.0`, `10.1` - Xは2桁以上も可
+
+**無効な例:**
+- `1` - .0が省略されている（必ず X.Y 形式）
+- `1.0.0` - セマンティックバージョニング（旧形式、移行前のみ許可）
+- `v1.0`, `ver1.0` - プレフィックス付き
+
+**実装:**
+```typescript
+// バージョンのパースと検証
+const parseVersion = (version: string): {major: number, minor: number} => {
+  const match = version.match(/^(\d+)\.(\d+)$/);
+  if (!match) {
+    throw new Error(`Invalid version format: ${version}. Must be X.Y format (e.g., "1.0", "2.5")`);
+  }
+  return {
+    major: parseInt(match[1], 10),
+    minor: parseInt(match[2], 10),
+  };
+};
+
+// バージョンのフォーマット
+const formatVersion = (major: number, minor: number): string => {
+  return `${major}.${minor}`;
+};
+
+// X.0インクリメント
+const incrementMajor = (version: string): string => {
+  const {major} = parseVersion(version);
+  return formatVersion(major + 1, 0);  // "1.5" → "2.0"
+};
+
+// .Yインクリメント
+const incrementMinor = (version: string): string => {
+  const {major, minor} = parseVersion(version);
+  return formatVersion(major, minor + 1);  // "1.5" → "1.6"
+};
+```
 
 #### バージョン変更トリガー判定
 
-| 変更内容 | バージョン変更 | 備考 |
-|---------|--------------|------|
-| title, successCriteria, format, dependencies等 | する | 内容変更 = バージョンアップ |
-| status変更（draft → approved → implemented等） | **しない** | ワークフロー進行はバージョンと無関係 |
-| flagの追加・削除 | **しない** | メタ情報の変更 |
+| 操作 | バージョン変更 | 新バージョン例 | 備考 |
+|------|--------------|--------------|------|
+| `reqord req draft`（approved/implemented → draft） | **する（X.0）** | 1.0 (approved) → 2.0 (draft) | デフォルトでメジャーバージョンアップ |
+| `reqord req draft --patch`（軽微な修正の場合） | **する（.Y）** | 1.0 (approved) → 1.1 (draft) | typoなど例外的に使用 |
+| approved/implementedでの軽微な修正 | **する（.Y）** | 1.0 → 1.1 | draftに戻さずマイナーバージョンのみ更新 |
+| `reqord req approve`（draft → approved） | **しない** | 1.0 (draft) → 1.0 (approved) | ステータス遷移のみ |
+| `reqord req implemented`（approved → implemented） | **しない** | 1.0 (approved) → 1.0 (implemented) | ステータス遷移のみ |
+| flagの追加・削除 | **しない** | - | メタ情報の変更 |
 
 ### 3.3 RequirementService 拡張
 
-**変更点:** updateRequirement内でのバージョン自動インクリメント。
+**変更点:** `reqord req draft`コマンド実行時のバージョンインクリメント。
 
-```typescript
-// 内容フィールドに変更がある場合のみバージョンインクリメント
-const contentChanged = hasContentChanges(before, after);
-if (contentChanged) {
-  const nextVersion = determineNextVersion(before, after);
-  after.version = nextVersion;
-  after.versionHistory.push(createHistoryEntry(after, gitCommit));
-}
-// ステータスのみの変更ではバージョンを変えない
-```
+> **注:** 実装の詳細はPhase 2（Issue #247実装時）で確定します。
 
 ### 3.4 状態遷移ルール
 
@@ -112,52 +154,32 @@ draft ──approve──→ approved ──implement──→ implemented
 
 ## 4. データフロー
 
-### 更新時の自動バージョニング（内容変更あり）
+> **注:** 新しいバージョニングルール（X.Y形式）に基づくデータフローの詳細は、Phase 2（Issue #247実装時）で確定します。
 
-```
-ユーザー → reqord req update req-000001 --title "新しいタイトル"
-  → updateRequirement(cwd, id, { title: "新しいタイトル" })
-    → before取得（title: "旧タイトル", version: "1.0.0"）
-    → hasContentChanges(before, after) → true（title変更）
-    → determineNextVersion(before, after) → "1.1.0"（構造変更=minor）
-    → createHistoryEntry(after, gitCommit)
-    → versionHistory.push(entry)
-    → reqRepo.save(cwd, after)
-```
+### 主要フロー概要
 
-### 状態遷移（バージョン据え置き、履歴は記録）
-
-```
-ユーザー → reqord req approve req-000001
-  → before取得（status: "draft", version: "1.1.0"）
-  → 状態遷移チェック: draft → approved（許可）
-  → バージョンインクリメントなし
-  → versionHistory.push({ version: "1.1.0", status: "approved", gitCommit, ... })
-  → reqRepo.save(cwd, after)
-```
-
-### flag対応によるdraft差し戻し
-
+**draft化とバージョンインクリメント:**
 ```
 ユーザー → reqord req draft req-000001
-  → before取得（status: "implemented", version: "1.1.0"）
-  → 状態遷移チェック: implemented → draft（許可）
-  → バージョン見直し（必要に応じて内容変更時にインクリメント）
-  → versionHistory.push({ version: "1.1.0", status: "draft", gitCommit, ... })
-  → reqRepo.save(cwd, after)
+  → approved/implemented → draft 遷移
+  → デフォルト: X.0インクリメント（1.0 → 2.0）
+  → --patch指定: .Yインクリメント（1.0 → 1.1）
+  → versionHistory.push(entry)
 ```
 
-### 履歴表示
+**状態遷移（バージョン据え置き）:**
+```
+ユーザー → reqord req approve req-000001
+  → draft → approved 遷移
+  → バージョンインクリメントなし
+  → versionHistory.push({ version: "1.0", status: "approved", ... })
+```
 
+**履歴表示:**
 ```
 ユーザー → reqord req history req-000001
-  → showRequirement(cwd, id)
-    → requirement.versionHistory取得
-  → テーブル表示:
-    | Version | Status    | Git Commit | Date       | Summary              |
-    | 1.0.0   | draft     | abc1234    | 2025-01-01 | Initial              |
-    | 1.1.0   | draft     | def5678    | 2025-01-05 | 成功基準追加          |
-    | 2.0.0   | approved  | 9ab0cde    | 2025-01-10 | スコープ変更          |
+  → requirement.versionHistory取得
+  → テーブル表示
 ```
 
 ## 5. テスト方針
@@ -169,7 +191,7 @@ draft ──approve──→ approved ──implement──→ implemented
 - **状態遷移**: 許可/禁止される遷移パターンの網羅テスト
 - **createHistoryEntry**: エントリ生成の各フィールド検証
 - **ステータスのみ変更**: バージョンインクリメントされないことの確認
-- **明示的バージョン指定**: `--major`/`--minor`/`--patch` オプションの動作
+- **明示的バージョン指定**: `--major`/`--patch` オプションの動作
 
 ### 統合テスト
 

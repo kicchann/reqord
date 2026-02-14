@@ -1,10 +1,10 @@
 id: req-000005
-version: 2.0.0
+version: 3.0
 title: Requirement/Specificationバージョン管理
-status: approved
+status: draft
 priority: medium
 createdAt: 2026-02-07T10:00:00Z
-updatedAt: 2026-02-13T00:00:00.000Z
+updatedAt: 2026-02-14T00:00:00.000Z
 versionHistory:
   - version: 1.0.0
     status: implemented
@@ -15,16 +15,21 @@ versionHistory:
     status: draft
     gitCommit: a3583e7
     changedAt: 2026-02-13T00:00:00.000Z
-    summary: Reverted to draft for revision based on feedback (#109,
+    summary: Reverted to draft for revision based on feedback (#109, #208, #209)
+  - version: 3.0
+    status: draft
+    gitCommit: pending
+    changedAt: 2026-02-14T00:00:00.000Z
+    summary: 'Simplified versioning: semantic versioning → integer-based (X.Y) format (Issue #247)'
 files:
   description: requirements/req-000005/description.md
   supplementary: []
 successCriteria:
-  - 内容変更時にバージョンが自動インクリメントされる（req/spec共通）
+  - approved/implementedからdraftに戻す際にバージョンがインクリメントされる（req/spec共通）
   - ステータス変更のみではバージョンをインクリメントしない
+  - X.Y形式のバージョン番号をサポートする（1.0, 2.0, 1.1など）
   - versionHistory にバージョン履歴が記録される
   - reqord req history <id> / reqord spec history <id> でバージョン履歴を表示できる
-  - 特定バージョンの要件/仕様内容を参照できる
   - Gitコミットとバージョンが紐付けられる
 format:
   type: ears
@@ -43,10 +48,4 @@ dependencies:
     - req-000006
 estimatedComplexity: medium
 estimatedHours: 12
-flags:
-  - type: feedback-review
-    reason: 'Feedback from issue #247'
-    createdAt: 2026-02-13T15:49:24.303Z
-    relatedIssues:
-      - 247
-    severity: low
+flags: []

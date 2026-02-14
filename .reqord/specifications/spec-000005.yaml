@@ -1,15 +1,20 @@
 id: spec-000005
 requirementId: req-000005
-version: 2.0.0
-status: approved
+version: 2.0
+status: draft
 createdAt: 2026-02-08T14:08:06.961Z
-updatedAt: 2026-02-13T00:00:00.000Z
+updatedAt: 2026-02-14T00:00:00.000Z
 versionHistory:
   - version: 1.0.0
     status: implemented
     gitCommit: aa7e3b6
     changedAt: 2026-02-12T15:12:54.066Z
     summary: Initial implementation (Requirement versioning only)
+  - version: 2.0
+    status: draft
+    gitCommit: pending
+    changedAt: 2026-02-14T00:00:00.000Z
+    summary: "Simplified versioning: semantic versioning → integer-based (X.Y) format (Issue #247)"
 files:
   design: specifications/spec-000005/design.md
   supplementary: []
@@ -17,22 +22,22 @@ flags: []
 implementation:
   issues:
     - number: 48
-      title: '[Feature] updateコマンドにバージョン指定オプション追加（--major/--minor/--patch）'
+      title: "[Feature] updateコマンドにバージョン指定オプション追加（--major/--minor/--patch）"
       url: https://github.com/kicchann/reqord/issues/48
       priority: P2
       status: closed
     - number: 47
-      title: '[Feature] reqord req historyコマンド新規作成'
+      title: "[Feature] reqord req historyコマンド新規作成"
       url: https://github.com/kicchann/reqord/issues/47
       priority: P2
       status: closed
     - number: 46
-      title: '[Feature] RequirementService拡張（状態遷移バリデーション＋自動バージョンインクリメント）'
+      title: "[Feature] RequirementService拡張（状態遷移バリデーション＋自動バージョンインクリメント）"
       url: https://github.com/kicchann/reqord/issues/46
       priority: P2
       status: closed
     - number: 45
-      title: '[Feature] VersionService新規作成（バージョン決定・履歴エントリ生成・状態遷移ルール）'
+      title: "[Feature] VersionService新規作成（バージョン決定・履歴エントリ生成・状態遷移ルール）"
       url: https://github.com/kicchann/reqord/issues/45
       priority: P2
       status: closed
