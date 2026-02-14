@@ -25,7 +25,7 @@ versionHistory:
     status: draft
     gitCommit: pending
     changedAt: 2026-02-14T12:00:00.000Z
-    summary: 'Add reqord version command specification, separate versioning from status transitions (Issue #263)'
+    summary: 'Major design change: Add reqord version command, fully separate versioning from status transitions. Removes --major/--patch from draft command. Backward incompatible with v3.0 (Issue #263)'
 files:
   description: requirements/req-000005/description.md
   supplementary: []

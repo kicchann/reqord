@@ -37,10 +37,10 @@ the system shall NOT increment the version.
 |------|--------------|--------------|------|
 | `reqord version --major` | **する（X.0）** | 1.0 → 2.0 | 任意のステータスで実行可能 |
 | `reqord version --patch` | **する（.Y）** | 1.0 → 1.1 | 任意のステータスで実行可能 |
-| `reqord req draft` | **しない** | - | ステータス遷移のみ |
+| `reqord req draft` | **しない** | 変更なし | ステータス遷移のみ |
 | `reqord req approve`（draft → approved） | **しない** | 1.0 (draft) → 1.0 (approved) | ステータス遷移のみ |
 | `reqord req implemented`（approved → implemented） | **しない** | 1.0 (approved) → 1.0 (implemented) | ステータス遷移のみ |
-| flagの追加・削除 | **しない** | - | メタ情報の変更 |
+| flagの追加・削除 | **しない** | 変更なし | メタ情報の変更 |
 
 ### 状態遷移
 
@@ -104,6 +104,48 @@ reqord version spec-000001 --patch --summary "Fix typo in design document"
 - Gitコミットハッシュとの紐付けはGit操作と連携
 - `versionHistory` 配列は追記のみ（履歴改変不可）
 
+## コマンドインターフェースの移行計画（v4.0）
+
+### 廃止されるコマンドオプション
+
+v4.0では、以下のコマンドオプションが廃止されます:
+- `reqord req draft <id> --major` (削除)
+- `reqord req draft <id> --patch` (削除)
+- `reqord spec draft <id> --major` (削除)
+- `reqord spec draft <id> --patch` (削除)
+
+### 新しいコマンド
+
+代わりに、専用の`reqord version`コマンドを使用します:
+```bash
+# 旧: reqord req draft req-000001 --major
+# 新: reqord version req-000001 --major && reqord req draft req-000001
+
+# 旧: reqord req draft req-000001 --patch
+# 新: reqord version req-000001 --patch && reqord req draft req-000001
+```
+
+### 移行スケジュール
+
+**Phase 1 (即時)**: ドキュメント更新とコマンド追加
+- req-000005 v4.0、spec-000005 v3.0のドキュメント承認
+- `reqord version`コマンドの実装
+
+**Phase 2 (v4.0実装後)**: Deprecation警告の追加
+- `reqord req draft --major/--patch`実行時に警告メッセージを表示
+- 警告メッセージ例: "Warning: --major/--patch options are deprecated. Use 'reqord version <id> --major/--patch' instead."
+
+**Phase 3 (v5.0以降)**: オプション削除
+- `--major`/`--patch`オプションを完全に削除
+- エラーメッセージで新しいコマンドを案内
+
+### 移行ガイド
+
+ユーザー向けの移行ガイドは以下に記載:
+- CHANGELOG.md: v4.0のBreaking Changesセクション
+- README.md: Versioning Workflowセクションの更新
+- CLIヘルプ: `reqord req draft --help`にdeprecation noticeを追加
+
 ## フィードバック反映履歴
 
 | Issue | 反映内容 |
@@ -111,6 +153,8 @@ reqord version spec-000001 --patch --summary "Fix typo in design document"
 | #109 | ステータス変更ではバージョンをインクリメントしない方針に変更 |
 | #208 | approved廃止に伴い状態遷移図を更新 |
 | #209 | draft化時のバージョン指定（--major/--minor/--patch）を明記。Specificationも対象に拡大 |
+| #247 | セマンティックバージョニングから整数+小数点形式（X.Y）に簡素化（v3.0） |
+| #263 | reqord versionコマンドを追加し、バージョニングとステータス遷移を完全分離（v4.0、後方互換性なし） |
 
 ## 既存データの移行
 
