@@ -1,9 +1,11 @@
 id: spec-000033
 requirementId: req-000005
-version: '2.0'
-status: approved
+version: '2.1'
+status: deprecated
+deprecationReason: 'Merged into spec-000005. Requirement and Specification share the same versioning mechanism via the unified reqord version command.'
+replacedBy: spec-000005
 createdAt: 2026-02-13T01:52:26.669Z
-updatedAt: 2026-02-14T00:21:07.022Z
+updatedAt: 2026-02-14T12:00:00.000Z
 versionHistory:
   - version: 1.0.0
     status: approved
@@ -15,6 +17,11 @@ versionHistory:
     gitCommit: pending
     changedAt: 2026-02-14T00:00:00.000Z
     summary: 'Simplified versioning: semantic versioning → integer-based (X.Y) format (Issue #247)'
+  - version: '2.1'
+    status: deprecated
+    gitCommit: pending
+    changedAt: 2026-02-14T12:00:00.000Z
+    summary: 'Deprecated: merged into spec-000005 (unified Requirement/Specification versioning)'
 files:
   design: specifications/spec-000033/design.md
   supplementary: []

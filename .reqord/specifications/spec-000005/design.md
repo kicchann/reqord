@@ -1,29 +1,36 @@
-# Requirementバージョン管理 - 技術設計書
+# Requirement/Specificationバージョン管理 - 技術設計書
 
 ## 1. 設計概要
 
-要件のライフサイクル管理として、シンプルなX.Y形式のバージョニング（1.0, 2.0, 1.1...）による変更追跡と状態遷移（draft → approved → implemented）を実装する。通常は X.0 形式を使い、typoなど軽微な修正でどうしても必要な時のみ .Y を使用する。バージョンインクリメントは**内容変更時のみ**行い、ステータス遷移ではバージョンを変更しない。要件更新時にversionHistoryへ自動的に履歴エントリを追加し、`reqord req history <id>` コマンドで変更履歴を表示する。既存のRequirementスキーマに定義済みの `version` / `versionHistory` フィールドを活用する。
+要件（Requirement）と仕様（Specification）のライフサイクル管理として、シンプルなX.Y形式のバージョニング（1.0, 2.0, 1.1...）による変更追跡と状態遷移（draft → approved → implemented）を実装する。通常は X.0 形式を使い、typoなど軽微な修正でどうしても必要な時のみ .Y を使用する。バージョンインクリメントは**明示的な`reqord version`コマンド実行時のみ**行い、ステータス遷移ではバージョンを変更しない。更新時にversionHistoryへ自動的に履歴エントリを追加し、`reqord req history <id>` / `reqord spec history <id>` コマンドで変更履歴を表示する。既存のRequirement/Specificationスキーマに定義済みの `version` / `versionHistory` フィールドを活用する。
 
 > **v2.0.0改訂:** フィードバック(#109, #208, #209)に基づき、バージョニングルールと状態遷移を改訂。
 > **v3.0.0改訂 (Issue #247):** セマンティックバージョニングから整数+小数点形式（X.Y）に簡素化。
+> **v3.0.0改訂 (Issue #263):** バージョン管理とステータス遷移を完全分離。`reqord version`コマンド追加。Requirement/Specification共通設計に統合。
 
 ## 2. アーキテクチャ
 
 ```
-Command Layer:  commands/req/history.ts  (新規)
-                commands/req/update.ts   (既存拡張)
+Command Layer:  commands/version/version.ts       (NEW - req/spec両対応)
+                commands/req/draft.ts             (MODIFY - バージョンオプション削除)
+                commands/spec/draft.ts            (MODIFY - バージョンオプション削除)
+                commands/req/history.ts           (既存)
+                commands/spec/history.ts          (既存)
                     ↓
-Service Layer:  services/requirement-service.ts (既存拡張)
-                services/version-service.ts     (新規)
+Service Layer:  services/requirement-service.ts   (既存)
+                services/specification-service.ts (既存)
+                services/version-service.ts       (既存 - 共通ロジック)
                     ↓
-Repository:     repositories/requirement.ts     (既存)
+Repository:     repositories/requirement.ts       (既存)
+                repositories/specification.ts     (既存)
                     ↓
 Shared:         @reqord/shared
-                  schemas/common.ts             (VersionHistoryEntrySchema既存)
-                  schemas/requirement.ts        (version, versionHistory既存)
+                  schemas/common.ts               (VersionHistoryEntrySchema既存)
+                  schemas/requirement.ts          (version, versionHistory既存)
+                  schemas/specification.ts        (version, versionHistory既存)
 ```
 
-既存のスキーマ定義（VersionHistoryEntrySchema）とフィールド（versionHistory配列）はすでに存在するため、新規コードは主にサービス層のバージョン管理ロジックとhistoryコマンドの追加となる。
+既存のスキーマ定義（VersionHistoryEntrySchema）とフィールド（versionHistory配列）はすでに存在するため、新規コードは主に`commands/version/version.ts`の追加と、既存コマンドからバージョンオプションの削除となる。
 
 ## 3. コンポーネント設計
 
