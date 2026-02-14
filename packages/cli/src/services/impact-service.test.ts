@@ -225,6 +225,33 @@ describe("analyzeImpact", () => {
       expect(result.indirectImpacts).toEqual([]);
     });
 
+    it("maxDepth境界値: depth=2でdepth=2の影響が含まれる", async () => {
+      const reqA = makeRequirement({
+        id: "req-000001",
+        title: "A",
+        dependencies: { blockedBy: [], blocks: ["req-000002"], relatedTo: [] },
+      });
+      const reqB = makeRequirement({
+        id: "req-000002",
+        title: "B",
+        dependencies: { blockedBy: ["req-000001"], blocks: ["req-000003"], relatedTo: [] },
+      });
+      const reqC = makeRequirement({
+        id: "req-000003",
+        title: "C",
+        dependencies: { blockedBy: ["req-000002"], blocks: [], relatedTo: [] },
+      });
+      vi.mocked(reqRepo.findAll).mockResolvedValue([reqA, reqB, reqC]);
+      vi.mocked(specRepo.findAll).mockResolvedValue([]);
+
+      const result = await analyzeImpact("/cwd", "req-000001", { maxDepth: 2 });
+
+      expect(result.directImpacts).toHaveLength(1);
+      expect(result.indirectImpacts).toHaveLength(1);
+      expect(result.indirectImpacts[0].id).toBe("req-000003");
+      expect(result.indirectImpacts[0].depth).toBe(2);
+    });
+
     it("循環依存検出（A→B→C→A）", async () => {
       const reqA = makeRequirement({
         id: "req-000001",
@@ -453,6 +480,37 @@ describe("notifyImpact", () => {
 
     const body = vi.mocked(github.createIssueComment).mock.calls[0][1];
     expect(body).toContain("緊急の変更です");
+  });
+
+  it("sourceReqがnullの場合、タイトルにidが使われる", async () => {
+    const sourceReq = makeRequirement({
+      id: "req-000001",
+      dependencies: { blockedBy: [], blocks: ["req-000002"], relatedTo: [] },
+    });
+    const targetReq = makeRequirement({
+      id: "req-000002",
+      dependencies: { blockedBy: ["req-000001"], blocks: [], relatedTo: [] },
+    });
+    const spec = makeSpecification({
+      id: "spec-000001",
+      requirementId: "req-000002",
+      implementation: {
+        issues: [{ number: 42, title: "Issue", url: "https://github.com/test/42", priority: "P1" as const, status: "open" as const }],
+        totalEstimatedHours: 8,
+        createdAt: "2024-01-01T00:00:00Z",
+      },
+    });
+    vi.mocked(reqRepo.findAll).mockResolvedValue([sourceReq, targetReq]);
+    vi.mocked(reqRepo.findById).mockResolvedValue(null);
+    vi.mocked(specRepo.findAll).mockResolvedValue([spec]);
+    vi.mocked(github.createIssueComment).mockResolvedValue(undefined);
+
+    await notifyImpact("/cwd", "req-000001");
+
+    const body = vi.mocked(github.createIssueComment).mock.calls[0][1];
+    expect(body).toContain("req-000001");
+    // タイトルがnullの場合、IDがフォールバックとして使われる
+    expect(body).toContain("(req-000001)");
   });
 
   it("影響先0件で空の NotifyResult が返ること", async () => {

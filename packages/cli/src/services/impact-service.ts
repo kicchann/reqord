@@ -303,7 +303,8 @@ export async function notifyImpact(
     }
   }
 
-  if (issuesWithContext.length > 100) {
+  const BATCH_WARNING_THRESHOLD = 100;
+  if (issuesWithContext.length > BATCH_WARNING_THRESHOLD) {
     console.warn(`Warning: ${issuesWithContext.length} issues found. This may take a while.`);
   }
 
@@ -321,7 +322,7 @@ export async function notifyImpact(
     }
 
     const impact = impactMap.get(issue.requirementId);
-    const relation = impact?.relation ?? "unknown";
+    const relation: "blocks" | "relatedTo" | "unknown" = impact?.relation ?? "unknown";
     const path = impact?.path.join(" → ") ?? "";
 
     const comment = buildNotificationComment({
