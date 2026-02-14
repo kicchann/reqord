@@ -27,6 +27,7 @@ import { historyCommand as specHistoryCommand } from "./commands/spec/history.js
 import { feedbackCommand } from "./commands/feedback/index.js";
 import { issueCommand } from "./commands/issue/index.js";
 import { migrateToYamlCommand } from "./commands/migrate-to-yaml.js";
+import { impactCommand } from "./commands/impact/index.js";
 import { ensureReqordInitialized } from "./middleware/reqord-check.js";
 
 const program = new Command();
@@ -103,5 +104,11 @@ issueCommand.hook("preAction", async () => {
 program.addCommand(issueCommand);
 
 program.addCommand(migrateToYamlCommand);
+
+impactCommand.hook("preAction", async () => {
+  await ensureReqordInitialized(process.cwd());
+});
+
+program.addCommand(impactCommand);
 
 program.parse();
