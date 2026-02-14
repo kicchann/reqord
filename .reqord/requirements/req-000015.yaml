@@ -31,7 +31,7 @@ files:
   description: requirements/req-000015/description.md
   supplementary: []
 successCriteria:
-  - reqord spec draft <id> でflag付きのspecをdraft状態に戻せる（--major/--minor/--patchでバージョン指定）
+  - reqord spec draft <id> でflag付きのspecをdraft状態に戻せる（--major/--patchでバージョン指定）
   - reqord spec approve <id> でGitブランチが作成され、承認依頼PRが自動生成される
   - approve実行時にstatusをapprovedに設定し、PRマージで承認完了
   - PR本文にreqordメタデータコメントタグが埋め込まれる

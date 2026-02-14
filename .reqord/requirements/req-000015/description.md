@@ -21,18 +21,20 @@ draft ──approve(PR作成)──→ PRマージ ──→ approved ──impl
 
 ## CLIコマンド仕様
 
-### reqord spec draft \<id\> [--major|--minor|--patch]
+### reqord spec draft \<id\> [--major|--patch]
 
 flag付き、またはapproved/implementedのspecをdraft状態に戻し、再編集を可能にする。
 
 1. 対象Specificationのstatusが `draft` 以外であることを検証
 2. `status` を `draft` に更新
-3. バージョンを引数に応じてインクリメント（デフォルト: `--minor`）
+3. バージョンを引数に応じてインクリメント（デフォルト: `--major`）
 4. `versionHistory` にエントリを追加
 5. flagsがある場合、draft化の理由として記録
 
 ```bash
-reqord spec draft spec-000011 --minor
+reqord spec draft spec-000011           # 1.0 → 2.0 (デフォルト: major)
+reqord spec draft spec-000011 --major   # 1.0 → 2.0
+reqord spec draft spec-000011 --patch   # 1.0 → 1.1
 ```
 
 ### reqord spec approve \<id\>
