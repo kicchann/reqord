@@ -1,5 +1,5 @@
 id: req-000024
-version: 3.0
+version: '3.0'
 title: Web UIからのCLIジョブ実行 (Agent API)
 status: approved
 priority: high

@@ -1,5 +1,5 @@
 id: req-000001
-version: 1.0
+version: '1.0'
 title: CLI初期化コマンド
 status: implemented
 priority: high

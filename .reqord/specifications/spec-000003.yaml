@@ -1,6 +1,6 @@
 id: spec-000003
 requirementId: req-000003
-version: 1.0
+version: '1.0'
 status: implemented
 createdAt: 2026-02-08T14:08:06.788Z
 updatedAt: 2026-02-09T11:57:48Z

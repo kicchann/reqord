@@ -1,6 +1,6 @@
 id: spec-000009
 requirementId: req-000009
-version: 1.0
+version: '1.0'
 status: implemented
 createdAt: 2026-02-08T14:08:07.300Z
 updatedAt: 2026-02-08T14:08:07.300Z

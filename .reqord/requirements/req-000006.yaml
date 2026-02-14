@@ -1,5 +1,5 @@
 id: req-000006
-version: 1.0
+version: '1.0'
 title: 構造化出力・バッチ更新
 status: implemented
 priority: medium

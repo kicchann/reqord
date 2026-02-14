@@ -1,5 +1,5 @@
 id: req-000027
-version: 3.0
+version: '3.0'
 title: データ形式のYAML移行
 status: implemented
 priority: medium

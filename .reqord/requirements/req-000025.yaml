@@ -1,5 +1,5 @@
 id: req-000025
-version: 3.0
+version: '3.0'
 title: reqord ui CLIコマンド
 status: approved
 priority: medium

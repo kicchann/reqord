@@ -1,5 +1,5 @@
 id: req-000023
-version: 3.0
+version: '3.0'
 title: Feedback管理 (GitHub Issue連携)
 status: implemented
 priority: medium
@@ -64,7 +64,7 @@ dependencies:
 estimatedComplexity: medium
 estimatedHours: 20
 currentApproval:
-  version: 3.0
+  version: '3.0'
   phase: requirement
   prNumber: 207
   prUrl: https://github.com/kicchann/reqord/pull/207

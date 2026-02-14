@@ -1,5 +1,5 @@
 id: req-000016
-version: 1.0
+version: '1.0'
 title: GitHub Issue生成・管理
 status: implemented
 priority: high

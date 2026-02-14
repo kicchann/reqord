@@ -1,5 +1,5 @@
 id: req-000003
-version: 1.0
+version: '1.0'
 title: ProjectContext CRUD
 status: implemented
 priority: high

@@ -1,5 +1,5 @@
 id: req-000004
-version: 1.0
+version: '1.0'
 title: 共有型定義 (@reqord/shared)
 status: implemented
 priority: high
