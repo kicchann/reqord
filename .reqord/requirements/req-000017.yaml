@@ -7,10 +7,10 @@ createdAt: 2026-02-07T12:00:00Z
 updatedAt: 2026-02-09T10:00:00Z
 versionHistory:
   - version: 1.0.0
-    changedAt: 2026-02-07T12:00:00Z
-    summary: 初版作成
     status: deprecated
     gitCommit: legacy
+    changedAt: 2026-02-07T12:00:00Z
+    summary: 初版作成
 files:
   description: requirements/req-000017/description.md
   supplementary: []
@@ -35,11 +35,4 @@ dependencies:
     - req-000006
 estimatedComplexity: medium
 estimatedHours: 16
-deprecatedReason: 'AI駆動のコード分析機能はreqord CLIの責務外。Claude Codeエコシステム（code-explorerエージェント等）で実現する。reqordはデータ管理に集中する方針（Feedback #17）'
-flags:
-  - type: feedback-review
-    reason: AI補助機能のreqord CLI/SDKからClaude Codeエコシステムへの分離
-    createdAt: 2026-02-09T10:00:00Z
-    relatedIssues:
-      - 17
-    severity: high
+flags: []

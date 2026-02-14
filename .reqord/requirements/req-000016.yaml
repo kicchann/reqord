@@ -46,16 +46,4 @@ dependencies:
   relatedTo: []
 estimatedComplexity: medium
 estimatedHours: 16
-flags:
-  - type: feedback-review
-    reason: AI駆動タスク分解（Anthropic SDK）をClaude Codeエコシステムに移管。reqordは構造化タスク定義(--tasks-file)からのIssue作成・同期・検証に集中
-    createdAt: 2026-02-09T10:00:00Z
-    relatedIssues:
-      - 17
-    severity: high
-  - type: feedback-review
-    reason: 'Feedback from issue #30'
-    createdAt: 2026-02-11T07:19:01.430Z
-    relatedIssues:
-      - 30
-    severity: low
+flags: []

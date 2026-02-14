@@ -46,10 +46,4 @@ dependencies:
     - req-000007
 estimatedComplexity: large
 estimatedHours: 32
-flags:
-  - type: feedback-review
-    reason: 'Feedback from issue #159'
-    createdAt: 2026-02-11T07:25:14.787Z
-    relatedIssues:
-      - 159
-    severity: medium
+flags: []
