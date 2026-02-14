@@ -1,9 +1,9 @@
 id: spec-000005
 requirementId: req-000005
 version: '3.0'
-status: draft
+status: approved
 createdAt: 2026-02-08T14:08:06.961Z
-updatedAt: 2026-02-14T12:00:00.000Z
+updatedAt: 2026-02-14T13:01:02.544Z
 versionHistory:
   - version: 1.0.0
     status: implemented
@@ -20,6 +20,11 @@ versionHistory:
     gitCommit: pending
     changedAt: 2026-02-14T12:00:00.000Z
     summary: 'Expand to unified Requirement/Specification versioning, add reqord version command design (Issue #263)'
+  - version: '3.0'
+    status: approved
+    gitCommit: f629e6a
+    changedAt: 2026-02-14T13:01:02.544Z
+    summary: 'status: draft → approved'
 files:
   design: specifications/spec-000005/design.md
   supplementary: []
@@ -48,3 +53,9 @@ implementation:
       status: open
   totalEstimatedHours: 20
   createdAt: 2026-02-14T00:32:00.801Z
+currentApproval:
+  version: '3.0'
+  phase: specification
+  prNumber: 0
+  prUrl: ''
+  approvedBy: []
