@@ -1,15 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import {
-  CONTEXT_DIR,
-  REQUIREMENTS_DIR,
-  SPECIFICATIONS_DIR,
-  SETTINGS_DIR,
-  TEMPLATES_DIR,
-  RULES_DIR,
-  ASSETS_DIR,
-  DOMAIN_DIR,
-  ISSUE_TEMPLATES_DIR,
-} from "@reqord/shared";
+import { SPECIFICATIONS_DIR, ASSETS_DIR } from "@reqord/shared";
 
 vi.mock("../repositories/file-system.js", () => ({
   exists: vi.fn(),

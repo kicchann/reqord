@@ -17,6 +17,20 @@ export default tseslint.config(
   },
   eslint.configs.recommended,
   ...tseslint.configs.recommended,
+  // Global rules for all TypeScript files
+  {
+    files: ["**/*.ts", "**/*.tsx"],
+    rules: {
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        {
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+          caughtErrorsIgnorePattern: "^_",
+        },
+      ],
+    },
+  },
   // shared + cli: Node.js環境
   {
     files: ["packages/shared/src/**/*.ts", "packages/cli/src/**/*.ts"],
@@ -41,6 +55,20 @@ export default tseslint.config(
       ],
       "@typescript-eslint/no-explicit-any": "warn",
       "no-console": ["warn", { allow: ["warn", "error"] }],
+    },
+  },
+  // web: Next.js pages - allow metadata exports
+  {
+    files: ["packages/web/src/app/**/page.tsx", "packages/web/src/app/**/layout.tsx"],
+    rules: {
+      "react-refresh/only-export-components": "off",
+    },
+  },
+  // Test files: allow any type for mocks
+  {
+    files: ["**/*.test.ts", "**/*.test.tsx"],
+    rules: {
+      "@typescript-eslint/no-explicit-any": "off",
     },
   }
 );

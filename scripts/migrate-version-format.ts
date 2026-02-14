@@ -17,11 +17,9 @@ function processYamlFileWithRegex(filePath: string, dryRun: boolean): boolean {
   try {
     let content = fs.readFileSync(filePath, "utf-8");
     const originalContent = content;
-    let changeCount = 0;
 
     // Pattern 1: version: "X.Y.Z" or version: X.Y.Z (main version field)
     content = content.replace(/^(version:\s+["']?)(\d+)\.(\d+)\.(\d+)(["']?)$/gm, (match, prefix, major, minor, patch, suffix) => {
-      changeCount++;
       if (!dryRun) {
         console.log(`  ${filePath}: version ${major}.${minor}.${patch} → ${major}.0`);
       } else {
