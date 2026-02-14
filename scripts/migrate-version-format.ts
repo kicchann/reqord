@@ -12,6 +12,7 @@ import * as path from "node:path";
 /**
  * Convert semantic version (x.y.z) to X.Y format using string replacement
  * This approach preserves all YAML formatting and avoids data loss
+ * - x.y.z → X.0 (discard minor/patch components)
  */
 function processYamlFileWithRegex(filePath: string, dryRun: boolean): boolean {
   try {
@@ -19,27 +20,41 @@ function processYamlFileWithRegex(filePath: string, dryRun: boolean): boolean {
     const originalContent = content;
     let changeCount = 0;
 
-    // Pattern 1: version: "X.Y.Z" or version: X.Y.Z (main version field)
-    content = content.replace(/^(version:\s+["']?)(\d+)\.(\d+)\.(\d+)(["']?)$/gm, (match, prefix, major, minor, patch, suffix) => {
-      changeCount++;
-      if (!dryRun) {
-        console.log(`  ${filePath}: version ${major}.${minor}.${patch} → ${major}.0`);
-      } else {
-        console.log(`  [DRY-RUN] ${filePath}: version ${major}.${minor}.${patch} → ${major}.0`);
+    // Pattern 1: version: X.Y.Z at start of line (main version field)
+    // Matches: version: 1.2.3 or version: '1.2.3' or version: "1.2.3"
+    content = content.replace(
+      /^version:\s+(['"]?)(\d+)\.(\d+)\.(\d+)(['"]?)$/gm,
+      (match, startQuote, major, minor, patch, endQuote) => {
+        changeCount++;
+        const oldVersion = `${major}.${minor}.${patch}`;
+        const newVersion = `${major}.0`;
+        if (!dryRun) {
+          console.log(`  ${filePath}: version ${oldVersion} → ${newVersion}`);
+        } else {
+          console.log(`  [DRY-RUN] ${filePath}: version ${oldVersion} → ${newVersion}`);
+        }
+        // Preserve quotes if present
+        return `version: ${startQuote}${newVersion}${endQuote}`;
       }
-      return `${prefix}${major}.0${suffix}`;
-    });
+    );
 
-    // Pattern 2: - version: "X.Y.Z" (versionHistory entries)
-    content = content.replace(/^(\s+version:\s+["']?)(\d+)\.(\d+)\.(\d+)(["']?)$/gm, (match, prefix, major, minor, patch, suffix) => {
-      changeCount++;
-      if (!dryRun) {
-        console.log(`  ${filePath}: versionHistory ${major}.${minor}.${patch} → ${major}.0`);
-      } else {
-        console.log(`  [DRY-RUN] ${filePath}: versionHistory ${major}.${minor}.${patch} → ${major}.0`);
+    // Pattern 2: - version: X.Y.Z (versionHistory list entries)
+    // Matches: - version: 1.2.3 or - version: '1.2.3'
+    content = content.replace(
+      /^(\s+)-(\s+)version:\s+(['"]?)(\d+)\.(\d+)\.(\d+)(['"]?)$/gm,
+      (match, indent, dashSpace, startQuote, major, minor, patch, endQuote) => {
+        changeCount++;
+        const oldVersion = `${major}.${minor}.${patch}`;
+        const newVersion = `${major}.0`;
+        if (!dryRun) {
+          console.log(`  ${filePath}: versionHistory ${oldVersion} → ${newVersion}`);
+        } else {
+          console.log(`  [DRY-RUN] ${filePath}: versionHistory ${oldVersion} → ${newVersion}`);
+        }
+        // Preserve indentation, dash, and quotes
+        return `${indent}-${dashSpace}version: ${startQuote}${newVersion}${endQuote}`;
       }
-      return `${prefix}${major}.0${suffix}`;
-    });
+    );
 
     const modified = content !== originalContent;
 

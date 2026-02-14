@@ -6,12 +6,12 @@ priority: medium
 createdAt: 2026-02-07T12:00:00Z
 updatedAt: 2026-02-11T08:05:04.024Z
 versionHistory:
-  - version: 2.0.0
+  - version: 2.0
     status: approved
     gitCommit: 4a1fcac
     changedAt: 2026-02-11T08:05:03.835Z
     summary: Status changed from draft to pending_approval
-  - version: 3.0.0
+  - version: 3.0
     status: approved
     gitCommit: 4a1fcac
     changedAt: 2026-02-11T08:05:04.025Z
