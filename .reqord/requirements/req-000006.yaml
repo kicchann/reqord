@@ -1,12 +1,12 @@
 id: req-000006
-version: '1.0'
+version: 1.0
 title: 構造化出力・バッチ更新
 status: implemented
 priority: medium
 createdAt: 2026-02-07T10:00:00Z
 updatedAt: 2026-02-09T12:00:00Z
 versionHistory:
-  - version: '1.0'
+  - version: 1.0.0
     status: approved
     gitCommit: legacy
     changedAt: 2026-02-07T10:00:00Z

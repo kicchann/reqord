@@ -1,5 +1,5 @@
 id: req-000022
-version: '1.0'
+version: 1.0
 title: Web UI拡張 (Dashboard・依存グラフ・Gantt Chart)
 status: implemented
 priority: medium

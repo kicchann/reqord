@@ -1,12 +1,12 @@
 id: req-000017
-version: '1.0'
+version: 1.0
 title: Gap Analysis (既存コード差分分析)
 status: deprecated
 priority: medium
 createdAt: 2026-02-07T12:00:00Z
 updatedAt: 2026-02-09T10:00:00Z
 versionHistory:
-  - version: '1.0'
+  - version: 1.0.0
     status: deprecated
     gitCommit: legacy
     changedAt: 2026-02-07T12:00:00Z

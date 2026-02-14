@@ -8,109 +8,43 @@
 
 import * as fs from "node:fs";
 import * as path from "node:path";
-import * as yaml from "js-yaml";
-
-interface VersionHistoryEntry {
-  version: string;
-  status: string;
-  changedAt: string;
-  gitCommit?: string;
-  summary?: string;
-}
-
-interface YamlData {
-  version: string;
-  versionHistory?: VersionHistoryEntry[];
-  [key: string]: unknown;
-}
 
 /**
- * Convert semantic version (x.y.z) to X.Y format
- * - x.0.0 → X.0
- * - x.y.z → X.0 (discard minor/patch)
+ * Convert semantic version (x.y.z) to X.Y format using string replacement
+ * This approach preserves all YAML formatting and avoids data loss
  */
-function convertVersion(oldVersion: string): string {
-  // Check if already X.Y format
-  if (/^\d+\.\d+$/.test(oldVersion)) {
-    return oldVersion;
-  }
-
-  // Try x.y.z format
-  const match = oldVersion.match(/^(\d+)\.(\d+)\.(\d+)$/);
-  if (!match) {
-    console.warn(`  WARNING: Unrecognized version format: ${oldVersion}`);
-    return oldVersion;
-  }
-
-  const major = match[1];
-  const minor = match[2];
-  const patch = match[3];
-
-  // x.0.0 → X.0
-  if (minor === "0" && patch === "0") {
-    return `${major}.0`;
-  }
-
-  // x.y.z → X.0 (discard minor/patch)
-  return `${major}.0`;
-}
-
-/**
- * Process a single YAML file
- */
-function processYamlFile(filePath: string, dryRun: boolean): boolean {
+function processYamlFileWithRegex(filePath: string, dryRun: boolean): boolean {
   try {
-    const content = fs.readFileSync(filePath, "utf-8");
-    const data = yaml.load(content, { schema: yaml.JSON_SCHEMA }) as YamlData;
+    let content = fs.readFileSync(filePath, "utf-8");
+    const originalContent = content;
+    let changeCount = 0;
 
-    let modified = false;
-
-    // Convert main version field
-    if (data.version && typeof data.version === "string") {
-      const newVersion = convertVersion(data.version);
-      if (newVersion !== data.version) {
-        if (dryRun) {
-          console.log(
-            `  [DRY-RUN] ${filePath}: version ${data.version} → ${newVersion}`
-          );
-        } else {
-          console.log(`  ${filePath}: version ${data.version} → ${newVersion}`);
-        }
-        data.version = newVersion;
-        modified = true;
+    // Pattern 1: version: "X.Y.Z" or version: X.Y.Z (main version field)
+    content = content.replace(/^(version:\s+["']?)(\d+)\.(\d+)\.(\d+)(["']?)$/gm, (match, prefix, major, minor, patch, suffix) => {
+      changeCount++;
+      if (!dryRun) {
+        console.log(`  ${filePath}: version ${major}.${minor}.${patch} → ${major}.0`);
+      } else {
+        console.log(`  [DRY-RUN] ${filePath}: version ${major}.${minor}.${patch} → ${major}.0`);
       }
-    }
+      return `${prefix}${major}.0${suffix}`;
+    });
 
-    // Convert versionHistory entries
-    if (Array.isArray(data.versionHistory)) {
-      for (const entry of data.versionHistory) {
-        if (entry.version && typeof entry.version === "string") {
-          const newVersion = convertVersion(entry.version);
-          if (newVersion !== entry.version) {
-            if (dryRun) {
-              console.log(
-                `  [DRY-RUN] ${filePath}: versionHistory ${entry.version} → ${newVersion}`
-              );
-            } else {
-              console.log(
-                `  ${filePath}: versionHistory ${entry.version} → ${newVersion}`
-              );
-            }
-            entry.version = newVersion;
-            modified = true;
-          }
-        }
+    // Pattern 2: - version: "X.Y.Z" (versionHistory entries)
+    content = content.replace(/^(\s+version:\s+["']?)(\d+)\.(\d+)\.(\d+)(["']?)$/gm, (match, prefix, major, minor, patch, suffix) => {
+      changeCount++;
+      if (!dryRun) {
+        console.log(`  ${filePath}: versionHistory ${major}.${minor}.${patch} → ${major}.0`);
+      } else {
+        console.log(`  [DRY-RUN] ${filePath}: versionHistory ${major}.${minor}.${patch} → ${major}.0`);
       }
-    }
+      return `${prefix}${major}.0${suffix}`;
+    });
 
-    // Write back if modified
+    const modified = content !== originalContent;
+
     if (modified && !dryRun) {
-      const newContent = yaml.dump(data, {
-        schema: yaml.JSON_SCHEMA,
-        lineWidth: -1,
-        noRefs: true,
-      });
-      fs.writeFileSync(filePath, newContent, "utf-8");
+      fs.writeFileSync(filePath, content, "utf-8");
     }
 
     return modified;
@@ -186,7 +120,7 @@ function main() {
   let modifiedCount = 0;
 
   for (const filePath of yamlFiles) {
-    const wasModified = processYamlFile(filePath, dryRun);
+    const wasModified = processYamlFileWithRegex(filePath, dryRun);
     if (wasModified) {
       modifiedCount++;
     }

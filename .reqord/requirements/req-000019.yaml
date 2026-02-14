@@ -1,12 +1,12 @@
 id: req-000019
-version: '1.0'
+version: 1.0
 title: ステータス表示コマンド
 status: approved
 priority: medium
 createdAt: 2026-02-07T12:00:00Z
 updatedAt: 2026-02-09T12:00:00Z
 versionHistory:
-  - version: '1.0'
+  - version: 1.0.0
     changedAt: 2026-02-07T12:00:00Z
     summary: 初版作成
     status: approved

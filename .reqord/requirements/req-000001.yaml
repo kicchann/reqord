@@ -1,17 +1,17 @@
 id: req-000001
-version: '1.0'
+version: 1.0
 title: CLI初期化コマンド
 status: implemented
 priority: high
 createdAt: 2026-02-07T10:00:00Z
 updatedAt: 2026-02-11T12:30:00Z
 versionHistory:
-  - version: '1.0'
+  - version: 1.0.0
     status: draft
     gitCommit: 073c09c
     changedAt: 2026-02-11T12:00:00Z
     summary: 'Status changed from implemented to draft: add GitHub Actions finalize-approval workflow to reqord init'
-  - version: '1.0'
+  - version: 1.0.0
     status: implemented
     gitCommit: 073c09c
     changedAt: 2026-02-11T12:30:00Z
