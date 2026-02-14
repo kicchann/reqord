@@ -1,5 +1,5 @@
 id: req-000005
-version: "3.0"
+version: '3.0'
 title: Requirement/Specificationバージョン管理
 status: draft
 priority: medium
@@ -15,8 +15,8 @@ versionHistory:
     status: draft
     gitCommit: a3583e7
     changedAt: 2026-02-13T00:00:00.000Z
-    summary: Reverted to draft for revision based on feedback (#109, #208, #209)
-  - version: "3.0"
+    summary: Reverted to draft for revision based on feedback (#109,
+  - version: '3.0'
     status: draft
     gitCommit: pending
     changedAt: 2026-02-14T00:00:00.000Z
@@ -48,4 +48,10 @@ dependencies:
     - req-000006
 estimatedComplexity: medium
 estimatedHours: 12
-flags: []
+flags:
+  - type: feedback-review
+    reason: 'Feedback from issue #263'
+    createdAt: 2026-02-14T07:46:04.513Z
+    relatedIssues:
+      - 263
+    severity: medium

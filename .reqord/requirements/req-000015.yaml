@@ -1,5 +1,5 @@
 id: req-000015
-version: 5.0
+version: '5.0'
 title: Specification承認フロー
 status: draft
 priority: medium
@@ -25,8 +25,9 @@ versionHistory:
     summary: Status changed from approved to implemented
   - version: 5.0.0
     status: draft
+    gitCommit: a3583e7
     changedAt: 2026-02-13T00:00:00.000Z
-    summary: Reverted to draft for revision based on feedback (#208, #209). Added draft/implement commands, removed pending_approval
+    summary: Reverted to draft for revision based on feedback (#208,
 files:
   description: requirements/req-000015/description.md
   supplementary: []
@@ -56,9 +57,15 @@ dependencies:
 estimatedComplexity: small
 estimatedHours: 8
 currentApproval:
-  version: 2.0
+  version: '2.0'
   phase: requirement
   prNumber: 108
   prUrl: https://github.com/kicchann/reqord/pull/108
   approvedBy: []
-flags: []
+flags:
+  - type: feedback-review
+    reason: 'Feedback from issue #263'
+    createdAt: 2026-02-14T07:47:08.134Z
+    relatedIssues:
+      - 263
+    severity: medium
