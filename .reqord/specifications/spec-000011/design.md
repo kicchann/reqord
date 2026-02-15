@@ -229,3 +229,101 @@ Phase 1では手動更新を前提とし、Phase 2でGitHub Actionsによる自�
 
 **決定:** GitHub操作にはgh CLIを使用（Octokit.jsではなく）
 **理由:** reqordの設計方針としてgh CLIを主要なGitHubインテグレーション手段としている。認証管理がgh CLI側で完結し、追加のトークン管理が不要。
+
+## 7. draftコマンド設計
+
+### 7.1 draftコマンド (`commands/req/draft.ts`)
+
+**責務:** approved/implementedのreqをdraft状態に差し戻す。ステータス変更のみ行い、バージョンはインクリメントしない。
+
+```
+reqord req draft <id> [--dry-run]
+```
+
+| オプション | 説明 |
+|-----------|------|
+| `<id>` | 差し戻し対象の要件ID（req-NNNNNN） |
+| `--dry-run` | 実際の操作を行わず、実行予定の内容を表示 |
+
+### 7.2 DraftReversionService (`services/draft-reversion-service.ts`)
+
+**責務:** draft差し戻しフローのロジック。approved/implementedからの差し戻し時にPRを作成し、影響範囲をレビュー可能にする。
+
+```typescript
+export interface DraftReversionResult {
+  previousStatus: string;
+  impactedRequirements: string[];  // blocksで依存する要件ID
+  prNumber?: number;
+  prUrl?: string;
+}
+
+export async function revertToDraft(
+  cwd: string,
+  id: string,
+  options?: { dryRun?: boolean },
+): Promise<DraftReversionResult>;
+```
+
+**処理フロー:**
+
+1. 前提条件チェック（statusが `draft` 以外）
+2. `impact-service.analyzeImpact()` で影響範囲を分析（`blocks`で依存する要件を取得）
+3. 影響範囲をコンソールに表示
+4. Gitブランチ作成: `reqord/req-<id>-revert-to-draft`
+5. `status` を `draft` に更新（**バージョンはインクリメントしない**）
+6. `versionHistory` にエントリを追加
+7. 変更をコミット・プッシュ
+8. PRを作成（影響範囲をPR本文に記載）
+
+**既存サービスの再利用:**
+
+- `packages/cli/src/services/impact-service.ts` — `analyzeImpact()` で影響範囲分析
+- `packages/cli/src/services/approval-service.ts` — PR作成パターンの参考
+- `packages/cli/src/repositories/github.ts` — GitHub CLI操作
+- `packages/cli/src/repositories/git.ts` — Git操作
+
+### 7.3 PR本文テンプレート（差し戻し用）
+
+```markdown
+## 要件差し戻し
+
+| フィールド | 値 |
+|-----------|------|
+| ID | {id} |
+| タイトル | {title} |
+| バージョン | {version} |
+| 変更前ステータス | {previousStatus} |
+
+### 影響範囲
+
+以下の要件がこの要件に依存しています:
+
+{impactedRequirements}
+
+### 変更内容
+status: {previousStatus} → draft
+
+> このPRをマージすると、要件のステータスが `draft` に差し戻されます。
+```
+
+## 8. implementコマンド設計
+
+### 8.1 implementコマンド (`commands/req/implement.ts`)
+
+**責務:** approvedのreqをimplemented状態に遷移させる。ステータス変更のみ行い、バージョンはインクリメントしない。
+
+```
+reqord req implement <id>
+```
+
+| オプション | 説明 |
+|-----------|------|
+| `<id>` | 対象の要件ID（req-NNNNNN） |
+
+### 8.2 処理フロー
+
+1. 前提条件チェック: `status === "approved"`
+2. `status` を `implemented` に更新（**バージョンはインクリメントしない**）
+3. `versionHistory` にエントリを追加
+
+> バージョン変更は `reqord version` コマンドで明示的に行う（req-000005参照）。

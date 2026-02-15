@@ -1,10 +1,10 @@
 id: req-000011
 version: '5.0'
 title: Requirement承認フロー (GitHub PR連携)
-status: draft
+status: approved
 priority: high
 createdAt: 2026-02-07T12:00:00Z
-updatedAt: 2026-02-13T00:00:00.000Z
+updatedAt: 2026-02-14T22:31:15.218Z
 versionHistory:
   - version: 2.0.0
     status: approved
@@ -32,16 +32,18 @@ files:
   description: requirements/req-000011/description.md
   supplementary: []
 successCriteria:
-  - reqord req draft <id> でflag付きのreq/specをdraft状態に戻せる（--major/--patchでバージョン指定）
+  - reqord req draft <id> でflag付きのreq/specをdraft状態に戻せる
   - reqord req approve <id> でGitブランチが作成され、承認依頼PRが自動生成される
   - PR本文にreqordメタデータコメントタグが埋め込まれる
   - CODEOWNERSで指定されたレビュアーがPRに自動アサインされる
   - PRマージ時にRequirementのstatusがapprovedに更新される
   - currentApproval情報（version, phase, prNumber, approvedBy）が記録される
-  - approve実行時にバージョンをインクリメントしない（バージョンアップはdraft化時に行う）
+  - approve実行時にバージョンをインクリメントしない（バージョン変更はreqord versionコマンドで行う）
   - approve実行時にstatusをapprovedに設定し、PRマージで承認完了
   - reqord req implement <id> でapproved状態のreqをimplementedに遷移できる
   - コマンドのヘルプ・出力が各コマンドの実際の動作を正確に伝える
+  - reqord req draft <id> でapproved/implementedからdraftに差し戻す際、影響範囲（blocksで依存する要件）を表示する
+  - draft差し戻しはPRを作成し、影響範囲をまとめてレビュー可能にする
 format:
   type: user-story
   userStory:
@@ -54,22 +56,17 @@ dependencies:
   blocks:
     - req-000012
     - req-000015
-  relatedTo: []
+  relatedTo:
+    - req-000005
 estimatedComplexity: medium
 estimatedHours: 12
 currentApproval:
-  version: '2.0'
+  version: '5.0'
   phase: requirement
-  prNumber: 107
-  prUrl: https://github.com/kicchann/reqord/pull/107
+  prNumber: 280
+  prUrl: https://github.com/kicchann/reqord/pull/280
   approvedBy: []
 flags:
-  - type: feedback-review
-    reason: 'Feedback from issue #263'
-    createdAt: 2026-02-14T07:47:05.207Z
-    relatedIssues:
-      - 263
-    severity: medium
   - type: feedback-review
     reason: 'Feedback from issue #279'
     createdAt: 2026-02-14T21:47:28.602Z
