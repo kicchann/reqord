@@ -40,7 +40,7 @@ function buildPrBody(
   const impactSection =
     impactedRequirements.length > 0
       ? impactedRequirements.map((rid) => `- ${rid}`).join("\n")
-      : "なし";
+      : "なし（他の要件に影響はありません）";
 
   return `## 要件差し戻し
 
@@ -168,7 +168,7 @@ export async function revertToDraft(
     try {
       await gitRepo.checkout(cwd, originalBranch);
     } catch {
-      // Best-effort restore
+      console.warn(`Warning: Failed to restore original branch "${originalBranch}".`);
     }
   }
 }
