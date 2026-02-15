@@ -1,9 +1,9 @@
 id: spec-000011
 requirementId: req-000011
 version: '1.0'
-status: approved
+status: implemented
 createdAt: 2026-02-08T14:08:07.471Z
-updatedAt: 2026-02-15T13:00:03.485Z
+updatedAt: 2026-02-15T14:50:00.000Z
 versionHistory:
   - version: '1.0'
     status: draft
@@ -15,6 +15,11 @@ versionHistory:
     gitCommit: 2067d8c
     changedAt: 2026-02-15T09:39:03.405Z
     summary: 'status: draft → approved'
+  - version: '1.0'
+    status: implemented
+    gitCommit: 32427ff
+    changedAt: 2026-02-15T14:50:00.000Z
+    summary: 'status: approved → implemented (PR #286)'
 files:
   design: specifications/spec-000011/design.md
   supplementary: []
@@ -31,16 +36,16 @@ implementation:
       title: '[spec-000011] draftコマンドから--major/--patchオプション削除（バージョニング分離）'
       url: https://github.com/kicchann/reqord/issues/283
       priority: P1
-      status: open
+      status: closed
     - number: 284
       title: '[spec-000011] DraftReversionService実装（PR作成+影響範囲分析）'
       url: https://github.com/kicchann/reqord/issues/284
       priority: P1
-      status: open
+      status: closed
     - number: 285
       title: '[spec-000011] draftコマンドをDraftReversionServiceに接続'
       url: https://github.com/kicchann/reqord/issues/285
       priority: P1
-      status: open
+      status: closed
   totalEstimatedHours: 7
   createdAt: 2026-02-15T13:00:03.483Z
