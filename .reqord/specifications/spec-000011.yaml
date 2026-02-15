@@ -1,16 +1,27 @@
 id: spec-000011
 requirementId: req-000011
 version: '1.0'
-status: draft
+status: approved
 createdAt: 2026-02-08T14:08:07.471Z
-updatedAt: 2026-02-14T22:32:10.477Z
+updatedAt: 2026-02-15T09:39:03.405Z
 versionHistory:
   - version: '1.0'
     status: draft
     gitCommit: f1bd45c
     changedAt: 2026-02-14T22:32:10.477Z
     summary: 'status: implemented → draft'
+  - version: '1.0'
+    status: approved
+    gitCommit: 2067d8c
+    changedAt: 2026-02-15T09:39:03.405Z
+    summary: 'status: draft → approved'
 files:
   design: specifications/spec-000011/design.md
   supplementary: []
 flags: []
+currentApproval:
+  version: '1.0'
+  phase: specification
+  prNumber: 282
+  prUrl: https://github.com/kicchann/reqord/pull/282
+  approvedBy: []
