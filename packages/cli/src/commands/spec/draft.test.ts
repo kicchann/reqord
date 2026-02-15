@@ -41,8 +41,6 @@ describe("spec draft command", () => {
     consoleLogSpy = vi.spyOn(console, "log").mockImplementation(() => {});
     consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     // Reset Commander option state
-    draftCommand.setOptionValue("major", undefined);
-    draftCommand.setOptionValue("patch", undefined);
     draftCommand.setOptionValue("json", undefined);
   });
 
@@ -108,53 +106,19 @@ describe("spec draft command", () => {
     );
   });
 
-  it("--major指定でmajorバージョンアップ", async () => {
-    const before = makeSpecification({ status: "approved", version: "1.2" });
+  it("versionBumpを渡さずにステータスのみ変更", async () => {
+    const before = makeSpecification({ status: "approved", version: "2.0" });
     const after = makeSpecification({ status: "draft", version: "2.0" });
 
     mockShowSpecification.mockResolvedValue({ specification: before, design: null });
     mockUpdateSpecification.mockResolvedValue({ before, after });
 
-    await draftCommand.parseAsync(["node", "test", "spec-000001", "--major"]);
+    await draftCommand.parseAsync(["node", "test", "spec-000001"]);
 
     expect(mockUpdateSpecification).toHaveBeenCalledWith(
       process.cwd(),
       "spec-000001",
-      expect.objectContaining({
-        status: "draft",
-        versionBump: "major",
-      }),
-    );
-    expect(consoleLogSpy).toHaveBeenCalledWith("  version: 1.2 → 2.0");
-  });
-
-  it("--patch指定でpatchバージョンアップ", async () => {
-    const before = makeSpecification({ status: "approved", version: "1.2" });
-    const after = makeSpecification({ status: "draft", version: "1.3" });
-
-    mockShowSpecification.mockResolvedValue({ specification: before, design: null });
-    mockUpdateSpecification.mockResolvedValue({ before, after });
-
-    await draftCommand.parseAsync(["node", "test", "spec-000001", "--patch"]);
-
-    expect(mockUpdateSpecification).toHaveBeenCalledWith(
-      process.cwd(),
-      "spec-000001",
-      expect.objectContaining({
-        versionBump: "patch",
-      }),
-    );
-  });
-
-  it("--major/--patchの複数指定でエラー", async () => {
-    const specification = makeSpecification({ status: "approved" });
-    mockShowSpecification.mockResolvedValue({ specification, design: null });
-
-    await draftCommand.parseAsync(["node", "test", "spec-000001", "--major", "--patch"]);
-
-    expect(process.exitCode).toBe(1);
-    expect(consoleErrorSpy).toHaveBeenCalledWith(
-      expect.stringContaining("Only one of --major or --patch can be specified"),
+      { status: "draft" },
     );
   });
 
@@ -168,7 +132,6 @@ describe("spec draft command", () => {
     await draftCommand.parseAsync(["node", "test", "spec-000001", "--json"]);
 
     expect(consoleLogSpy).toHaveBeenCalledWith(JSON.stringify(after, null, 2));
-    // JSON mode should not print other messages
     expect(consoleLogSpy).not.toHaveBeenCalledWith(
       expect.stringContaining("Reverted specification to draft"),
     );

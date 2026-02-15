@@ -45,8 +45,6 @@ describe("req draft command", () => {
     consoleLogSpy = vi.spyOn(console, "log").mockImplementation(() => {});
     consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     // Reset Commander option state
-    draftCommand.setOptionValue("major", undefined);
-    draftCommand.setOptionValue("patch", undefined);
     draftCommand.setOptionValue("json", undefined);
   });
 
@@ -112,53 +110,19 @@ describe("req draft command", () => {
     );
   });
 
-  it("--major指定でmajorバージョンアップ", async () => {
-    const before = makeRequirement({ status: "approved", version: "1.5" });
+  it("versionBumpを渡さずにステータスのみ変更", async () => {
+    const before = makeRequirement({ status: "approved", version: "2.0" });
     const after = makeRequirement({ status: "draft", version: "2.0" });
 
     mockShowRequirement.mockResolvedValue({ requirement: before, description: null });
     mockUpdateRequirement.mockResolvedValue({ before, after, descriptionUpdated: false });
 
-    await draftCommand.parseAsync(["node", "test", "req-000001", "--major"]);
+    await draftCommand.parseAsync(["node", "test", "req-000001"]);
 
     expect(mockUpdateRequirement).toHaveBeenCalledWith(
       process.cwd(),
       "req-000001",
-      expect.objectContaining({
-        status: "draft",
-        versionBump: "major",
-      }),
-    );
-    expect(consoleLogSpy).toHaveBeenCalledWith("  version: 1.5 → 2.0");
-  });
-
-  it("--patch指定でpatchバージョンアップ", async () => {
-    const before = makeRequirement({ status: "approved", version: "1.5" });
-    const after = makeRequirement({ status: "draft", version: "1.6" });
-
-    mockShowRequirement.mockResolvedValue({ requirement: before, description: null });
-    mockUpdateRequirement.mockResolvedValue({ before, after, descriptionUpdated: false });
-
-    await draftCommand.parseAsync(["node", "test", "req-000001", "--patch"]);
-
-    expect(mockUpdateRequirement).toHaveBeenCalledWith(
-      process.cwd(),
-      "req-000001",
-      expect.objectContaining({
-        versionBump: "patch",
-      }),
-    );
-  });
-
-  it("--major/--patchの複数指定でエラー", async () => {
-    const requirement = makeRequirement({ status: "approved" });
-    mockShowRequirement.mockResolvedValue({ requirement, description: null });
-
-    await draftCommand.parseAsync(["node", "test", "req-000001", "--major", "--patch"]);
-
-    expect(process.exitCode).toBe(1);
-    expect(consoleErrorSpy).toHaveBeenCalledWith(
-      expect.stringContaining("Only one of --major or --patch can be specified"),
+      { status: "draft" },
     );
   });
 

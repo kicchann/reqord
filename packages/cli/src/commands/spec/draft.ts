@@ -6,35 +6,21 @@ import {
   type UpdateSpecOptions,
 } from "../../services/specification-service.js";
 import { handleError } from "../../utils/error-handler.js";
-import { AppError, ErrorCode } from "../../utils/errors.js";
 
 export const draftCommand = new Command("draft")
   .description("Revert a specification to draft status")
   .argument("<id>", "Specification ID (e.g. spec-000001)")
-  .option("--major", "Force major version increment (X.0)")
-  .option("--patch", "Force patch version increment (.Y)")
   .option("--json", "Output result as JSON")
   .action(
     async (
       id: string,
       options: {
-        major?: boolean;
-        patch?: boolean;
         json?: boolean;
       },
     ) => {
       const cwd = process.cwd();
 
       try {
-        // Check for mutually exclusive version bump options
-        const versionBumpCount = [options.major, options.patch].filter(Boolean).length;
-        if (versionBumpCount > 1) {
-          throw new AppError(
-            "Only one of --major or --patch can be specified.",
-            ErrorCode.INVALID_ARGUMENT,
-          );
-        }
-
         // Show current specification and flags
         const { specification } = await showSpecification(cwd, id);
 
@@ -59,10 +45,6 @@ export const draftCommand = new Command("draft")
         const updateOpts: UpdateSpecOptions = {
           status: "draft",
         };
-
-        // Version bump override
-        if (options.major) updateOpts.versionBump = "major";
-        if (options.patch) updateOpts.versionBump = "patch";
 
         const { before, after } = await updateSpecification(cwd, id, updateOpts);
 
