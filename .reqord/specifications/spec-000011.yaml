@@ -22,6 +22,6 @@ flags: []
 currentApproval:
   version: '1.0'
   phase: specification
-  prNumber: 0
-  prUrl: ''
+  prNumber: 282
+  prUrl: https://github.com/kicchann/reqord/pull/282
   approvedBy: []
