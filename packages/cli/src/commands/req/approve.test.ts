@@ -98,7 +98,10 @@ describe("approveCommand", () => {
 
     // Verify success message
     expect(consoleLogSpy).toHaveBeenCalledWith(
-      expect.stringContaining("Approval PR created for req-000001")
+      expect.stringContaining("承認依頼PRを作成しました: req-000001")
+    );
+    expect(consoleLogSpy).toHaveBeenCalledWith(
+      expect.stringContaining("PRがマージされると承認が確定します")
     );
     expect(consoleLogSpy).toHaveBeenCalledWith(
       expect.stringContaining("Branch: reqord/req-000001-approve-v1.0")
@@ -204,7 +207,7 @@ describe("approveCommand", () => {
 
     // Verify success message NOT shown in dry-run mode
     expect(consoleLogSpy).not.toHaveBeenCalledWith(
-      expect.stringContaining("Approval PR created")
+      expect.stringContaining("承認依頼PRを作成しました")
     );
 
     consoleLogSpy.mockRestore();
@@ -252,7 +255,7 @@ describe("approveCommand", () => {
     // Approval still proceeds
     expect(startApproval).toHaveBeenCalled();
     expect(consoleLogSpy).toHaveBeenCalledWith(
-      expect.stringContaining("Approval PR created for req-000001")
+      expect.stringContaining("承認依頼PRを作成しました: req-000001")
     );
 
     consoleLogSpy.mockRestore();
@@ -279,6 +282,42 @@ describe("approveCommand", () => {
     expect(consoleLogSpy).not.toHaveBeenCalledWith(
       expect.stringContaining("Warning")
     );
+
+    consoleLogSpy.mockRestore();
+  });
+
+  it("既存PR検出時に早期リターン", async () => {
+    const requirement = makeRequirement({
+      currentApproval: {
+        version: "1.0",
+        phase: "requirement",
+        prNumber: 50,
+        prUrl: "https://github.com/owner/repo/pull/50",
+        approvedBy: [],
+      },
+    });
+    vi.mocked(showRequirement).mockResolvedValue({
+      requirement,
+      description: null,
+    });
+
+    const consoleLogSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+
+    await approveCommand.parseAsync(["node", "test", "req-000001"]);
+
+    // Existing PR message shown
+    expect(consoleLogSpy).toHaveBeenCalledWith(
+      expect.stringContaining("承認依頼PRは既に作成されています: req-000001")
+    );
+    expect(consoleLogSpy).toHaveBeenCalledWith(
+      expect.stringContaining("PR: https://github.com/owner/repo/pull/50")
+    );
+
+    // startApproval NOT called
+    expect(startApproval).not.toHaveBeenCalled();
+
+    // No error
+    expect(process.exitCode).toBe(0);
 
     consoleLogSpy.mockRestore();
   });

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { Requirement, Specification } from "@reqord/shared";
-import { implementedCommand } from "./implemented.js";
+import { implementCommand } from "./implement.js";
 
 // Mock services
 vi.mock("../../services/requirement-service.js", () => ({
@@ -59,15 +59,17 @@ function makeSpecification(overrides: Partial<Specification> = {}): Specificatio
   };
 }
 
-describe("req implemented command", () => {
+describe("req implement command", () => {
   let consoleLogSpy: ReturnType<typeof vi.spyOn>;
+  let consoleErrorSpy: ReturnType<typeof vi.spyOn>;
 
   beforeEach(() => {
     vi.clearAllMocks();
     process.exitCode = 0;
     consoleLogSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+    consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     // Reset Commander option state
-    implementedCommand.setOptionValue("json", undefined);
+    implementCommand.setOptionValue("json", undefined);
   });
 
   it("approved → implementedへの遷移", async () => {
@@ -78,7 +80,7 @@ describe("req implemented command", () => {
     mockListSpecifications.mockResolvedValue([]);
     mockUpdateRequirement.mockResolvedValue({ before, after, descriptionUpdated: false });
 
-    await implementedCommand.parseAsync(["node", "test", "req-000001"]);
+    await implementCommand.parseAsync(["node", "test", "req-000001"]);
 
     expect(mockUpdateRequirement).toHaveBeenCalledWith(
       process.cwd(),
@@ -101,7 +103,7 @@ describe("req implemented command", () => {
     mockListSpecifications.mockResolvedValue([]);
     mockUpdateRequirement.mockResolvedValue({ before, after, descriptionUpdated: false });
 
-    await implementedCommand.parseAsync(["node", "test", "req-000001"]);
+    await implementCommand.parseAsync(["node", "test", "req-000001"]);
 
     // Version should not be displayed if unchanged
     expect(consoleLogSpy).not.toHaveBeenCalledWith(
@@ -121,7 +123,7 @@ describe("req implemented command", () => {
     mockListSpecifications.mockResolvedValue(specs);
     mockUpdateRequirement.mockResolvedValue({ before, after, descriptionUpdated: false });
 
-    await implementedCommand.parseAsync(["node", "test", "req-000001"]);
+    await implementCommand.parseAsync(["node", "test", "req-000001"]);
 
     expect(consoleLogSpy).toHaveBeenCalledWith(
       expect.stringContaining("Related specifications (2)"),
@@ -138,7 +140,7 @@ describe("req implemented command", () => {
     mockListSpecifications.mockResolvedValue([]);
     mockUpdateRequirement.mockResolvedValue({ before, after, descriptionUpdated: false });
 
-    await implementedCommand.parseAsync(["node", "test", "req-000001"]);
+    await implementCommand.parseAsync(["node", "test", "req-000001"]);
 
     expect(consoleLogSpy).not.toHaveBeenCalledWith(
       expect.stringContaining("Related specifications"),
@@ -169,7 +171,7 @@ describe("req implemented command", () => {
     mockListSpecifications.mockResolvedValue([]);
     mockUpdateRequirement.mockResolvedValue({ before, after, descriptionUpdated: false });
 
-    await implementedCommand.parseAsync(["node", "test", "req-000001"]);
+    await implementCommand.parseAsync(["node", "test", "req-000001"]);
 
     expect(consoleLogSpy).toHaveBeenCalledWith(
       expect.stringContaining("history: Status changed from approved to implemented"),
@@ -184,13 +186,41 @@ describe("req implemented command", () => {
     mockListSpecifications.mockResolvedValue([]);
     mockUpdateRequirement.mockResolvedValue({ before, after, descriptionUpdated: false });
 
-    await implementedCommand.parseAsync(["node", "test", "req-000001", "--json"]);
+    await implementCommand.parseAsync(["node", "test", "req-000001", "--json"]);
 
     expect(consoleLogSpy).toHaveBeenCalledWith(JSON.stringify(after, null, 2));
     // JSON mode should not print other messages
     expect(consoleLogSpy).not.toHaveBeenCalledWith(
       expect.stringContaining("Marked requirement as implemented"),
     );
+  });
+
+  it("draftステータスでエラー", async () => {
+    const req = makeRequirement({ status: "draft" });
+
+    mockShowRequirement.mockResolvedValue({ requirement: req, description: null });
+
+    await implementCommand.parseAsync(["node", "test", "req-000001"]);
+
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      expect.stringContaining("Requirementのステータスが approved ではありません（現在: draft）"),
+    );
+    expect(process.exitCode).toBe(1);
+    expect(mockUpdateRequirement).not.toHaveBeenCalled();
+  });
+
+  it("implementedステータスでエラー", async () => {
+    const req = makeRequirement({ status: "implemented" });
+
+    mockShowRequirement.mockResolvedValue({ requirement: req, description: null });
+
+    await implementCommand.parseAsync(["node", "test", "req-000001"]);
+
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      expect.stringContaining("Requirementのステータスが approved ではありません（現在: implemented）"),
+    );
+    expect(process.exitCode).toBe(1);
+    expect(mockUpdateRequirement).not.toHaveBeenCalled();
   });
 
   it("JSON modeでは関連Specificationを表示しない", async () => {
@@ -202,7 +232,7 @@ describe("req implemented command", () => {
     mockListSpecifications.mockResolvedValue(specs);
     mockUpdateRequirement.mockResolvedValue({ before, after, descriptionUpdated: false });
 
-    await implementedCommand.parseAsync(["node", "test", "req-000001", "--json"]);
+    await implementCommand.parseAsync(["node", "test", "req-000001", "--json"]);
 
     expect(consoleLogSpy).not.toHaveBeenCalledWith(
       expect.stringContaining("Related specifications"),
