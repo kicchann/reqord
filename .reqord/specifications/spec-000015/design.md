@@ -8,8 +8,11 @@ Specificationの承認プロセスをGitHub PRベースで管理する。`reqord
 
 ```
 Command Layer:  commands/spec/approve.ts      (新規)
+                commands/spec/draft.ts        (新規)
+                commands/spec/implement.ts    (新規)
                     ↓
 Service Layer:  services/approval-service.ts   (spec-000011で追加 - 共通)
+                services/draft-reversion-service.ts (spec-000011で追加 - 共通)
                 services/specification-service.ts (既存拡張)
                     ↓
 Repository:     repositories/specification.ts  (既存)
@@ -23,7 +26,7 @@ Storage:        .reqord/specifications/spec-NNNNNN.yaml
                 GitHub PR
 ```
 
-Requirement承認フローと同一のapproval-serviceを使用し、Specification固有のロジック（前提条件チェック、PR本文テンプレート）のみをコマンド層とサービス層で追加する。
+Requirement承認フローと同一のapproval-serviceおよびdraft-reversion-serviceを使用し、Specification固有のロジック（前提条件チェック、PR本文テンプレート）のみをコマンド層とサービス層で追加する。
 
 ## 3. コンポーネント設計
 
@@ -186,7 +189,7 @@ status: draft → approved
 
 ### ユニットテスト
 
-- **前提条件チェック**:
+- **前提条件チェック（approve）**:
   - Specificationがdraftのときに成功すること
   - Specificationがdraft以外のときにエラーメッセージが返ること
   - 関連Requirementがapproved/approvedのときに成功すること
@@ -195,12 +198,25 @@ status: draft → approved
 - **ApprovalTarget構築**: type="specification"、files配列にdesign.mdが含まれること
 - **designSummary抽出**: 設計概要セクションの正しい抽出
 - **ブランチ名生成**: "reqord/spec-{id}-approve-v{version}" 形式
+- **draftコマンド**:
+  - approved → draftへのステータス遷移が正しく行われること
+  - implemented → draftへのステータス遷移が正しく行われること
+  - 影響分析が実行されること
+  - バージョンがインクリメントされないこと
+  - PRが作成されること（approved/implementedからの差し戻し時）
+  - ブランチ名が `reqord/spec-<id>-revert-to-draft` 形式であること
+- **implementコマンド**:
+  - approved → implementedへのステータス遷移が正しく行われること
+  - approved以外のステータスでエラーが返ること
+  - バージョンがインクリメントされないこと
 
 ### 統合テスト
 
 - Requirement承認済み → Specification承認の一連フロー
 - `--dry-run` モードでの動作確認
 - 前提条件エラー時の適切なメッセージ表示
+- draft差し戻しフロー: approved → draft → PR作成
+- implement遷移フロー: approved → implemented
 
 ## 6. 技術的決定事項
 
@@ -218,3 +234,86 @@ status: draft → approved
 
 **決定:** テンプレートのままのdesign.mdでは承認を拒否
 **理由:** 設計文書が実際に記述されていない仕様の承認は意味がない。テンプレートのデフォルトテキスト（「Phase 3で実装予定」等）が残っている場合はエラーとする。
+
+## 7. draftコマンド設計
+
+### 7.1 draftコマンド (`commands/spec/draft.ts`)
+
+**責務:** approved/implementedのspecをdraft状態に差し戻す。ステータス変更のみ行い、バージョンはインクリメントしない。
+
+```
+reqord spec draft <id> [--dry-run]
+```
+
+| オプション | 説明 |
+|-----------|------|
+| `<id>` | 差し戻し対象のSpecification ID（spec-NNNNNN） |
+| `--dry-run` | 実際の操作を行わず、実行予定の内容を表示 |
+
+### 7.2 DraftReversionServiceの再利用
+
+spec-000011で追加した `DraftReversionService` を再利用する。Specification用のコマンド層で `type: "specification"` として呼び出す。
+
+### 7.3 処理フロー
+
+1. 前提条件チェック（statusが `draft` 以外）
+2. `impact-service.analyzeImpact()` で影響範囲を分析
+3. 影響範囲をコンソールに表示
+4. Gitブランチ作成: `reqord/spec-<id>-revert-to-draft`
+5. `status` を `draft` に更新（**バージョンはインクリメントしない**）
+6. `versionHistory` にエントリを追加
+7. 変更をコミット・プッシュ
+8. PRを作成（影響範囲をPR本文に記載）
+
+### 7.4 PR本文テンプレート（差し戻し用）
+
+```markdown
+## 仕様差し戻し
+
+| フィールド | 値 |
+|-----------|------|
+| ID | {id} |
+| タイトル | {title} |
+| バージョン | {version} |
+| 変更前ステータス | {previousStatus} |
+
+### 影響範囲
+
+以下の仕様がこの仕様に依存しています:
+
+{impactedSpecifications}
+
+### 変更内容
+status: {previousStatus} → draft
+
+> このPRをマージすると、仕様のステータスが `draft` に差し戻されます。
+```
+
+### 7.5 ブランチ命名規則
+
+```
+reqord/spec-<id>-revert-to-draft
+例: reqord/spec-000015-revert-to-draft
+```
+
+## 8. implementコマンド設計
+
+### 8.1 implementコマンド (`commands/spec/implement.ts`)
+
+**責務:** approvedのspecをimplemented状態に遷移させる。ステータス変更のみ行い、バージョンはインクリメントしない。
+
+```
+reqord spec implement <id>
+```
+
+| オプション | 説明 |
+|-----------|------|
+| `<id>` | 対象のSpecification ID（spec-NNNNNN） |
+
+### 8.2 処理フロー
+
+1. 前提条件チェック: `status === "approved"`
+2. `status` を `implemented` に更新（**バージョンはインクリメントしない**）
+3. `versionHistory` にエントリを追加
+
+> バージョン変更は `reqord version` コマンドで明示的に行う（req-000005参照）。
