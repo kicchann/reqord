@@ -1,25 +1,30 @@
 id: spec-000015
 requirementId: req-000015
 version: '1.0'
-status: draft
+status: approved
 createdAt: 2026-02-08T14:08:07.812Z
-updatedAt: 2026-02-15T22:26:50.192Z
+updatedAt: 2026-02-15T22:36:44.283Z
 versionHistory:
   - version: '1.0'
     status: draft
     gitCommit: 5ca7776
     changedAt: 2026-02-15T22:26:50.192Z
     summary: 'status: implemented → draft'
+  - version: '1.0'
+    status: approved
+    gitCommit: 829313c
+    changedAt: 2026-02-15T22:36:44.283Z
+    summary: 'status: draft → approved'
 files:
   design: specifications/spec-000015/design.md
   supplementary: []
-flags:
-  - type: feedback-review
-    reason: 'Feedback from issue #208'
-    createdAt: 2026-02-12T22:13:07.934Z
-    relatedIssues:
-      - 208
-    severity: medium
+flags: []
+currentApproval:
+  version: '1.0'
+  phase: specification
+  prNumber: 298
+  prUrl: https://github.com/kicchann/reqord/pull/298
+  approvedBy: []
 implementation:
   issues:
     - number: 85
