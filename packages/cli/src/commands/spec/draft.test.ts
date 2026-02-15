@@ -85,7 +85,7 @@ describe("spec draft command", () => {
 
       expect(mockRevertToDraft).toHaveBeenCalled();
       expect(consoleLogSpy).toHaveBeenCalledWith(
-        expect.stringContaining("PRを作成しました"),
+        expect.stringContaining("差し戻しPRを作成しました"),
       );
     });
 

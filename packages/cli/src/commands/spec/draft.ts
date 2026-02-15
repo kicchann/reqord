@@ -54,9 +54,17 @@ export const draftCommand = new Command("draft")
             return;
           }
 
-          if (!options.dryRun) {
-            console.log(chalk.green(`Reverted specification to draft: ${id}`));
-            console.log(`  status: ${result.previousStatus} → draft`);
+          if (options.dryRun) {
+            console.log(`[dry-run] ステータス変更: ${result.previousStatus} → draft`);
+            if (result.impactedRequirements.length > 0) {
+              console.log(`[dry-run] 影響範囲:`);
+              for (const rid of result.impactedRequirements) {
+                console.log(`  - ${rid}`);
+              }
+            }
+          } else {
+            console.log(chalk.green(`差し戻しPRを作成しました: ${id}`));
+            console.log(`  status: ${result.previousStatus} → draft (PRマージ後に確定)`);
             if (result.impactedRequirements.length > 0) {
               console.log();
               console.log("影響範囲:");

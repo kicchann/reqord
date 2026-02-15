@@ -36,13 +36,24 @@ function buildPrBody(
   version: string,
   previousStatus: string,
   impactedRequirements: string[],
+  entityType: "requirement" | "specification",
 ): string {
+  const isSpec = entityType === "specification";
+  const entityLabel = isSpec ? "仕様" : "要件";
+  const heading = isSpec ? "仕様差し戻し" : "要件差し戻し";
+  const impactLabel = isSpec
+    ? "以下の要件がこの仕様の親要件に依存しています:"
+    : "以下の要件がこの要件に依存しています:";
+  const noImpactLabel = isSpec
+    ? "なし（他の要件に影響はありません）"
+    : "なし（他の要件に影響はありません）";
+
   const impactSection =
     impactedRequirements.length > 0
       ? impactedRequirements.map((rid) => `- ${rid}`).join("\n")
-      : "なし（他の要件に影響はありません）";
+      : noImpactLabel;
 
-  return `## 要件差し戻し
+  return `## ${heading}
 
 | フィールド | 値 |
 |-----------|------|
@@ -52,13 +63,13 @@ function buildPrBody(
 | 変更前ステータス | ${previousStatus} |
 
 ### 影響範囲
-以下の要件がこの要件に依存しています:
+${impactLabel}
 ${impactSection}
 
 ### 変更内容
 status: ${previousStatus} → draft
 
-> このPRをマージすると、要件のステータスが \`draft\` に差し戻されます。`;
+> このPRをマージすると、${entityLabel}のステータスが \`draft\` に差し戻されます。`;
 }
 
 function getEntityInfo(id: string): { type: "requirement" | "specification"; dir: string } {
@@ -87,6 +98,18 @@ function extractImpactedRequirements(impact: ImpactAnalysis): string[] {
     .map((entry) => entry.id);
 }
 
+async function analyzeSpecImpact(
+  cwd: string,
+  impact: ImpactAnalysis,
+): Promise<string[]> {
+  // For specifications, analyze impact via the parent requirement
+  if (impact.parentRequirement) {
+    const parentImpact = await analyzeImpact(cwd, impact.parentRequirement.id);
+    return extractImpactedRequirements(parentImpact);
+  }
+  return [];
+}
+
 export async function revertToDraft(
   cwd: string,
   id: string,
@@ -99,24 +122,16 @@ export async function revertToDraft(
   }
 
   const previousStatus = entity.status;
-  const { dir } = getEntityInfo(id);
+  const { type: entityType, dir } = getEntityInfo(id);
 
   // 2. Analyze impact
   const impact = await analyzeImpact(cwd, id);
-  const impactedRequirements = extractImpactedRequirements(impact);
+  const impactedRequirements = entityType === "specification"
+    ? await analyzeSpecImpact(cwd, impact)
+    : extractImpactedRequirements(impact);
 
   // 3. Dry-run mode
   if (options?.dryRun) {
-    const branchName = buildBranchName(id);
-    console.log(`[dry-run] ブランチ作成: ${branchName}`);
-    console.log(`[dry-run] ステータス変更: ${previousStatus} → draft`);
-    if (impactedRequirements.length > 0) {
-      console.log(`[dry-run] 影響範囲:`);
-      for (const rid of impactedRequirements) {
-        console.log(`  - ${rid}`);
-      }
-    }
-    console.log(`[dry-run] PR作成: ${buildPrTitle(id, entity.title)}`);
     return { previousStatus, impactedRequirements };
   }
 
@@ -150,6 +165,7 @@ export async function revertToDraft(
       entity.version,
       previousStatus,
       impactedRequirements,
+      entityType,
     );
 
     const prInfo = await githubRepo.createPullRequest({

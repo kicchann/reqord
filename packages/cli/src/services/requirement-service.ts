@@ -184,22 +184,10 @@ export async function updateRequirement(
   }
 
   // 7. Determine version
-  let nextVersion = before.version; // Default: version preserved
-
-  // approved/implemented → draft transition triggers version increment
-  if (
-    (before.status === "approved" || before.status === "implemented") &&
-    merged.status === "draft"
-  ) {
-    if (options.versionBump === "patch") {
-      nextVersion = versionService.applyVersionBump(before.version, "patch");
-    } else {
-      nextVersion = versionService.applyVersionBump(before.version, "major");
-    }
-  } else if (options.versionBump) {
-    // Explicit version bump outside draft transition
-    nextVersion = versionService.applyVersionBump(before.version, options.versionBump);
-  }
+  // Version changes only via explicit versionBump option (no auto-versioning)
+  const nextVersion = options.versionBump
+    ? versionService.applyVersionBump(before.version, options.versionBump)
+    : before.version;
 
   merged.version = nextVersion;
   const versionChanged = nextVersion !== before.version;

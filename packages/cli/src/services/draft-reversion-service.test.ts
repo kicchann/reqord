@@ -244,6 +244,27 @@ describe("DraftReversionService", () => {
       expect(result.prNumber).toBe(42);
     });
 
+    it("バージョンが変更されないこと（versionBumpなし）", async () => {
+      const req = makeRequirement({ status: "approved", version: "2.0" });
+      const afterReq = makeRequirement({ status: "draft", version: "2.0" });
+      vi.mocked(reqRepo.findByIdOrThrow).mockResolvedValue(req);
+      vi.mocked(analyzeImpact).mockResolvedValue(makeImpactAnalysis());
+      vi.mocked(updateRequirement).mockResolvedValue({
+        before: req,
+        after: afterReq,
+        descriptionUpdated: false,
+      });
+
+      await revertToDraft(process.cwd(), "req-000001");
+
+      // updateRequirement should be called with only status, no versionBump
+      expect(updateRequirement).toHaveBeenCalledWith(
+        process.cwd(),
+        "req-000001",
+        { status: "draft" },
+      );
+    });
+
     it("元のブランチに復帰すること", async () => {
       const req = makeRequirement({ status: "approved" });
       const afterReq = makeRequirement({ status: "draft" });
@@ -283,6 +304,82 @@ describe("DraftReversionService", () => {
       expect(result.prNumber).toBe(42);
     });
 
+    it("バージョンが変更されないこと（versionBumpなし）", async () => {
+      const spec = makeSpecification({ status: "approved", version: "1.0" });
+      const afterSpec = makeSpecification({ status: "draft", version: "1.0" });
+      vi.mocked(specRepo.findByIdOrThrow).mockResolvedValue(spec);
+      vi.mocked(analyzeImpact).mockResolvedValue(
+        makeImpactAnalysis({ sourceId: "spec-000001", sourceType: "specification" }),
+      );
+      vi.mocked(updateSpecification).mockResolvedValue({
+        before: spec,
+        after: afterSpec,
+      });
+
+      await revertToDraft(process.cwd(), "spec-000001");
+
+      expect(updateSpecification).toHaveBeenCalledWith(
+        process.cwd(),
+        "spec-000001",
+        { status: "draft" },
+      );
+    });
+
+    it("親要件経由で影響範囲を取得すること", async () => {
+      const spec = makeSpecification({ status: "approved" });
+      const afterSpec = makeSpecification({ status: "draft" });
+      vi.mocked(specRepo.findByIdOrThrow).mockResolvedValue(spec);
+
+      // First call: spec impact analysis (returns parentRequirement)
+      // Second call: parent requirement impact analysis (returns blocks)
+      vi.mocked(analyzeImpact)
+        .mockResolvedValueOnce(
+          makeImpactAnalysis({
+            sourceId: "spec-000001",
+            sourceType: "specification",
+            parentRequirement: { id: "req-000001", title: "Parent Req" },
+          }),
+        )
+        .mockResolvedValueOnce(
+          makeImpactAnalysis({
+            sourceId: "req-000001",
+            directImpacts: [
+              { id: "req-000002", relation: "blocks", depth: 1, path: ["req-000001"], title: "Blocked" },
+            ],
+          }),
+        );
+      vi.mocked(updateSpecification).mockResolvedValue({
+        before: spec,
+        after: afterSpec,
+      });
+
+      const result = await revertToDraft(process.cwd(), "spec-000001");
+
+      expect(result.impactedRequirements).toEqual(["req-000002"]);
+      // analyzeImpact should be called twice: once for spec, once for parent req
+      expect(analyzeImpact).toHaveBeenCalledTimes(2);
+      expect(analyzeImpact).toHaveBeenCalledWith(process.cwd(), "req-000001");
+    });
+
+    it("PR本文が仕様向けテンプレートであること", async () => {
+      const spec = makeSpecification({ status: "approved" });
+      const afterSpec = makeSpecification({ status: "draft" });
+      vi.mocked(specRepo.findByIdOrThrow).mockResolvedValue(spec);
+      vi.mocked(analyzeImpact).mockResolvedValue(
+        makeImpactAnalysis({ sourceId: "spec-000001", sourceType: "specification" }),
+      );
+      vi.mocked(updateSpecification).mockResolvedValue({
+        before: spec,
+        after: afterSpec,
+      });
+
+      await revertToDraft(process.cwd(), "spec-000001");
+
+      const callArgs = vi.mocked(githubRepo.createPullRequest).mock.calls[0][0];
+      expect(callArgs.body).toContain("仕様差し戻し");
+      expect(callArgs.body).toContain("仕様のステータス");
+    });
+
     it("ブランチ名が reqord/spec-<id>-revert-to-draft であること", async () => {
       const spec = makeSpecification({ status: "approved" });
       const afterSpec = makeSpecification({ status: "draft" });
@@ -310,8 +407,6 @@ describe("DraftReversionService", () => {
       vi.mocked(reqRepo.findByIdOrThrow).mockResolvedValue(req);
       vi.mocked(analyzeImpact).mockResolvedValue(makeImpactAnalysis());
 
-      const consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {});
-
       const result = await revertToDraft(process.cwd(), "req-000001", { dryRun: true });
 
       expect(gitRepo.createBranch).not.toHaveBeenCalled();
@@ -321,11 +416,9 @@ describe("DraftReversionService", () => {
       expect(updateRequirement).not.toHaveBeenCalled();
       expect(result.prNumber).toBeUndefined();
       expect(result.impactedRequirements).toEqual([]);
-
-      consoleSpy.mockRestore();
     });
 
-    it("dryRunモードで影響範囲を表示すること", async () => {
+    it("dryRunモードで影響範囲がresultに含まれること", async () => {
       const req = makeRequirement({ status: "approved" });
       vi.mocked(reqRepo.findByIdOrThrow).mockResolvedValue(req);
       vi.mocked(analyzeImpact).mockResolvedValue(
@@ -336,14 +429,22 @@ describe("DraftReversionService", () => {
         }),
       );
 
+      const result = await revertToDraft(process.cwd(), "req-000001", { dryRun: true });
+
+      expect(result.impactedRequirements).toEqual(["req-000002"]);
+      expect(result.previousStatus).toBe("approved");
+    });
+
+    it("dryRunモードでconsole.logが呼ばれないこと", async () => {
+      const req = makeRequirement({ status: "approved" });
+      vi.mocked(reqRepo.findByIdOrThrow).mockResolvedValue(req);
+      vi.mocked(analyzeImpact).mockResolvedValue(makeImpactAnalysis());
+
       const consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {});
 
       await revertToDraft(process.cwd(), "req-000001", { dryRun: true });
 
-      expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining("req-000002"),
-      );
-
+      expect(consoleSpy).not.toHaveBeenCalled();
       consoleSpy.mockRestore();
     });
   });
