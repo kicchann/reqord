@@ -19,6 +19,12 @@ files:
   design: specifications/spec-000015/design.md
   supplementary: []
 flags: []
+currentApproval:
+  version: '1.0'
+  phase: specification
+  prNumber: 298
+  prUrl: https://github.com/kicchann/reqord/pull/298
+  approvedBy: []
 implementation:
   issues:
     - number: 85
@@ -53,9 +59,3 @@ implementation:
     completed: 5
     percentage: 100
     lastSyncedAt: 2026-02-12T15:12:58.431Z
-currentApproval:
-  version: '1.0'
-  phase: specification
-  prNumber: 0
-  prUrl: ''
-  approvedBy: []
