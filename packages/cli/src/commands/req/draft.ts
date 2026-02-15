@@ -5,16 +5,19 @@ import {
   showRequirement,
   type UpdateOptions,
 } from "../../services/requirement-service.js";
+import { revertToDraft } from "../../services/draft-reversion-service.js";
 import { handleError } from "../../utils/error-handler.js";
 
 export const draftCommand = new Command("draft")
   .description("Revert a requirement to draft status")
   .argument("<id>", "Requirement ID (e.g. req-000001)")
+  .option("--dry-run", "Show what would happen without making changes")
   .option("--json", "Output result as JSON")
   .action(
     async (
       id: string,
       options: {
+        dryRun?: boolean;
         json?: boolean;
       },
     ) => {
@@ -42,6 +45,33 @@ export const draftCommand = new Command("draft")
           console.log();
         }
 
+        // approved/implemented → draft: use DraftReversionService (PR flow)
+        if (requirement.status === "approved" || requirement.status === "implemented") {
+          const result = await revertToDraft(cwd, id, { dryRun: options.dryRun });
+
+          if (options.json) {
+            console.log(JSON.stringify(result, null, 2));
+            return;
+          }
+
+          if (!options.dryRun) {
+            console.log(chalk.green(`Reverted requirement to draft: ${id}`));
+            console.log(`  status: ${result.previousStatus} → draft`);
+            if (result.impactedRequirements.length > 0) {
+              console.log();
+              console.log("影響範囲:");
+              for (const rid of result.impactedRequirements) {
+                console.log(`  - ${rid}`);
+              }
+            }
+            console.log();
+            console.log(`PRを作成しました: ${result.prUrl}`);
+            console.log("PRマージで差し戻しが確定します。");
+          }
+          return;
+        }
+
+        // flagged → draft: use existing updateRequirement (no PR needed)
         const updateOpts: UpdateOptions = {
           status: "draft",
         };
