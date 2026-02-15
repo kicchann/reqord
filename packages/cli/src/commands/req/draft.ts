@@ -5,36 +5,25 @@ import {
   showRequirement,
   type UpdateOptions,
 } from "../../services/requirement-service.js";
+import { revertToDraft } from "../../services/draft-reversion-service.js";
 import { handleError } from "../../utils/error-handler.js";
-import { AppError, ErrorCode } from "../../utils/errors.js";
 
 export const draftCommand = new Command("draft")
   .description("Revert a requirement to draft status")
   .argument("<id>", "Requirement ID (e.g. req-000001)")
-  .option("--major", "Force major version increment (X.0)")
-  .option("--patch", "Force patch version increment (.Y)")
+  .option("--dry-run", "Show what would happen without making changes")
   .option("--json", "Output result as JSON")
   .action(
     async (
       id: string,
       options: {
-        major?: boolean;
-        patch?: boolean;
+        dryRun?: boolean;
         json?: boolean;
       },
     ) => {
       const cwd = process.cwd();
 
       try {
-        // Check for mutually exclusive version bump options
-        const versionBumpCount = [options.major, options.patch].filter(Boolean).length;
-        if (versionBumpCount > 1) {
-          throw new AppError(
-            "Only one of --major or --patch can be specified.",
-            ErrorCode.INVALID_ARGUMENT,
-          );
-        }
-
         // Show current requirement and flags
         const { requirement } = await showRequirement(cwd, id);
 
@@ -56,13 +45,44 @@ export const draftCommand = new Command("draft")
           console.log();
         }
 
+        // approved/implemented → draft: use DraftReversionService (PR flow)
+        if (requirement.status === "approved" || requirement.status === "implemented") {
+          const result = await revertToDraft(cwd, id, { dryRun: options.dryRun });
+
+          if (options.json) {
+            console.log(JSON.stringify(result, null, 2));
+            return;
+          }
+
+          if (options.dryRun) {
+            console.log(`[dry-run] ステータス変更: ${result.previousStatus} → draft`);
+            if (result.impactedRequirements.length > 0) {
+              console.log(`[dry-run] 影響範囲:`);
+              for (const rid of result.impactedRequirements) {
+                console.log(`  - ${rid}`);
+              }
+            }
+          } else {
+            console.log(chalk.green(`差し戻しPRを作成しました: ${id}`));
+            console.log(`  status: ${result.previousStatus} → draft (PRマージ後に確定)`);
+            if (result.impactedRequirements.length > 0) {
+              console.log();
+              console.log("影響範囲:");
+              for (const rid of result.impactedRequirements) {
+                console.log(`  - ${rid}`);
+              }
+            }
+            console.log();
+            console.log(`PRを作成しました: ${result.prUrl}`);
+            console.log("PRマージで差し戻しが確定します。");
+          }
+          return;
+        }
+
+        // flagged → draft: use existing updateRequirement (no PR needed)
         const updateOpts: UpdateOptions = {
           status: "draft",
         };
-
-        // Version bump override
-        if (options.major) updateOpts.versionBump = "major";
-        if (options.patch) updateOpts.versionBump = "patch";
 
         const { before, after } = await updateRequirement(cwd, id, updateOpts);
 

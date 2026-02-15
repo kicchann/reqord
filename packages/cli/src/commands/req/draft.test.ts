@@ -8,10 +8,16 @@ vi.mock("../../services/requirement-service.js", () => ({
   showRequirement: vi.fn(),
 }));
 
+vi.mock("../../services/draft-reversion-service.js", () => ({
+  revertToDraft: vi.fn(),
+}));
+
 import { updateRequirement, showRequirement } from "../../services/requirement-service.js";
+import { revertToDraft } from "../../services/draft-reversion-service.js";
 
 const mockUpdateRequirement = vi.mocked(updateRequirement);
 const mockShowRequirement = vi.mocked(showRequirement);
+const mockRevertToDraft = vi.mocked(revertToDraft);
 
 function makeRequirement(overrides: Partial<Requirement> = {}): Requirement {
   return {
@@ -37,55 +43,111 @@ function makeRequirement(overrides: Partial<Requirement> = {}): Requirement {
 
 describe("req draft command", () => {
   let consoleLogSpy: ReturnType<typeof vi.spyOn>;
-  let consoleErrorSpy: ReturnType<typeof vi.spyOn>;
 
   beforeEach(() => {
     vi.clearAllMocks();
     process.exitCode = 0;
     consoleLogSpy = vi.spyOn(console, "log").mockImplementation(() => {});
-    consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    vi.spyOn(console, "error").mockImplementation(() => {});
     // Reset Commander option state
-    draftCommand.setOptionValue("major", undefined);
-    draftCommand.setOptionValue("patch", undefined);
+    draftCommand.setOptionValue("dryRun", undefined);
     draftCommand.setOptionValue("json", undefined);
   });
 
-  it("approved → draftへの差し戻し", async () => {
-    const before = makeRequirement({ status: "approved", version: "2.0" });
-    const after = makeRequirement({ status: "draft", version: "2.0" });
+  describe("approved/implemented → draft (PR flow)", () => {
+    it("approved状態でDraftReversionServiceが呼び出される", async () => {
+      const requirement = makeRequirement({ status: "approved" });
+      mockShowRequirement.mockResolvedValue({ requirement, description: null });
+      mockRevertToDraft.mockResolvedValue({
+        previousStatus: "approved",
+        impactedRequirements: [],
+        prNumber: 42,
+        prUrl: "https://github.com/kicchann/reqord/pull/42",
+      });
 
-    mockShowRequirement.mockResolvedValue({ requirement: before, description: null });
-    mockUpdateRequirement.mockResolvedValue({ before, after, descriptionUpdated: false });
+      await draftCommand.parseAsync(["node", "test", "req-000001"]);
 
-    await draftCommand.parseAsync(["node", "test", "req-000001"]);
+      expect(mockRevertToDraft).toHaveBeenCalledWith(
+        process.cwd(),
+        "req-000001",
+        { dryRun: undefined },
+      );
+      expect(mockUpdateRequirement).not.toHaveBeenCalled();
+    });
 
-    expect(mockUpdateRequirement).toHaveBeenCalledWith(
-      process.cwd(),
-      "req-000001",
-      expect.objectContaining({
-        status: "draft",
-      }),
-    );
-    expect(consoleLogSpy).toHaveBeenCalledWith(
-      expect.stringContaining("Reverted requirement to draft: req-000001"),
-    );
-    expect(consoleLogSpy).toHaveBeenCalledWith("  status: approved → draft");
+    it("implemented状態でDraftReversionServiceが呼び出される", async () => {
+      const requirement = makeRequirement({ status: "implemented" });
+      mockShowRequirement.mockResolvedValue({ requirement, description: null });
+      mockRevertToDraft.mockResolvedValue({
+        previousStatus: "implemented",
+        impactedRequirements: [],
+        prNumber: 42,
+        prUrl: "https://github.com/kicchann/reqord/pull/42",
+      });
+
+      await draftCommand.parseAsync(["node", "test", "req-000001"]);
+
+      expect(mockRevertToDraft).toHaveBeenCalled();
+      expect(consoleLogSpy).toHaveBeenCalledWith(
+        expect.stringContaining("差し戻しPRを作成しました"),
+      );
+    });
+
+    it("影響範囲が表示される", async () => {
+      const requirement = makeRequirement({ status: "approved" });
+      mockShowRequirement.mockResolvedValue({ requirement, description: null });
+      mockRevertToDraft.mockResolvedValue({
+        previousStatus: "approved",
+        impactedRequirements: ["req-000002", "req-000003"],
+        prNumber: 42,
+        prUrl: "https://github.com/kicchann/reqord/pull/42",
+      });
+
+      await draftCommand.parseAsync(["node", "test", "req-000001"]);
+
+      expect(consoleLogSpy).toHaveBeenCalledWith("影響範囲:");
+      expect(consoleLogSpy).toHaveBeenCalledWith("  - req-000002");
+      expect(consoleLogSpy).toHaveBeenCalledWith("  - req-000003");
+    });
+
+    it("--dry-runオプションが正しく渡される", async () => {
+      const requirement = makeRequirement({ status: "approved" });
+      mockShowRequirement.mockResolvedValue({ requirement, description: null });
+      mockRevertToDraft.mockResolvedValue({
+        previousStatus: "approved",
+        impactedRequirements: [],
+      });
+
+      await draftCommand.parseAsync(["node", "test", "req-000001", "--dry-run"]);
+
+      expect(mockRevertToDraft).toHaveBeenCalledWith(
+        process.cwd(),
+        "req-000001",
+        { dryRun: true },
+      );
+    });
   });
 
-  it("implemented → draftへの差し戻し", async () => {
-    const before = makeRequirement({ status: "implemented", version: "3.0" });
-    const after = makeRequirement({ status: "draft", version: "3.0" });
+  describe("other status → draft (direct update)", () => {
+    it("approved/implemented以外の状態ではPRが作成されない", async () => {
+      const before = makeRequirement({ status: "deprecated" });
+      const after = makeRequirement({ status: "draft" });
+      mockShowRequirement.mockResolvedValue({ requirement: before, description: null });
+      mockUpdateRequirement.mockResolvedValue({ before, after, descriptionUpdated: false });
 
-    mockShowRequirement.mockResolvedValue({ requirement: before, description: null });
-    mockUpdateRequirement.mockResolvedValue({ before, after, descriptionUpdated: false });
+      await draftCommand.parseAsync(["node", "test", "req-000001"]);
 
-    await draftCommand.parseAsync(["node", "test", "req-000001"]);
-
-    expect(consoleLogSpy).toHaveBeenCalledWith("  status: implemented → draft");
+      expect(mockRevertToDraft).not.toHaveBeenCalled();
+      expect(mockUpdateRequirement).toHaveBeenCalledWith(
+        process.cwd(),
+        "req-000001",
+        { status: "draft" },
+      );
+    });
   });
 
   it("フラグがある場合に警告表示", async () => {
-    const before = makeRequirement({
+    const requirement = makeRequirement({
       status: "approved",
       flags: [
         {
@@ -97,89 +159,51 @@ describe("req draft command", () => {
         },
       ],
     });
-    const after = makeRequirement({ status: "draft" });
-
-    mockShowRequirement.mockResolvedValue({ requirement: before, description: null });
-    mockUpdateRequirement.mockResolvedValue({ before, after, descriptionUpdated: false });
+    mockShowRequirement.mockResolvedValue({ requirement, description: null });
+    mockRevertToDraft.mockResolvedValue({
+      previousStatus: "approved",
+      impactedRequirements: [],
+      prNumber: 42,
+      prUrl: "https://github.com/kicchann/reqord/pull/42",
+    });
 
     await draftCommand.parseAsync(["node", "test", "req-000001"]);
 
     expect(consoleLogSpy).toHaveBeenCalledWith(
       expect.stringContaining("Warning: req-000001 has 1 unresolved feedback flag(s)"),
     );
-    expect(consoleLogSpy).toHaveBeenCalledWith(
-      expect.stringContaining("feedback-review: 要確認 (medium)"),
-    );
   });
 
-  it("--major指定でmajorバージョンアップ", async () => {
-    const before = makeRequirement({ status: "approved", version: "1.5" });
-    const after = makeRequirement({ status: "draft", version: "2.0" });
-
-    mockShowRequirement.mockResolvedValue({ requirement: before, description: null });
-    mockUpdateRequirement.mockResolvedValue({ before, after, descriptionUpdated: false });
-
-    await draftCommand.parseAsync(["node", "test", "req-000001", "--major"]);
-
-    expect(mockUpdateRequirement).toHaveBeenCalledWith(
-      process.cwd(),
-      "req-000001",
-      expect.objectContaining({
-        status: "draft",
-        versionBump: "major",
-      }),
-    );
-    expect(consoleLogSpy).toHaveBeenCalledWith("  version: 1.5 → 2.0");
-  });
-
-  it("--patch指定でpatchバージョンアップ", async () => {
-    const before = makeRequirement({ status: "approved", version: "1.5" });
-    const after = makeRequirement({ status: "draft", version: "1.6" });
-
-    mockShowRequirement.mockResolvedValue({ requirement: before, description: null });
-    mockUpdateRequirement.mockResolvedValue({ before, after, descriptionUpdated: false });
-
-    await draftCommand.parseAsync(["node", "test", "req-000001", "--patch"]);
-
-    expect(mockUpdateRequirement).toHaveBeenCalledWith(
-      process.cwd(),
-      "req-000001",
-      expect.objectContaining({
-        versionBump: "patch",
-      }),
-    );
-  });
-
-  it("--major/--patchの複数指定でエラー", async () => {
+  it("--jsonオプションでJSON出力（PRフロー）", async () => {
     const requirement = makeRequirement({ status: "approved" });
     mockShowRequirement.mockResolvedValue({ requirement, description: null });
+    const result = {
+      previousStatus: "approved",
+      impactedRequirements: [],
+      prNumber: 42,
+      prUrl: "https://github.com/kicchann/reqord/pull/42",
+    };
+    mockRevertToDraft.mockResolvedValue(result);
 
-    await draftCommand.parseAsync(["node", "test", "req-000001", "--major", "--patch"]);
+    await draftCommand.parseAsync(["node", "test", "req-000001", "--json"]);
 
-    expect(process.exitCode).toBe(1);
-    expect(consoleErrorSpy).toHaveBeenCalledWith(
-      expect.stringContaining("Only one of --major or --patch can be specified"),
-    );
+    expect(consoleLogSpy).toHaveBeenCalledWith(JSON.stringify(result, null, 2));
   });
 
-  it("--jsonオプションでJSON出力", async () => {
-    const before = makeRequirement({ status: "approved", version: "2.0" });
-    const after = makeRequirement({ status: "draft", version: "2.0" });
-
+  it("--jsonオプションでJSON出力（直接更新フロー）", async () => {
+    const before = makeRequirement({ status: "deprecated" });
+    const after = makeRequirement({ status: "draft" });
     mockShowRequirement.mockResolvedValue({ requirement: before, description: null });
     mockUpdateRequirement.mockResolvedValue({ before, after, descriptionUpdated: false });
 
     await draftCommand.parseAsync(["node", "test", "req-000001", "--json"]);
 
     expect(consoleLogSpy).toHaveBeenCalledWith(JSON.stringify(after, null, 2));
-    expect(consoleLogSpy).not.toHaveBeenCalledWith(
-      expect.stringContaining("Reverted requirement to draft"),
-    );
   });
 
-  it("versionHistoryエントリが記録される", async () => {
+  it("versionHistoryエントリが記録される（直接更新フロー）", async () => {
     const before = makeRequirement({
-      status: "approved",
+      status: "deprecated",
       version: "2.0",
       versionHistory: [],
     });
@@ -192,7 +216,7 @@ describe("req draft command", () => {
           status: "draft",
           gitCommit: "abc123",
           changedAt: "2026-01-01T00:00:00Z",
-          summary: "Status changed from approved to draft",
+          summary: "Status changed from deprecated to draft",
         },
       ],
     });
@@ -203,7 +227,7 @@ describe("req draft command", () => {
     await draftCommand.parseAsync(["node", "test", "req-000001"]);
 
     expect(consoleLogSpy).toHaveBeenCalledWith(
-      expect.stringContaining("history: Status changed from approved to draft"),
+      expect.stringContaining("history: Status changed from deprecated to draft"),
     );
   });
 });

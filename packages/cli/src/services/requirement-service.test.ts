@@ -184,30 +184,21 @@ describe("updateRequirement - バージョンインクリメント", () => {
     expect(result.versionChanged).toBe(false);
   });
 
-  it("approved→draftでmajorバンプ（デフォルト）", async () => {
+  it("approved→draftでバージョンが変更されないこと（明示的versionBumpなし）", async () => {
     const before = makeRequirement({ status: "approved", version: "1.0" });
     vi.mocked(reqRepo.findByIdOrThrow).mockResolvedValue(before);
     vi.mocked(versionService.shouldRevertToDraft).mockReturnValue(true);
-    vi.mocked(versionService.applyVersionBump).mockReturnValue("2.0");
-    vi.mocked(versionService.generateChangeSummary).mockReturnValue("Status changed");
-    vi.mocked(versionService.createHistoryEntry).mockReturnValue({
-      version: "2.0",
-      status: "draft",
-      gitCommit: "abc123",
-      changedAt: "2026-01-02T00:00:00Z",
-      summary: "Status changed",
-    });
 
     const result = await updateRequirement("/test/cwd", "req-000001", {
       title: "変更タイトル",
     });
 
-    expect(versionService.applyVersionBump).toHaveBeenCalledWith("1.0", "major");
-    expect(result.after.version).toBe("2.0");
-    expect(result.versionChanged).toBe(true);
+    expect(versionService.applyVersionBump).not.toHaveBeenCalled();
+    expect(result.after.version).toBe("1.0");
+    expect(result.versionChanged).toBe(false);
   });
 
-  it("approved→draftで--patch指定時はpatchバンプ", async () => {
+  it("approved→draftで明示的versionBump指定時はバンプされること", async () => {
     const before = makeRequirement({ status: "approved", version: "1.0" });
     vi.mocked(reqRepo.findByIdOrThrow).mockResolvedValue(before);
     vi.mocked(versionService.shouldRevertToDraft).mockReturnValue(true);
@@ -231,27 +222,18 @@ describe("updateRequirement - バージョンインクリメント", () => {
     expect(result.versionChanged).toBe(true);
   });
 
-  it("implemented→draftでmajorバンプ（デフォルト）", async () => {
+  it("implemented→draftでバージョンが変更されないこと（明示的versionBumpなし）", async () => {
     const before = makeRequirement({ status: "implemented", version: "2.0" });
     vi.mocked(reqRepo.findByIdOrThrow).mockResolvedValue(before);
     vi.mocked(versionService.shouldRevertToDraft).mockReturnValue(true);
-    vi.mocked(versionService.applyVersionBump).mockReturnValue("3.0");
-    vi.mocked(versionService.generateChangeSummary).mockReturnValue("Status changed");
-    vi.mocked(versionService.createHistoryEntry).mockReturnValue({
-      version: "3.0",
-      status: "draft",
-      gitCommit: "abc123",
-      changedAt: "2026-01-02T00:00:00Z",
-      summary: "Status changed",
-    });
 
     const result = await updateRequirement("/test/cwd", "req-000001", {
       title: "変更タイトル",
     });
 
-    expect(versionService.applyVersionBump).toHaveBeenCalledWith("2.0", "major");
-    expect(result.after.version).toBe("3.0");
-    expect(result.versionChanged).toBe(true);
+    expect(versionService.applyVersionBump).not.toHaveBeenCalled();
+    expect(result.after.version).toBe("2.0");
+    expect(result.versionChanged).toBe(false);
   });
 
   it("明示的versionBumpがdraft遷移以外でも適用される", async () => {
