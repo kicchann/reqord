@@ -1,10 +1,15 @@
 id: spec-000011
 requirementId: req-000011
 version: '1.0'
-status: implemented
+status: draft
 createdAt: 2026-02-08T14:08:07.471Z
-updatedAt: 2026-02-08T14:08:07.471Z
-versionHistory: []
+updatedAt: 2026-02-14T22:32:10.477Z
+versionHistory:
+  - version: '1.0'
+    status: draft
+    gitCommit: f1bd45c
+    changedAt: 2026-02-14T22:32:10.477Z
+    summary: 'status: implemented → draft'
 files:
   design: specifications/spec-000011/design.md
   supplementary: []
