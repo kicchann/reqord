@@ -209,6 +209,10 @@ feedbacks:
         - spec-000011
         - spec-000015
       createdSpecifications: []
+      resolved:
+        requirements: []
+        specifications:
+          - spec-000015
     syncedAt: 2026-02-12T21:57:49.473Z
     status: closed
   - githubIssue: 196
@@ -333,6 +337,10 @@ feedbacks:
       createdRequirements: []
       specifications: []
       createdSpecifications: []
+      resolved:
+        requirements:
+          - req-000015
+        specifications: []
     syncedAt: 2026-02-14T07:45:41.133Z
     status: open
   - githubIssue: 279
@@ -345,6 +353,10 @@ feedbacks:
       createdRequirements: []
       specifications: []
       createdSpecifications: []
+      resolved:
+        requirements:
+          - req-000015
+        specifications: []
     syncedAt: 2026-02-14T21:43:20.689Z
     status: open
   - githubIssue: 273
