@@ -4,6 +4,10 @@
 
 要件（Requirement）に対応する仕様書（Specification）のCRUD操作をCLIコマンドとして提供する。各仕様はYAML（メタデータ）とMarkdown（設計文書）のハイブリッドストレージに保存され、Requirementとの1:N関係で管理される。本機能は既に実装済みであり、`commands/spec/{create,list,show,design}.ts`、`services/specification-service.ts`、`repositories/specification.ts` で構成される。この設計書は既存実装のアーキテクチャを文書化する。
 
+> **v1.1変更点（Feedback #157, #220）:**
+> - `title`フィールド追加: グラフ表示等でSpecificationを識別可能にする
+> - `requirementVersion`フィールド追加: 紐づくRequirementのどのバージョンに準拠しているかを追跡する
+
 ## 2. アーキテクチャ
 
 ```
@@ -40,8 +44,8 @@ Requirement CRUDと同様の3層構成。Command層はCommander.jsによるCLI�
 
 | コマンド | 引数・オプション | 出力 |
 |---------|-----------------|------|
-| `create <req-id>` | Requirement ID（必須） | 作成したSpec ID・メタデータ・design.mdパス表示 |
-| `list` | `-s, --status`, `-r, --requirement`, `--json` | cli-table3によるテーブル表示 |
+| `create <req-id>` | Requirement ID（必須）, `--title <title>`（任意） | 作成したSpec ID・メタデータ・design.mdパス表示 |
+| `list` | `-s, --status`, `-r, --requirement`, `--json` | cli-table3によるテーブル表示（Title列を含む） |
 | `show <id>` | `--json` | メタデータ全フィールド + design.md内容表示 |
 | `design <id>` | `--content-file <path>` | design.mdパス表示 or ファイル更新 |
 
@@ -49,9 +53,11 @@ Requirement CRUDと同様の3層構成。Command層はCommander.jsによるCLI�
 
 **責務:** CRUD操作のビジネスロジック。
 
-- `createSpecification(cwd, { requirementId })`:
+- `createSpecification(cwd, { requirementId, title? })`:
   - Requirementの存在確認（reqRepo.findById）
+  - Requirementの現行バージョンを取得し`requirementVersion`に設定
   - ID自動採番（spec-NNNNNN形式）
+  - title未指定時はRequirementのtitleをデフォルト値として使用
   - Specificationオブジェクト構築
   - ディレクトリ作成 + YAML保存
   - design.mdテンプレート配置（プロジェクトカスタム or デフォルト）
@@ -84,7 +90,9 @@ Requirement CRUDと同様の3層構成。Command層はCommander.jsによるCLI�
 ```typescript
 export const SpecificationSchema = z.object({
   id: z.string().regex(/^spec-\d{6}$/),
+  title: z.string(),                                    // ← #157で追加
   requirementId: z.string().regex(/^req-\d{6}$/),
+  requirementVersion: z.string(),                       // ← #220で追加
   version: z.string().default("1.0.0"),
   status: StatusSchema.default("draft"),
   createdAt: z.string(),
@@ -94,8 +102,16 @@ export const SpecificationSchema = z.object({
     design: z.string(),
     supplementary: z.array(z.string()).default([]),
   }),
+  flags: z.array(FeedbackFlagSchema).default([]),
+  currentApproval: SpecCurrentApprovalSchema.optional(),
+  implementation: ImplementationSchema.optional(),
 });
 ```
+
+**新フィールドの仕様:**
+
+- `title`: 仕様のタイトル。create時に`--title`で指定可能。未指定時はRequirementのtitleをデフォルト値として使用。グラフ表示やlist出力での識別に利用。
+- `requirementVersion`: 仕様が準拠するRequirementのバージョン（例: `"1.1"`）。create時にRequirementの現行versionを自動取得して設定。Requirementが更新された際に、Specificationが最新バージョンに準拠しているか判別できる。
 
 ### 3.5 ID自動採番 (`utils/spec-id-generator.ts` - 実装済み)
 
@@ -108,23 +124,24 @@ export const SpecificationSchema = z.object({
 
 - `loadProjectTemplate(cwd, "specification-design.md")`: プロジェクトカスタムテンプレート読み込み
 - `DEFAULT_SPECIFICATION_DESIGN_TEMPLATE`: テンプレート未カスタマイズ時のデフォルト
-- テンプレート変数: `{{id}}`, `{{requirementId}}`
+- テンプレート変数: `{{id}}`, `{{title}}`, `{{requirementId}}`
 
 ## 4. データフロー
 
 ### Create
 
 ```
-ユーザー → reqord spec create req-000013
-  → specCreateCommand.action("req-000013")
-    → createSpecification(cwd, { requirementId: "req-000013" })
-      → reqRepo.findById(cwd, "req-000013") → Requirement存在確認
+ユーザー → reqord spec create req-000013 --title "Specification CRUD設計"
+  → specCreateCommand.action("req-000013", { title: "Specification CRUD設計" })
+    → createSpecification(cwd, { requirementId: "req-000013", title: "Specification CRUD設計" })
+      → reqRepo.findById(cwd, "req-000013") → Requirement存在確認 + version取得
+      → title未指定の場合、Requirement.titleをデフォルト値として使用
       → generateNextSpecId(cwd) → "spec-000013"
-      → Specificationオブジェクト構築
+      → Specificationオブジェクト構築（title, requirementVersion を含む）
       → specRepo.ensureSpecDir(cwd, "spec-000013")
       → specRepo.save(cwd, specification) → spec-000013.yaml書き込み
       → loadProjectTemplate(cwd, "specification-design.md") → テンプレート取得
-      → テンプレート変数置換（{{id}}, {{requirementId}}）
+      → テンプレート変数置換（{{id}}, {{title}}, {{requirementId}}）
       → specRepo.saveFile(cwd, "spec-000013", "design.md", content)
   → 成功メッセージ: "Created specification: spec-000013"
   → メタデータ表示 + design.mdパス
@@ -148,8 +165,10 @@ export const SpecificationSchema = z.object({
 ### ユニットテスト（実装済み: specification-service.test.ts）
 
 - **createSpecification**: Requirement存在確認、ID自動採番、テンプレート適用
-- **listSpecifications**: status/requirementIdフィルタリング
-- **showSpecification**: メタデータ + design.md読み込み
+- **createSpecification（title）**: title指定時はそのまま使用、未指定時はRequirement.titleがデフォルト
+- **createSpecification（requirementVersion）**: Requirementの現行versionが自動設定されること
+- **listSpecifications**: status/requirementIdフィルタリング、Title列の表示
+- **showSpecification**: メタデータ（title, requirementVersion含む）+ design.md読み込み
 - **updateSpecDesign**: content指定時のファイル更新、未指定時のスキップ
 - **存在しないRequirement**: エラーが投げられること
 - **存在しないSpecification**: show/designでエラーが投げられること
@@ -181,3 +200,13 @@ export const SpecificationSchema = z.object({
 
 **決定:** specRepo.saveFile/loadFileは汎用的なファイル名を受け取る設計
 **理由:** design.md以外のファイル（research.md, architecture.mmd等）を将来追加する際に、リポジトリ層の変更が不要。
+
+### titleフィールドのデフォルト値（#157）
+
+**決定:** `spec create`時に`--title`未指定の場合、紐づくRequirementのtitleをデフォルト値として使用
+**理由:** 多くのケースでSpecificationのタイトルはRequirementと同じか類似する。手動入力の手間を省きつつ、`--title`で明示的に異なるタイトルも指定可能にする。
+
+### requirementVersionの自動設定（#220）
+
+**決定:** `spec create`時にRequirementの現行versionを自動取得して`requirementVersion`に設定。手動指定は不要。
+**理由:** Specificationは常にcreate時点のRequirementバージョンに基づいて作成される。Requirementが後から更新された場合、`requirementVersion`と現行versionの差分からSpecificationの準拠性を判別できる。

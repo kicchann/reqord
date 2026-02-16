@@ -41,7 +41,9 @@ Requirementに基づくSpecification（仕様）の作成・管理機能。設�
 
 仕様書のYAMLフォーマット。主要フィールド:
 
+- `title`: 仕様のタイトル（グラフ表示等での識別用） ← **#157で追加**
 - `requirementId`: 紐づくRequirement ID
+- `requirementVersion`: 紐づくRequirementのバージョン（準拠性の追跡用） ← **#220で追加**
 - `files`: 外部ファイル参照（design + supplementary）
 - `versionHistory`: 承認トラッキング（version, status, gitCommit, approvedAt, approvedBy）
 

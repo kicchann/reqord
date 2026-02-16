@@ -1,27 +1,34 @@
 id: req-000013
-version: '1.0'
+version: '1.1'
 title: Specification CRUD
 status: draft
 priority: high
 createdAt: 2026-02-07T12:00:00Z
-updatedAt: 2026-02-16T01:30:25.760Z
+updatedAt: 2026-02-16T01:39:03.142Z
 versionHistory:
   - version: 1.0.0
     status: implemented
     gitCommit: legacy
     changedAt: 2026-02-07T12:00:00Z
     summary: 初版作成
+  - version: '1.1'
+    status: draft
+    gitCommit: c32e95b
+    changedAt: 2026-02-16T01:38:58.639Z
+    summary: Success criteria updated
 files:
   description: requirements/req-000013/description.md
   supplementary: []
 successCriteria:
-  - reqord spec create <req-id> でSpecification JSON+ディレクトリが生成される
+  - reqord spec create <req-id> でSpecification YAML+ディレクトリが生成される
   - reqord spec list でSpecification一覧がテーブル表示される
   - reqord spec show <id> でSpecification詳細が表示される
   - reqord spec edit <id> --file research でresearch.mdの内容を表示・更新できる
   - reqord spec edit <id> --file design でdesign.mdの内容を表示・更新できる
-  - Specification JSONがZodスキーマでバリデーションされる
+  - Specification YAMLがZodスキーマでバリデーションされる
   - design.md, supplementary/ が適切に管理される
+  - Specificationにtitleフィールドがあり、グラフ表示等で識別できる
+  - SpecificationにrequirementVersionフィールドがあり、Requirementのどのバージョンに準拠しているか追跡できる
 format:
   type: user-story
   userStory:
@@ -41,22 +48,4 @@ dependencies:
   relatedTo: []
 estimatedComplexity: large
 estimatedHours: 20
-flags:
-  - type: feedback-review
-    reason: spec design/researchコマンドをファイル管理（表示・更新）に限定。AI駆動の設計書生成は/reqord:designコマンド（Claude Code）の責務
-    createdAt: 2026-02-09T10:00:00Z
-    relatedIssues:
-      - 17
-    severity: medium
-  - type: feedback-review
-    reason: 'Feedback from issue #157'
-    createdAt: 2026-02-11T07:24:49.598Z
-    relatedIssues:
-      - 157
-    severity: medium
-  - type: feedback-review
-    reason: 'Feedback from issue #220'
-    createdAt: 2026-02-12T22:05:48.336Z
-    relatedIssues:
-      - 220
-    severity: medium
+flags: []
