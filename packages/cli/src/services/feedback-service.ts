@@ -490,7 +490,7 @@ export async function checkRemainingFlags(
       remaining.push({
         artifactId: reqId,
         issueNumber: feedback.githubIssue,
-        severity: flag.severity ?? "medium",
+        severity: flag.type === "feedback-review" ? flag.severity : "medium",
       });
     }
   }
@@ -512,7 +512,7 @@ export async function checkRemainingFlags(
       remaining.push({
         artifactId: specId,
         issueNumber: feedback.githubIssue,
-        severity: flag.severity ?? "medium",
+        severity: flag.type === "feedback-review" ? flag.severity : "medium",
       });
     }
   }

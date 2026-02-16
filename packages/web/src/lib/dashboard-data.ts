@@ -153,7 +153,7 @@ export function detectWarnings(
   // Check for design verification errors (feedback flags with critical/high severity)
   for (const spec of specifications) {
     const hasErrorFlag = spec.flags.some(
-      (flag) => flag.severity === "critical" || flag.severity === "high"
+      (flag) => flag.type === "feedback-review" && (flag.severity === "critical" || flag.severity === "high")
     );
 
     if (hasErrorFlag) {

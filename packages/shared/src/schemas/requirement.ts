@@ -41,6 +41,25 @@ const FeedbackFlagSchema = z.object({
   severity: FeedbackSeveritySchema,
 });
 
+const SecurityReviewFlagSchema = z.object({
+  type: z.literal("security-review"),
+  reason: z.string(),
+  createdAt: z.string(),
+});
+
+const BreakingChangeFlagSchema = z.object({
+  type: z.literal("breaking-change"),
+  reason: z.string(),
+  createdAt: z.string(),
+  affectedVersions: z.array(z.string()).optional(),
+});
+
+const FlagSchema = z.discriminatedUnion("type", [
+  FeedbackFlagSchema,
+  SecurityReviewFlagSchema,
+  BreakingChangeFlagSchema,
+]);
+
 const RequirementOriginSchema = z.object({
   feedbackIssue: z.number(),
 });
@@ -77,11 +96,14 @@ export const RequirementSchema = z.object({
   estimatedComplexity: ComplexitySchema.optional(),
   estimatedHours: z.number().positive().optional(),
   currentApproval: CurrentApprovalSchema.optional(),
-  flags: z.array(FeedbackFlagSchema).default([]),
+  flags: z.array(FlagSchema).default([]),
   origin: RequirementOriginSchema.optional(),
 });
 
-export { FeedbackFlagSchema, CurrentApprovalSchema };
+export { FeedbackFlagSchema, SecurityReviewFlagSchema, BreakingChangeFlagSchema, FlagSchema, CurrentApprovalSchema };
 export type FeedbackFlag = z.infer<typeof FeedbackFlagSchema>;
+export type SecurityReviewFlag = z.infer<typeof SecurityReviewFlagSchema>;
+export type BreakingChangeFlag = z.infer<typeof BreakingChangeFlagSchema>;
+export type Flag = z.infer<typeof FlagSchema>;
 export type CurrentApproval = z.infer<typeof CurrentApprovalSchema>;
 export type Requirement = z.infer<typeof RequirementSchema>;
