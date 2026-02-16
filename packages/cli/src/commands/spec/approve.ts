@@ -25,7 +25,17 @@ export const specApproveCommand = new Command("approve")
     const cwd = process.cwd();
 
     try {
-      // 1. Check prerequisites
+      // 1. Load spec and check for existing approval PR first
+      const { specification, design } = await showSpecification(cwd, id);
+
+      if (specification.currentApproval?.prUrl) {
+        console.log(chalk.yellow(`承認依頼PRは既に作成されています: ${id}`));
+        console.log(`  PR: ${specification.currentApproval.prUrl}`);
+        process.exitCode = 0;
+        return;
+      }
+
+      // 2. Check prerequisites
       const prereqs = await checkSpecApprovalPrerequisites(cwd, id);
       if (!prereqs.ok) {
         for (const error of prereqs.errors) {
@@ -33,16 +43,6 @@ export const specApproveCommand = new Command("approve")
         }
         console.error(chalk.yellow(`先に問題を解決してください。`));
         process.exitCode = 1;
-        return;
-      }
-
-      // 2. Load spec and check for existing approval PR
-      const { specification, design } = await showSpecification(cwd, id);
-
-      if (specification.currentApproval?.prUrl) {
-        console.log(chalk.yellow(`承認依頼PRは既に作成されています: ${id}`));
-        console.log(`  PR: ${specification.currentApproval.prUrl}`);
-        process.exitCode = 0;
         return;
       }
 
