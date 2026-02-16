@@ -1,4 +1,4 @@
-import type { Specification, Status, VersionHistoryEntry } from "@reqord/shared";
+import type { Specification, Status } from "@reqord/shared";
 import { SPECIFICATIONS_DIR } from "@reqord/shared";
 import * as specRepo from "../repositories/specification.js";
 import * as reqRepo from "../repositories/requirement.js";
@@ -288,13 +288,10 @@ export async function updateSpecification(
 
   // Append history entry only when version changed
   if (versionChanged) {
-    const historyEntry: VersionHistoryEntry = {
-      version: nextVersion,
-      status: merged.status,
-      gitCommit: versionService.getCurrentGitCommit(),
-      changedAt: now,
-      summary,
-    };
+    const historyEntry = versionService.createHistoryEntry(
+      { version: nextVersion, status: merged.status },
+      { summary },
+    );
     after = {
       ...after,
       versionHistory: [...after.versionHistory, historyEntry],

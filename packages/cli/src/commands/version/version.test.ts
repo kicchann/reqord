@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import type { Requirement, Specification } from "@reqord/shared";
+import type { Requirement, Specification, VersionHistoryEntry } from "@reqord/shared";
 
 // Mock repositories and services
 vi.mock("../../repositories/requirement.js", () => ({
@@ -12,7 +12,7 @@ vi.mock("../../repositories/specification.js", () => ({
 }));
 vi.mock("../../services/version-service.js", () => ({
   applyVersionBump: vi.fn(),
-  getCurrentGitCommit: vi.fn(),
+  createHistoryEntry: vi.fn(),
 }));
 
 import { versionCommand } from "./version.js";
@@ -25,7 +25,7 @@ const mockReqSave = vi.mocked(reqRepo.save);
 const mockSpecFindByIdOrThrow = vi.mocked(specRepo.findByIdOrThrow);
 const mockSpecSave = vi.mocked(specRepo.save);
 const mockApplyVersionBump = vi.mocked(versionService.applyVersionBump);
-const mockGetCurrentGitCommit = vi.mocked(versionService.getCurrentGitCommit);
+const mockCreateHistoryEntry = vi.mocked(versionService.createHistoryEntry);
 
 function makeRequirement(overrides: Partial<Requirement> = {}): Requirement {
   return {
@@ -67,6 +67,17 @@ function makeSpecification(overrides: Partial<Specification> = {}): Specificatio
   };
 }
 
+function makeHistoryEntry(overrides: Partial<VersionHistoryEntry> = {}): VersionHistoryEntry {
+  return {
+    version: "2.0",
+    status: "draft",
+    gitCommit: "abc1234",
+    changedAt: "2026-01-15T00:00:00Z",
+    summary: "Version bumped (major)",
+    ...overrides,
+  };
+}
+
 describe("version command", () => {
   let consoleLogSpy: ReturnType<typeof vi.spyOn>;
   let consoleErrorSpy: ReturnType<typeof vi.spyOn>;
@@ -81,6 +92,9 @@ describe("version command", () => {
     versionCommand.setOptionValue("patch", undefined);
     versionCommand.setOptionValue("summary", undefined);
     versionCommand.setOptionValue("json", undefined);
+
+    // Default mock: createHistoryEntry returns a basic entry
+    mockCreateHistoryEntry.mockReturnValue(makeHistoryEntry());
   });
 
   describe("requirement version bump", () => {
@@ -88,7 +102,6 @@ describe("version command", () => {
       const req = makeRequirement({ version: "1.0", status: "draft" });
       mockReqFindByIdOrThrow.mockResolvedValue(req);
       mockApplyVersionBump.mockReturnValue("2.0");
-      mockGetCurrentGitCommit.mockReturnValue("abc1234");
 
       await versionCommand.parseAsync(["node", "test", "req-000001"]);
 
@@ -103,7 +116,6 @@ describe("version command", () => {
       const req = makeRequirement({ version: "1.0" });
       mockReqFindByIdOrThrow.mockResolvedValue(req);
       mockApplyVersionBump.mockReturnValue("2.0");
-      mockGetCurrentGitCommit.mockReturnValue("abc1234");
 
       await versionCommand.parseAsync(["node", "test", "req-000001", "--major"]);
 
@@ -118,7 +130,7 @@ describe("version command", () => {
       const req = makeRequirement({ version: "1.0" });
       mockReqFindByIdOrThrow.mockResolvedValue(req);
       mockApplyVersionBump.mockReturnValue("1.1");
-      mockGetCurrentGitCommit.mockReturnValue("abc1234");
+      mockCreateHistoryEntry.mockReturnValue(makeHistoryEntry({ version: "1.1" }));
 
       await versionCommand.parseAsync(["node", "test", "req-000001", "--patch"]);
 
@@ -133,7 +145,6 @@ describe("version command", () => {
       const req = makeRequirement({ version: "1.0", status: "approved" });
       mockReqFindByIdOrThrow.mockResolvedValue(req);
       mockApplyVersionBump.mockReturnValue("2.0");
-      mockGetCurrentGitCommit.mockReturnValue("abc1234");
 
       await versionCommand.parseAsync(["node", "test", "req-000001"]);
 
@@ -143,47 +154,74 @@ describe("version command", () => {
       );
     });
 
-    it("appends versionHistory entry with correct fields", async () => {
-      const req = makeRequirement({
-        version: "1.0",
-        status: "draft",
-        versionHistory: [],
-      });
+    it("calls createHistoryEntry with correct arguments", async () => {
+      const req = makeRequirement({ version: "1.0", status: "draft" });
       mockReqFindByIdOrThrow.mockResolvedValue(req);
       mockApplyVersionBump.mockReturnValue("2.0");
-      mockGetCurrentGitCommit.mockReturnValue("abc1234");
+
+      await versionCommand.parseAsync(["node", "test", "req-000001"]);
+
+      expect(mockCreateHistoryEntry).toHaveBeenCalledWith(
+        { version: "2.0", status: "draft" },
+        { summary: "Version bumped (major)" },
+      );
+    });
+
+    it("appends versionHistory entry from createHistoryEntry", async () => {
+      const req = makeRequirement({ version: "1.0", status: "draft", versionHistory: [] });
+      mockReqFindByIdOrThrow.mockResolvedValue(req);
+      mockApplyVersionBump.mockReturnValue("2.0");
+      const entry = makeHistoryEntry({ version: "2.0", status: "draft" });
+      mockCreateHistoryEntry.mockReturnValue(entry);
 
       await versionCommand.parseAsync(["node", "test", "req-000001"]);
 
       const savedReq = mockReqSave.mock.calls[0][1] as Requirement;
       expect(savedReq.versionHistory).toHaveLength(1);
-      expect(savedReq.versionHistory[0]).toMatchObject({
-        version: "2.0",
-        status: "draft",
-        gitCommit: "abc1234",
-        summary: "Version bumped (major)",
-      });
+      expect(savedReq.versionHistory[0]).toBe(entry);
     });
 
-    it("--summary sets custom summary in versionHistory", async () => {
+    it("--summary sets custom summary passed to createHistoryEntry", async () => {
       const req = makeRequirement({ version: "1.0" });
       mockReqFindByIdOrThrow.mockResolvedValue(req);
       mockApplyVersionBump.mockReturnValue("2.0");
-      mockGetCurrentGitCommit.mockReturnValue("abc1234");
 
       await versionCommand.parseAsync([
         "node", "test", "req-000001", "--summary", "Breaking change in API",
       ]);
 
+      expect(mockCreateHistoryEntry).toHaveBeenCalledWith(
+        expect.anything(),
+        { summary: "Breaking change in API" },
+      );
+    });
+
+    it("approved status includes approval metadata via createHistoryEntry", async () => {
+      const req = makeRequirement({ version: "1.0", status: "approved" });
+      mockReqFindByIdOrThrow.mockResolvedValue(req);
+      mockApplyVersionBump.mockReturnValue("2.0");
+      mockCreateHistoryEntry.mockReturnValue(makeHistoryEntry({
+        version: "2.0",
+        status: "approved",
+        approvedAt: "2026-01-15T00:00:00Z",
+        approvedBy: [],
+      }));
+
+      await versionCommand.parseAsync(["node", "test", "req-000001"]);
+
+      expect(mockCreateHistoryEntry).toHaveBeenCalledWith(
+        { version: "2.0", status: "approved" },
+        { summary: "Version bumped (major)" },
+      );
       const savedReq = mockReqSave.mock.calls[0][1] as Requirement;
-      expect(savedReq.versionHistory[0].summary).toBe("Breaking change in API");
+      expect(savedReq.versionHistory[0].approvedAt).toBeDefined();
+      expect(savedReq.versionHistory[0].approvedBy).toEqual([]);
     });
 
     it("displays human-readable output", async () => {
       const req = makeRequirement({ version: "1.0" });
       mockReqFindByIdOrThrow.mockResolvedValue(req);
       mockApplyVersionBump.mockReturnValue("2.0");
-      mockGetCurrentGitCommit.mockReturnValue("abc1234");
 
       await versionCommand.parseAsync(["node", "test", "req-000001"]);
 
@@ -204,7 +242,6 @@ describe("version command", () => {
       const spec = makeSpecification({ version: "1.0" });
       mockSpecFindByIdOrThrow.mockResolvedValue(spec);
       mockApplyVersionBump.mockReturnValue("2.0");
-      mockGetCurrentGitCommit.mockReturnValue("abc1234");
 
       await versionCommand.parseAsync(["node", "test", "spec-000001"]);
 
@@ -219,7 +256,7 @@ describe("version command", () => {
       const spec = makeSpecification({ version: "1.0" });
       mockSpecFindByIdOrThrow.mockResolvedValue(spec);
       mockApplyVersionBump.mockReturnValue("1.1");
-      mockGetCurrentGitCommit.mockReturnValue("abc1234");
+      mockCreateHistoryEntry.mockReturnValue(makeHistoryEntry({ version: "1.1" }));
 
       await versionCommand.parseAsync(["node", "test", "spec-000001", "--patch"]);
 
@@ -234,7 +271,6 @@ describe("version command", () => {
       const spec = makeSpecification({ version: "1.0", status: "approved" });
       mockSpecFindByIdOrThrow.mockResolvedValue(spec);
       mockApplyVersionBump.mockReturnValue("2.0");
-      mockGetCurrentGitCommit.mockReturnValue("abc1234");
 
       await versionCommand.parseAsync(["node", "test", "spec-000001"]);
 
@@ -245,25 +281,39 @@ describe("version command", () => {
     });
 
     it("appends versionHistory entry for specification", async () => {
-      const spec = makeSpecification({
-        version: "1.0",
-        status: "draft",
-        versionHistory: [],
-      });
+      const spec = makeSpecification({ version: "1.0", status: "draft", versionHistory: [] });
       mockSpecFindByIdOrThrow.mockResolvedValue(spec);
       mockApplyVersionBump.mockReturnValue("2.0");
-      mockGetCurrentGitCommit.mockReturnValue("abc1234");
+      const entry = makeHistoryEntry({ version: "2.0", status: "draft" });
+      mockCreateHistoryEntry.mockReturnValue(entry);
 
       await versionCommand.parseAsync(["node", "test", "spec-000001"]);
 
       const savedSpec = mockSpecSave.mock.calls[0][1] as Specification;
       expect(savedSpec.versionHistory).toHaveLength(1);
-      expect(savedSpec.versionHistory[0]).toMatchObject({
+      expect(savedSpec.versionHistory[0]).toBe(entry);
+    });
+
+    it("approved specification includes approval metadata via createHistoryEntry", async () => {
+      const spec = makeSpecification({ version: "1.0", status: "approved" });
+      mockSpecFindByIdOrThrow.mockResolvedValue(spec);
+      mockApplyVersionBump.mockReturnValue("2.0");
+      mockCreateHistoryEntry.mockReturnValue(makeHistoryEntry({
         version: "2.0",
-        status: "draft",
-        gitCommit: "abc1234",
-        summary: "Version bumped (major)",
-      });
+        status: "approved",
+        approvedAt: "2026-01-15T00:00:00Z",
+        approvedBy: [],
+      }));
+
+      await versionCommand.parseAsync(["node", "test", "spec-000001"]);
+
+      expect(mockCreateHistoryEntry).toHaveBeenCalledWith(
+        { version: "2.0", status: "approved" },
+        { summary: "Version bumped (major)" },
+      );
+      const savedSpec = mockSpecSave.mock.calls[0][1] as Specification;
+      expect(savedSpec.versionHistory[0].approvedAt).toBeDefined();
+      expect(savedSpec.versionHistory[0].approvedBy).toEqual([]);
     });
   });
 
@@ -294,7 +344,6 @@ describe("version command", () => {
       const req = makeRequirement({ version: "1.0" });
       mockReqFindByIdOrThrow.mockResolvedValue(req);
       mockApplyVersionBump.mockReturnValue("2.0");
-      mockGetCurrentGitCommit.mockReturnValue("abc1234");
 
       await versionCommand.parseAsync(["node", "test", "req-000001", "--json"]);
 
@@ -308,7 +357,6 @@ describe("version command", () => {
       const spec = makeSpecification({ version: "1.0" });
       mockSpecFindByIdOrThrow.mockResolvedValue(spec);
       mockApplyVersionBump.mockReturnValue("2.0");
-      mockGetCurrentGitCommit.mockReturnValue("abc1234");
 
       await versionCommand.parseAsync(["node", "test", "spec-000001", "--json"]);
 

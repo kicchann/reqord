@@ -86,26 +86,35 @@ export function getCurrentGitCommit(): string {
 }
 
 /**
+ * Minimal interface for creating version history entries.
+ * Accepts both Requirement and Specification objects.
+ */
+interface Versionable {
+  version: string;
+  status: Status;
+}
+
+/**
  * Create version history entry
  */
 export function createHistoryEntry(
-  requirement: Requirement,
+  source: Versionable,
   options?: { gitCommit?: string; summary?: string },
 ): VersionHistoryEntry {
   const now = new Date().toISOString();
   const gitCommit = options?.gitCommit ?? getCurrentGitCommit();
-  const summary = options?.summary ?? "Requirement updated";
+  const summary = options?.summary ?? "Updated";
 
   const entry: VersionHistoryEntry = {
-    version: requirement.version,
-    status: requirement.status,
+    version: source.version,
+    status: source.status,
     gitCommit,
     changedAt: now,
     summary,
   };
 
   // Add approval metadata if status is approved
-  if (requirement.status === "approved") {
+  if (source.status === "approved") {
     entry.approvedAt = now;
     entry.approvedBy = [];
   }
