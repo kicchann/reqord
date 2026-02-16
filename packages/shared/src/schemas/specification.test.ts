@@ -17,6 +17,58 @@ describe("SpecificationSchema", () => {
     flags: [],
   };
 
+  describe("title", () => {
+    it("titleフィールドを持つSpecificationを受け入れる", () => {
+      const specification = {
+        ...baseSpecification,
+        title: "テスト仕様",
+      };
+
+      const result = SpecificationSchema.parse(specification);
+      expect(result.title).toBe("テスト仕様");
+    });
+
+    it("titleなしの既存データが引き続きパースできる（後方互換性）", () => {
+      const result = SpecificationSchema.parse(baseSpecification);
+      expect(result.title).toBeUndefined();
+    });
+
+    it("空文字列のtitleを拒否する", () => {
+      const specification = {
+        ...baseSpecification,
+        title: "",
+      };
+
+      expect(() => SpecificationSchema.parse(specification)).toThrow();
+    });
+  });
+
+  describe("requirementVersion", () => {
+    it("requirementVersionフィールドを持つSpecificationを受け入れる", () => {
+      const specification = {
+        ...baseSpecification,
+        requirementVersion: "1.0",
+      };
+
+      const result = SpecificationSchema.parse(specification);
+      expect(result.requirementVersion).toBe("1.0");
+    });
+
+    it("requirementVersionなしの既存データが引き続きパースできる（後方互換性）", () => {
+      const result = SpecificationSchema.parse(baseSpecification);
+      expect(result.requirementVersion).toBeUndefined();
+    });
+
+    it("空文字列のrequirementVersionを拒否する", () => {
+      const specification = {
+        ...baseSpecification,
+        requirementVersion: "",
+      };
+
+      expect(() => SpecificationSchema.parse(specification)).toThrow();
+    });
+  });
+
   describe("currentApproval", () => {
     it("currentApprovalを持つ有効なSpecificationを受け入れる", () => {
       const specification = {

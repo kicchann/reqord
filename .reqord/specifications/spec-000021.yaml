@@ -1,5 +1,7 @@
 id: spec-000021
 requirementId: req-000021
+title: 'EARS形式変換'
+requirementVersion: '1.0'
 version: '1.0'
 status: deprecated
 createdAt: 2026-02-08T14:08:08.324Z

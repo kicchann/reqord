@@ -66,7 +66,11 @@ export const DEFAULT_REQUIREMENT_QUALITY_RULES = `# 要件品質ルール
 - [ ] フォーマット（user-story/ears/free-form）が適切
 `;
 
-export const DEFAULT_SPECIFICATION_DESIGN_TEMPLATE = `# {{id}} - Design
+// Available template variables:
+// - {{id}}: Specification ID (e.g., spec-000001)
+// - {{title}}: Specification title (defaults to Requirement title)
+// - {{requirementId}}: Linked requirement ID (e.g., req-000001)
+export const DEFAULT_SPECIFICATION_DESIGN_TEMPLATE = `# {{id}} - {{title}}
 
 ## 対象要件: {{requirementId}}
 

@@ -1,5 +1,7 @@
 id: spec-000013
 requirementId: req-000013
+title: 'Specification CRUD'
+requirementVersion: '1.1'
 version: '1.1'
 status: approved
 createdAt: 2026-02-08T14:08:07.639Z
