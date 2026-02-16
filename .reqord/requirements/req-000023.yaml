@@ -1,10 +1,10 @@
 id: req-000023
-version: '3.0'
+version: '4.0'
 title: Feedback管理 (GitHub Issue連携)
-status: draft
+status: approved
 priority: medium
 createdAt: 2026-02-09T10:00:00Z
-updatedAt: 2026-02-16T06:29:17.984Z
+updatedAt: 2026-02-16T09:28:03.549Z
 versionHistory:
   - version: 2.0.0
     status: draft
@@ -46,6 +46,14 @@ successCriteria:
     reqord feedback sync 実行時、既存エントリの手動設定メタデータ（type, severity, linkedTo）は保持され、 GitHub Issueから取得可能な情報（status,
     syncedAt）のみ更新される（マージ更新）
   - flags配列が空でないRequirement/Specificationに対して承認操作を行う場合、警告が表示される
+  - >-
+    reqord feedback unlink <issue-number> --req <id> でRequirementからリンクとfeedback-reviewフラグが削除され、
+    index.yamlのlinkedToからも削除される
+  - reqord feedback unlink <issue-number> --spec <id> でSpecificationからリンクが削除され、 index.yamlのlinkedToからも削除される
+  - reqord feedback close <issue-number> 実行時、紐付けされたartifactに残存するfeedback-reviewフラグがある場合、 警告メッセージが表示される
+  - >-
+    reqord feedback create --title <title> --description <text> でISSUE_TEMPLATE準拠のfeedback+reqordラベル付きGitHub Issueが
+    [Feedback] prefix付きで作成され、index.yamlに新規エントリが追加される
 format:
   type: user-story
   userStory:
@@ -63,29 +71,10 @@ dependencies:
     - req-000019
 estimatedComplexity: medium
 estimatedHours: 20
+flags: []
 currentApproval:
-  version: '3.0'
+  version: '4.0'
   phase: requirement
-  prNumber: 207
-  prUrl: https://github.com/kicchann/reqord/pull/207
+  prNumber: 0
+  prUrl: ''
   approvedBy: []
-  approvedAt: 2026-02-11T14:30:00Z
-flags:
-  - type: feedback-review
-    reason: 'Feedback from issue #226'
-    createdAt: 2026-02-13T15:49:27.374Z
-    relatedIssues:
-      - 226
-    severity: medium
-  - type: feedback-review
-    reason: 'Feedback from issue #225'
-    createdAt: 2026-02-13T15:49:30.887Z
-    relatedIssues:
-      - 225
-    severity: low
-  - type: feedback-review
-    reason: 'Feedback from issue #224'
-    createdAt: 2026-02-13T15:49:34.208Z
-    relatedIssues:
-      - 224
-    severity: medium
