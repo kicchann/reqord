@@ -248,6 +248,23 @@ describe("spec implement command", () => {
     expect(mockUpdateSpecification).not.toHaveBeenCalled();
   });
 
+  it("draftステータス + --jsonでJSON形式のエラー出力", async () => {
+    const spec = makeSpecification({ status: "draft" });
+
+    mockShowSpecification.mockResolvedValue({ specification: spec, design: null });
+
+    await implementCommand.parseAsync(["node", "test", "spec-000001", "--json"]);
+
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      expect.stringContaining('"error":true'),
+    );
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      expect.stringContaining("VALIDATION_ERROR"),
+    );
+    expect(process.exitCode).toBe(1);
+    expect(mockUpdateSpecification).not.toHaveBeenCalled();
+  });
+
   it("JSON modeでは実装Issueを表示しない", async () => {
     const before = makeSpecification({
       status: "approved",

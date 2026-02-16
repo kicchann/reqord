@@ -6,6 +6,7 @@ import {
   type UpdateSpecOptions,
 } from "../../services/specification-service.js";
 import { handleError } from "../../utils/error-handler.js";
+import { AppError, ErrorCode } from "../../utils/errors.js";
 
 export const implementCommand = new Command("implement")
   .description("Mark a specification as implemented")
@@ -26,9 +27,10 @@ export const implementCommand = new Command("implement")
 
         // Precondition: status must be "approved"
         if (specification.status !== "approved") {
-          console.error(chalk.red(`エラー: Specificationのステータスが approved ではありません（現在: ${specification.status}）`));
-          process.exitCode = 1;
-          return;
+          throw new AppError(
+            `Specificationのステータスが approved ではありません（現在: ${specification.status}）`,
+            ErrorCode.VALIDATION_ERROR,
+          );
         }
 
         // Check implementation issues if present

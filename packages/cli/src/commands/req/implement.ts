@@ -7,6 +7,7 @@ import {
 } from "../../services/requirement-service.js";
 import { listSpecifications } from "../../services/specification-service.js";
 import { handleError } from "../../utils/error-handler.js";
+import { AppError, ErrorCode } from "../../utils/errors.js";
 
 export const implementCommand = new Command("implement")
   .description("Mark a requirement as implemented")
@@ -27,9 +28,10 @@ export const implementCommand = new Command("implement")
 
         // Precondition: status must be "approved"
         if (requirement.status !== "approved") {
-          console.error(chalk.red(`エラー: Requirementのステータスが approved ではありません（現在: ${requirement.status}）`));
-          process.exitCode = 1;
-          return;
+          throw new AppError(
+            `Requirementのステータスが approved ではありません（現在: ${requirement.status}）`,
+            ErrorCode.VALIDATION_ERROR,
+          );
         }
 
         // Show related specifications

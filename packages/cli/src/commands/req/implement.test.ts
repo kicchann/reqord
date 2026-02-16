@@ -223,6 +223,23 @@ describe("req implement command", () => {
     expect(mockUpdateRequirement).not.toHaveBeenCalled();
   });
 
+  it("draftステータス + --jsonでJSON形式のエラー出力", async () => {
+    const req = makeRequirement({ status: "draft" });
+
+    mockShowRequirement.mockResolvedValue({ requirement: req, description: null });
+
+    await implementCommand.parseAsync(["node", "test", "req-000001", "--json"]);
+
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      expect.stringContaining('"error":true'),
+    );
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      expect.stringContaining("VALIDATION_ERROR"),
+    );
+    expect(process.exitCode).toBe(1);
+    expect(mockUpdateRequirement).not.toHaveBeenCalled();
+  });
+
   it("JSON modeでは関連Specificationを表示しない", async () => {
     const before = makeRequirement({ status: "approved" });
     const after = makeRequirement({ status: "implemented" });
