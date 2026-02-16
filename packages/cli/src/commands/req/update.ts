@@ -13,7 +13,7 @@ export const updateCommand = new Command("update")
   .description("Update a requirement")
   .argument("<id>", "Requirement ID (e.g. req-000001)")
   .option("-t, --title <title>", "New title")
-  .option("-s, --status <status>", "New status (draft, approved, implemented, deprecated)")
+  .option("-s, --status <status>", "New status (deprecated: use 'reqord req approve/draft/implement' instead)")
   .option("-p, --priority <priority>", "New priority (low, medium, high)")
   .option("--patch-file <path>", "JSON file with partial update data")
   .option("--description-file <path>", "Markdown file to replace description.md")
@@ -59,6 +59,15 @@ export const updateCommand = new Command("update")
           throw new AppError(
             "At least one option (--title, --status, --priority, --patch-file, --description-file, --major, --patch) is required.",
             ErrorCode.INVALID_ARGUMENT,
+          );
+        }
+
+        // Show deprecation warning for --status
+        if (options.status !== undefined) {
+          console.error(
+            chalk.yellow(
+              "Warning: --status option is deprecated. Use 'reqord req approve/draft/implement <id>' instead.",
+            ),
           );
         }
 
