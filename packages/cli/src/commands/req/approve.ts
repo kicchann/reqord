@@ -10,7 +10,7 @@ import { requirementHandler } from "../../services/requirement-approval-handler.
 import { handleError } from "../../utils/error-handler.js";
 
 export const approveCommand = new Command("approve")
-  .description("Start approval flow for a requirement via GitHub PR")
+  .description("Create an approval request PR for a requirement (approval is confirmed when the PR is merged)")
   .argument("<id>", "Requirement ID (e.g. req-000001)")
   .option("--dry-run", "Show what would be done without making changes")
   .action(async (id: string, options: { dryRun?: boolean }) => {
@@ -18,6 +18,14 @@ export const approveCommand = new Command("approve")
 
     try {
       const { requirement } = await showRequirement(cwd, id);
+
+      // Check for existing approval PR
+      if (requirement.currentApproval?.prUrl) {
+        console.log(chalk.yellow(`承認依頼PRは既に作成されています: ${id}`));
+        console.log(`  PR: ${requirement.currentApproval.prUrl}`);
+        process.exitCode = 0;
+        return;
+      }
 
       // v2.0.0: Flag warning before approval
       if (requirement.flags.length > 0) {
@@ -54,7 +62,8 @@ export const approveCommand = new Command("approve")
         return;
       }
 
-      console.log(chalk.green(`Approval PR created for ${id}`));
+      console.log(chalk.green(`承認依頼PRを作成しました: ${id}`));
+      console.log(`PRがマージされると承認が確定します`);
       console.log(`  Branch: ${result.branchName}`);
       console.log(`  PR: ${result.prUrl}`);
     } catch (error) {

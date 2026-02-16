@@ -3,7 +3,7 @@ requirementId: req-000015
 version: '1.0'
 status: approved
 createdAt: 2026-02-08T14:08:07.812Z
-updatedAt: 2026-02-15T22:36:44.283Z
+updatedAt: 2026-02-15T23:35:22.312Z
 versionHistory:
   - version: '1.0'
     status: draft
@@ -27,35 +27,20 @@ currentApproval:
   approvedBy: []
 implementation:
   issues:
-    - number: 85
-      title: '[Feature] spec approveコマンド統合（ApprovalService呼び出し + E2Eテスト）'
-      url: https://github.com/kicchann/reqord/issues/85
+    - number: 299
+      title: '[spec-000015] approveコマンドUX改善（req/spec両方）'
+      url: https://github.com/kicchann/reqord/issues/299
       priority: P2
-      status: closed
-    - number: 84
-      title: '[Feature] Specification承認PR本文テンプレート・designSummary抽出'
-      url: https://github.com/kicchann/reqord/issues/84
+      status: open
+    - number: 300
+      title: '[spec-000015] implementコマンド修正（req/spec両方: コマンド名変更 + 前提条件チェック強化）'
+      url: https://github.com/kicchann/reqord/issues/300
       priority: P2
-      status: closed
-    - number: 83
-      title: '[Feature] Specification承認の前提条件チェック実装'
-      url: https://github.com/kicchann/reqord/issues/83
+      status: open
+    - number: 301
+      title: '[spec-000015] Specification承認フロー統合テスト'
+      url: https://github.com/kicchann/reqord/issues/301
       priority: P2
-      status: closed
-    - number: 82
-      title: '[Feature] SpecificationSchemaにcurrentApprovalフィールドを追加'
-      url: https://github.com/kicchann/reqord/issues/82
-      priority: P2
-      status: closed
-    - number: 81
-      title: '[Feature] Specification承認フロー（spec approve コマンド）'
-      url: https://github.com/kicchann/reqord/issues/81
-      priority: P2
-      status: closed
-  totalEstimatedHours: 0
-  createdAt: 2026-02-10T22:45:11.154Z
-  progress:
-    total: 5
-    completed: 5
-    percentage: 100
-    lastSyncedAt: 2026-02-12T15:12:58.431Z
+      status: open
+  totalEstimatedHours: 9
+  createdAt: 2026-02-15T23:35:22.309Z

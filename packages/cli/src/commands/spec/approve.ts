@@ -18,14 +18,24 @@ import {
 import { handleError } from "../../utils/error-handler.js";
 
 export const specApproveCommand = new Command("approve")
-  .description("Start approval flow for a specification via GitHub PR")
+  .description("Create an approval request PR for a specification (approval is confirmed when the PR is merged)")
   .argument("<id>", "Specification ID (e.g. spec-000001)")
   .option("--dry-run", "Show what would be done without making changes")
   .action(async (id: string, options: { dryRun?: boolean }) => {
     const cwd = process.cwd();
 
     try {
-      // 1. Check prerequisites
+      // 1. Load spec and check for existing approval PR first
+      const { specification, design } = await showSpecification(cwd, id);
+
+      if (specification.currentApproval?.prUrl) {
+        console.log(chalk.yellow(`承認依頼PRは既に作成されています: ${id}`));
+        console.log(`  PR: ${specification.currentApproval.prUrl}`);
+        process.exitCode = 0;
+        return;
+      }
+
+      // 2. Check prerequisites
       const prereqs = await checkSpecApprovalPrerequisites(cwd, id);
       if (!prereqs.ok) {
         for (const error of prereqs.errors) {
@@ -36,8 +46,6 @@ export const specApproveCommand = new Command("approve")
         return;
       }
 
-      // 2. Load spec and requirement
-      const { specification, design } = await showSpecification(cwd, id);
       const { requirement } = await showRequirement(cwd, specification.requirementId);
 
       // Flag warning before approval
@@ -94,7 +102,8 @@ export const specApproveCommand = new Command("approve")
         return;
       }
 
-      console.log(chalk.green(`Approval PR created for ${id}`));
+      console.log(chalk.green(`承認依頼PRを作成しました: ${id}`));
+      console.log(`PRがマージされると承認が確定します`);
       console.log(`  Branch: ${result.branchName}`);
       console.log(`  PR: ${result.prUrl}`);
     } catch (error) {

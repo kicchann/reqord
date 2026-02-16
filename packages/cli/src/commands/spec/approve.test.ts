@@ -155,7 +155,10 @@ describe("specApproveCommand", () => {
 
     // Success message
     expect(consoleLogSpy).toHaveBeenCalledWith(
-      expect.stringContaining("Approval PR created for spec-000001")
+      expect.stringContaining("承認依頼PRを作成しました: spec-000001")
+    );
+    expect(consoleLogSpy).toHaveBeenCalledWith(
+      expect.stringContaining("PRがマージされると承認が確定します")
     );
     expect(consoleLogSpy).toHaveBeenCalledWith(
       expect.stringContaining("Branch: reqord/spec-000001-approve-v1.0")
@@ -256,7 +259,7 @@ describe("specApproveCommand", () => {
 
     // Success message NOT shown in dry-run
     expect(consoleLogSpy).not.toHaveBeenCalledWith(
-      expect.stringContaining("Approval PR created")
+      expect.stringContaining("承認依頼PRを作成しました")
     );
 
     consoleLogSpy.mockRestore();
@@ -362,7 +365,7 @@ describe("specApproveCommand", () => {
     // Approval still proceeds
     expect(startApproval).toHaveBeenCalled();
     expect(consoleLogSpy).toHaveBeenCalledWith(
-      expect.stringContaining("Approval PR created for spec-000001")
+      expect.stringContaining("承認依頼PRを作成しました: spec-000001")
     );
 
     consoleLogSpy.mockRestore();
@@ -401,6 +404,50 @@ describe("specApproveCommand", () => {
     expect(consoleLogSpy).not.toHaveBeenCalledWith(
       expect.stringContaining("Warning")
     );
+
+    consoleLogSpy.mockRestore();
+  });
+
+  it("既存PR検出時に早期リターン", async () => {
+    const specification = makeSpecification({
+      currentApproval: {
+        version: "1.0",
+        phase: "specification",
+        prNumber: 80,
+        prUrl: "https://github.com/owner/repo/pull/80",
+        approvedBy: [],
+      },
+    });
+
+    vi.mocked(checkSpecApprovalPrerequisites).mockResolvedValue({
+      ok: true,
+      errors: [],
+    });
+    vi.mocked(showSpecification).mockResolvedValue({
+      specification,
+      design: "# Design",
+    });
+
+    const consoleLogSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+
+    await specApproveCommand.parseAsync(["node", "test", "spec-000001"]);
+
+    // Existing PR message shown
+    expect(consoleLogSpy).toHaveBeenCalledWith(
+      expect.stringContaining("承認依頼PRは既に作成されています: spec-000001")
+    );
+    expect(consoleLogSpy).toHaveBeenCalledWith(
+      expect.stringContaining("PR: https://github.com/owner/repo/pull/80")
+    );
+
+    // showRequirement NOT called (early return before loading requirement)
+    expect(showRequirement).not.toHaveBeenCalled();
+
+    // startApproval NOT called
+    expect(startApproval).not.toHaveBeenCalled();
+
+    // No error
+    expect(process.exitCode).toBe(0);
 
     consoleLogSpy.mockRestore();
   });

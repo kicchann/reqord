@@ -6,8 +6,9 @@ import {
   type UpdateSpecOptions,
 } from "../../services/specification-service.js";
 import { handleError } from "../../utils/error-handler.js";
+import { AppError, ErrorCode } from "../../utils/errors.js";
 
-export const implementedCommand = new Command("implemented")
+export const implementCommand = new Command("implement")
   .description("Mark a specification as implemented")
   .argument("<id>", "Specification ID (e.g. spec-000001)")
   .option("--json", "Output result as JSON")
@@ -23,6 +24,14 @@ export const implementedCommand = new Command("implemented")
       try {
         // Show current specification
         const { specification } = await showSpecification(cwd, id);
+
+        // Precondition: status must be "approved"
+        if (specification.status !== "approved") {
+          throw new AppError(
+            `Specificationのステータスが approved ではありません（現在: ${specification.status}）`,
+            ErrorCode.VALIDATION_ERROR,
+          );
+        }
 
         // Check implementation issues if present
         if (specification.implementation?.issues && specification.implementation.issues.length > 0 && !options.json) {
