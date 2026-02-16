@@ -209,4 +209,76 @@ describe("spec draft command", () => {
       expect.stringContaining("history: Status changed from deprecated to draft"),
     );
   });
+
+  describe("--major/--patch deprecation warnings", () => {
+    let consoleErrorSpy: ReturnType<typeof vi.spyOn>;
+
+    beforeEach(() => {
+      consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+      draftCommand.setOptionValue("major", undefined);
+      draftCommand.setOptionValue("patch", undefined);
+    });
+
+    it("--major使用時にdeprecation警告を表示", async () => {
+      const specification = makeSpecification({ status: "flagged" as any });
+      mockShowSpecification.mockResolvedValue({ specification, design: null });
+      mockUpdateSpecification.mockResolvedValue({
+        before: specification,
+        after: makeSpecification({ status: "draft" }),
+      });
+
+      await draftCommand.parseAsync(["node", "test", "spec-000001", "--major"]);
+
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        expect.stringContaining("--major/--patch options are deprecated"),
+      );
+    });
+
+    it("--patch使用時にdeprecation警告を表示", async () => {
+      const specification = makeSpecification({ status: "flagged" as any });
+      mockShowSpecification.mockResolvedValue({ specification, design: null });
+      mockUpdateSpecification.mockResolvedValue({
+        before: specification,
+        after: makeSpecification({ status: "draft" }),
+      });
+
+      await draftCommand.parseAsync(["node", "test", "spec-000001", "--patch"]);
+
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        expect.stringContaining("--major/--patch options are deprecated"),
+      );
+    });
+
+    it("--major使用時にversionBumpがサービスに渡される", async () => {
+      const specification = makeSpecification({ status: "flagged" as any });
+      mockShowSpecification.mockResolvedValue({ specification, design: null });
+      mockUpdateSpecification.mockResolvedValue({
+        before: specification,
+        after: makeSpecification({ status: "draft" }),
+      });
+
+      await draftCommand.parseAsync(["node", "test", "spec-000001", "--major"]);
+
+      expect(mockUpdateSpecification).toHaveBeenCalledWith(
+        process.cwd(),
+        "spec-000001",
+        expect.objectContaining({ status: "draft", versionBump: "major" }),
+      );
+    });
+
+    it("--json指定時は警告を表示しない", async () => {
+      const specification = makeSpecification({ status: "flagged" as any });
+      mockShowSpecification.mockResolvedValue({ specification, design: null });
+      mockUpdateSpecification.mockResolvedValue({
+        before: specification,
+        after: makeSpecification({ status: "draft" }),
+      });
+
+      await draftCommand.parseAsync(["node", "test", "spec-000001", "--major", "--json"]);
+
+      expect(consoleErrorSpy).not.toHaveBeenCalledWith(
+        expect.stringContaining("deprecated"),
+      );
+    });
+  });
 });

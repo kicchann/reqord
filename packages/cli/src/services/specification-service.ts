@@ -221,6 +221,7 @@ export interface UpdateSpecOptions {
 export interface UpdateSpecResult {
   before: Specification;
   after: Specification;
+  versionChanged?: boolean;
 }
 
 export async function updateSpecification(
@@ -257,6 +258,7 @@ export async function updateSpecification(
   const nextVersion = options.versionBump
     ? versionService.applyVersionBump(before.version, options.versionBump)
     : before.version;
+  const versionChanged = nextVersion !== before.version;
 
   // Generate summary
   const changes: string[] = [];
@@ -274,23 +276,30 @@ export async function updateSpecification(
   }
   const summary = changes.length > 0 ? changes.join(", ") : "Specification updated";
 
-  // Create version history entry
   const now = new Date().toISOString();
-  const historyEntry: VersionHistoryEntry = {
-    version: nextVersion,
-    status: merged.status,
-    gitCommit: versionService.getCurrentGitCommit(),
-    changedAt: now,
-    summary,
-  };
 
   // Build final specification
-  const after: Specification = {
+  let after: Specification = {
     ...merged,
     version: nextVersion,
     updatedAt: now,
-    versionHistory: [...before.versionHistory, historyEntry],
+    versionHistory: before.versionHistory,
   };
+
+  // Append history entry only when version changed
+  if (versionChanged) {
+    const historyEntry: VersionHistoryEntry = {
+      version: nextVersion,
+      status: merged.status,
+      gitCommit: versionService.getCurrentGitCommit(),
+      changedAt: now,
+      summary,
+    };
+    after = {
+      ...after,
+      versionHistory: [...after.versionHistory, historyEntry],
+    };
+  }
 
   // Save design file if provided
   if (options.designContent !== undefined) {
@@ -300,7 +309,7 @@ export async function updateSpecification(
   // Save specification
   await specRepo.save(cwd, after);
 
-  return { before, after };
+  return { before, after, versionChanged };
 }
 
 // --- Update Specification Status ---
