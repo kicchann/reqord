@@ -14,9 +14,15 @@ export {
 export {
   RequirementSchema,
   FeedbackFlagSchema,
+  SecurityReviewFlagSchema,
+  BreakingChangeFlagSchema,
+  FlagSchema,
   CurrentApprovalSchema,
   type Requirement,
   type FeedbackFlag,
+  type SecurityReviewFlag,
+  type BreakingChangeFlag,
+  type Flag,
   type CurrentApproval,
 } from "./requirement.js";
 

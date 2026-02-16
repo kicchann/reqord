@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { StatusSchema, VersionHistoryEntrySchema } from "./common.js";
-import { FeedbackFlagSchema } from "./requirement.js";
+import { FlagSchema } from "./requirement.js";
 
 const SpecCurrentApprovalSchema = z.object({
   version: z.string(),
@@ -47,7 +47,7 @@ export const SpecificationSchema = z.object({
     design: z.string(),
     supplementary: z.array(z.string()).default([]),
   }),
-  flags: z.array(FeedbackFlagSchema).default([]),
+  flags: z.array(FlagSchema).default([]),
   currentApproval: SpecCurrentApprovalSchema.optional(),
   implementation: ImplementationSchema.optional(),
 });
