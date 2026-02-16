@@ -1,9 +1,9 @@
 id: spec-000013
 requirementId: req-000013
 version: '1.1'
-status: draft
+status: approved
 createdAt: 2026-02-08T14:08:07.639Z
-updatedAt: 2026-02-16T01:53:40.006Z
+updatedAt: 2026-02-16T04:34:15.048Z
 versionHistory:
   - version: '1.0'
     status: draft
@@ -14,8 +14,14 @@ versionHistory:
     status: draft
     gitCommit: c32e95b
     changedAt: 2026-02-16T01:53:40.006Z
-    summary: Specification updated
+    summary: Design updated for title and requirementVersion fields (#157, #220)
 files:
   design: specifications/spec-000013/design.md
   supplementary: []
 flags: []
+currentApproval:
+  version: '1.1'
+  phase: specification
+  prNumber: 313
+  prUrl: https://github.com/kicchann/reqord/pull/313
+  approvedBy: []

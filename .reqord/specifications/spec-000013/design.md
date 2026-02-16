@@ -124,7 +124,7 @@ export const SpecificationSchema = z.object({
 
 - `loadProjectTemplate(cwd, "specification-design.md")`: プロジェクトカスタムテンプレート読み込み
 - `DEFAULT_SPECIFICATION_DESIGN_TEMPLATE`: テンプレート未カスタマイズ時のデフォルト
-- テンプレート変数: `{{id}}`, `{{title}}`, `{{requirementId}}`
+- テンプレート変数: `{id}`, `{title}`, `{requirementId}`（二重波括弧で囲む）
 
 ## 4. データフロー
 
@@ -141,7 +141,7 @@ export const SpecificationSchema = z.object({
       → specRepo.ensureSpecDir(cwd, "spec-000013")
       → specRepo.save(cwd, specification) → spec-000013.yaml書き込み
       → loadProjectTemplate(cwd, "specification-design.md") → テンプレート取得
-      → テンプレート変数置換（{{id}}, {{title}}, {{requirementId}}）
+      → テンプレート変数置換（{id}, {title}, {requirementId} を二重波括弧で展開）
       → specRepo.saveFile(cwd, "spec-000013", "design.md", content)
   → 成功メッセージ: "Created specification: spec-000013"
   → メタデータ表示 + design.mdパス
