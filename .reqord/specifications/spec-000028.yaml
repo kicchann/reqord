@@ -5,7 +5,7 @@ requirementVersion: '4.0'
 version: '3.0'
 status: approved
 createdAt: 2026-02-09T05:48:42.351Z
-updatedAt: 2026-02-16T10:32:41.433Z
+updatedAt: 2026-02-16T11:01:02.990Z
 versionHistory: []
 files:
   design: specifications/spec-000028/design.md
@@ -17,3 +17,22 @@ currentApproval:
   prNumber: 331
   prUrl: https://github.com/kicchann/reqord/pull/331
   approvedBy: []
+implementation:
+  issues:
+    - number: 332
+      title: '[spec-000028 v3.0] unlink CLI'
+      url: https://github.com/kicchann/reqord/issues/332
+      priority: P2
+      status: open
+    - number: 333
+      title: '[spec-000028 v3.0] create CLI'
+      url: https://github.com/kicchann/reqord/issues/333
+      priority: P2
+      status: open
+    - number: 334
+      title: '[spec-000028 v3.0] close改善 - 残存flag警告'
+      url: https://github.com/kicchann/reqord/issues/334
+      priority: P2
+      status: open
+  totalEstimatedHours: 8
+  createdAt: 2026-02-16T11:01:02.987Z

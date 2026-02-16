@@ -31,6 +31,7 @@ body:
         - spec-mismatch (仕様と実装の不一致)
         - implementation-bug (実装のバグ)
         - improvement (改善提案)
+        - security (セキュリティ)
     validations:
       required: true
 
