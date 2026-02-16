@@ -12,18 +12,30 @@ export const draftCommand = new Command("draft")
   .description("Revert a requirement to draft status")
   .argument("<id>", "Requirement ID (e.g. req-000001)")
   .option("--dry-run", "Show what would happen without making changes")
+  .option("--major", "Force major version increment (deprecated)")
+  .option("--patch", "Force minor version increment (deprecated)")
   .option("--json", "Output result as JSON")
   .action(
     async (
       id: string,
       options: {
         dryRun?: boolean;
+        major?: boolean;
+        patch?: boolean;
         json?: boolean;
       },
     ) => {
       const cwd = process.cwd();
 
       try {
+        // Show deprecation warning for --major/--patch
+        if ((options.major || options.patch) && !options.json) {
+          console.error(
+            chalk.yellow(
+              "Warning: --major/--patch options are deprecated. Use 'reqord version <id> --major/--patch' instead.",
+            ),
+          );
+        }
         // Show current requirement and flags
         const { requirement } = await showRequirement(cwd, id);
 
@@ -83,6 +95,10 @@ export const draftCommand = new Command("draft")
         const updateOpts: UpdateOptions = {
           status: "draft",
         };
+
+        // Pass version bump if specified (deprecated, but maintain behavior)
+        if (options.major) updateOpts.versionBump = "major";
+        if (options.patch) updateOpts.versionBump = "patch";
 
         const { before, after } = await updateRequirement(cwd, id, updateOpts);
 

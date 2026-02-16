@@ -406,8 +406,7 @@ describe("updateSpecificationStatus", () => {
     expect(result.before.version).toBe("1.2");
     expect(result.after.version).toBe("1.2");
     expect(result.after.status).toBe("approved");
-    expect(result.after.versionHistory).toHaveLength(1);
-    expect(result.after.versionHistory[0].version).toBe("1.2");
+    expect(result.after.versionHistory).toHaveLength(0); // no version change = no history entry
   });
 
   it("バージョンがすでに高い場合でもステータス変更のみならバージョン据え置き", async () => {
@@ -637,7 +636,7 @@ describe("updateSpecification", () => {
     expect(result.after.version).toBe("1.0");
   });
 
-  it("versionHistoryが自動記録される", async () => {
+  it("versionBumpなしではversionHistoryに追加しない", async () => {
     const before = makeSpecification({ version: "1.0", versionHistory: [] });
     mockSpecRepo.findByIdOrThrow.mockResolvedValue(before);
 
@@ -645,9 +644,7 @@ describe("updateSpecification", () => {
       patchData: { files: { design: "specifications/spec-000001/design.md", supplementary: ["new.md"] } },
     });
 
-    expect(result.after.versionHistory).toHaveLength(1);
-    expect(result.after.versionHistory[0].version).toBe("1.0");
-    expect(result.after.versionHistory[0].summary).toContain("supplementary");
+    expect(result.after.versionHistory).toHaveLength(0); // no version change = no history entry
   });
 
   it("ステータス+内容変更でバージョン据え置き（自動判定廃止）", async () => {
@@ -712,5 +709,48 @@ describe("updateSpecification", () => {
     await expect(
       updateSpecification("/cwd", "spec-000001", { status: "implemented" })
     ).rejects.toThrow(/Invalid status transition: draft → implemented/);
+  });
+
+  it("ステータスのみ変更（versionBumpなし）ではversionHistoryに追加しない", async () => {
+    const existingHistory = [
+      {
+        version: "1.0",
+        status: "draft" as const,
+        gitCommit: "abc123",
+        changedAt: "2025-01-01T00:00:00.000Z",
+        summary: "initial",
+      },
+    ];
+    const before = makeSpecification({
+      status: "draft",
+      version: "1.0",
+      versionHistory: existingHistory,
+    });
+    mockSpecRepo.findByIdOrThrow.mockResolvedValue(before);
+
+    const result = await updateSpecification("/cwd", "spec-000001", {
+      status: "approved",
+    });
+
+    expect(result.after.versionHistory).toHaveLength(1);
+    expect(result.after.version).toBe("1.0");
+    expect(result.versionChanged).toBe(false);
+  });
+
+  it("versionBump指定時はversionHistoryにエントリを追加する", async () => {
+    const before = makeSpecification({
+      version: "1.0",
+      versionHistory: [],
+    });
+    mockSpecRepo.findByIdOrThrow.mockResolvedValue(before);
+
+    const result = await updateSpecification("/cwd", "spec-000001", {
+      versionBump: "major",
+    });
+
+    expect(result.after.versionHistory).toHaveLength(1);
+    expect(result.after.versionHistory[0].version).toBe("2.0");
+    expect(result.after.version).toBe("2.0");
+    expect(result.versionChanged).toBe(true);
   });
 });
