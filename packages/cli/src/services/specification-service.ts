@@ -28,7 +28,9 @@ export async function createSpecification(
 
   const id = await generateNextSpecId(cwd);
   const now = new Date().toISOString();
-  const title = options.title ?? requirement.title;
+  // Normalize empty string to undefined to avoid validation errors
+  const normalizedTitle = options.title?.trim() || undefined;
+  const title = normalizedTitle ?? requirement.title;
 
   const specification: Specification = {
     id,

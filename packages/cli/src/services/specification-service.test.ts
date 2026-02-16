@@ -137,6 +137,34 @@ describe("createSpecification", () => {
     expect(result.specification.title).toBe("カスタムタイトル");
   });
 
+  it("空文字列のtitleはRequirementのtitleで上書きされる", async () => {
+    const mockReq = makeRequirement({ title: "要件タイトル" });
+    mockReqRepo.findByIdOrThrow.mockResolvedValue(mockReq);
+    mockGenerateNextSpecId.mockResolvedValue("spec-000010");
+    mockLoadProjectTemplate.mockResolvedValue(null);
+
+    const result = await createSpecification("/cwd", {
+      requirementId: "req-000001",
+      title: "",
+    });
+
+    expect(result.specification.title).toBe("要件タイトル");
+  });
+
+  it("空白のみのtitleはRequirementのtitleで上書きされる", async () => {
+    const mockReq = makeRequirement({ title: "要件タイトル" });
+    mockReqRepo.findByIdOrThrow.mockResolvedValue(mockReq);
+    mockGenerateNextSpecId.mockResolvedValue("spec-000010");
+    mockLoadProjectTemplate.mockResolvedValue(null);
+
+    const result = await createSpecification("/cwd", {
+      requirementId: "req-000001",
+      title: "   ",
+    });
+
+    expect(result.specification.title).toBe("要件タイトル");
+  });
+
   it("Requirementの現行versionがrequirementVersionに自動設定される", async () => {
     const mockReq = makeRequirement({ version: "2.1" });
     mockReqRepo.findByIdOrThrow.mockResolvedValue(mockReq);
