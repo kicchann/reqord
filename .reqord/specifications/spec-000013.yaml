@@ -1,10 +1,16 @@
 id: spec-000013
 requirementId: req-000013
 version: '1.0'
-status: implemented
+status: draft
 createdAt: 2026-02-08T14:08:07.639Z
-updatedAt: 2026-02-09T11:57:48Z
-versionHistory: []
+updatedAt: 2026-02-16T01:30:31.353Z
+versionHistory:
+  - version: '1.0'
+    status: draft
+    gitCommit: 6ca43f4
+    changedAt: 2026-02-16T01:30:31.353Z
+    summary: 'status: implemented → draft'
 files:
   design: specifications/spec-000013/design.md
   supplementary: []
+flags: []
