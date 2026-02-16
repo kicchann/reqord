@@ -3,9 +3,9 @@ requirementId: req-000004
 title: 共有型定義 (@reqord/shared)
 requirementVersion: '1.1'
 version: '1.1'
-status: approved
+status: implemented
 createdAt: 2026-02-08T14:08:06.872Z
-updatedAt: 2026-02-16T20:17:52.860Z
+updatedAt: 2026-02-16T20:47:30.983Z
 versionHistory:
   - version: '1.0'
     status: implemented
@@ -33,16 +33,21 @@ implementation:
       title: '[spec-000004] ステータス遷移ルール定数・関数の追加'
       url: https://github.com/kicchann/reqord/issues/340
       priority: P1
-      status: open
+      status: closed
     - number: 341
       title: '[spec-000004] Req/Spec整合性チェック関数の追加'
       url: https://github.com/kicchann/reqord/issues/341
       priority: P2
-      status: open
+      status: closed
     - number: 342
       title: '[spec-000004] FlagSchemaのdiscriminatedUnion拡張'
       url: https://github.com/kicchann/reqord/issues/342
       priority: P2
-      status: open
+      status: closed
   totalEstimatedHours: 7
   createdAt: 2026-02-16T20:17:52.856Z
+  progress:
+    total: 3
+    completed: 3
+    percentage: 100
+    lastSyncedAt: 2026-02-16T20:47:30.983Z
