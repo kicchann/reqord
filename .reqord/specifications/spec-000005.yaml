@@ -3,7 +3,7 @@ requirementId: req-000005
 version: '3.0'
 status: implemented
 createdAt: 2026-02-08T14:08:06.961Z
-updatedAt: 2026-02-14T21:22:47.041Z
+updatedAt: 2026-02-16T03:23:27.866Z
 versionHistory:
   - version: 1.0.0
     status: implemented
@@ -23,10 +23,10 @@ versionHistory:
       Unified Requirement/Specification versioning design. Added reqord version command architecture, separated
       versioning from status transitions. Status: draft → approved (Issue #263)
   - version: '3.0'
-    status: implemented
+    status: approved
     gitCommit: bfc2d7a
     changedAt: 2026-02-14T21:22:47.041Z
-    summary: 'status: approved → implemented'
+    summary: 'status: implemented → approved (実装未完了のため差し戻し)'
 files:
   design: specifications/spec-000005/design.md
   supplementary: []
@@ -39,25 +39,15 @@ currentApproval:
   approvedBy: []
 implementation:
   issues:
-    - number: 255
-      title: '[spec-000005 v2.0] VersionService の X.Y 形式対応'
-      url: https://github.com/kicchann/reqord/issues/255
+    - number: 307
+      title: '[spec-000005 v3.0] reqord version コマンド新規作成'
+      url: https://github.com/kicchann/reqord/issues/307
       priority: P1
-      status: open
-    - number: 256
-      title: '[spec-000005 v2.0] RequirementService の X.Y 形式対応とバージョニングロジック改訂'
-      url: https://github.com/kicchann/reqord/issues/256
-      priority: P1
-      status: open
-    - number: 257
-      title: '[spec-000005 v2.0] コマンド層の X.Y 形式対応（update/draft/history）'
-      url: https://github.com/kicchann/reqord/issues/257
+      status: closed
+    - number: 308
+      title: '[spec-000005 v3.0] draft コマンドの --major/--patch オプションに deprecation 警告追加'
+      url: https://github.com/kicchann/reqord/issues/308
       priority: P2
-      status: open
-    - number: 258
-      title: '[spec-000005 v2.0] 既存データの X.Y 形式移行'
-      url: https://github.com/kicchann/reqord/issues/258
-      priority: P2
-      status: open
-  totalEstimatedHours: 20
-  createdAt: 2026-02-14T00:32:00.801Z
+      status: closed
+  totalEstimatedHours: 6
+  createdAt: 2026-02-16T02:26:10.308Z
