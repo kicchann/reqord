@@ -4,7 +4,7 @@
 
 プロジェクト全体および個別のRequirement/Specificationの進捗状況を俯瞰的に表示するコマンド。ステータス整合性チェックにより、Req/Spec間の不整合を警告する。
 
-> **v1.1.0変更点**: Req/Specステータス整合性チェック・警告表示を追加（Feedback #16）。整合性ルールはreq-000004（shared）で定義。自動ステータス変更は行わず、警告表示でhuman-in-the-loopを維持。
+> **実装予定機能**: Req/Specステータス整合性チェック・警告表示（Feedback #16）。整合性ルールはreq-000004（shared）で定義。自動ステータス変更は行わず、警告表示でhuman-in-the-loopを維持。
 
 ## ユーザーストーリー
 
@@ -26,7 +26,6 @@ Reqord Status - MyProject
   Warnings:
     - req-005: 全関連Specが implemented だがReqが approved のまま
     - req-008: deprecated だが関連Spec(spec-012)が draft のまま
-    - spec-003: in-progress だが親Req(req-003)が未承認
     - req-006: feedback-review flag あり (#17)
 ```
 
@@ -46,7 +45,7 @@ Specification個別の詳細ステータス:
 - 親Requirementとの整合性チェック
 - Issue進捗（完了/進行中/ブロック）
 
-## ステータス整合性チェック（v1.1.0追加）
+## ステータス整合性チェック（計画中）
 
 req-000004（shared）で定義されたルールに基づき、以下の不整合を検出・警告する:
 
@@ -54,7 +53,6 @@ req-000004（shared）で定義されたルールに基づき、以下の不整�
 |------|-----------|----------|
 | 全関連Specが `implemented` だがReqが `approved` | warning | Reqを `implemented` に更新を検討 |
 | Reqが `deprecated` だが関連Specが active | warning | 関連Specの廃止を検討 |
-| Specが `in-progress` だがReqが `draft` | error | Reqを承認してからSpecの実装を進めるべき |
 | Reqに `feedback-review` flagあり | info | Feedback対応の確認 |
 
 **自動ステータス変更は行わない。** 警告表示のみでユーザーの判断に委ねる（human-in-the-loop）。

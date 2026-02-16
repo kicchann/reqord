@@ -48,13 +48,30 @@ cli と web は shared に依存するが、shared は他パッケージに依�
 
 | スキーマ | 値 | 用途 |
 |---------|-----|------|
-| `StatusSchema` | `"draft" \| "approved" \| "approved" \| "deprecated"` | 要件・仕様の状態管理 |
+| `StatusSchema` | `"draft" \| "approved" \| "implemented" \| "deprecated"` | 要件・仕様の状態管理 |
 | `PrioritySchema` | `"low" \| "medium" \| "high"` | 要件の優先度 |
 | `ComplexitySchema` | `"small" \| "medium" \| "large" \| "xlarge"` | 実装複雑度 |
 | `FormatTypeSchema` | `"user-story" \| "ears" \| "free-form"` | 要件記述形式 |
 | `VersionHistoryEntrySchema` | `{ version, status, gitCommit, approvedAt, approvedBy }` | バージョン履歴エントリ |
 
-### 3.2 RequirementSchema (`schemas/requirement.ts`)
+### 3.2 FlagSchema (`schemas/common.ts`)
+
+**責務:** Requirement・Specificationに付与するフラグの型定義。
+
+- `FeedbackFlagSchema`: `{ type: "feedback-review", feedbackId, issueNumber?, status }`
+  - feedbackとの紐付け情報を保持するフラグ（実装済み）
+- Requirement・Specificationの `flags` フィールドは `FlagSchema[]` 型の配列
+
+**将来の拡張計画:**
+
+現状 `feedback-review` のみ実装済み。将来的に以下のフラグ型を追加予定:
+
+- `security-review`: セキュリティレビューが必要なことを示すフラグ
+- `breaking-change`: 破壊的変更を含むことを示すフラグ
+
+FlagSchemaはdiscriminatedUnion（`type` フィールドで判別）に拡張する方針。新しいフラグ型追加時は `type` リテラルを追加し、各型固有のフィールドを定義する。
+
+### 3.3 RequirementSchema (`schemas/requirement.ts`)
 
 **責務:** 要件データの完全なスキーマ定義。
 
@@ -62,21 +79,22 @@ cli と web は shared に依存するが、shared は他パッケージに依�
 - FormatSchema: discriminatedUnion（type フィールドでuser-story/ears/free-formを判別）
 - DependenciesSchema: blockedBy/blocks/relatedToの3方向依存関係
 - オプションフィールド: estimatedComplexity, estimatedHours
+- `flags`: FlagSchema[] - フラグ配列（FeedbackFlag等）
 
-### 3.3 ProjectContextSchema (`schemas/project-context.ts`)
+### 3.4 ProjectContextSchema (`schemas/project-context.ts`)
 
 **責務:** プロジェクトコンテキストのスキーマ定義。
 
 - filesフィールド: string | object のユニオン型で柔軟なファイル参照をサポート
 
-### 3.4 SpecificationSchema (`schemas/specification.ts`)
+### 3.5 SpecificationSchema (`schemas/specification.ts`)
 
 **責務:** 仕様書データのスキーマ定義。
 
 - requirementIdで要件との紐付け
 - filesにdesignドキュメントパスを保持
 
-### 3.5 ValidationResultSchema (`schemas/validation.ts`)
+### 3.6 ValidationResultSchema (`schemas/validation.ts`)
 
 **責務:** バリデーション結果の構造化データ定義。
 
@@ -84,13 +102,13 @@ cli と web は shared に依存するが、shared は他パッケージに依�
 - `SmartScoreSchema`: SMART基準の各軸スコア（0-1）+ overall
 - `ValidationMetadataSchema`: criteriaCount, hasDescription, hasDependencyIssues, validatedAt
 
-### 3.6 パス定数 (`constants/paths.ts`)
+### 3.7 パス定数 (`constants/paths.ts`)
 
 **責務:** .reqord/配下のディレクトリ名を定数化。
 
 - `REQORD_DIR`, `CONTEXT_DIR`, `REQUIREMENTS_DIR`, `SPECIFICATIONS_DIR`, `SETTINGS_DIR`, `TEMPLATES_DIR`, `RULES_DIR`, `ASSETS_DIR`, `DOMAIN_DIR`, `ISSUE_TEMPLATES_DIR`
 
-### 3.7 SMARTスコアリング (`validation/smart-scoring.ts`)
+### 3.8 SMARTスコアリング (`validation/smart-scoring.ts`)
 
 **責務:** ルールベース（AI不要）でのSMART基準スコア算出。
 
@@ -100,12 +118,76 @@ cli と web は shared に依存するが、shared は他パッケージに依�
 - Relevant: formatの充実度 + 依存関係の定義
 - TimeBound: 見積もり時間 + 複雑度 + 時間制約表現
 
-### 3.8 曖昧表現検出 (`validation/ambiguous-phrases.ts`)
+### 3.9 曖昧表現検出 (`validation/ambiguous-phrases.ts`)
 
 **責務:** 日本語の曖昧表現リスト提供。
 
 - 「適切に」「なるべく」「できるだけ」等の42表現
 - `getAmbiguousPhrases(language)`: 言語コードに応じたリスト返却（現時点はjaのみ）
+
+### 3.10 ステータス遷移ルール（計画中）
+
+> **実装状況**: 未実装。遷移チェックはCLI `version-service.ts` 等にハードコードで散在しており、@reqord/shared への集約が未完了。
+
+**責務:** Requirement・Specificationのステータス遷移を定数・関数として一元管理する。
+
+#### 遷移図
+
+Requirement・Specificationともに同一の遷移ルール:
+
+```
+draft → approved → implemented
+  ↓                    ↓
+deprecated         deprecated
+```
+
+#### 設計
+
+- **配置先:** `schemas/common.ts` または新規 `rules/status-transitions.ts`
+- **`STATUS_TRANSITIONS`**: 許可遷移のマップ定数
+
+  ```typescript
+  const STATUS_TRANSITIONS: Record<Status, Status[]> = {
+    draft: ["approved", "deprecated"],
+    approved: ["implemented", "deprecated"],
+    implemented: ["deprecated"],
+    deprecated: [],
+  };
+  ```
+
+- **`isValidTransition(from: Status, to: Status): boolean`**: 遷移の妥当性チェック
+- **`getAvailableTransitions(current: Status): Status[]`**: 現在のステータスから遷移可能な状態一覧を返却
+
+### 3.11 Req/Spec 整合性ルール（計画中）
+
+> **実装状況**: 未実装。`reqord status` コマンド（req-000019）から使用される想定。
+
+**責務:** RequirementとSpecificationの状態整合性を検査し、警告リストを返却する。自動ステータス変更は行わず、警告のみ（human-in-the-loop）。
+
+#### 整合性ルール
+
+| 条件 | 警告メッセージ |
+|------|---------------|
+| 全関連Specが `implemented` だがRequirementが `approved` のまま | "全Specが実装完了。Requirementを `implemented` に更新を検討" |
+| Requirementが `deprecated` だが関連Specが `draft`/`approved` | "親Requirementが廃止。関連Specの廃止を検討" |
+
+#### 設計
+
+- **配置先:** 新規 `rules/consistency.ts`
+- **`ConsistencyWarning`** 型:
+
+  ```typescript
+  type ConsistencyWarning = {
+    requirementId: string;
+    specificationIds: string[];
+    message: string;
+    severity: "warning";
+  };
+  ```
+
+- **`checkConsistency(req: Requirement, specs: Specification[]): ConsistencyWarning[]`**: 整合性チェック関数
+  - 入力: 対象Requirementとそれに紐づくSpecification配列
+  - 出力: 警告の配列（問題がなければ空配列）
 
 ## 4. データフロー
 

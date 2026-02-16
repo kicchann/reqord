@@ -1,16 +1,20 @@
 id: req-000004
-version: '1.0'
+version: '1.1'
 title: 共有型定義 (@reqord/shared)
-status: implemented
+status: approved
 priority: high
 createdAt: 2026-02-07T10:00:00Z
-updatedAt: 2026-02-09T11:57:46Z
+updatedAt: 2026-02-17T00:00:00Z
 versionHistory:
   - version: 1.0.0
     changedAt: 2026-02-07T10:00:00Z
     summary: 初版作成
     status: implemented
     gitCommit: legacy
+  - version: 1.1.0
+    changedAt: 2026-02-17T00:00:00Z
+    summary: ドキュメント修正 - in-progress削除、遷移ルール未実装注記追加、StatusSchema統一
+    status: approved
 files:
   description: requirements/req-000004/description.md
   supplementary: []
@@ -37,10 +41,4 @@ dependencies:
     - req-000003
 estimatedComplexity: medium
 estimatedHours: 12
-flags:
-  - type: feedback-review
-    reason: Requirement/Specificationのステータス遷移ルール・整合性ルールを型定義に追加（成功基準6）
-    createdAt: 2026-02-09T11:00:00Z
-    relatedIssues:
-      - 16
-    severity: medium
+flags: []

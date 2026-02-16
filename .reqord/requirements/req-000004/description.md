@@ -34,8 +34,7 @@ packages/shared/
 ## 主要な型定義
 
 - `Requirement` - 要件のJSON構造
-- `RequirementStatus` - draft | approved | deprecated | implemented
-- `SpecificationStatus` - draft | approved | in-progress | implemented | deprecated
+- `StatusSchema`（Requirement・Specification共通） - draft | approved | implemented | deprecated
 - `Priority` - low | medium | high
 - `Complexity` - small | medium | large | xlarge
 - `EarsFormat` / `UserStoryFormat` / `FreeFormFormat` - 要件記述形式
@@ -43,7 +42,10 @@ packages/shared/
 - `Specification` - 仕様書
 - `Flag` - feedback-review | security-review | breaking-change 等のフラグ型
 
-## ステータス遷移ルール（v1.1.0追加, Feedback #16）
+## ステータス遷移ルール（計画中, Feedback #16）
+
+> **実装状況**: 未実装。遷移チェックはCLI各コマンドにハードコードで散在しており、
+> @reqord/shared への集約が未完了。
 
 ### Requirement
 
@@ -56,9 +58,9 @@ deprecated         deprecated
 ### Specification
 
 ```
-draft → approved → in-progress → implemented
-  ↓                                   ↓
-deprecated                        deprecated
+draft → approved → implemented
+  ↓                    ↓
+deprecated         deprecated
 ```
 
 ### Req/Spec 整合性ルール
@@ -67,9 +69,8 @@ deprecated                        deprecated
 |------|------|
 | 全関連Specが `implemented` だがRequirementが `approved` のまま | "全Specが実装完了。Requirementを `implemented` に更新を検討" |
 | Requirementが `deprecated` だが関連Specが `draft`/`approved` | "親Requirementが廃止。関連Specの廃止を検討" |
-| Specが `in-progress` だがRequirementが `draft` | "Specが実装中だがRequirementが未承認" |
 
-これらのルールは `reqord status` コマンド（req-000019）の整合性チェックで使用する。自動ステータス変更は行わず、警告として表示しユーザーの判断に委ねる（human-in-the-loop）。
+これらのルールは `reqord status` コマンド（req-000019）の整合性チェックで使用予定。自動ステータス変更は行わず、警告として表示しユーザーの判断に委ねる（human-in-the-loop）。
 
 ## 技術的制約
 
