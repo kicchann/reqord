@@ -39,6 +39,7 @@ export const feedbackUnlinkCommand = new Command("unlink")
           specificationId: options.spec,
         });
         console.log(chalk.green(`✓ Unlinked Feedback #${issueNumber} from ${options.spec}`));
+        console.log(chalk.gray(`  Removed feedback-review flag from ${options.spec}`));
       }
     } catch (error) {
       handleError(error);
