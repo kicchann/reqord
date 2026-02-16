@@ -30,6 +30,9 @@ export const specShowCommand = new Command("show")
 
       console.log(chalk.cyan(`Specification: ${spec.id}`));
       console.log("");
+      if (spec.title) {
+        console.log(`  Title:         ${spec.title}`);
+      }
       console.log(`  Requirement:   ${spec.requirementId}`);
       console.log(`  Status:        ${spec.status}`);
       console.log(`  Version:       ${spec.version}`);

@@ -13,6 +13,7 @@ import * as versionService from "./version-service.js";
 
 export interface CreateSpecOptions {
   requirementId: string;
+  title?: string;
 }
 
 export interface CreateSpecResult {
@@ -23,14 +24,16 @@ export async function createSpecification(
   cwd: string,
   options: CreateSpecOptions,
 ): Promise<CreateSpecResult> {
-  await reqRepo.findByIdOrThrow(cwd, options.requirementId);
+  const requirement = await reqRepo.findByIdOrThrow(cwd, options.requirementId);
 
   const id = await generateNextSpecId(cwd);
   const now = new Date().toISOString();
+  const title = options.title ?? requirement.title;
 
   const specification: Specification = {
     id,
     requirementId: options.requirementId,
+    title,
     version: "1.0",
     status: "draft",
     createdAt: now,
@@ -54,6 +57,7 @@ export async function createSpecification(
   const replace = (template: string) =>
     template
       .replace(/\{\{id\}\}/g, id)
+      .replace(/\{\{title\}\}/g, title)
       .replace(/\{\{requirementId\}\}/g, options.requirementId);
 
   await specRepo.saveFile(cwd, id, "design.md", replace(designTemplate));

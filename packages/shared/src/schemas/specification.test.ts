@@ -17,6 +17,23 @@ describe("SpecificationSchema", () => {
     flags: [],
   };
 
+  describe("title", () => {
+    it("titleフィールドを持つSpecificationを受け入れる", () => {
+      const specification = {
+        ...baseSpecification,
+        title: "テスト仕様",
+      };
+
+      const result = SpecificationSchema.parse(specification);
+      expect(result.title).toBe("テスト仕様");
+    });
+
+    it("titleなしの既存データが引き続きパースできる（後方互換性）", () => {
+      const result = SpecificationSchema.parse(baseSpecification);
+      expect(result.title).toBeUndefined();
+    });
+  });
+
   describe("currentApproval", () => {
     it("currentApprovalを持つ有効なSpecificationを受け入れる", () => {
       const specification = {

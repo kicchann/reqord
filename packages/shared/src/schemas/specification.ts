@@ -36,6 +36,7 @@ export const ImplementationSchema = z.object({
 export const SpecificationSchema = z.object({
   id: z.string().regex(/^spec-\d{6}$/),
   requirementId: z.string().regex(/^req-\d{6}$/),
+  title: z.string().optional(),
   version: z.string().default("1.0.0"),
   status: StatusSchema.default("draft"),
   createdAt: z.string(),

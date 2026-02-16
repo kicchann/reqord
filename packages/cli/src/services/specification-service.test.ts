@@ -112,6 +112,31 @@ describe("createSpecification", () => {
     );
   });
 
+  it("title未指定時はRequirementのtitleをデフォルト値として使用する", async () => {
+    const mockReq = makeRequirement({ title: "要件タイトル" });
+    mockReqRepo.findByIdOrThrow.mockResolvedValue(mockReq);
+    mockGenerateNextSpecId.mockResolvedValue("spec-000010");
+    mockLoadProjectTemplate.mockResolvedValue(null);
+
+    const result = await createSpecification("/cwd", { requirementId: "req-000001" });
+
+    expect(result.specification.title).toBe("要件タイトル");
+  });
+
+  it("title指定時はその値を使用する", async () => {
+    const mockReq = makeRequirement({ title: "要件タイトル" });
+    mockReqRepo.findByIdOrThrow.mockResolvedValue(mockReq);
+    mockGenerateNextSpecId.mockResolvedValue("spec-000010");
+    mockLoadProjectTemplate.mockResolvedValue(null);
+
+    const result = await createSpecification("/cwd", {
+      requirementId: "req-000001",
+      title: "カスタムタイトル",
+    });
+
+    expect(result.specification.title).toBe("カスタムタイトル");
+  });
+
   it("存在しない要件IDでエラーを投げる", async () => {
     mockReqRepo.findByIdOrThrow.mockRejectedValue(
       new Error("Requirement not found")

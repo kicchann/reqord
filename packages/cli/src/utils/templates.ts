@@ -66,7 +66,7 @@ export const DEFAULT_REQUIREMENT_QUALITY_RULES = `# 要件品質ルール
 - [ ] フォーマット（user-story/ears/free-form）が適切
 `;
 
-export const DEFAULT_SPECIFICATION_DESIGN_TEMPLATE = `# {{id}} - Design
+export const DEFAULT_SPECIFICATION_DESIGN_TEMPLATE = `# {{id}} - {{title}}
 
 ## 対象要件: {{requirementId}}
 

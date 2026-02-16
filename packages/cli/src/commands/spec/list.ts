@@ -36,7 +36,7 @@ export const specListCommand = new Command("list")
         }
 
         const table = new Table({
-          head: ["ID", "Requirement", "Status", "Version"],
+          head: ["ID", "Title", "Requirement", "Status", "Version"],
           style: { head: ["cyan"] },
         });
 
@@ -46,6 +46,7 @@ export const specListCommand = new Command("list")
 
           table.push([
             spec.id,
+            spec.title ?? "",
             spec.requirementId,
             statusColor(spec.status),
             spec.version,
