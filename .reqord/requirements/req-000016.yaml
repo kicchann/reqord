@@ -40,7 +40,6 @@ format:
 dependencies:
   blockedBy:
     - req-000013
-    - req-000015
   blocks:
     - req-000018
   relatedTo: []

@@ -54,8 +54,7 @@ dependencies:
   blockedBy:
     - req-000013
     - req-000011
-  blocks:
-    - req-000016
+  blocks: []
   relatedTo: []
 estimatedComplexity: small
 estimatedHours: 8
