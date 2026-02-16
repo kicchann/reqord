@@ -3,8 +3,10 @@ import { syncCommand } from "./sync.js";
 import { feedbackListCommand } from "./list.js";
 import { feedbackShowCommand } from "./show.js";
 import { feedbackLinkCommand } from "./link.js";
+import { feedbackUnlinkCommand } from "./unlink.js";
 import { feedbackCloseCommand } from "./close.js";
 import { resolveCommand } from "./resolve.js";
+import { feedbackCreateCommand } from "./create.js";
 
 export const feedbackCommand = new Command("feedback")
   .description("Manage feedback from GitHub issues");
@@ -13,5 +15,7 @@ feedbackCommand.addCommand(syncCommand);
 feedbackCommand.addCommand(feedbackListCommand);
 feedbackCommand.addCommand(feedbackShowCommand);
 feedbackCommand.addCommand(feedbackLinkCommand);
+feedbackCommand.addCommand(feedbackUnlinkCommand);
 feedbackCommand.addCommand(feedbackCloseCommand);
 feedbackCommand.addCommand(resolveCommand);
+feedbackCommand.addCommand(feedbackCreateCommand);

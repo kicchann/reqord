@@ -272,6 +272,113 @@ function buildImpactSummary(feedback: FeedbackEntry): string {
   return lines.join("\n");
 }
 
+// v3.0.0: ISSUE_TEMPLATE/05-feedback.yml に準拠したbody生成 (SC-17)
+export interface CreateFeedbackOptions {
+  title: string;
+  description: string;
+  type?: FeedbackType;
+  severity?: FeedbackSeverity;
+  relatedReq?: string;
+  relatedSpec?: string;
+}
+
+function feedbackTypeToLabel(type: FeedbackType): string {
+  const map: Record<FeedbackType, string> = {
+    "requirement-gap": "requirement-gap (要件の不足)",
+    "spec-mismatch": "spec-mismatch (仕様と実装の不一致)",
+    "bug": "implementation-bug (実装のバグ)",
+    "improvement": "improvement (改善提案)",
+    "security": "security (セキュリティ)",
+  };
+  return map[type] ?? type;
+}
+
+function severityToLabel(severity: FeedbackSeverity): string {
+  const map: Record<FeedbackSeverity, string> = {
+    critical: "critical (全ユーザーに影響)",
+    high: "high (多数のユーザーに影響)",
+    medium: "medium (一部のユーザーに影響)",
+    low: "low (軽微な問題)",
+  };
+  return map[severity] ?? severity;
+}
+
+function buildFeedbackIssueBody(options: CreateFeedbackOptions): string {
+  const lines: string[] = [];
+
+  lines.push("### 何が起きた？ / 何に気づいた？");
+  lines.push("");
+  lines.push(options.description);
+  lines.push("");
+
+  lines.push("### フィードバックの種類");
+  lines.push("");
+  const typeLabel = options.type
+    ? feedbackTypeToLabel(options.type)
+    : "不明/未分類";
+  lines.push(typeLabel);
+  lines.push("");
+
+  if (options.relatedReq) {
+    lines.push("### 関連する要件 (Requirement)");
+    lines.push("");
+    lines.push(options.relatedReq);
+    lines.push("");
+  }
+
+  if (options.relatedSpec) {
+    lines.push("### 関連する仕様 (Specification)");
+    lines.push("");
+    lines.push(options.relatedSpec);
+    lines.push("");
+  }
+
+  if (options.severity) {
+    lines.push("### 深刻度");
+    lines.push("");
+    lines.push(severityToLabel(options.severity));
+    lines.push("");
+  }
+
+  return lines.join("\n");
+}
+
+export async function createFeedbackIssue(
+  cwd: string,
+  options: CreateFeedbackOptions,
+): Promise<number> {
+  const body = buildFeedbackIssueBody(options);
+
+  const title = options.title.startsWith("[Feedback]")
+    ? options.title
+    : `[Feedback] ${options.title}`;
+
+  const result = await githubClient.createIssue({
+    title,
+    body,
+    labels: ["feedback", "reqord-generated", ...(options.type ? [options.type] : [])],
+  });
+
+  const index = await feedbackRepo.loadIndex(cwd);
+  const newEntry: FeedbackEntry = {
+    githubIssue: result.number,
+    type: options.type,
+    severity: options.severity,
+    linkedTo: {
+      requirements: [],
+      createdRequirements: [],
+      specifications: [],
+      createdSpecifications: [],
+    },
+    syncedAt: new Date().toISOString(),
+    status: "open",
+  };
+  index.feedbacks.push(newEntry);
+  await feedbackRepo.saveIndex(cwd, index);
+
+  return result.number;
+}
+
 // v2.0.0: Resolve feedback flag (SC-11)
 export interface ResolveFeedbackOptions {
   issueNumber: number;
@@ -351,4 +458,128 @@ export async function resolveFeedback(
   }
 
   await feedbackRepo.saveIndex(cwd, index);
+}
+
+// v3.0.0: close時の残存flag警告 (SC-16)
+export interface RemainingFlag {
+  artifactId: string;
+  issueNumber: number;
+  severity: string;
+}
+
+export async function checkRemainingFlags(
+  cwd: string,
+  feedback: FeedbackEntry,
+): Promise<RemainingFlag[]> {
+  const remaining: RemainingFlag[] = [];
+
+  for (const reqId of feedback.linkedTo.requirements) {
+    let requirement;
+    try {
+      requirement = await reqRepo.findByIdOrThrow(cwd, reqId);
+    } catch {
+      continue;
+    }
+
+    const flags = requirement.flags.filter(
+      (f) =>
+        f.type === "feedback-review" &&
+        f.relatedIssues.includes(feedback.githubIssue),
+    );
+    for (const flag of flags) {
+      remaining.push({
+        artifactId: reqId,
+        issueNumber: feedback.githubIssue,
+        severity: flag.severity ?? "medium",
+      });
+    }
+  }
+
+  return remaining;
+}
+
+// v3.0.0: Feedbackのリンク解除 (SC-14, SC-15)
+export interface UnlinkFromRequirementOptions {
+  issueNumber: number;
+  requirementId: string;
+}
+
+export interface UnlinkFromSpecificationOptions {
+  issueNumber: number;
+  specificationId: string;
+}
+
+export async function unlinkFromRequirement(
+  cwd: string,
+  options: UnlinkFromRequirementOptions,
+): Promise<void> {
+  const index = await feedbackRepo.loadIndex(cwd);
+  const feedback = index.feedbacks.find((f) => f.githubIssue === options.issueNumber);
+
+  if (!feedback) {
+    throw new Error(`Feedback for issue #${options.issueNumber} not found in index.yaml`);
+  }
+
+  // linkedTo.requirementsから削除
+  const reqIndex = feedback.linkedTo.requirements.indexOf(options.requirementId);
+  if (reqIndex === -1) {
+    throw new Error(
+      `${options.requirementId} is not linked to feedback #${options.issueNumber}`,
+    );
+  }
+  feedback.linkedTo.requirements.splice(reqIndex, 1);
+
+  // Requirementからfeedback-reviewフラグを削除
+  const requirement = await reqRepo.findByIdOrThrow(cwd, options.requirementId);
+  requirement.flags = requirement.flags.filter(
+    (f) =>
+      !(
+        f.type === "feedback-review" &&
+        f.relatedIssues.includes(options.issueNumber)
+      ),
+  );
+  await reqRepo.save(cwd, requirement);
+
+  await feedbackRepo.saveIndex(cwd, index);
+
+  // GitHub Issue bodyのHTMLコメントを更新
+  const issue = await githubClient.getIssue(options.issueNumber);
+  const newBody = upsertReqordComment(issue.body ?? "", {
+    type: feedback.type,
+    severity: feedback.severity,
+    linkedTo: feedback.linkedTo,
+  });
+  await githubClient.updateIssueBody(options.issueNumber, newBody);
+}
+
+export async function unlinkFromSpecification(
+  cwd: string,
+  options: UnlinkFromSpecificationOptions,
+): Promise<void> {
+  const index = await feedbackRepo.loadIndex(cwd);
+  const feedback = index.feedbacks.find((f) => f.githubIssue === options.issueNumber);
+
+  if (!feedback) {
+    throw new Error(`Feedback for issue #${options.issueNumber} not found in index.yaml`);
+  }
+
+  // linkedTo.specificationsから削除
+  const specIndex = feedback.linkedTo.specifications.indexOf(options.specificationId);
+  if (specIndex === -1) {
+    throw new Error(
+      `${options.specificationId} is not linked to feedback #${options.issueNumber}`,
+    );
+  }
+  feedback.linkedTo.specifications.splice(specIndex, 1);
+
+  await feedbackRepo.saveIndex(cwd, index);
+
+  // GitHub Issue bodyのHTMLコメントを更新
+  const issue = await githubClient.getIssue(options.issueNumber);
+  const newBody = upsertReqordComment(issue.body ?? "", {
+    type: feedback.type,
+    severity: feedback.severity,
+    linkedTo: feedback.linkedTo,
+  });
+  await githubClient.updateIssueBody(options.issueNumber, newBody);
 }

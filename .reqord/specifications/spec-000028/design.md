@@ -598,11 +598,12 @@ export async function createFeedbackIssue(
     ? options.title
     : `[Feedback] ${options.title}`;
 
-  // GitHub Issue作成（feedbackラベル付き）
+  // GitHub Issue作成（feedbackラベル + reqord-generatedラベル付き）
+  // reqord-generated: reqord issue createと同様、自動生成タスクであることを示すラベル
   const issueNumber = await createIssue({
     title,
     body,
-    labels: ["feedback", "reqord", ...(options.type ? [options.type] : [])],
+    labels: ["feedback", "reqord-generated", ...(options.type ? [options.type] : [])],
   });
 
   // index.yamlに新規エントリ追加
@@ -995,7 +996,7 @@ export const createCommand = new Command("create")
       });
 
       console.log(chalk.green(`✓ Created Feedback Issue #${issueNumber}`));
-      console.log(chalk.gray(`  Label: feedback`));
+      console.log(chalk.gray(`  Label: feedback, reqord-generated`));
       console.log(chalk.gray(`  Updated .reqord/feedback/index.yaml`));
     } catch (error) {
       console.error(chalk.red(`Error: ${(error as Error).message}`));
