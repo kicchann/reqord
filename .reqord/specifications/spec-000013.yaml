@@ -1,11 +1,11 @@
 id: spec-000013
 requirementId: req-000013
-title: 'Specification CRUD'
+title: Specification CRUD
 requirementVersion: '1.1'
 version: '1.1'
-status: approved
+status: implemented
 createdAt: 2026-02-08T14:08:07.639Z
-updatedAt: 2026-02-16T04:34:15.048Z
+updatedAt: 2026-02-16T05:55:52.368Z
 versionHistory:
   - version: '1.0'
     status: draft
@@ -16,7 +16,7 @@ versionHistory:
     status: draft
     gitCommit: c32e95b
     changedAt: 2026-02-16T01:53:40.006Z
-    summary: Design updated for title and requirementVersion fields (#157, #220)
+    summary: Design updated for title and requirementVersion fields (#157,
 files:
   design: specifications/spec-000013/design.md
   supplementary: []
@@ -27,3 +27,27 @@ currentApproval:
   prNumber: 313
   prUrl: https://github.com/kicchann/reqord/pull/313
   approvedBy: []
+implementation:
+  issues:
+    - number: 316
+      title: '[spec-000013 v1.1] 既存Specificationデータのマイグレーション'
+      url: https://github.com/kicchann/reqord/issues/316
+      priority: P2
+      status: closed
+    - number: 315
+      title: '[spec-000013 v1.1] SpecificationスキーマにrequirementVersionフィールド追加'
+      url: https://github.com/kicchann/reqord/issues/315
+      priority: P1
+      status: closed
+    - number: 314
+      title: '[spec-000013 v1.1] Specificationスキーマにtitleフィールド追加'
+      url: https://github.com/kicchann/reqord/issues/314
+      priority: P1
+      status: closed
+  totalEstimatedHours: 8
+  createdAt: 2026-02-16T05:55:40.335Z
+  progress:
+    total: 3
+    completed: 3
+    percentage: 100
+    lastSyncedAt: 2026-02-16T05:55:46.683Z
