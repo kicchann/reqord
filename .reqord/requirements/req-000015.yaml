@@ -1,10 +1,10 @@
 id: req-000015
 version: '5.0'
 title: Specification承認フロー
-status: approved
+status: implemented
 priority: medium
 createdAt: 2026-02-07T12:00:00Z
-updatedAt: 2026-02-15T21:50:06.085Z
+updatedAt: 2026-02-16T00:22:56.121Z
 versionHistory:
   - version: 2.0.0
     status: approved
