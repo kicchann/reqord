@@ -265,6 +265,10 @@ feedbacks:
       createdRequirements: []
       specifications: []
       createdSpecifications: []
+      resolved:
+        requirements:
+          - req-000023
+        specifications: []
     syncedAt: 2026-02-13T15:40:05.017Z
     status: closed
   - githubIssue: 225
@@ -276,6 +280,10 @@ feedbacks:
       createdRequirements: []
       specifications: []
       createdSpecifications: []
+      resolved:
+        requirements:
+          - req-000023
+        specifications: []
     syncedAt: 2026-02-13T15:40:05.017Z
     status: closed
   - githubIssue: 224
@@ -287,6 +295,10 @@ feedbacks:
       createdRequirements: []
       specifications: []
       createdSpecifications: []
+      resolved:
+        requirements:
+          - req-000023
+        specifications: []
     syncedAt: 2026-02-13T15:40:05.017Z
     status: closed
   - githubIssue: 223
@@ -298,6 +310,10 @@ feedbacks:
       createdRequirements: []
       specifications: []
       createdSpecifications: []
+      resolved:
+        requirements:
+          - req-000023
+        specifications: []
     syncedAt: 2026-02-13T15:40:05.017Z
     status: closed
   - githubIssue: 248

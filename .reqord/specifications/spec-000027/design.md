@@ -15,6 +15,10 @@ GitHub Issueと`.reqord/feedback/index.yaml`の双方向同期機構を提供す
 - **syncマージ更新**: sync時の手動メタデータ保持（SC-12対応）
 - **パフォーマンス改善**: Issue毎のファイルI/O → 一括load/save
 
+### v3.0.0 追加スコープ
+
+- **GitHubClient.createIssue()**: feedbackラベル付きGitHub Issue作成（spec-000028 v3.0.0のcreateコマンドが依存）
+
 ## 2. アーキテクチャ
 
 ```
@@ -248,6 +252,30 @@ export async function closeIssue(
     cmd += ` --comment "${comment.replace(/"/g, '\\"')}"`;
   }
   await execAsync(cmd);
+}
+
+// v3.0.0追加: GitHub Issue作成
+export interface CreateIssueOptions {
+  title: string;
+  body?: string;
+  labels?: string[];
+}
+
+export async function createIssue(
+  options: CreateIssueOptions
+): Promise<number> {
+  const args = ["gh", "issue", "create", "--title", options.title];
+  if (options.body) {
+    args.push("--body", options.body);
+  }
+  if (options.labels && options.labels.length > 0) {
+    args.push("--label", options.labels.join(","));
+  }
+  args.push("--json", "number");
+
+  const { stdout } = await execAsync(args.join(" "));
+  const result = JSON.parse(stdout);
+  return result.number;
 }
 ```
 

@@ -6,6 +6,8 @@ GitHub Issueをベースとしたフィードバック管理機能。feedbackラ
 
 > **v1.1.0変更点**: sync中心設計へ再構成。structureコマンドを廃止し、syncコマンドを追加。メタデータ設定はlinkコマンドに統合。Zodスキーマバリデーション成功基準を追加。
 
+> **v4.0変更点**: feedback運用の完全化。unlinkコマンド追加（linkの逆操作）、createコマンド追加（GitHub Issue作成）、close時の残存flag警告追加。
+
 設計方針は docs/feedback-control.md を参照。
 
 ## ユーザーストーリー
@@ -145,11 +147,10 @@ reqord feedback sync
 ```
 
 動作:
-1. `gh issue list --label feedback --json number,title,state,labels,createdAt` でGitHub Issueを取得
-2. GitHub Issueのラベルからreqordメタデータをパース
-   - `req:000006` → `linkedTo.requirements: ["req-000006"]`
-   - `spec:000001` → `linkedTo.specifications: ["spec-000001"]`
-   - `bug`, `improvement`, `requirement-gap`, `spec-mismatch`, `security` → `type`
+1. `gh issue list --label feedback --json number,title,state,labels,createdAt,body` でGitHub Issueを取得
+2. GitHub Issue bodyのHTMLコメント (`<!-- reqord:feedback {...} -->`) からメタデータをパース
+   - `linkedTo.requirements`, `linkedTo.specifications` を抽出
+   - `type`, `severity` を抽出
 3. index.yamlにないIssueを追加、既存エントリをマージ更新
 4. GitHub Issueがcloseされている場合は`status: "closed"`に更新
 
@@ -158,13 +159,13 @@ reqord feedback sync
 ```bash
 reqord feedback sync --from-local
 # → Syncing local metadata to GitHub...
-# → Updated labels on Issue #17, #21, #23
+# → Updated Issue body on Issue #17, #21, #23
 ```
 
 動作:
-1. index.yamlの`linkedTo`情報を元にGitHub Issueラベルを追加/更新
-2. `req:NNNNNN`, `spec:NNNNNN`, feedbackタイプのラベルを設定
-3. 既存ラベルは保持（feedback, priority等）
+1. index.yamlの`linkedTo`情報を元にGitHub Issue bodyのHTMLコメントを挿入/更新
+2. `<!-- reqord:feedback {"type":"...","linkedTo":{...}} -->` 形式でメタデータを埋め込み
+3. 既存のIssue本文は保持（HTMLコメント部分のみ更新）
 
 オプション:
 - `--from-local` : index.yaml → GitHub方向の同期
@@ -220,14 +221,14 @@ Feedbackをアーティファクトに紐付ける。type/severityも同時に�
 reqord feedback link 17 --req req-000006 --type improvement --severity high
 # → Linked Feedback #17 to req-000006
 # → Added feedback-review flag to req-000006
-# → Updated GitHub Issue labels: req:000006, improvement
+# → Updated GitHub Issue body (HTML comment)
 # → Updated .reqord/feedback/index.yaml
 ```
 
 動作:
 1. index.yamlの`linkedTo.requirements`に追加
 2. 対象Requirementに`feedback-review`フラグを追加
-3. GitHub Issueにラベル追加（`req:000006`, typeラベル）
+3. GitHub Issue bodyにHTMLコメントを挿入/更新
 4. index.yamlに`type`, `severity`を記録
 
 #### パターンB: 新規Requirement作成（--created-req）
@@ -235,7 +236,7 @@ reqord feedback link 17 --req req-000006 --type improvement --severity high
 ```bash
 reqord feedback link 13 --created-req --type requirement-gap --severity medium
 # → Created req-000023 from Feedback #13
-# → Updated GitHub Issue labels: req:000023, requirement-gap
+# → Updated GitHub Issue body (HTML comment)
 # → Updated .reqord/feedback/index.yaml
 ```
 
@@ -243,20 +244,20 @@ reqord feedback link 13 --created-req --type requirement-gap --severity medium
 1. 次の連番IDで新Requirementを作成（YAML + ディレクトリ）
 2. `origin: { feedbackIssue: 13 }`を記録
 3. index.yamlの`linkedTo.createdRequirements`に追加
-4. GitHub Issueにラベル追加（`req:NNNNNN`, typeラベル）
+4. GitHub Issue bodyにHTMLコメントを挿入/更新
 
 #### パターンC: Specificationへの紐付け（--spec）
 
 ```bash
 reqord feedback link 15 --spec spec-000001 --type spec-mismatch
 # → Linked Feedback #15 to spec-000001
-# → Updated GitHub Issue labels: spec:000001, spec-mismatch
+# → Updated GitHub Issue body (HTML comment)
 # → Updated .reqord/feedback/index.yaml
 ```
 
 動作:
 1. index.yamlの`linkedTo.specifications`に追加
-2. GitHub Issueにラベル追加（`spec:000001`, typeラベル）
+2. GitHub Issue bodyにHTMLコメントを挿入/更新
 3. Requirementへのflagは付与しない（Spec更新で対応するため）
 
 オプション:
@@ -282,7 +283,78 @@ reqord feedback close 17
 2. `gh issue close <issue-number> --comment "<影響範囲サマリー>"`でGitHub Issueをクローズ
 3. Requirementのflagsは**残す**（flagの除去はRequirement側の対応完了時に行う）
 
-**注意**: flagsの除去はFeedbackのクローズとは独立。Requirementの改訂やSpecificationの更新が完了した時点で、`reqord req unflag` により個別に除去する。
+**注意**: flagsの除去はFeedbackのクローズとは独立。Requirementの改訂やSpecificationの更新が完了した時点で、`reqord feedback resolve` により個別に除去する。v4.0でクローズ時に残存flag警告が追加された（上記「v4.0改善」セクション参照）。
+
+### reqord feedback unlink \<issue-number\>
+
+Feedbackとアーティファクトの紐付けを解除する（linkの逆操作）。
+
+```bash
+reqord feedback unlink 224 --req req-000023
+# → Unlinked Feedback #224 from req-000023
+# → Removed feedback-review flag from req-000023
+# → Updated .reqord/feedback/index.yaml
+
+reqord feedback unlink 224 --spec spec-000028
+# → Unlinked Feedback #224 from spec-000028
+# → Updated .reqord/feedback/index.yaml
+```
+
+動作:
+1. index.yamlの`linkedTo.requirements`または`linkedTo.specifications`から削除
+2. `--req`の場合、対象Requirementの`feedback-review`フラグを削除
+3. GitHub Issue bodyのHTMLコメントを更新
+
+オプション:
+- `--req <id>` : Requirementとの紐付けを解除
+- `--spec <id>` : Specificationとの紐付けを解除
+
+### reqord feedback create
+
+ISSUE_TEMPLATE/05-feedback.yml に準拠したfeedbackラベル付きGitHub Issueを作成し、index.yamlに新規エントリを追加する。
+
+```bash
+reqord feedback create \
+  --title "closeコマンドに警告がない" \
+  --description "feedback close実行時に残存flagがあっても警告なしでクローズされる" \
+  --type improvement \
+  --severity low
+# → Created GitHub Issue #228 "[Feedback] closeコマンドに警告がない"
+# → Labels: feedback, reqord, improvement
+# → Updated .reqord/feedback/index.yaml
+```
+
+動作:
+1. ISSUE_TEMPLATE準拠のbodyを生成（「何が起きた？」セクション等）
+2. タイトルに `[Feedback] ` prefixを自動付与
+3. `gh issue create`でfeedbackラベル付きGitHub Issueを作成
+4. index.yamlに新規エントリを追加
+
+オプション:
+- `--title <title>` : Issueタイトル（必須、自動で`[Feedback]` prefix付与）
+- `--description <text>` : 何が起きた？/何に気づいた？（必須）
+- `--type <type>` : Feedbackの種別
+- `--severity <level>` : 深刻度
+- `--related-req <id>` : 関連要件ID
+- `--related-spec <id>` : 関連仕様ID
+
+### reqord feedback close \<issue-number\>（v4.0改善）
+
+影響範囲確定後にFeedbackをクローズする。v4.0で残存flag警告を追加。
+
+```bash
+reqord feedback close 17
+# → ⚠ Warning: Linked artifacts have remaining feedback-review flags:
+# →   - req-000006: feedback-review (issue #17)
+# →   - req-000020: feedback-review (issue #17)
+# → Closed Feedback #17 on GitHub
+# → Updated .reqord/feedback/index.yaml (status: closed)
+```
+
+動作:
+1. 紐付けされたartifactの残存feedback-reviewフラグをチェックし、あれば警告表示
+2. index.yamlの`status`を`closed`に更新
+3. `gh issue close <issue-number> --comment "<影響範囲サマリー>"`でGitHub Issueをクローズ
 
 ## データ構造
 

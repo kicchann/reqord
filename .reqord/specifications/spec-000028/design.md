@@ -16,6 +16,12 @@ Feedback一覧表示・詳細表示・紐付け・クローズの4つのCLIコ�
 - **resolve**: フラグ解決 + `linkedTo.resolved`への記録（SC-11対応）
 - **承認時flag警告**: flags付きアーティファクト承認時の警告表示（SC-13対応）
 
+### v3.0.0 追加スコープ
+
+- **unlink**: linkの逆操作。アーティファクトとの紐付け解除 + フラグ削除（SC-14, SC-15対応）
+- **create**: feedbackラベル付きGitHub Issue作成 + index.yaml登録（SC-17対応）
+- **close改善**: クローズ時に残存feedback-reviewフラグの警告表示（SC-16対応）
+
 ## 2. アーキテクチャ
 
 ```
@@ -24,8 +30,10 @@ Feedback一覧表示・詳細表示・紐付け・クローズの4つのCLIコ�
 │ ├─ list.ts    - reqord feedback list                   │
 │ ├─ show.ts    - reqord feedback show <issue-number>    │
 │ ├─ link.ts    - reqord feedback link <issue-number>    │
-│ ├─ close.ts   - reqord feedback close <issue-number>   │
-│ └─ resolve.ts - reqord feedback resolve <artifact-id>  │  ← v2.0.0
+│ ├─ close.ts   - reqord feedback close <issue-number>   │  ← v3.0.0改善
+│ ├─ resolve.ts - reqord feedback resolve <artifact-id>  │  ← v2.0.0
+│ ├─ unlink.ts  - reqord feedback unlink <issue-number>  │  ← v3.0.0
+│ └─ create.ts  - reqord feedback create                 │  ← v3.0.0
 └────────────────────────┬────────────────────────────────┘
                          │
                          ▼
@@ -417,6 +425,241 @@ export async function resolveFeedback(
   await saveIndex(cwd, index);
 }
 
+// v3.0.0: Feedbackのリンク解除（SC-14, SC-15）
+export interface UnlinkFromRequirementOptions {
+  issueNumber: number;
+  requirementId: string;
+}
+
+export interface UnlinkFromSpecificationOptions {
+  issueNumber: number;
+  specificationId: string;
+}
+
+export async function unlinkFromRequirement(
+  cwd: string,
+  options: UnlinkFromRequirementOptions
+): Promise<void> {
+  const index = await loadIndex(cwd);
+  const feedback = index.feedbacks.find((f) => f.githubIssue === options.issueNumber);
+
+  if (!feedback) {
+    throw new Error(`Feedback for issue #${options.issueNumber} not found in index.yaml`);
+  }
+
+  // linkedTo.requirementsから削除
+  const reqIndex = feedback.linkedTo.requirements.indexOf(options.requirementId);
+  if (reqIndex === -1) {
+    throw new Error(
+      `${options.requirementId} is not linked to feedback #${options.issueNumber}`
+    );
+  }
+  feedback.linkedTo.requirements.splice(reqIndex, 1);
+
+  // Requirementからfeedback-reviewフラグを削除
+  const requirement = await findRequirementById(cwd, options.requirementId);
+  if (!requirement) {
+    throw new Error(`Requirement ${options.requirementId} not found`);
+  }
+  requirement.flags = (requirement.flags || []).filter(
+    (f) =>
+      !(
+        f.type === "feedback-review" &&
+        f.relatedIssues?.includes(options.issueNumber)
+      )
+  );
+  await saveRequirement(cwd, requirement);
+
+  await saveIndex(cwd, index);
+
+  // GitHub Issue bodyのHTMLコメントを更新
+  const issue = await getIssue(options.issueNumber);
+  const newBody = upsertReqordComment(issue.body ?? "", {
+    type: feedback.type,
+    severity: feedback.severity,
+    linkedTo: feedback.linkedTo,
+  });
+  await updateIssueBody(options.issueNumber, newBody);
+}
+
+export async function unlinkFromSpecification(
+  cwd: string,
+  options: UnlinkFromSpecificationOptions
+): Promise<void> {
+  const index = await loadIndex(cwd);
+  const feedback = index.feedbacks.find((f) => f.githubIssue === options.issueNumber);
+
+  if (!feedback) {
+    throw new Error(`Feedback for issue #${options.issueNumber} not found in index.yaml`);
+  }
+
+  // linkedTo.specificationsから削除
+  const specIndex = feedback.linkedTo.specifications.indexOf(options.specificationId);
+  if (specIndex === -1) {
+    throw new Error(
+      `${options.specificationId} is not linked to feedback #${options.issueNumber}`
+    );
+  }
+  feedback.linkedTo.specifications.splice(specIndex, 1);
+
+  await saveIndex(cwd, index);
+
+  // GitHub Issue bodyのHTMLコメントを更新
+  const issue = await getIssue(options.issueNumber);
+  const newBody = upsertReqordComment(issue.body ?? "", {
+    type: feedback.type,
+    severity: feedback.severity,
+    linkedTo: feedback.linkedTo,
+  });
+  await updateIssueBody(options.issueNumber, newBody);
+}
+
+// v3.0.0: ISSUE_TEMPLATE/05-feedback.yml に準拠したbody生成
+function buildFeedbackIssueBody(options: CreateFeedbackOptions): string {
+  const lines: string[] = [];
+
+  lines.push("### 何が起きた？ / 何に気づいた？");
+  lines.push("");
+  lines.push(options.description);
+  lines.push("");
+
+  lines.push("### フィードバックの種類");
+  lines.push("");
+  const typeLabel = options.type
+    ? feedbackTypeToLabel(options.type)
+    : "不明/未分類";
+  lines.push(typeLabel);
+  lines.push("");
+
+  if (options.relatedReq) {
+    lines.push("### 関連する要件 (Requirement)");
+    lines.push("");
+    lines.push(options.relatedReq);
+    lines.push("");
+  }
+
+  if (options.relatedSpec) {
+    lines.push("### 関連する仕様 (Specification)");
+    lines.push("");
+    lines.push(options.relatedSpec);
+    lines.push("");
+  }
+
+  if (options.severity) {
+    lines.push("### 深刻度");
+    lines.push("");
+    lines.push(severityToLabel(options.severity));
+    lines.push("");
+  }
+
+  return lines.join("\n");
+}
+
+function feedbackTypeToLabel(type: FeedbackType): string {
+  const map: Record<FeedbackType, string> = {
+    "requirement-gap": "requirement-gap (要件の不足)",
+    "spec-mismatch": "spec-mismatch (仕様と実装の不一致)",
+    "bug": "implementation-bug (実装のバグ)",
+    "improvement": "improvement (改善提案)",
+    "security": "security (セキュリティ)",
+  };
+  return map[type] ?? type;
+}
+
+function severityToLabel(severity: FeedbackSeverity): string {
+  const map: Record<FeedbackSeverity, string> = {
+    critical: "critical (全ユーザーに影響)",
+    high: "high (多数のユーザーに影響)",
+    medium: "medium (一部のユーザーに影響)",
+    low: "low (軽微な問題)",
+  };
+  return map[severity] ?? severity;
+}
+
+// v3.0.0: Feedback GitHub Issue作成（SC-17）
+export interface CreateFeedbackOptions {
+  title: string;
+  description: string;      // 何が起きた？ / 何に気づいた？（必須）
+  type?: FeedbackType;
+  severity?: FeedbackSeverity;
+  relatedReq?: string;       // 関連要件ID
+  relatedSpec?: string;      // 関連仕様ID
+}
+
+export async function createFeedbackIssue(
+  cwd: string,
+  options: CreateFeedbackOptions
+): Promise<number> {
+  // ISSUE_TEMPLATE/05-feedback.yml に準拠したbody生成
+  const body = buildFeedbackIssueBody(options);
+
+  // タイトルに [Feedback] prefix付与（テンプレート準拠）
+  const title = options.title.startsWith("[Feedback]")
+    ? options.title
+    : `[Feedback] ${options.title}`;
+
+  // GitHub Issue作成（feedbackラベル付き）
+  const issueNumber = await createIssue({
+    title,
+    body,
+    labels: ["feedback", "reqord", ...(options.type ? [options.type] : [])],
+  });
+
+  // index.yamlに新規エントリ追加
+  const index = await loadIndex(cwd);
+  const newEntry: FeedbackEntry = {
+    githubIssue: issueNumber,
+    type: options.type,
+    severity: options.severity,
+    linkedTo: {
+      requirements: [],
+      createdRequirements: [],
+      specifications: [],
+      createdSpecifications: [],
+    },
+    syncedAt: new Date().toISOString(),
+    status: "open",
+  };
+  index.feedbacks.push(newEntry);
+  await saveIndex(cwd, index);
+
+  return issueNumber;
+}
+
+// v3.0.0: close時の残存flag警告（SC-16）
+export interface RemainingFlag {
+  artifactId: string;
+  issueNumber: number;
+  severity: string;
+}
+
+export async function checkRemainingFlags(
+  cwd: string,
+  feedback: FeedbackEntry
+): Promise<RemainingFlag[]> {
+  const remaining: RemainingFlag[] = [];
+
+  for (const reqId of feedback.linkedTo.requirements) {
+    const requirement = await findRequirementById(cwd, reqId);
+    if (!requirement) continue;
+
+    const flags = (requirement.flags || []).filter(
+      (f) =>
+        f.type === "feedback-review" &&
+        f.relatedIssues?.includes(feedback.githubIssue)
+    );
+    for (const flag of flags) {
+      remaining.push({
+        artifactId: reqId,
+        issueNumber: feedback.githubIssue,
+        severity: flag.severity || "medium",
+      });
+    }
+  }
+
+  return remaining;
+}
+
 function buildImpactSummary(feedback: FeedbackEntry): string {
   const lines = ["**Feedback closed - Impact summary:**", ""];
 
@@ -622,7 +865,146 @@ export const closeCommand = new Command("close")
   });
 ```
 
-#### 3.2.5 resolve.ts（v2.0.0追加）
+#### 3.2.5 close.ts（v3.0.0改善）
+
+**ファイルパス**: `packages/cli/src/commands/feedback/close.ts`
+
+v3.0.0で残存flag警告を追加:
+
+```typescript
+import { Command } from "commander";
+import chalk from "chalk";
+import { closeFeedback, checkRemainingFlags, showFeedback } from "../../services/feedback-service";
+
+export const closeCommand = new Command("close")
+  .description("Close feedback (updates index.yaml and closes GitHub Issue)")
+  .argument("<issue-number>", "GitHub issue number")
+  .action(async (issueNumberStr: string) => {
+    try {
+      const cwd = process.cwd();
+      const issueNumber = parseInt(issueNumberStr, 10);
+
+      // v3.0.0: 残存flag警告
+      const { feedback } = await showFeedback(cwd, issueNumber);
+      const remainingFlags = await checkRemainingFlags(cwd, feedback);
+      if (remainingFlags.length > 0) {
+        console.log(
+          chalk.yellow(
+            `⚠ Warning: Linked artifacts have remaining feedback-review flags:`
+          )
+        );
+        for (const flag of remainingFlags) {
+          console.log(
+            chalk.yellow(
+              `  - ${flag.artifactId}: feedback-review (issue #${flag.issueNumber}, ${flag.severity})`
+            )
+          );
+        }
+      }
+
+      await closeFeedback(cwd, issueNumber);
+
+      console.log(chalk.green(`✓ Closed Feedback #${issueNumber}`));
+      if (remainingFlags.length > 0) {
+        console.log(chalk.gray("  Flags remain on linked artifacts. Use 'reqord feedback resolve' to remove."));
+      }
+    } catch (error) {
+      console.error(chalk.red(`Error: ${(error as Error).message}`));
+      process.exitCode = 1;
+    }
+  });
+```
+
+#### 3.2.6 unlink.ts（v3.0.0追加）
+
+**ファイルパス**: `packages/cli/src/commands/feedback/unlink.ts`
+
+```typescript
+import { Command } from "commander";
+import chalk from "chalk";
+import {
+  unlinkFromRequirement,
+  unlinkFromSpecification,
+} from "../../services/feedback-service";
+
+export const unlinkCommand = new Command("unlink")
+  .description("Unlink feedback from requirement/specification (reverse of link)")
+  .argument("<issue-number>", "GitHub issue number")
+  .option("--req <id>", "Unlink from requirement")
+  .option("--spec <id>", "Unlink from specification")
+  .action(async (issueNumberStr: string, options) => {
+    try {
+      const cwd = process.cwd();
+      const issueNumber = parseInt(issueNumberStr, 10);
+
+      // 排他チェック
+      const modes = [options.req, options.spec].filter(Boolean);
+      if (modes.length !== 1) {
+        throw new Error("Specify exactly one of --req or --spec");
+      }
+
+      if (options.req) {
+        await unlinkFromRequirement(cwd, {
+          issueNumber,
+          requirementId: options.req,
+        });
+        console.log(chalk.green(`✓ Unlinked Feedback #${issueNumber} from ${options.req}`));
+        console.log(chalk.gray(`  Removed feedback-review flag from ${options.req}`));
+      } else if (options.spec) {
+        await unlinkFromSpecification(cwd, {
+          issueNumber,
+          specificationId: options.spec,
+        });
+        console.log(chalk.green(`✓ Unlinked Feedback #${issueNumber} from ${options.spec}`));
+      }
+    } catch (error) {
+      console.error(chalk.red(`Error: ${(error as Error).message}`));
+      process.exitCode = 1;
+    }
+  });
+```
+
+#### 3.2.7 create.ts（v3.0.0追加）
+
+**ファイルパス**: `packages/cli/src/commands/feedback/create.ts`
+
+```typescript
+import { Command } from "commander";
+import chalk from "chalk";
+import { createFeedbackIssue } from "../../services/feedback-service";
+
+export const createCommand = new Command("create")
+  .description("Create a new feedback GitHub Issue (follows ISSUE_TEMPLATE/05-feedback.yml)")
+  .requiredOption("--title <title>", "Issue title (auto-prefixed with [Feedback])")
+  .requiredOption("--description <text>", "What happened / what did you notice?")
+  .option("--type <type>", "Feedback type (bug|improvement|requirement-gap|spec-mismatch|security)")
+  .option("--severity <level>", "Severity (critical|high|medium|low)")
+  .option("--related-req <id>", "Related requirement ID")
+  .option("--related-spec <id>", "Related specification ID")
+  .action(async (options) => {
+    try {
+      const cwd = process.cwd();
+
+      const issueNumber = await createFeedbackIssue(cwd, {
+        title: options.title,
+        description: options.description,
+        type: options.type,
+        severity: options.severity,
+        relatedReq: options.relatedReq,
+        relatedSpec: options.relatedSpec,
+      });
+
+      console.log(chalk.green(`✓ Created Feedback Issue #${issueNumber}`));
+      console.log(chalk.gray(`  Label: feedback`));
+      console.log(chalk.gray(`  Updated .reqord/feedback/index.yaml`));
+    } catch (error) {
+      console.error(chalk.red(`Error: ${(error as Error).message}`));
+      process.exitCode = 1;
+    }
+  });
+```
+
+#### 3.2.8 resolve.ts（v2.0.0追加）
 
 **ファイルパス**: `packages/cli/src/commands/feedback/resolve.ts`
 
@@ -668,6 +1050,8 @@ import { showCommand } from "./show";
 import { linkCommand } from "./link";
 import { closeCommand } from "./close";
 import { resolveCommand } from "./resolve"; // v2.0.0追加
+import { unlinkCommand } from "./unlink"; // v3.0.0追加
+import { createCommand } from "./create"; // v3.0.0追加
 
 export const feedbackCommand = new Command("feedback")
   .description("Manage feedback (GitHub Issue integration)")
@@ -676,7 +1060,9 @@ export const feedbackCommand = new Command("feedback")
   .addCommand(showCommand)
   .addCommand(linkCommand)
   .addCommand(closeCommand)
-  .addCommand(resolveCommand); // v2.0.0追加
+  .addCommand(resolveCommand)  // v2.0.0追加
+  .addCommand(unlinkCommand)   // v3.0.0追加
+  .addCommand(createCommand);  // v3.0.0追加
 ```
 
 **メインエントリーポイント**: `packages/cli/src/index.ts`
@@ -812,7 +1198,76 @@ program.addCommand(feedbackCommand);
      Added req-000006 to linkedTo.resolved
 ```
 
-### 4.7 承認時flag警告（v2.0.0追加）
+### 4.7 Feedbackリンク解除（v3.0.0追加）
+
+```
+1. ユーザー実行
+   $ reqord feedback unlink 224 --req req-000023
+
+2. unlinkFromRequirement()
+   ├─ index.yamlからfeedbackエントリを検索
+   ├─ linkedTo.requirementsからreq-000023を削除
+   ├─ req-000023のfeedback-reviewフラグ（issue #224）を削除
+   ├─ index.yaml保存
+   └─ Issue bodyのHTMLコメントを更新
+
+3. 出力
+   ✓ Unlinked Feedback #224 from req-000023
+     Removed feedback-review flag from req-000023
+```
+
+### 4.8 Feedback Issue作成（v3.0.0追加）
+
+```
+1. ユーザー実行
+   $ reqord feedback create \
+       --title "closeコマンドに警告がない" \
+       --description "feedback close実行時に残存flagがあっても警告なしでクローズされる" \
+       --type improvement \
+       --severity low
+
+2. createFeedbackIssue()
+   ├─ buildFeedbackIssueBody() でISSUE_TEMPLATE準拠のbody生成
+   │  ├─ "### 何が起きた？ / 何に気づいた？" セクション
+   │  ├─ "### フィードバックの種類" セクション
+   │  └─ "### 深刻度" セクション（指定時）
+   ├─ タイトルに "[Feedback] " prefix付与
+   ├─ gh issue create --label feedback,reqord,improvement でGitHub Issue作成
+   ├─ index.yamlに新規エントリ追加（type, severity設定）
+   └─ index.yaml保存
+
+3. 出力
+   ✓ Created Feedback Issue #228
+     Label: feedback
+     Updated .reqord/feedback/index.yaml
+```
+
+### 4.9 Close時の残存flag警告（v3.0.0改善）
+
+```
+1. ユーザー実行
+   $ reqord feedback close 17
+
+2. close処理
+   ├─ checkRemainingFlags()
+   │  ├─ linkedTo.requirementsの各reqを読み込み
+   │  └─ feedback-reviewフラグ（relatedIssues一致）を収集
+   ├─ 残存flagがあれば警告表示
+   │  ⚠ Warning: Linked artifacts have remaining feedback-review flags:
+   │    - req-000006: feedback-review (issue #17, high)
+   ├─ closeFeedback()
+   │  ├─ index.yamlのstatus更新（closed）
+   │  └─ gh issue close --comment でクローズ
+   └─ 残存flag案内表示
+
+3. 出力
+   ⚠ Warning: Linked artifacts have remaining feedback-review flags:
+     - req-000006: feedback-review (issue #17, high)
+   ✓ Closed Feedback #17
+     Flags remain on linked artifacts. Use 'reqord feedback resolve' to remove.
+```
+
+### 4.10 承認時flag警告（v2.0.0追加）
 
 ```
 1. ユーザー実行
@@ -872,12 +1327,26 @@ if (entity.flags && entity.flags.length > 0) {
   - linkedToに含まれないartifact-idの場合エラー
   - 既にresolvedに含まれている場合の重複防止
   - 操作順序: flag削除 → resolved追加（部分的障害時の安全性）
+- v3.0.0: unlinkFromRequirement(): linkedTo + flag同時削除
+  - linkedToに含まれないreqの場合エラー
+  - flag削除後のGitHub Issue body更新
+- v3.0.0: unlinkFromSpecification(): linkedTo削除
+  - linkedToに含まれないspecの場合エラー
+- v3.0.0: createFeedbackIssue(): GitHub Issue作成 + index.yaml登録
+  - feedbackラベル付きIssueが作成される
+  - index.yamlに新規エントリが追加される
+- v3.0.0: checkRemainingFlags(): 残存flag収集
+  - linkedTo.requirementsの各reqからfeedback-reviewフラグを収集
+  - 該当issueのフラグのみ抽出
 
 **commands/feedback/*.test.ts**
 - オプション解析
 - エラーハンドリング
 - JSON出力モード
 - v2.0.0: resolve.ts: --issueオプション必須、artifact-idバリデーション
+- v3.0.0: unlink.ts: --req/--specの排他チェック、リンクされていない場合のエラー
+- v3.0.0: create.ts: --titleオプション必須、type/severityバリデーション
+- v3.0.0: close.ts: 残存flag警告表示の検証
 
 **commands/req/approve.test.ts / commands/spec/approve.test.ts**（v2.0.0追加）
 - flags配列が空でない場合に警告が表示される
@@ -898,6 +1367,10 @@ if (entity.flags && entity.flags.length > 0) {
 9. v2.0.0: アーティファクトからfeedback-reviewフラグが除去されることを確認
 10. v2.0.0: index.yamlのlinkedTo.resolvedに記録されることを確認
 11. v2.0.0: flags付きアーティファクトの承認時に警告が表示されることを確認
+12. v3.0.0: `reqord feedback unlink <issue> --req <id>` でリンクとフラグが削除されることを確認
+13. v3.0.0: `reqord feedback unlink <issue> --spec <id>` でリンクが削除されることを確認
+14. v3.0.0: `reqord feedback create --title <title> --type <type>` でGitHub Issueが作成されindex.yamlに登録されることを確認
+15. v3.0.0: `reqord feedback close <issue>` 実行時に残存flagの警告が表示されることを確認
 
 ## 6. 技術的決定事項
 
@@ -1003,3 +1476,37 @@ Error: Specify exactly one of --req, --created-req, or --spec
 - resolve: 個々のアーティファクトのflagを解決した時点で実行
 - 1つのFeedbackが複数のアーティファクトにリンクされている場合、各アーティファクトは個別にresolveされる
 - closeとresolveの実行順序に制約はない（closeしてからresolveも可能）
+
+### 6.9 unlinkとresolveの使い分け（v3.0.0）
+
+**決定**: unlinkは「誤ったリンクの解除」、resolveは「対応完了後のフラグ解決」
+
+**理由**:
+- unlink: linkedTo自体を削除する。紐付けが誤りだった場合に使用。トレーサビリティからも削除される
+- resolve: linkedToは残し、resolvedに追加 + flagを削除。正しいリンクで対応が完了した場合に使用
+- 両者は意味的に異なる操作であり、結果のデータ状態も異なる
+
+**使い分け例**:
+| シナリオ | 操作 | 結果 |
+|---------|------|------|
+| 誤ってreq-000006にリンクした | `unlink --req req-000006` | linkedToから削除、flag削除 |
+| req-000006の改訂が完了した | `resolve req-000006 --issue 17` | linkedTo残存、resolved追加、flag削除 |
+
+### 6.10 close時の残存flag警告方針（v3.0.0）
+
+**決定**: 警告のみ（ブロックしない）。closeは続行される
+
+**理由**:
+- human-in-the-loop原則: close判断はユーザーに委ねる
+- flagが残っている状態でのcloseは正当なケース（影響範囲は確定したが対応はこれから）
+- 警告により「未対応のflagがある」ことをユーザーに明示
+
+### 6.11 createコマンドのラベル管理（v3.0.0）
+
+**決定**: `feedback` + `reqord` ラベルは必ず付与。`--type`指定時はtypeもラベルとして追加
+
+**理由**:
+- `feedback`ラベルはsync対象の判定に使用される必須ラベル
+- `reqord`ラベルはCLIから作成されたことを示すトレーサビリティ用ラベル
+- typeラベルはGitHub UI上での視認性向上のため
+- `gh issue list --label reqord` でCLI経由の作成物をフィルタ可能
