@@ -495,6 +495,28 @@ export async function checkRemainingFlags(
     }
   }
 
+  for (const specId of feedback.linkedTo.specifications) {
+    let specification;
+    try {
+      specification = await specRepo.findByIdOrThrow(cwd, specId);
+    } catch {
+      continue;
+    }
+
+    const flags = specification.flags.filter(
+      (f) =>
+        f.type === "feedback-review" &&
+        f.relatedIssues.includes(feedback.githubIssue),
+    );
+    for (const flag of flags) {
+      remaining.push({
+        artifactId: specId,
+        issueNumber: feedback.githubIssue,
+        severity: flag.severity ?? "medium",
+      });
+    }
+  }
+
   return remaining;
 }
 
@@ -571,6 +593,17 @@ export async function unlinkFromSpecification(
     );
   }
   feedback.linkedTo.specifications.splice(specIndex, 1);
+
+  // Specificationからfeedback-reviewフラグを削除
+  const specification = await specRepo.findByIdOrThrow(cwd, options.specificationId);
+  specification.flags = specification.flags.filter(
+    (f) =>
+      !(
+        f.type === "feedback-review" &&
+        f.relatedIssues.includes(options.issueNumber)
+      ),
+  );
+  await specRepo.save(cwd, specification);
 
   await feedbackRepo.saveIndex(cwd, index);
 

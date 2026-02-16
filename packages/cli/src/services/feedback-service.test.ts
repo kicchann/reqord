@@ -1207,6 +1207,43 @@ describe("unlinkFromSpecification", () => {
     );
   });
 
+  it("Specificationからfeedback-reviewフラグを削除する", async () => {
+    const feedback = makeFeedbackEntry({
+      githubIssue: 17,
+      linkedTo: {
+        requirements: [],
+        createdRequirements: [],
+        specifications: ["spec-000001"],
+        createdSpecifications: [],
+      },
+    });
+    mockFeedbackRepo.loadIndex.mockResolvedValue(makeFeedbackIndex([feedback]));
+    const specification = makeSpecification({
+      id: "spec-000001",
+      flags: [
+        {
+          type: "feedback-review",
+          reason: "Feedback from issue #17",
+          createdAt: "2026-01-01T00:00:00.000Z",
+          relatedIssues: [17],
+          severity: "medium",
+        },
+      ],
+    });
+    mockSpecRepo.findByIdOrThrow.mockResolvedValue(specification);
+    mockGithubClient.getIssue.mockResolvedValue(makeGitHubIssue({ number: 17 }));
+
+    await unlinkFromSpecification("/test/cwd", {
+      issueNumber: 17,
+      specificationId: "spec-000001",
+    });
+
+    expect(mockSpecRepo.save).toHaveBeenCalledWith(
+      "/test/cwd",
+      expect.objectContaining({ flags: [] }),
+    );
+  });
+
   it("紐付けされていないspecificationでエラーを投げる", async () => {
     const feedback = makeFeedbackEntry({
       githubIssue: 17,
@@ -1371,6 +1408,104 @@ describe("checkRemainingFlags", () => {
       },
     });
     mockReqRepo.findByIdOrThrow.mockRejectedValue(new Error("Not found"));
+
+    const result = await checkRemainingFlags("/test/cwd", feedback);
+
+    expect(result).toEqual([]);
+  });
+
+  it("Specificationの残存flagも検出する", async () => {
+    const feedback = makeFeedbackEntry({
+      githubIssue: 17,
+      linkedTo: {
+        requirements: [],
+        createdRequirements: [],
+        specifications: ["spec-000001"],
+        createdSpecifications: [],
+      },
+    });
+    const specification = makeSpecification({
+      id: "spec-000001",
+      flags: [
+        {
+          type: "feedback-review",
+          reason: "Feedback from issue #17",
+          createdAt: "2026-01-01T00:00:00.000Z",
+          relatedIssues: [17],
+          severity: "critical",
+        },
+      ],
+    });
+    mockSpecRepo.findByIdOrThrow.mockResolvedValue(specification);
+
+    const result = await checkRemainingFlags("/test/cwd", feedback);
+
+    expect(result).toEqual([
+      {
+        artifactId: "spec-000001",
+        issueNumber: 17,
+        severity: "critical",
+      },
+    ]);
+  });
+
+  it("RequirementとSpecification両方の残存flagを返す", async () => {
+    const feedback = makeFeedbackEntry({
+      githubIssue: 17,
+      linkedTo: {
+        requirements: ["req-000001"],
+        createdRequirements: [],
+        specifications: ["spec-000001"],
+        createdSpecifications: [],
+      },
+    });
+    mockReqRepo.findByIdOrThrow.mockResolvedValue(
+      makeRequirement({
+        id: "req-000001",
+        flags: [
+          {
+            type: "feedback-review",
+            reason: "Feedback from issue #17",
+            createdAt: "2026-01-01T00:00:00.000Z",
+            relatedIssues: [17],
+            severity: "medium",
+          },
+        ],
+      }),
+    );
+    mockSpecRepo.findByIdOrThrow.mockResolvedValue(
+      makeSpecification({
+        id: "spec-000001",
+        flags: [
+          {
+            type: "feedback-review",
+            reason: "Feedback from issue #17",
+            createdAt: "2026-01-01T00:00:00.000Z",
+            relatedIssues: [17],
+            severity: "high",
+          },
+        ],
+      }),
+    );
+
+    const result = await checkRemainingFlags("/test/cwd", feedback);
+
+    expect(result).toHaveLength(2);
+    expect(result[0]).toMatchObject({ artifactId: "req-000001", severity: "medium" });
+    expect(result[1]).toMatchObject({ artifactId: "spec-000001", severity: "high" });
+  });
+
+  it("存在しないspecificationはスキップする", async () => {
+    const feedback = makeFeedbackEntry({
+      githubIssue: 17,
+      linkedTo: {
+        requirements: [],
+        createdRequirements: [],
+        specifications: ["spec-000001"],
+        createdSpecifications: [],
+      },
+    });
+    mockSpecRepo.findByIdOrThrow.mockRejectedValue(new Error("Not found"));
 
     const result = await checkRemainingFlags("/test/cwd", feedback);
 
