@@ -34,6 +34,23 @@ describe("SpecificationSchema", () => {
     });
   });
 
+  describe("requirementVersion", () => {
+    it("requirementVersionフィールドを持つSpecificationを受け入れる", () => {
+      const specification = {
+        ...baseSpecification,
+        requirementVersion: "1.0",
+      };
+
+      const result = SpecificationSchema.parse(specification);
+      expect(result.requirementVersion).toBe("1.0");
+    });
+
+    it("requirementVersionなしの既存データが引き続きパースできる（後方互換性）", () => {
+      const result = SpecificationSchema.parse(baseSpecification);
+      expect(result.requirementVersion).toBeUndefined();
+    });
+  });
+
   describe("currentApproval", () => {
     it("currentApprovalを持つ有効なSpecificationを受け入れる", () => {
       const specification = {

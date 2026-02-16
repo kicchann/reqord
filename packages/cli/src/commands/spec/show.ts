@@ -34,6 +34,9 @@ export const specShowCommand = new Command("show")
         console.log(`  Title:         ${spec.title}`);
       }
       console.log(`  Requirement:   ${spec.requirementId}`);
+      if (spec.requirementVersion) {
+        console.log(`  Req Version:   ${spec.requirementVersion}`);
+      }
       console.log(`  Status:        ${spec.status}`);
       console.log(`  Version:       ${spec.version}`);
       console.log(`  Created:       ${spec.createdAt}`);

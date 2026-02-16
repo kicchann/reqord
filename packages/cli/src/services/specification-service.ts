@@ -34,6 +34,7 @@ export async function createSpecification(
     id,
     requirementId: options.requirementId,
     title,
+    requirementVersion: requirement.version,
     version: "1.0",
     status: "draft",
     createdAt: now,

@@ -137,6 +137,17 @@ describe("createSpecification", () => {
     expect(result.specification.title).toBe("カスタムタイトル");
   });
 
+  it("Requirementの現行versionがrequirementVersionに自動設定される", async () => {
+    const mockReq = makeRequirement({ version: "2.1" });
+    mockReqRepo.findByIdOrThrow.mockResolvedValue(mockReq);
+    mockGenerateNextSpecId.mockResolvedValue("spec-000010");
+    mockLoadProjectTemplate.mockResolvedValue(null);
+
+    const result = await createSpecification("/cwd", { requirementId: "req-000001" });
+
+    expect(result.specification.requirementVersion).toBe("2.1");
+  });
+
   it("存在しない要件IDでエラーを投げる", async () => {
     mockReqRepo.findByIdOrThrow.mockRejectedValue(
       new Error("Requirement not found")
