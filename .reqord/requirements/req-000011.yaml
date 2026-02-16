@@ -66,10 +66,4 @@ currentApproval:
   prNumber: 280
   prUrl: https://github.com/kicchann/reqord/pull/280
   approvedBy: []
-flags:
-  - type: feedback-review
-    reason: 'Feedback from issue #279'
-    createdAt: 2026-02-14T21:47:28.602Z
-    relatedIssues:
-      - 279
-    severity: low
+flags: []
