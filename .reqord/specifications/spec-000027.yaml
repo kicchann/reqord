@@ -3,11 +3,17 @@ requirementId: req-000023
 title: Feedback管理 (GitHub Issue連携)
 requirementVersion: '4.0'
 version: '3.0'
-status: draft
+status: approved
 createdAt: 2026-02-09T05:48:38.643Z
-updatedAt: 2026-02-16T06:29:09.273Z
+updatedAt: 2026-02-16T10:32:33.309Z
 versionHistory: []
 files:
   design: specifications/spec-000027/design.md
   supplementary: []
 flags: []
+currentApproval:
+  version: '3.0'
+  phase: specification
+  prNumber: 330
+  prUrl: https://github.com/kicchann/reqord/pull/330
+  approvedBy: []
