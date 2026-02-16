@@ -32,6 +32,15 @@ describe("SpecificationSchema", () => {
       const result = SpecificationSchema.parse(baseSpecification);
       expect(result.title).toBeUndefined();
     });
+
+    it("空文字列のtitleを拒否する", () => {
+      const specification = {
+        ...baseSpecification,
+        title: "",
+      };
+
+      expect(() => SpecificationSchema.parse(specification)).toThrow();
+    });
   });
 
   describe("requirementVersion", () => {
@@ -48,6 +57,15 @@ describe("SpecificationSchema", () => {
     it("requirementVersionなしの既存データが引き続きパースできる（後方互換性）", () => {
       const result = SpecificationSchema.parse(baseSpecification);
       expect(result.requirementVersion).toBeUndefined();
+    });
+
+    it("空文字列のrequirementVersionを拒否する", () => {
+      const specification = {
+        ...baseSpecification,
+        requirementVersion: "",
+      };
+
+      expect(() => SpecificationSchema.parse(specification)).toThrow();
     });
   });
 
