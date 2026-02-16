@@ -1,5 +1,7 @@
 id: spec-000031
 requirementId: req-000027
+title: 'データ形式のYAML移行'
+requirementVersion: '3.0'
 version: '3.0'
 status: implemented
 createdAt: 2026-02-11T09:00:00.000Z

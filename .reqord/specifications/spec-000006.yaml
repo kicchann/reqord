@@ -1,5 +1,7 @@
 id: spec-000006
 requirementId: req-000006
+title: '構造化出力・バッチ更新'
+requirementVersion: '1.0'
 version: '1.0'
 status: implemented
 createdAt: 2026-02-08T14:08:07.042Z

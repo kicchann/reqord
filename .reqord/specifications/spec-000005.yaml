@@ -1,5 +1,7 @@
 id: spec-000005
 requirementId: req-000005
+title: 'Requirement/Specificationバージョン管理'
+requirementVersion: '4.0'
 version: '3.0'
 status: implemented
 createdAt: 2026-02-08T14:08:06.961Z

@@ -1,5 +1,7 @@
 id: spec-000032
 requirementId: req-000001
+title: 'CLI初期化コマンド'
+requirementVersion: '1.0'
 version: '1.0'
 status: implemented
 createdAt: 2026-02-11T12:00:00.000Z

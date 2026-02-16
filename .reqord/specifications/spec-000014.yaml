@@ -1,5 +1,7 @@
 id: spec-000014
 requirementId: req-000014
+title: '設計検証・要件カバレッジ'
+requirementVersion: '3.0'
 version: '1.0'
 status: draft
 createdAt: 2026-02-08T14:08:07.721Z

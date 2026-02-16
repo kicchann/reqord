@@ -1,5 +1,7 @@
 id: spec-000017
 requirementId: req-000017
+title: 'Gap Analysis (既存コード差分分析)'
+requirementVersion: '1.0'
 version: '1.0'
 status: deprecated
 createdAt: 2026-02-08T14:08:07.981Z
