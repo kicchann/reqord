@@ -14,6 +14,6 @@ flags: []
 currentApproval:
   version: '3.0'
   phase: specification
-  prNumber: 0
-  prUrl: ''
+  prNumber: 331
+  prUrl: https://github.com/kicchann/reqord/pull/331
   approvedBy: []
