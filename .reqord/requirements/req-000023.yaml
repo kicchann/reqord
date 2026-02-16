@@ -1,10 +1,10 @@
 id: req-000023
 version: '3.0'
 title: Feedback管理 (GitHub Issue連携)
-status: implemented
+status: draft
 priority: medium
 createdAt: 2026-02-09T10:00:00Z
-updatedAt: 2026-02-11T14:30:00Z
+updatedAt: 2026-02-16T06:29:17.984Z
 versionHistory:
   - version: 2.0.0
     status: draft
@@ -88,10 +88,4 @@ flags:
     createdAt: 2026-02-13T15:49:34.208Z
     relatedIssues:
       - 224
-    severity: medium
-  - type: feedback-review
-    reason: 'Feedback from issue #223'
-    createdAt: 2026-02-13T15:49:37.666Z
-    relatedIssues:
-      - 223
     severity: medium
