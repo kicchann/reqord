@@ -58,7 +58,7 @@ export const specApproveCommand = new Command("approve")
         for (const flag of specification.flags) {
           console.log(
             chalk.yellow(
-              `  - ${flag.type}: ${flag.reason} (${flag.severity})`,
+              `  - ${flag.type}: ${flag.reason}${"severity" in flag ? ` (${flag.severity})` : ""}`,
             ),
           );
         }

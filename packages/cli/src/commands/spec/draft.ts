@@ -49,7 +49,7 @@ export const draftCommand = new Command("draft")
           for (const flag of specification.flags) {
             console.log(
               chalk.yellow(
-                `  - ${flag.type}: ${flag.reason} (${flag.severity})`,
+                `  - ${flag.type}: ${flag.reason}${"severity" in flag ? ` (${flag.severity})` : ""}`,
               ),
             );
           }
