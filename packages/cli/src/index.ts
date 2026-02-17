@@ -29,6 +29,7 @@ import { issueCommand } from "./commands/issue/index.js";
 import { migrateToYamlCommand } from "./commands/migrate-to-yaml.js";
 import { impactCommand } from "./commands/impact/index.js";
 import { versionCommand } from "./commands/version/version.js";
+import { uiCommand } from "./commands/ui.js";
 import { ensureReqordInitialized } from "./middleware/reqord-check.js";
 
 const program = new Command();
@@ -116,5 +117,10 @@ versionCommand.hook("preAction", async () => {
   await ensureReqordInitialized(process.cwd());
 });
 program.addCommand(versionCommand);
+
+uiCommand.hook("preAction", async () => {
+  await ensureReqordInitialized(process.cwd());
+});
+program.addCommand(uiCommand);
 
 program.parse();
