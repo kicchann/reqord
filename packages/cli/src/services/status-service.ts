@@ -134,27 +134,16 @@ export function detectWarnings(
     const req = requirements.find((r) => r.id === spec.requirementId);
     if (!req) continue;
 
-    // Specが実装済みなのにReqがdraft
-    if (spec.status === "implemented" && req.status === "draft") {
-      warnings.push({
-        id: spec.id,
-        type: "status-inconsistency",
-        message: `Specificationがimplementedですが、要件 ${req.id} がまだdraftです`,
-      });
-    }
-
     // Specがapproved以上なのにReqがdraft
     if (
       (spec.status === "approved" || spec.status === "implemented") &&
       req.status === "draft"
     ) {
-      if (!warnings.some((w) => w.id === spec.id && w.type === "status-inconsistency")) {
-        warnings.push({
-          id: spec.id,
-          type: "status-inconsistency",
-          message: `Specificationが${spec.status}ですが、要件 ${req.id} がまだdraftです`,
-        });
-      }
+      warnings.push({
+        id: spec.id,
+        type: "status-inconsistency",
+        message: `Specificationが${spec.status}ですが、要件 ${req.id} がまだdraftです`,
+      });
     }
   }
 
@@ -181,8 +170,10 @@ export async function getRequirementStatus(
   reqId: string,
 ): Promise<RequirementDetailStatus> {
   const requirement = await reqRepo.findByIdOrThrow(cwd, reqId);
-  const allSpecs = await specRepo.findAll(cwd);
-  const allReqs = await reqRepo.findAll(cwd);
+  const [allSpecs, allReqs] = await Promise.all([
+    specRepo.findAll(cwd),
+    reqRepo.findAll(cwd),
+  ]);
 
   const relatedSpecs = allSpecs.filter(
     (s) => s.requirementId === reqId,
