@@ -1,0 +1,19 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "reqord-plugins",
+  "version": "1.0.0",
+  "description": "Git-native要件管理ツールReqordの開発支援プラグイン",
+  "owner": {
+    "name": "kicchann"
+  },
+  "plugins": [
+    {
+      "name": "reqord",
+      "description": "要件(Requirement)から仕様(Specification)、実装、検証までのトレーサビリティを維持した開発支援",
+      "version": "0.1.0",
+      "author": { "name": "kicchann" },
+      "source": "./plugins/reqord",
+      "category": "development"
+    }
+  ]
+}
