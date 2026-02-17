@@ -103,9 +103,9 @@ reqord req enhance req-005
 .reqord/
 ├── context/
 │   ├── context.json
-│   ├── product.md              # "AIネイティブな要件管理ツール"
-│   ├── technical.md            # "Node.js, TypeScript, Next.js"
-│   └── structure.md            # "packages/ monorepo"
+│   ├── product.yaml              # "AIネイティブな要件管理ツール"
+│   ├── technical.yaml            # "Node.js, TypeScript, Next.js"
+│   └── structure.yaml            # "packages/ monorepo"
 │
 ├── requirements/
 │   ├── req-001.json            # CLI基本コマンド

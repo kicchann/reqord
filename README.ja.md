@@ -22,12 +22,12 @@
 
 ソフトウェア開発の現場では、「何を作るか」の情報管理に根深い課題があります。
 
-| 課題 | 起きること |
-|------|-----------|
-| **要件の散在** | チャット、メモ、Issue コメントに要件が散らばり、同じ議論を何度も繰り返す |
-| **コンテキストの消失** | プロジェクトの背景や設計判断が引き継がれず、新メンバーやAIが毎回ゼロから理解し直す |
+| 課題                         | 起きること                                                                               |
+| ---------------------------- | ---------------------------------------------------------------------------------------- |
+| **要件の散在**               | チャット、メモ、Issue コメントに要件が散らばり、同じ議論を何度も繰り返す                 |
+| **コンテキストの消失**       | プロジェクトの背景や設計判断が引き継がれず、新メンバーやAIが毎回ゼロから理解し直す       |
 | **仕様の劣化（Spec Drift）** | 実装後に仕様がメンテナンスされず、半年後には「この仕様は今も正しいのか」が分からなくなる |
-| **トレーサビリティの断絶** | 要件から仕様、仕様からコードへの紐付けが不明で、変更の影響範囲が見えない |
+| **トレーサビリティの断絶**   | 要件から仕様、仕様からコードへの紐付けが不明で、変更の影響範囲が見えない                 |
 
 Reqord はこれらの課題を、Gitリポジトリ内の構造化データとして解決します。
 
@@ -44,11 +44,11 @@ Requirement（何を作るか） --> Specification（どう作るか） --> GitH
        +---------------------- Feedback Loop ----------------------+
 ```
 
-| 層 | 役割 | 例 |
-|----|------|----|
-| **Requirement** | What -- 何を作るか | 「ユーザーがメールでログインできる」 |
-| **Specification** | How -- どう作るか | 「OAuth2 + JWT、セッション管理は Redis」 |
-| **GitHub Issue** | Tasks -- 実装タスク | 「POST /auth/login エンドポイント実装」 |
+| 層                | 役割                | 例                                       |
+| ----------------- | ------------------- | ---------------------------------------- |
+| **Requirement**   | What -- 何を作るか  | 「ユーザーがメールでログインできる」     |
+| **Specification** | How -- どう作るか   | 「OAuth2 + JWT、セッション管理は Redis」 |
+| **GitHub Issue**  | Tasks -- 実装タスク | 「POST /auth/login エンドポイント実装」  |
 
 実装後のフィードバックが要件・仕様の更新に還流する循環構造により、要件は「生きたドキュメント」として維持されます。
 
@@ -95,8 +95,8 @@ reqord context init
 .reqord/
 ├── context/          # プロジェクトコンテキスト
 │   ├── context.yaml
-│   ├── product.md
-│   ├── technical.md
+│   ├── product.yaml
+│   ├── technical.yaml
 │   └── domain/
 ├── requirements/     # 要件データ
 ├── specifications/   # 仕様データ
@@ -151,7 +151,7 @@ reqord spec design spec-000001
 
 ### AI 連携（ProjectContext）
 
-`.reqord/context/` に格納される ProjectContext（product.md, technical.md, domain/*.md）が、AIセッションに一貫した文脈を提供します。構造化された要件データは Claude Code, Cursor, Codex などのAIツールが直接解析できる形式であり、「毎回プロジェクトの説明からやり直す」問題を解消します。
+`.reqord/context/` に格納される ProjectContext（product.yaml, technical.yaml, domain/\*.md）が、AIセッションに一貫した文脈を提供します。構造化された要件データは Claude Code, Cursor, Codex などのAIツールが直接解析できる形式であり、「毎回プロジェクトの説明からやり直す」問題を解消します。
 
 ### フィードバックループ
 
@@ -165,16 +165,16 @@ EARS（Easy Approach to Requirements Syntax）と User Story 形式をサポー�
 
 ## 比較
 
-| 観点 | Reqord | Jira | Linear | Notion | GitHub Projects |
-|------|--------|------|--------|--------|-----------------|
-| Git-native（リポジトリ内管理） | **対応** | -- | -- | -- | 部分的 |
-| オフライン動作 | **対応** | -- | -- | -- | -- |
-| AI 対応（構造化データ） | **対応** | -- | -- | -- | -- |
-| トレーサビリティ（Req -> Spec -> Issue） | **組み込み** | プラグイン | -- | 手動 | -- |
-| PR ベース承認フロー | **組み込み** | -- | -- | -- | -- |
-| バージョン管理（差分・履歴） | **Git 統合** | 独自 | 独自 | 独自 | -- |
-| セルフホスト / SaaS 不要 | **対応** | -- | -- | -- | SaaS |
-| SMART バリデーション | **対応** | -- | -- | -- | -- |
+| 観点                                     | Reqord       | Jira       | Linear | Notion | GitHub Projects |
+| ---------------------------------------- | ------------ | ---------- | ------ | ------ | --------------- |
+| Git-native（リポジトリ内管理）           | **対応**     | --         | --     | --     | 部分的          |
+| オフライン動作                           | **対応**     | --         | --     | --     | --              |
+| AI 対応（構造化データ）                  | **対応**     | --         | --     | --     | --              |
+| トレーサビリティ（Req -> Spec -> Issue） | **組み込み** | プラグイン | --     | 手動   | --              |
+| PR ベース承認フロー                      | **組み込み** | --         | --     | --     | --              |
+| バージョン管理（差分・履歴）             | **Git 統合** | 独自       | 独自   | 独自   | --              |
+| セルフホスト / SaaS 不要                 | **対応**     | --         | --     | --     | SaaS            |
+| SMART バリデーション                     | **対応**     | --         | --     | --     | --              |
 
 Reqord は Jira や Linear の代替ではなく、要件ライフサイクル管理という領域に特化したツールです。既存のプロジェクト管理ツールと併用する設計になっています。
 
@@ -220,15 +220,15 @@ reqord/
 
 ### 技術スタック
 
-| レイヤー | 技術 |
-|---------|------|
-| 言語 | TypeScript 5.x（ESM） |
-| パッケージ管理 | pnpm workspaces |
-| スキーマ / 型 | Zod（CLI と Web で共有） |
-| CLI | Commander.js, chalk, cli-table3 |
-| Web UI | Next.js 15, React 19, Tailwind CSS 4, React Flow |
-| テスト | Vitest, Testing Library |
-| 品質 | ESLint 9, TypeScript strict mode |
+| レイヤー       | 技術                                             |
+| -------------- | ------------------------------------------------ |
+| 言語           | TypeScript 5.x（ESM）                            |
+| パッケージ管理 | pnpm workspaces                                  |
+| スキーマ / 型  | Zod（CLI と Web で共有）                         |
+| CLI            | Commander.js, chalk, cli-table3                  |
+| Web UI         | Next.js 15, React 19, Tailwind CSS 4, React Flow |
+| テスト         | Vitest, Testing Library                          |
+| 品質           | ESLint 9, TypeScript strict mode                 |
 
 ### データフロー
 
@@ -246,14 +246,14 @@ reqord/
 
 Reqord の設計思想、理論的背景、実践ガイドは `docs/about/` にまとめられています。
 
-| ドキュメント | 内容 |
-|-------------|------|
-| [Philosophy](docs/about/01-philosophy.md) | なぜ Reqord が存在するのか -- 設計原則と解決する課題 |
-| [Purpose](docs/about/02-purpose.md) | 何を達成するのか -- 機能概要とターゲットユーザー |
-| [Theory](docs/about/03-theory.md) | 採用した手法 -- EARS, SMART, トレーサビリティの理論的背景 |
-| [Best Practices](docs/about/04-best-practices.md) | 効果的な使い方のパターン |
-| [Don'ts](docs/about/05-donts.md) | やってはいけないこと -- 典型的な失敗パターン |
-| [AI Integration](docs/about/06-ai-integration.md) | AI 駆動開発での活用 -- ツール別の実践パターン |
+| ドキュメント                                      | 内容                                                      |
+| ------------------------------------------------- | --------------------------------------------------------- |
+| [Philosophy](docs/about/01-philosophy.md)         | なぜ Reqord が存在するのか -- 設計原則と解決する課題      |
+| [Purpose](docs/about/02-purpose.md)               | 何を達成するのか -- 機能概要とターゲットユーザー          |
+| [Theory](docs/about/03-theory.md)                 | 採用した手法 -- EARS, SMART, トレーサビリティの理論的背景 |
+| [Best Practices](docs/about/04-best-practices.md) | 効果的な使い方のパターン                                  |
+| [Don'ts](docs/about/05-donts.md)                  | やってはいけないこと -- 典型的な失敗パターン              |
+| [AI Integration](docs/about/06-ai-integration.md) | AI 駆動開発での活用 -- ツール別の実践パターン             |
 
 その他:
 

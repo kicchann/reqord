@@ -27,6 +27,11 @@
 │   ├── hooks/       # フック設定 (PreToolUse, PostToolUse等)
 │   ├── scripts/     # フックから実行されるスクリプト
 │   └── tool-usage/  # ツール使用ガイドライン
+├── plugins/
+│   └── reqord/          # Reqordプラグイン (marketplace対応)
+│       ├── .claude-plugin/  # プラグイン設定
+│       ├── skills/          # スキル (context, design, feedback, refine, status, dev, git, verify)
+│       └── agents/          # エージェント (explorer, architect, implementer, reviewer)
 ├── .reqord/         # 要件データ (YAML + Markdown)
 │   ├── requirements/  # 要件定義
 │   ├── specifications/ # 仕様書
@@ -120,6 +125,28 @@
 - `good-test-principles` - TDD原則（Four Pillars, Classical vs London, テストスタイル階層）
 - `clean-architecture` - クリーンアーキテクチャ（依存性逆転、レイヤー分離、参照ルール）
 - `code-review-guideline` - レビュー基準（テスト品質、アーキテクチャ遵守、チェックリスト）
+
+### Reqordプラグイン
+
+`claude --plugin-dir ./plugins/reqord` で読み込む。
+要件(Requirement)から仕様(Specification)、実装、検証までのトレーサビリティを維持しながら、設計・TDD実装・コードレビュー・Git操作を一貫して行うスキル・エージェントを提供する。
+
+**スキル（`/reqord:` 名前空間）:**
+
+- `/reqord:status` - 要件・仕様の実装進捗ダッシュボード
+- `/reqord:design` - Specification設計書（design.md）作成
+- `/reqord:dev` - design.mdに基づくTDD機能開発
+- `/reqord:git` - spec-idベースのGit操作（ブランチ・コミット・PR）
+- `/reqord:verify` - 実装検証・トレーサビリティ確認・完了処理
+- `/reqord:feedback` - フィードバック運用（同期・分類・リンク・クローズ）
+- `/reqord:refine` - 要件詳細化（SMART品質スコア向上）
+
+**エージェント（プラグイン提供）:**
+
+- `reqord-explorer` - 要件・仕様を踏まえたコード調査
+- `reqord-architect` - 要件・仕様に基づく設計
+- `reqord-implementer` - 仕様に基づくTDD実装
+- `reqord-reviewer` - 要件・仕様に基づくコードレビュー
 
 ### ワークフロー
 

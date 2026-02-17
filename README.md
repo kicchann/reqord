@@ -37,11 +37,11 @@ Requirement (What)  -->  Specification (How)  -->  GitHub Issue (Tasks)
        '------------------ Feedback Loop -----------------'
 ```
 
-| Layer           | Purpose                        | Example                                      |
-|-----------------|--------------------------------|----------------------------------------------|
-| **Requirement** | What to build                  | "Users can log in with email"                |
-| **Specification** | How to build it              | "OAuth2 + JWT, sessions stored in Redis"     |
-| **GitHub Issue** | Concrete implementation tasks | "Implement POST /auth/login endpoint"        |
+| Layer             | Purpose                       | Example                                  |
+| ----------------- | ----------------------------- | ---------------------------------------- |
+| **Requirement**   | What to build                 | "Users can log in with email"            |
+| **Specification** | How to build it               | "OAuth2 + JWT, sessions stored in Redis" |
+| **GitHub Issue**  | Concrete implementation tasks | "Implement POST /auth/login endpoint"    |
 
 Each layer links to the others. When a requirement changes, you can trace the impact through specifications to issues. When implementation feedback surfaces, it flows back to update requirements.
 
@@ -100,7 +100,7 @@ reqord context init
 reqord context show
 ```
 
-Project context files (`product.md`, `technical.md`, `structure.md`, `domain/*.md`) serve as persistent background for every AI session and team onboarding.
+Project context files (`product.yaml`, `technical.yaml`, `structure.yaml`, `domain/*.md`) serve as persistent background for every AI session and team onboarding.
 
 ### Create your first requirement
 
@@ -175,12 +175,12 @@ The `@reqord/web` package provides a Next.js dashboard with:
 
 The `.reqord/context/` directory stores structured project knowledge that AI tools can consume directly:
 
-| File | Purpose |
-|------|---------|
-| `product.md` | Vision, target users, core features, out-of-scope |
-| `technical.md` | Tech stack, architecture, design patterns |
-| `structure.md` | Naming conventions, directory structure, import rules |
-| `domain/*.md` | Domain-specific knowledge (security policies, API standards) |
+| File             | Purpose                                                      |
+| ---------------- | ------------------------------------------------------------ |
+| `product.yaml`   | Vision, target users, core features, out-of-scope            |
+| `technical.yaml` | Tech stack, architecture, design patterns                    |
+| `structure.yaml` | Naming conventions, directory structure, import rules        |
+| `domain/*.md`    | Domain-specific knowledge (security policies, API standards) |
 
 This context persists across AI sessions, eliminating the "explain the project from scratch every time" problem. Works with Claude Code, Cursor, Windsurf, Codex, and any tool that can read files.
 
@@ -213,16 +213,16 @@ reqord req history req-000001
 
 How Reqord compares to existing tools for managing what to build:
 
-| Capability | Reqord | Jira | Linear | Notion | GitHub Projects |
-|---|---|---|---|---|---|
-| **Git-native** | Yes -- lives in your repo | No | No | No | Partial |
-| **Offline-first** | Yes -- no server needed | No | No | No | No |
-| **AI-ready structure** | YAML + Markdown, typed schemas | Unstructured text | Unstructured text | Unstructured text | Unstructured text |
-| **Traceability** | Enforced (Req -> Spec -> Issue) | Manual linking | Manual linking | Manual linking | Manual linking |
-| **Approval workflow** | PR-based with CODEOWNERS | Built-in workflow | Built-in workflow | No formal approval | No formal approval |
-| **Version control** | Full Git history + semantic versions | Limited history | Limited history | Page history | No versioning |
-| **Quality validation** | SMART scoring built-in | No | No | No | No |
-| **Cost** | Free (AGPL-3.0) | Paid | Paid | Freemium | Free (limited) |
+| Capability             | Reqord                               | Jira              | Linear            | Notion             | GitHub Projects    |
+| ---------------------- | ------------------------------------ | ----------------- | ----------------- | ------------------ | ------------------ |
+| **Git-native**         | Yes -- lives in your repo            | No                | No                | No                 | Partial            |
+| **Offline-first**      | Yes -- no server needed              | No                | No                | No                 | No                 |
+| **AI-ready structure** | YAML + Markdown, typed schemas       | Unstructured text | Unstructured text | Unstructured text  | Unstructured text  |
+| **Traceability**       | Enforced (Req -> Spec -> Issue)      | Manual linking    | Manual linking    | Manual linking     | Manual linking     |
+| **Approval workflow**  | PR-based with CODEOWNERS             | Built-in workflow | Built-in workflow | No formal approval | No formal approval |
+| **Version control**    | Full Git history + semantic versions | Limited history   | Limited history   | Page history       | No versioning      |
+| **Quality validation** | SMART scoring built-in               | No                | No                | No                 | No                 |
+| **Cost**               | Free (AGPL-3.0)                      | Paid              | Paid              | Freemium           | Free (limited)     |
 
 **Reqord is not a replacement for project management tools.** It focuses specifically on requirements lifecycle management and is designed to complement tools like Jira, Linear, or GitHub Projects.
 
@@ -262,41 +262,41 @@ All data lives in the `.reqord/` directory within your project repository:
 
 ## CLI Commands
 
-| Command | Description |
-|---------|-------------|
-| `reqord init` | Initialize `.reqord/` directory structure |
-| `reqord context init` | Set up project context |
-| `reqord context show` | Display project context summary |
-| `reqord context update` | Update context metadata |
-| `reqord req create` | Create a new requirement |
-| `reqord req list` | List requirements (with filters) |
-| `reqord req show <id>` | Show requirement details |
-| `reqord req update <id>` | Update requirement metadata |
-| `reqord req delete <id>` | Delete a requirement |
-| `reqord req validate <id>` | SMART validation scoring |
-| `reqord req history <id>` | View version history |
-| `reqord spec create <req-id>` | Create specification for a requirement |
-| `reqord spec list` | List specifications |
-| `reqord spec show <id>` | Show specification details |
-| `reqord spec design <id>` | View/update design document |
-| `reqord feedback sync` | Sync with GitHub Issues |
-| `reqord feedback list` | List feedback items |
-| `reqord feedback show <id>` | Show feedback details |
-| `reqord feedback close <id>` | Close a feedback item |
-| `reqord feedback link <id>` | Link feedback to requirement/spec |
+| Command                       | Description                               |
+| ----------------------------- | ----------------------------------------- |
+| `reqord init`                 | Initialize `.reqord/` directory structure |
+| `reqord context init`         | Set up project context                    |
+| `reqord context show`         | Display project context summary           |
+| `reqord context update`       | Update context metadata                   |
+| `reqord req create`           | Create a new requirement                  |
+| `reqord req list`             | List requirements (with filters)          |
+| `reqord req show <id>`        | Show requirement details                  |
+| `reqord req update <id>`      | Update requirement metadata               |
+| `reqord req delete <id>`      | Delete a requirement                      |
+| `reqord req validate <id>`    | SMART validation scoring                  |
+| `reqord req history <id>`     | View version history                      |
+| `reqord spec create <req-id>` | Create specification for a requirement    |
+| `reqord spec list`            | List specifications                       |
+| `reqord spec show <id>`       | Show specification details                |
+| `reqord spec design <id>`     | View/update design document               |
+| `reqord feedback sync`        | Sync with GitHub Issues                   |
+| `reqord feedback list`        | List feedback items                       |
+| `reqord feedback show <id>`   | Show feedback details                     |
+| `reqord feedback close <id>`  | Close a feedback item                     |
+| `reqord feedback link <id>`   | Link feedback to requirement/spec         |
 
 ## Documentation
 
 Detailed documentation is available in the `docs/about/` series:
 
-| Document | Topic |
-|----------|-------|
-| [Philosophy](./docs/about/01-philosophy.md) | Why Reqord exists -- problems solved and design principles |
-| [Purpose](./docs/about/02-purpose.md) | What it achieves, who it is for, feature overview |
-| [Theory](./docs/about/03-theory.md) | EARS, SMART, and other methodologies adopted |
-| [Best Practices](./docs/about/04-best-practices.md) | Effective usage patterns |
-| [Don'ts](./docs/about/05-donts.md) | Common mistakes to avoid |
-| [AI Integration](./docs/about/06-ai-integration.md) | Using Reqord with Claude Code, Cursor, Codex |
+| Document                                            | Topic                                                      |
+| --------------------------------------------------- | ---------------------------------------------------------- |
+| [Philosophy](./docs/about/01-philosophy.md)         | Why Reqord exists -- problems solved and design principles |
+| [Purpose](./docs/about/02-purpose.md)               | What it achieves, who it is for, feature overview          |
+| [Theory](./docs/about/03-theory.md)                 | EARS, SMART, and other methodologies adopted               |
+| [Best Practices](./docs/about/04-best-practices.md) | Effective usage patterns                                   |
+| [Don'ts](./docs/about/05-donts.md)                  | Common mistakes to avoid                                   |
+| [AI Integration](./docs/about/06-ai-integration.md) | Using Reqord with Claude Code, Cursor, Codex               |
 
 Additional references:
 

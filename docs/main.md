@@ -22,9 +22,9 @@ project-root/
 ├── .reqord/
 │   ├── context/                          # プロジェクトコンテキスト(Steering)
 │   │   ├── context.json                  # メタデータ
-│   │   ├── product.md                    # Product vision
-│   │   ├── technical.md                  # Tech stack, Architecture
-│   │   ├── structure.md                  # Code structure, Naming conventions
+│   │   ├── product.yaml                    # Product vision
+│   │   ├── technical.yaml                  # Tech stack, Architecture
+│   │   ├── structure.yaml                  # Code structure, Naming conventions
 │   │   └── domain/                       # ドメイン知識(カスタム)
 │   │       ├── api-standards.md
 │   │       ├── security.md
@@ -93,9 +93,9 @@ project-root/
 
   // 外部ファイル参照
   "files": {
-    "product": "context/product.md",
-    "technical": "context/technical.md",
-    "structure": "context/structure.md",
+    "product": "context/product.yaml",
+    "technical": "context/technical.yaml",
+    "structure": "context/structure.yaml",
     "domain": [
       "context/domain/api-standards.md",
       "context/domain/security.md"
@@ -104,7 +104,7 @@ project-root/
 }
 ```
 
-### Product Context (context/product.md)
+### Product Context (context/product.yaml)
 
 ```markdown
 # Product Vision
@@ -137,7 +137,7 @@ project-root/
 - やらないこと2
 ```
 
-### Technical Context (context/technical.md)
+### Technical Context (context/technical.yaml)
 
 ````markdown
 # Technical Context
@@ -193,7 +193,7 @@ npm run dev
 - **Factory Pattern** - オブジェクト生成
 ````
 
-### Structure Context (context/structure.md)
+### Structure Context (context/structure.yaml)
 
 ````markdown
 # Code Structure
@@ -568,7 +568,7 @@ v1.1.0 (draft)
   ↓
   承認 → 新バージョン Approved
 
-````
+```
 
 ---
 
@@ -625,7 +625,7 @@ reqord context req-001 | claude code           # Claude Codeに直接渡す
 reqord status                                  # プロジェクト全体
 reqord status req-001                          # Requirement詳細
 reqord status spec-001                         # Specification詳細
-````
+```
 
 ---
 

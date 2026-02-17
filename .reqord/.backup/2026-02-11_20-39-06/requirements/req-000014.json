@@ -34,7 +34,7 @@
     "未カバーの要件が警告として表示され、カバレッジが50%未満の場合はexit code 1で終了する",
     "designValidation結果がSpecification JSONの designValidation フィールドに記録される",
     "検証結果が--jsonオプションで構造化出力され、CI連携が可能である",
-    "ProjectContextのtechnical.mdとstructure.mdのパースエラー時には明確なエラーメッセージが表示される"
+    "ProjectContextのtechnical.yamlとstructure.yamlのパースエラー時には明確なエラーメッセージが表示される"
   ],
   "format": {
     "type": "user-story",
@@ -45,13 +45,9 @@
     }
   },
   "dependencies": {
-    "blockedBy": [
-      "req-000013"
-    ],
+    "blockedBy": ["req-000013"],
     "blocks": [],
-    "relatedTo": [
-      "req-000003"
-    ]
+    "relatedTo": ["req-000003"]
   },
   "estimatedComplexity": "medium",
   "estimatedHours": 12,

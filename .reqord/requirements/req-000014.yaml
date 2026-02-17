@@ -1,5 +1,5 @@
 id: req-000014
-version: '3.0'
+version: "3.0"
 title: 設計検証・要件カバレッジ
 status: approved
 priority: medium
@@ -27,7 +27,7 @@ successCriteria:
   - 未カバーの要件が警告として表示され、カバレッジが50%未満の場合はexit code 1で終了する
   - designValidation結果がSpecification JSONの designValidation フィールドに記録される
   - 検証結果が--jsonオプションで構造化出力され、CI連携が可能である
-  - ProjectContextのtechnical.mdとstructure.mdのパースエラー時には明確なエラーメッセージが表示される
+  - ProjectContextのtechnical.yamlとstructure.yamlのパースエラー時には明確なエラーメッセージが表示される
 format:
   type: user-story
   userStory:

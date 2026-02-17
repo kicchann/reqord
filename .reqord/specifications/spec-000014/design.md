@@ -22,7 +22,7 @@ Shared:         @reqord/shared
                   schemas/project-context.ts   (既存: files.technical, files.structure)
 ```
 
-ProjectContextのtechnical.md（技術スタック・アーキテクチャパターン）とstructure.md（ディレクトリ構造・命名規則）を参照して検証ルールを構築する。検証結果はSpecification JSONのdesignValidationフィールドに永続化する。
+ProjectContextのtechnical.yaml（技術スタック・アーキテクチャパターン）とstructure.yaml（ディレクトリ構造・命名規則）を参照して検証ルールを構築する。検証結果はSpecification JSONのdesignValidationフィールドに永続化する。
 
 ## 3. コンポーネント設計
 
@@ -34,13 +34,14 @@ ProjectContextのtechnical.md（技術スタック・アーキテクチャパタ
 reqord spec validate <id> [--json] [--fix]
 ```
 
-| オプション | 説明 |
-|-----------|------|
-| `<id>` | 検証対象のSpecification ID |
-| `--json` | 構造化JSON出力 |
-| `--fix` | 自動修正可能な問題を修正（将来拡張） |
+| オプション | 説明                                 |
+| ---------- | ------------------------------------ |
+| `<id>`     | 検証対象のSpecification ID           |
+| `--json`   | 構造化JSON出力                       |
+| `--fix`    | 自動修正可能な問題を修正（将来拡張） |
 
 **表示形式:**
+
 ```
 設計検証: spec-000014
 
@@ -60,12 +61,13 @@ reqord spec validate <id> [--json] [--fix]
 reqord spec coverage [<req-id>] [--json]
 ```
 
-| オプション | 説明 |
-|-----------|------|
+| オプション   | 説明                                       |
+| ------------ | ------------------------------------------ |
 | `[<req-id>]` | 特定要件のカバレッジ表示（省略時: 全要件） |
-| `--json` | 構造化JSON出力 |
+| `--json`     | 構造化JSON出力                             |
 
 **表示形式:**
+
 ```
 要件カバレッジ:
 
@@ -109,14 +111,14 @@ export async function validateSpecDesign(
 
 **検証ルール一覧:**
 
-| ルールID | 名称 | 検証内容 | 重要度 |
-|---------|------|---------|--------|
-| `arch-layer` | レイヤー整合性 | design.mdに記載されたレイヤー構成がtechnical.mdのパターンに準拠 | error |
-| `arch-dependency` | 依存方向 | 上位レイヤーから下位レイヤーへの一方向依存 | error |
-| `naming-convention` | 命名規則 | コンポーネント名がstructure.mdの命名パターンに準拠 | warning |
-| `dep-conflict` | 依存関係矛盾 | 対象Specificationの要件が依存する他要件のSpecificationが存在すること | warning |
-| `design-sections` | セクション構成 | 必須セクション（設計概要、アーキテクチャ、コンポーネント設計等）の存在チェック | warning |
-| `test-strategy` | テスト方針記載 | テスト方針セクションにユニットテスト/統合テストの記載があること | info |
+| ルールID            | 名称           | 検証内容                                                                       | 重要度  |
+| ------------------- | -------------- | ------------------------------------------------------------------------------ | ------- |
+| `arch-layer`        | レイヤー整合性 | design.mdに記載されたレイヤー構成がtechnical.yamlのパターンに準拠              | error   |
+| `arch-dependency`   | 依存方向       | 上位レイヤーから下位レイヤーへの一方向依存                                     | error   |
+| `naming-convention` | 命名規則       | コンポーネント名がstructure.yamlの命名パターンに準拠                           | warning |
+| `dep-conflict`      | 依存関係矛盾   | 対象Specificationの要件が依存する他要件のSpecificationが存在すること           | warning |
+| `design-sections`   | セクション構成 | 必須セクション（設計概要、アーキテクチャ、コンポーネント設計等）の存在チェック | warning |
+| `test-strategy`     | テスト方針記載 | テスト方針セクションにユニットテスト/統合テストの記載があること                | info    |
 
 ### 3.4 CoverageService (`services/coverage-service.ts` - 新規)
 
@@ -153,6 +155,7 @@ export async function analyzeRequirementCoverage(
 ```
 
 **カバレッジ判定ロジック:**
+
 - `covered`: approved状態のSpecificationが1件以上存在
 - `partial`: draft/approved状態のSpecificationのみ存在
 - `not-covered`: Specificationが0件
@@ -187,8 +190,8 @@ designValidation: z.object({
       → specRepo.findById(cwd, "spec-000014") → Specification取得
       → specRepo.loadFile(cwd, "spec-000014", "design.md") → 設計文書取得
       → contextRepo.load(cwd) → ProjectContext取得
-        → technical.md → アーキテクチャパターン抽出
-        → structure.md → 命名規則パターン抽出
+        → technical.yaml → アーキテクチャパターン抽出
+        → structure.yaml → 命名規則パターン抽出
       → 各検証ルールを順次実行:
         → archLayerRule(design, technicalPatterns)
         → archDependencyRule(design, technicalPatterns)
@@ -243,7 +246,7 @@ designValidation: z.object({
 
 ### ProjectContextへの依存
 
-**決定:** 検証ルールのパラメータはProjectContext（technical.md, structure.md）から動的に取得
+**決定:** 検証ルールのパラメータはProjectContext（technical.yaml, structure.yaml）から動的に取得
 **理由:** プロジェクトごとに異なるアーキテクチャパターンや命名規則に対応する必要がある。ハードコードではなく、ProjectContextから読み取ることで汎用性を確保。ProjectContext未設定時はデフォルトルール（セクション構成チェック等）のみ実行。
 
 ### カバレッジの3段階評価

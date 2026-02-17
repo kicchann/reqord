@@ -16,17 +16,18 @@ SpecificationがProjectContextで定義されたアーキテクチャ原則・�
 Design Validationを実行し結果を表示:
 
 1. **アーキテクチャ整合性チェック**
-   - ProjectContext（technical.md）で定義されたDesign Patternsとの照合
+   - ProjectContext（technical.yaml）で定義されたDesign Patternsとの照合
    - 各パターンの準拠状態を `ok` / `warning` / `error` で判定
 
 2. **命名規則チェック**
-   - structure.mdで定義された命名規則と設計書内のファイル名・クラス名を照合
+   - structure.yamlで定義された命名規則と設計書内のファイル名・クラス名を照合
    - 違反箇所をリスト表示
 
 3. **依存関係コンフリクト検出**
    - design.md内で参照される依存関係の矛盾検出
 
 出力例:
+
 ```
 Design Validation: spec-001
   Architecture Alignment:

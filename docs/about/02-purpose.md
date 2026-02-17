@@ -27,11 +27,11 @@ graph LR
 
 Reqordの3層モデル:
 
-| 層 | 役割 | 例 |
-|---|---|---|
-| **Requirement** | 何を作るか（What） | 「ユーザーがメールでログインできる」 |
-| **Specification** | どう作るか（How） | 「OAuth2 + JWT、セッション管理はRedis」 |
-| **GitHub Issue** | 実装タスク | 「POST /auth/login エンドポイント実装」 |
+| 層                | 役割               | 例                                      |
+| ----------------- | ------------------ | --------------------------------------- |
+| **Requirement**   | 何を作るか（What） | 「ユーザーがメールでログインできる」    |
+| **Specification** | どう作るか（How）  | 「OAuth2 + JWT、セッション管理はRedis」 |
+| **GitHub Issue**  | 実装タスク         | 「POST /auth/login エンドポイント実装」 |
 
 フィードバックループにより、実装後の知見が要件・仕様の更新に還流する。
 
@@ -42,6 +42,7 @@ Reqordの3層モデル:
 **課題**: 品質の担保、設計判断のトレーサビリティ、チームの要件理解のばらつき
 
 **Reqordが提供する価値**:
+
 - PRベースの承認ワークフロー（CODEOWNERSレビュー）
 - Requirement → Specification → Issue の追跡チェーン
 - SMARTバリデーションによる要件品質の客観的評価
@@ -52,6 +53,7 @@ Reqordの3層モデル:
 **課題**: 進捗の把握、要件の全体像の把握、機能間の依存関係の理解
 
 **Reqordが提供する価値**:
+
 - Web UIのダッシュボードで進捗を一覧
 - 依存関係グラフで機能間の関係を視覚化
 - ステータスライフサイクル（draft → approved → implemented）で状態を明確に
@@ -61,8 +63,9 @@ Reqordの3層モデル:
 **課題**: AIへの指示が曖昧で出力品質が安定しない、セッション間でコンテキストが消失する
 
 **Reqordが提供する追加価値**:
+
 - 構造化された要件がAIへの明確な入力になる
-- ProjectContext（product.md, technical.md, domain/*.md）で毎回のAIセッションに一貫した文脈を提供
+- ProjectContext（product.yaml, technical.yaml, domain/\*.md）で毎回のAIセッションに一貫した文脈を提供
 - 人間がReqordを通じて「何が決まり、何が実装され、何が残っているか」を常に把握できる
 
 ## 中核機能の概要
@@ -70,10 +73,11 @@ Reqordの3層モデル:
 ### ProjectContext管理
 
 プロジェクト全体のコンテキストを構造化して管理:
+
 - `context.json` — プロジェクトメタデータ
-- `product.md` — ビジョン、課題、ターゲットユーザー
-- `technical.md` — 技術スタック、アーキテクチャ
-- `structure.md` — 命名規則、ディレクトリ構造
+- `product.yaml` — ビジョン、課題、ターゲットユーザー
+- `technical.yaml` — 技術スタック、アーキテクチャ
+- `structure.yaml` — 命名規則、ディレクトリ構造
 - `domain/*.md` — ドメイン固有の知識
 
 ### 要件CRUD + SMARTバリデーション

@@ -20,7 +20,7 @@ AI時代には、これらに**追加で**以下の価値が生まれる:
    - EARS形式の要件はAIが解釈しやすい（トリガー・条件・アクションが明示的）
 
 2. **ProjectContext → セッション間の一貫性**
-   - AIセッションが切れても、product.md / technical.md / domain/*.md で文脈を再現できる
+   - AIセッションが切れても、product.yaml / technical.yaml / domain/\*.md で文脈を再現できる
    - 「毎回プロジェクトの説明からやり直す」問題を解消
 
 3. **可視化 → 人間の状況把握**
@@ -73,19 +73,19 @@ AIの出力品質は入力の質に直結する。Reqordでは **ProjectContext*
 
 ### 構成ファイルと優先順位
 
-| 優先度 | ファイル | 役割 |
-|--------|---------|------|
-| 1（必須） | `context.json` | プロジェクトメタデータ（名前、バージョン等） |
-| 2（必須） | `product.md` | ビジョン、課題、ターゲットユーザー |
-| 3（必須） | `technical.md` | 技術スタック、設計原則、アーキテクチャ |
-| 4（推奨） | `structure.md` | 命名規則、ディレクトリ構造、アーキテクチャルール |
-| 5（必要時） | `domain/*.md` | ドメイン固有の知識（AI連携、承認フロー等） |
+| 優先度      | ファイル         | 役割                                             |
+| ----------- | ---------------- | ------------------------------------------------ |
+| 1（必須）   | `context.json`   | プロジェクトメタデータ（名前、バージョン等）     |
+| 2（必須）   | `product.yaml`   | ビジョン、課題、ターゲットユーザー               |
+| 3（必須）   | `technical.yaml` | 技術スタック、設計原則、アーキテクチャ           |
+| 4（推奨）   | `structure.yaml` | 命名規則、ディレクトリ構造、アーキテクチャルール |
+| 5（必要時） | `domain/*.md`    | ドメイン固有の知識（AI連携、承認フロー等）       |
 
 ### 「ProjectContextが貧弱 → AI出力も貧弱」の原則
 
 - **context無し**: AIは汎用的で的外れな出力をする（ドメイン用語を間違える、技術スタックに合わない提案をする）
-- **最低限（product.md + technical.md）**: 出力品質が大幅に向上する
-- **充実（全ファイル + domain/*.md）**: プロジェクト固有の正確な出力が得られる
+- **最低限（product.yaml + technical.yaml）**: 出力品質が大幅に向上する
+- **充実（全ファイル + domain/\*.md）**: プロジェクト固有の正確な出力が得られる
 
 ProjectContextの整備はAI無しでも価値がある（チームの知識共有、オンボーディング）。AI活用はその延長線上にある。
 
@@ -96,30 +96,35 @@ ProjectContextの整備はAI無しでも価値がある（チームの知識共�
 Reqordとの親和性が最も高い。CLI同士の統合により、シームレスな連携が可能。
 
 **仕様設計の生成フロー（`/reqord:design`）:**
+
 1. 対象の要件を選択
 2. ProjectContextを自動読み込み
 3. AIが技術設計書（design.md）を生成
 4. 人間がレビュー・修正 → 承認
 
 **要件品質の改善フロー（`/reqord:refine`）:**
+
 1. SMARTスコアが低い要件を選択
 2. AIが具体化・改善案を提示
 3. 曖昧な表現を検出し、数値・条件に置き換え
 
 **ProjectContextの自動活用:**
+
 - Claude Codeのセッション開始時に `.reqord/context/` が文脈として提供される
-- domain/*.md がRulesのように機能し、AIの出力を制約する
+- domain/\*.md がRulesのように機能し、AIの出力を制約する
 
 ### Cursor / Windsurf（IDE統合型）
 
 `.reqord/` をワークスペースに含めることで、IDEのAI機能が要件・仕様を参照できる。
 
 **実装時の参照パターン:**
+
 - 「この要件（req-000042）の仕様に基づいて実装して」と指示
 - AIが `.reqord/requirements/req-000042/` の内容を参照して実装
 - 成功基準をテストケースに変換
 
 **ProjectContextの活用:**
+
 - `domain/*.md` をCursorのRules / WindsurfのRulesに設定
 - 技術スタック・命名規則がAIの実装に反映される
 
@@ -165,7 +170,7 @@ AI無しでも価値がある。チームの知識を構造化し、共有する
 
 ```bash
 reqord init
-# product.md, technical.md を記述
+# product.yaml, technical.yaml を記述
 ```
 
 ### Step 2: enhance / refine でAI詳細化を試す
