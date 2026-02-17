@@ -1,7 +1,7 @@
 id: req-000018
 version: '3.0'
 title: 実装検証
-status: approved
+status: implemented
 priority: low
 createdAt: 2026-02-07T12:00:00Z
 updatedAt: 2026-02-11T08:05:04.761Z
