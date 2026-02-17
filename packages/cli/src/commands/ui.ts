@@ -38,16 +38,19 @@ export const uiCommand = new Command("ui")
             REQORD_ROOT: cwd,
             PORT: String(port),
           },
+          // Pipe stdout to detect server ready; inherit stderr for error visibility
           stdio: ["inherit", "pipe", "inherit"],
         });
 
-        // Pipe stdout and detect server ready
+        // Pipe stdout and detect server ready for --open
+        let browserOpened = false;
         if (child.stdout) {
           child.stdout.on("data", (data: Buffer) => {
             const text = data.toString();
             process.stdout.write(text);
 
-            if (options.open && text.includes("Ready")) {
+            if (options.open && !browserOpened && /ready/i.test(text)) {
+              browserOpened = true;
               const url = `http://localhost:${port}`;
               const openCmd =
                 process.platform === "darwin"
@@ -55,12 +58,13 @@ export const uiCommand = new Command("ui")
                   : process.platform === "win32"
                     ? "start"
                     : "xdg-open";
-              spawn(openCmd, [url], { stdio: "ignore", detached: true }).unref();
+              const shell = process.platform === "win32";
+              spawn(openCmd, [url], { stdio: "ignore", detached: true, shell }).unref();
             }
           });
         }
 
-        // Handle child process exit
+        // Handle child process errors
         child.on("error", (err) => {
           if ((err as NodeJS.ErrnoException).code === "ENOENT") {
             handleError(new Error("npx が見つかりません。Node.jsがインストールされていることを確認してください。"));
@@ -69,16 +73,35 @@ export const uiCommand = new Command("ui")
           }
         });
 
+        // SIGINT forwarding with timeout escalation
+        let sigintTimeout: NodeJS.Timeout | undefined;
+        let sigintSent = false;
+
+        const sigintHandler = () => {
+          if (!sigintSent) {
+            sigintSent = true;
+            child.kill("SIGINT");
+            sigintTimeout = setTimeout(() => {
+              if (!child.killed) {
+                child.kill("SIGKILL");
+              }
+            }, 5000);
+          } else {
+            if (!child.killed) {
+              child.kill("SIGKILL");
+            }
+          }
+        };
+
         child.on("exit", (code) => {
+          if (sigintTimeout) clearTimeout(sigintTimeout);
+          process.removeListener("SIGINT", sigintHandler);
           if (code !== null && code !== 0) {
             process.exitCode = code;
           }
         });
 
-        // Forward SIGINT to child
-        process.once("SIGINT", () => {
-          child.kill("SIGINT");
-        });
+        process.on("SIGINT", sigintHandler);
       } catch (error) {
         handleError(error);
       }
