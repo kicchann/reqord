@@ -1,14 +1,4 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import {
-  parseDesignPaths,
-  determineOverallStatus,
-  validateImplementation,
-} from "./impl-validation-service.js";
-import type {
-  IssueCheckResult,
-  ComponentCheckResult,
-  TestCheckResult,
-} from "./impl-validation-service.js";
 
 vi.mock("../repositories/specification.js", () => ({
   findByIdOrThrow: vi.fn(),
@@ -20,6 +10,16 @@ vi.mock("../repositories/file-system.js", () => ({
   exists: vi.fn(),
 }));
 
+import {
+  parseDesignPaths,
+  determineOverallStatus,
+  validateImplementation,
+} from "./impl-validation-service.js";
+import type {
+  IssueCheckResult,
+  ComponentCheckResult,
+  TestCheckResult,
+} from "./impl-validation-service.js";
 import * as specRepo from "../repositories/specification.js";
 import * as fs from "../repositories/file-system.js";
 
@@ -210,6 +210,50 @@ describe("validateImplementation", () => {
     expect(result.issueCheck.total).toBe(0);
     expect(result.componentCheck.total).toBe(0);
     expect(result.testCheck.total).toBe(0);
-    expect(result.overallStatus).toBe("complete");
+    expect(result.overallStatus).toBe("not-started");
+  });
+
+  it("preserves in_progress issue status", async () => {
+    vi.mocked(specRepo.findByIdOrThrow).mockResolvedValue({
+      id: "spec-000003",
+      requirementId: "req-000003",
+      version: "1.0.0",
+      status: "approved",
+      createdAt: "2024-01-01",
+      updatedAt: "2024-01-01",
+      versionHistory: [],
+      files: { design: "design.md", supplementary: [] },
+      flags: [],
+      implementation: {
+        issues: [
+          { number: 1, title: "Task 1", url: "http://x", priority: "P1" as const, status: "in_progress" as const },
+        ],
+        totalEstimatedHours: 5,
+        createdAt: "2024-01-01",
+      },
+    });
+
+    vi.mocked(specRepo.loadFile).mockResolvedValue(
+      `### 3.1 Service (\`packages/cli/src/services/foo.ts\`)`,
+    );
+    vi.mocked(fs.exists).mockResolvedValue(true);
+
+    const result = await validateImplementation("/project", "spec-000003");
+
+    expect(result.issueCheck.issues[0].state).toBe("in_progress");
+  });
+});
+
+describe("parseDesignPaths security", () => {
+  it("rejects path traversal attempts", () => {
+    const content = `### 3.1 Evil (\`packages/../../../etc/passwd.ts\`)`;
+    const result = parseDesignPaths(content);
+    expect(result.components).toEqual([]);
+  });
+
+  it("rejects Windows absolute paths", () => {
+    const content = `### 3.1 Evil (\`C:/Windows/system32/evil.ts\`)`;
+    const result = parseDesignPaths(content);
+    expect(result.components).toEqual([]);
   });
 });

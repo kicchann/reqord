@@ -37,7 +37,9 @@ export const implValidateCommand = new Command("impl")
             const icon =
               issue.state === "closed"
                 ? chalk.green("[DONE]   ")
-                : chalk.yellow("[OPEN]   ");
+                : issue.state === "in_progress"
+                  ? chalk.blue("[WIP]    ")
+                  : chalk.yellow("[OPEN]   ");
             const priorityStr = issue.priority
               ? chalk.gray(` (${issue.priority})`)
               : "";

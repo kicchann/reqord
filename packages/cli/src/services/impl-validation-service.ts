@@ -7,7 +7,7 @@ export interface IssueCheckResult {
   issues: Array<{
     number: number;
     title: string;
-    state: "open" | "closed";
+    state: "open" | "in_progress" | "closed";
     priority?: string;
   }>;
 }
@@ -54,6 +54,8 @@ export function parseDesignPaths(designContent: string): DesignPaths {
 
   function addComponent(path: string, desc: string) {
     const normalized = path.replace(/^\//, "");
+    // Guard against path traversal (e.g. "../../../etc/passwd")
+    if (normalized.includes("..") || /^[a-zA-Z]:/.test(normalized)) return;
     if (!seenPaths.has(normalized) && /\.tsx?$/.test(normalized)) {
       seenPaths.add(normalized);
       if (normalized.includes(".test.") || normalized.includes(".spec.")) {
@@ -139,21 +141,32 @@ export async function validateImplementation(
   const issueCheck: IssueCheckResult = { total: 0, completed: 0, issues: [] };
   if (spec.implementation) {
     for (const issue of spec.implementation.issues) {
-      const state =
-        issue.status === "closed" ? ("closed" as const) : ("open" as const);
       issueCheck.issues.push({
         number: issue.number,
         title: issue.title,
-        state,
+        state: issue.status,
         priority: issue.priority,
       });
       issueCheck.total++;
-      if (state === "closed") issueCheck.completed++;
+      if (issue.status === "closed") issueCheck.completed++;
     }
   }
 
+  // If design.md is missing, we cannot validate — treat as not-started
+  if (!design) {
+    return {
+      specId,
+      requirementId: spec.requirementId,
+      issueCheck,
+      componentCheck: { total: 0, exists: 0, components: [] },
+      testCheck: { total: 0, exists: 0, tests: [] },
+      overallStatus: "not-started",
+      validatedAt: new Date().toISOString(),
+    };
+  }
+
   // Parse design.md for component and test paths
-  const designPaths = design ? parseDesignPaths(design) : { components: [], tests: [] };
+  const designPaths = parseDesignPaths(design);
 
   // Component existence check
   const componentCheck: ComponentCheckResult = {
