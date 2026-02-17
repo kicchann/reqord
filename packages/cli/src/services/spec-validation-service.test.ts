@@ -122,7 +122,7 @@ Command → Service → Repository
 
     const testRule = result.rules.find((r) => r.ruleId === "test-strategy");
     expect(testRule?.status).toBe("fail");
-    expect(testRule?.severity).toBe("info");
+    expect(testRule?.severity).toBe("warning");
   });
 
   it("--json出力用の構造が正しい", async () => {

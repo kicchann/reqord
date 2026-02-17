@@ -66,7 +66,7 @@ function checkTestStrategy(design: string): ValidationRuleResult {
     return {
       ruleId: "test-strategy",
       ruleName: "テスト方針記載",
-      severity: "info",
+      severity: "warning",
       status: "pass",
     };
   }
@@ -74,7 +74,7 @@ function checkTestStrategy(design: string): ValidationRuleResult {
   return {
     ruleId: "test-strategy",
     ruleName: "テスト方針記載",
-    severity: "info",
+    severity: "warning",
     status: "fail",
     message: hasTestSection
       ? "テスト方針セクションにユニットテスト/統合テストの記載がありません"
@@ -82,7 +82,7 @@ function checkTestStrategy(design: string): ValidationRuleResult {
   };
 }
 
-function checkArchLayer(design: string, technical: unknown): ValidationRuleResult {
+function checkArchLayer(design: string, _technical: unknown): ValidationRuleResult {
   // Check that design.md mentions architectural layers consistent with technical.yaml
   // This is a basic check: look for layer-like patterns (Command, Service, Repository)
   const layerPatterns = ["command", "service", "repository"];
@@ -147,9 +147,8 @@ function checkNamingConvention(
   _structure: unknown,
 ): ValidationRuleResult {
   // Check for consistent naming patterns in the design
-  // Look for component names that follow kebab-case for files and PascalCase for types
-  const filePatterns = design.match(/`([a-z][a-z0-9-]*\.[a-z]+)`/g) ?? [];
-  const typePatterns = design.match(/[A-Z][a-zA-Z]+(?:Schema|Service|Command|Handler|Repository)/g) ?? [];
+  // Look for component names that follow kebab-case for files
+  const filePatterns = design.match(/`([^`]+\.[a-zA-Z0-9]+)`/g) ?? [];
 
   // Check file naming: should be kebab-case
   const badFileNames = filePatterns.filter((f) => {
@@ -161,7 +160,7 @@ function checkNamingConvention(
     return {
       ruleId: "naming-convention",
       ruleName: "命名規則",
-      severity: "warning",
+      severity: "info",
       status: "fail",
       message: `ファイル名がkebab-caseでない: ${badFileNames.join(", ")}`,
     };
@@ -170,7 +169,7 @@ function checkNamingConvention(
   return {
     ruleId: "naming-convention",
     ruleName: "命名規則",
-    severity: "warning",
+    severity: "info",
     status: "pass",
   };
 }
