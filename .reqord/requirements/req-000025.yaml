@@ -1,7 +1,7 @@
 id: req-000025
 version: '3.0'
 title: reqord ui CLIコマンド
-status: approved
+status: implemented
 priority: medium
 createdAt: 2026-02-11T12:00:00Z
 updatedAt: 2026-02-11T08:05:05.493Z
