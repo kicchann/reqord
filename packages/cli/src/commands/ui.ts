@@ -31,30 +31,33 @@ export const uiCommand = new Command("ui")
         console.log(`  Root: ${cwd}`);
         console.log(chalk.gray(`\n  Ctrl+C で停止\n`));
 
-        const args = ["start", "--port", String(port)];
-
-        const child = spawn("npx", ["next", ...args], {
+        const child = spawn("npx", ["next", "dev", "--port", String(port)], {
           cwd: webDir,
           env: {
             ...process.env,
             REQORD_ROOT: cwd,
             PORT: String(port),
           },
-          stdio: "inherit",
+          stdio: ["inherit", "pipe", "inherit"],
         });
 
-        if (options.open) {
-          // Wait a moment for the server to start, then open browser
-          setTimeout(() => {
-            const url = `http://localhost:${port}`;
-            const openCmd =
-              process.platform === "darwin"
-                ? "open"
-                : process.platform === "win32"
-                  ? "start"
-                  : "xdg-open";
-            spawn(openCmd, [url], { stdio: "ignore", detached: true }).unref();
-          }, 2000);
+        // Pipe stdout and detect server ready
+        if (child.stdout) {
+          child.stdout.on("data", (data: Buffer) => {
+            const text = data.toString();
+            process.stdout.write(text);
+
+            if (options.open && text.includes("Ready")) {
+              const url = `http://localhost:${port}`;
+              const openCmd =
+                process.platform === "darwin"
+                  ? "open"
+                  : process.platform === "win32"
+                    ? "start"
+                    : "xdg-open";
+              spawn(openCmd, [url], { stdio: "ignore", detached: true }).unref();
+            }
+          });
         }
 
         // Handle child process exit
@@ -73,7 +76,7 @@ export const uiCommand = new Command("ui")
         });
 
         // Forward SIGINT to child
-        process.on("SIGINT", () => {
+        process.once("SIGINT", () => {
           child.kill("SIGINT");
         });
       } catch (error) {
