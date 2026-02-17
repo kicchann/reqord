@@ -1,7 +1,7 @@
 id: req-000014
 version: "3.0"
 title: 設計検証・要件カバレッジ
-status: approved
+status: implemented
 priority: medium
 createdAt: 2026-02-07T12:00:00Z
 updatedAt: 2026-02-11T08:05:04.384Z

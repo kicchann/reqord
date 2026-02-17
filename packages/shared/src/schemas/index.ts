@@ -36,10 +36,14 @@ export {
   ImplementationIssueSchema,
   ImplementationSchema,
   ProgressSchema,
+  DesignValidationSchema,
+  DesignValidationRuleSchema,
   type Specification,
   type ImplementationIssue,
   type Implementation,
   type Progress,
+  type DesignValidation,
+  type DesignValidationRule,
 } from "./specification.js";
 
 export {

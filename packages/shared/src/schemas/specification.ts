@@ -33,6 +33,21 @@ export const ImplementationSchema = z.object({
   progress: ProgressSchema.optional(),
 });
 
+export const DesignValidationRuleSchema = z.object({
+  ruleId: z.string(),
+  status: z.enum(["pass", "fail"]),
+  severity: z.enum(["error", "warning", "info"]),
+  message: z.string().optional(),
+});
+
+export const DesignValidationSchema = z.object({
+  passed: z.number(),
+  warnings: z.number(),
+  errors: z.number(),
+  rules: z.array(DesignValidationRuleSchema),
+  validatedAt: z.string(),
+});
+
 export const SpecificationSchema = z.object({
   id: z.string().regex(/^spec-\d{6}$/),
   requirementId: z.string().regex(/^req-\d{6}$/),
@@ -50,9 +65,12 @@ export const SpecificationSchema = z.object({
   flags: z.array(FlagSchema).default([]),
   currentApproval: SpecCurrentApprovalSchema.optional(),
   implementation: ImplementationSchema.optional(),
+  designValidation: DesignValidationSchema.optional(),
 });
 
 export type Specification = z.infer<typeof SpecificationSchema>;
 export type ImplementationIssue = z.infer<typeof ImplementationIssueSchema>;
 export type Implementation = z.infer<typeof ImplementationSchema>;
 export type Progress = z.infer<typeof ProgressSchema>;
+export type DesignValidation = z.infer<typeof DesignValidationSchema>;
+export type DesignValidationRule = z.infer<typeof DesignValidationRuleSchema>;
