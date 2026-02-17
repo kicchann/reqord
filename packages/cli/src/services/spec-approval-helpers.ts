@@ -22,18 +22,23 @@ export function extractDesignSummary(designContent: string): string {
   return summary || "(設計概要なし)";
 }
 
+function escapeRegExp(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 export function extractDesignSection(designContent: string, sectionName: string): string | null {
   if (!designContent) return null;
 
+  const escaped = escapeRegExp(sectionName);
   const sections = designContent.split(/\n(?=##\s)/);
   const section = sections.find(s =>
-    new RegExp(`^##\\s+(?:\\d+\\.\\s+)?${sectionName}`).test(s),
+    new RegExp(`^##\\s+(?:\\d+\\.\\s+)?${escaped}`).test(s),
   );
 
   if (!section) return null;
 
   const contentAfterHeading = section.replace(
-    new RegExp(`^##\\s+(?:\\d+\\.\\s+)?${sectionName}\\s*\\n+`),
+    new RegExp(`^##\\s+(?:\\d+\\.\\s+)?${escaped}\\s*\\n+`),
     "",
   );
   const trimmed = contentAfterHeading.trim();

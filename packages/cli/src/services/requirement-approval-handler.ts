@@ -1,4 +1,3 @@
-import type { Requirement } from "@reqord/shared";
 import * as reqRepo from "../repositories/requirement.js";
 import { updateRequirement } from "./requirement-service.js";
 import type { ApprovalHandler } from "./approval-service.js";
