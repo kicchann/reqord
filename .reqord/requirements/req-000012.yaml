@@ -1,10 +1,10 @@
 id: req-000012
 version: '3.1'
 title: 影響範囲分析
-status: approved
+status: implemented
 priority: medium
 createdAt: 2026-02-07T12:00:00Z
-updatedAt: 2026-02-14T12:17:47.372Z
+updatedAt: 2026-02-17T14:36:08.697Z
 versionHistory:
   - version: 2.0.0
     status: approved
