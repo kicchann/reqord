@@ -20,6 +20,7 @@ vi.mock("../../services/requirement-approval-handler.js", () => ({
     buildPrTitle: vi.fn(),
     buildPrBody: vi.fn(),
   },
+  buildReqApprovalPrBody: vi.fn().mockReturnValue("PR body"),
 }));
 
 import { showRequirement } from "../../services/requirement-service.js";
@@ -92,7 +93,7 @@ describe("approveCommand", () => {
         title: "Test Requirement",
         files: [".reqord/requirements/req-000001.yaml"],
       },
-      requirementHandler,
+      expect.objectContaining({ revalidate: expect.any(Function), buildPrBody: expect.any(Function) }),
       { dryRun: undefined }
     );
 
@@ -172,7 +173,7 @@ describe("approveCommand", () => {
       title: "Another Requirement",
       files: [".reqord/requirements/req-000042.yaml"],
     });
-    expect(callArgs[2]).toBe(requirementHandler);
+    expect(callArgs[2]).toEqual(expect.objectContaining({ revalidate: expect.any(Function) }));
     // Check dryRun is falsy (undefined or false)
     expect(callArgs[3]?.dryRun).toBeFalsy();
 
@@ -201,7 +202,7 @@ describe("approveCommand", () => {
     expect(startApproval).toHaveBeenCalledWith(
       process.cwd(),
       expect.any(Object),
-      requirementHandler,
+      expect.objectContaining({ revalidate: expect.any(Function), buildPrBody: expect.any(Function) }),
       { dryRun: true }
     );
 
