@@ -1,7 +1,7 @@
 id: req-000026
 version: '3.0'
 title: PRテンプレート・状態遷移ワークフロー整備
-status: approved
+status: implemented
 priority: medium
 createdAt: 2026-02-11T07:25:04.815Z
 updatedAt: 2026-02-11T08:05:05.898Z
