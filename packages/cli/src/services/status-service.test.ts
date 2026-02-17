@@ -144,6 +144,45 @@ describe("buildIssueSummary", () => {
     expect(result.open).toBe(1);
     expect(result.closedPercentage).toBe(67);
   });
+
+  it("in_progressステータスはopenとしてカウント", () => {
+    const specs = [
+      makeSpecification({
+        implementation: {
+          issues: [
+            {
+              number: 1,
+              title: "Issue 1",
+              url: "https://example.com/1",
+              priority: "P1",
+              status: "open",
+            },
+            {
+              number: 2,
+              title: "Issue 2",
+              url: "https://example.com/2",
+              priority: "P1",
+              status: "in_progress",
+            },
+            {
+              number: 3,
+              title: "Issue 3",
+              url: "https://example.com/3",
+              priority: "P2",
+              status: "closed",
+            },
+          ],
+          totalEstimatedHours: 10,
+          createdAt: "2026-01-01T00:00:00Z",
+        },
+      }),
+    ];
+    const result = buildIssueSummary(specs);
+    expect(result.total).toBe(3);
+    expect(result.closed).toBe(1);
+    expect(result.open).toBe(2); // open + in_progress
+    expect(result.closedPercentage).toBe(33);
+  });
 });
 
 describe("detectWarnings", () => {
