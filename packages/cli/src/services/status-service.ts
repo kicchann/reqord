@@ -187,39 +187,37 @@ export async function getRequirementStatus(
 
   const dependencyStatus: RequirementDetailStatus["dependencyStatus"] = [];
   const deps = requirement.dependencies;
-  if (deps) {
-    for (const depId of deps.blockedBy) {
-      const dep = allReqs.find((r) => r.id === depId);
-      if (dep) {
-        dependencyStatus.push({
-          id: dep.id,
-          title: dep.title,
-          status: dep.status,
-          relation: "blockedBy",
-        });
-      }
+  for (const depId of deps.blockedBy) {
+    const dep = allReqs.find((r) => r.id === depId);
+    if (dep) {
+      dependencyStatus.push({
+        id: dep.id,
+        title: dep.title,
+        status: dep.status,
+        relation: "blockedBy",
+      });
     }
-    for (const depId of deps.blocks) {
-      const dep = allReqs.find((r) => r.id === depId);
-      if (dep) {
-        dependencyStatus.push({
-          id: dep.id,
-          title: dep.title,
-          status: dep.status,
-          relation: "blocks",
-        });
-      }
+  }
+  for (const depId of deps.blocks) {
+    const dep = allReqs.find((r) => r.id === depId);
+    if (dep) {
+      dependencyStatus.push({
+        id: dep.id,
+        title: dep.title,
+        status: dep.status,
+        relation: "blocks",
+      });
     }
-    for (const depId of deps.relatedTo) {
-      const dep = allReqs.find((r) => r.id === depId);
-      if (dep) {
-        dependencyStatus.push({
-          id: dep.id,
-          title: dep.title,
-          status: dep.status,
-          relation: "relatedTo",
-        });
-      }
+  }
+  for (const depId of deps.relatedTo) {
+    const dep = allReqs.find((r) => r.id === depId);
+    if (dep) {
+      dependencyStatus.push({
+        id: dep.id,
+        title: dep.title,
+        status: dep.status,
+        relation: "relatedTo",
+      });
     }
   }
 
