@@ -249,7 +249,7 @@ project:
 - 設計書作成: /reqord:design <spec-id>
 - 機能開発: /reqord:dev <spec-id>
 
-全スキル一覧: CLAUDE.md の「Reqordプラグイン」セクションを参照
+全スキル一覧: README.md を参照
 ```
 
 ---

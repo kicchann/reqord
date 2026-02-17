@@ -2,7 +2,7 @@
 
 ## High Priority
 
-### 1. 要件ブートストラップのスキル不足
+### 要件ブートストラップのスキル不足
 
 **問題**: 要件の作成・初期記述を支援するスキルがない。プラグインのカバー範囲に入る（`/reqord:design`）までに CLI コマンド直叩きが5ステップ必要。
 
@@ -15,7 +15,7 @@ reqord init → reqord context init → reqord req create → (description.md記
 - (B) `refine` スキルを拡張して、req未存在時の作成フローを組み込む
 - (C) setup スキルの完了メッセージに導線を追加（最小対応）
 
-### 2. フィードバック→修正実装ループの不明瞭さ
+### フィードバック→修正実装ループの不明瞭さ
 
 **問題**: `/reqord:feedback` で flag 付与・close した後、修正実装→flag解消→再検証のフローが定義されていない。flag 付き spec の修正を「どのスキルで行うか」が曖昧。
 
@@ -29,7 +29,7 @@ reqord init → reqord context init → reqord req create → (description.md記
 4. 再検証: /reqord:verify done spec-NNNNNN
 ```
 
-### 5. プロアクティブな品質レビュー・issue起票の仕組みがない
+### プロアクティブな品質レビュー・issue起票の仕組みがない
 
 **問題**: 現在のプラグインは「外部から報告されたissueを処理する」リアクティブなフローしかない。プロジェクトの品質を自発的にレビューし、問題を発見してfeedback issueを起票するサイクルが欠落している。
 
@@ -47,18 +47,18 @@ reqord init → reqord context init → reqord req create → (description.md記
 
 **備考**: これはプラグインだけでなくreqord本体（CLI）側の機能拡張とも関わる。`reqord review` や `reqord health` のようなCLIコマンドとの連携を検討する必要がある。
 
-### 6. 発見したfeedback issueの自発的消化サイクルがない
+### 発見したfeedback issueの自発的消化サイクルがない
 
-**問題**: #5でissueを起票できたとしても、それを自発的に消化する仕組みがない。現状は人間が `/reqord:feedback` を手動実行→ `/reqord:dev` で修正という流れで、「溜まったfeedbackを定期的に棚卸しして優先度順に消化する」運用が未定義。
+**問題**: 上記でissueを起票できたとしても、それを自発的に消化する仕組みがない。現状は人間が `/reqord:feedback` を手動実行→ `/reqord:dev` で修正という流れで、「溜まったfeedbackを定期的に棚卸しして優先度順に消化する」運用が未定義。
 
 **対応案**:
 - (A) `feedback` スキルに `triage` サブコマンドを追加: 未処理feedback一覧 → severity/type別に優先度付け → 上位N件を自動的にlink→close→修正実装フローに流す
 - (B) `status` スキルの拡張: 未処理feedback数・severity分布を表示し、critical/highがあれば通常開発より先にfeedback消化を推奨する
 - (C) CI/hookとの連携: コミット時やPR作成時にfeedback残存チェックを行い、critical feedbackが放置されていたら警告
 
-### 7. 定期的な品質チェック・リファクタリングのトリガー設計
+### 定期的な品質チェック・リファクタリングのトリガー設計
 
-**問題**: #5・#6を実現するには「いつ実行するか」のトリガーが必要だが、適切な指標が定まっていない。
+**問題**: 上記2件を実現するには「いつ実行するか」のトリガーが必要だが、適切な指標が定まっていない。
 
 **時間ベース（N日おき）の問題**: AI開発では1セッションで数百行の変更が発生しうるため、人間の開発ペースを前提とした時間間隔は指標として機能しない。1週間分のAI開発は人間の数ヶ月分に相当する場合がある。
 
@@ -75,7 +75,7 @@ reqord init → reqord context init → reqord req create → (description.md記
 
 ## Medium Priority
 
-### 3. 中断→再開の手順がない
+### 中断→再開の手順がない
 
 **問題**: `/reqord:dev` が途中で中断した場合（コンテキスト切れ等）、再実行すると Step 1 からやり直しになる。`plans/spec-NNNNNN-implementation.md` が残っていても活用されない。
 
@@ -83,7 +83,7 @@ reqord init → reqord context init → reqord req create → (description.md記
 
 ## Low Priority
 
-### 4. status の推奨アクションから次のスキルへの接続
+### status の推奨アクションから次のスキルへの接続
 
 **問題**: `/reqord:status` が推奨 spec-id を表示した後、ユーザーが spec-id をコピペして次のコマンドを叩く必要がある。自然ではあるが、もう一声欲しい。
 

@@ -16,10 +16,18 @@ claude plugin install kicchann/reqord
 claude --plugin-dir ./plugins/reqord
 ```
 
+## クイックスタート
+
+```bash
+/reqord:setup    # 初回は必ず実行（環境チェック・証憑記録）
+/reqord:status   # 進捗確認、次に着手すべきspecを特定
+```
+
 ## スキル
 
 | コマンド | 説明 |
 |---------|------|
+| `/reqord:setup` | 環境セットアップ・前提条件チェック |
 | `/reqord:status` | 要件・仕様の実装進捗ダッシュボード |
 | `/reqord:design` | Specification設計書（design.md）作成 |
 | `/reqord:dev` | design.mdに基づくTDD機能開発 |
