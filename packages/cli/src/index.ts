@@ -24,6 +24,8 @@ import { updateCommand as specUpdateCommand } from "./commands/spec/update.js";
 import { draftCommand as specDraftCommand } from "./commands/spec/draft.js";
 import { implementCommand as specImplementCommand } from "./commands/spec/implement.js";
 import { historyCommand as specHistoryCommand } from "./commands/spec/history.js";
+import { specValidateCommand } from "./commands/spec/validate.js";
+import { coverageCommand } from "./commands/spec/coverage.js";
 import { feedbackCommand } from "./commands/feedback/index.js";
 import { issueCommand } from "./commands/issue/index.js";
 import { migrateToYamlCommand } from "./commands/migrate-to-yaml.js";
@@ -85,6 +87,8 @@ specCommand.addCommand(specApproveCommand);
 specCommand.addCommand(specDraftCommand);
 specCommand.addCommand(specImplementCommand);
 specCommand.addCommand(specHistoryCommand);
+specCommand.addCommand(specValidateCommand);
+specCommand.addCommand(coverageCommand);
 
 specCommand.hook("preAction", async () => {
   await ensureReqordInitialized(process.cwd());
