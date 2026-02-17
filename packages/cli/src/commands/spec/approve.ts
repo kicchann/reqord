@@ -13,6 +13,8 @@ import {
 import { specificationHandler } from "../../services/specification-approval-handler.js";
 import {
   extractDesignSummary,
+  extractDesignSection,
+  extractComponentList,
   buildSpecApprovalPrBody,
 } from "../../services/spec-approval-helpers.js";
 import { handleError } from "../../utils/error-handler.js";
@@ -67,7 +69,10 @@ export const specApproveCommand = new Command("approve")
       }
 
       // 3. Build custom handler with actual design content
-      const designSummary = extractDesignSummary(design ?? "");
+      const designContent = design ?? "";
+      const designSummary = extractDesignSummary(designContent);
+      const testPlan = extractDesignSection(designContent, "テスト方針");
+      const components = extractComponentList(designContent);
       const customHandler = {
         ...specificationHandler,
         buildPrBody: (target: ApprovalTarget) =>
@@ -77,6 +82,9 @@ export const specApproveCommand = new Command("approve")
             reqTitle: requirement.title,
             version: target.version,
             designSummary,
+            successCriteria: requirement.successCriteria,
+            testPlan: testPlan || undefined,
+            components: components.length > 0 ? components : undefined,
           }),
       };
 

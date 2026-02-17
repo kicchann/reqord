@@ -32,6 +32,8 @@ vi.mock("../../services/specification-approval-handler.js", () => ({
 
 vi.mock("../../services/spec-approval-helpers.js", () => ({
   extractDesignSummary: vi.fn(),
+  extractDesignSection: vi.fn().mockReturnValue(null),
+  extractComponentList: vi.fn().mockReturnValue([]),
   buildSpecApprovalPrBody: vi.fn(),
 }));
 

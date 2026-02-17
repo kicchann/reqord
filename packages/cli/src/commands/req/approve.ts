@@ -6,7 +6,7 @@ import {
   startApproval,
   type ApprovalTarget,
 } from "../../services/approval-service.js";
-import { requirementHandler } from "../../services/requirement-approval-handler.js";
+import { requirementHandler, buildReqApprovalPrBody } from "../../services/requirement-approval-handler.js";
 import { handleError } from "../../utils/error-handler.js";
 
 export const approveCommand = new Command("approve")
@@ -54,7 +54,20 @@ export const approveCommand = new Command("approve")
         files: [`${REQORD_DIR}/${REQUIREMENTS_DIR}/${requirement.id}.yaml`],
       };
 
-      const result = await startApproval(cwd, target, requirementHandler, {
+      // Build custom handler with enriched PR body
+      const customHandler = {
+        ...requirementHandler,
+        buildPrBody: (t: ApprovalTarget) =>
+          buildReqApprovalPrBody({
+            id: t.id,
+            title: t.title,
+            version: t.version,
+            successCriteria: requirement.successCriteria,
+            dependencies: requirement.dependencies,
+          }),
+      };
+
+      const result = await startApproval(cwd, target, customHandler, {
         dryRun: options.dryRun,
       });
 
