@@ -80,6 +80,25 @@ Also see \`packages/cli/src/services/foo.ts\` for details.
     expect(result.components[0].path).toBe("packages/cli/src/services/foo.ts");
   });
 
+  it("generates .test.tsx for .tsx components", () => {
+    const content = `### 3.1 Button (\`packages/web/src/components/Button.tsx\`)`;
+    const result = parseDesignPaths(content);
+    expect(result.tests).toEqual([
+      { path: "packages/web/src/components/Button.test.tsx", type: "unit" },
+    ]);
+  });
+
+  it("extracts paths from architecture diagrams", () => {
+    const content = `## アーキテクチャ
+\`\`\`
+    services/foo-service.ts    (新規)
+    repositories/bar-repo.ts   (既存)
+\`\`\``;
+    const result = parseDesignPaths(content);
+    expect(result.components.some((c) => c.path === "services/foo-service.ts")).toBe(true);
+    expect(result.components.some((c) => c.path === "repositories/bar-repo.ts")).toBe(true);
+  });
+
   it("returns empty when no paths found", () => {
     const result = parseDesignPaths("No paths here, just text.");
     expect(result.components).toEqual([]);

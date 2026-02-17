@@ -92,7 +92,8 @@ export function parseDesignPaths(designContent: string): DesignPaths {
 
   // Generate test paths from components that don't already have test files
   for (const comp of components) {
-    const testPath = comp.path.replace(/\.tsx?$/, ".test.ts");
+    const ext = comp.path.endsWith(".tsx") ? ".test.tsx" : ".test.ts";
+    const testPath = comp.path.replace(/\.tsx?$/, ext);
     if (!seenPaths.has(testPath)) {
       seenPaths.add(testPath);
       tests.push({ path: testPath, type: "unit" });
@@ -116,6 +117,8 @@ export function determineOverallStatus(
     testCheck.total === 0 || testCheck.exists === testCheck.total;
 
   if (issueComplete && componentComplete && testComplete) return "complete";
+  // "not-started" = no files exist AND no issues completed.
+  // If all totals are 0, the "complete" check above catches it first.
   if (
     componentCheck.exists === 0 &&
     testCheck.exists === 0 &&
