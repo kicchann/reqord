@@ -30,6 +30,7 @@ import { migrateToYamlCommand } from "./commands/migrate-to-yaml.js";
 import { impactCommand } from "./commands/impact/index.js";
 import { versionCommand } from "./commands/version/version.js";
 import { statusCommand } from "./commands/status.js";
+import { implValidateCommand } from "./commands/validate/impl.js";
 import { ensureReqordInitialized } from "./middleware/reqord-check.js";
 
 const program = new Command();
@@ -122,5 +123,16 @@ statusCommand.hook("preAction", async () => {
   await ensureReqordInitialized(process.cwd());
 });
 program.addCommand(statusCommand);
+
+const validateGroupCommand = new Command("validate").description(
+  "Validate implementation and design",
+);
+validateGroupCommand.addCommand(implValidateCommand);
+
+validateGroupCommand.hook("preAction", async () => {
+  await ensureReqordInitialized(process.cwd());
+});
+
+program.addCommand(validateGroupCommand);
 
 program.parse();
