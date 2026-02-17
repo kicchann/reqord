@@ -94,7 +94,7 @@ function checkArchLayer(design: string, technical: unknown): ValidationRuleResul
     return {
       ruleId: "arch-layer",
       ruleName: "レイヤー整合性",
-      severity: "error",
+      severity: "warning",
       status: "pass",
     };
   }
@@ -102,7 +102,7 @@ function checkArchLayer(design: string, technical: unknown): ValidationRuleResul
   return {
     ruleId: "arch-layer",
     ruleName: "レイヤー整合性",
-    severity: "error",
+    severity: "warning",
     status: "fail",
     message: "設計にレイヤー構成の記載がありません",
   };
@@ -125,7 +125,7 @@ function checkArchDependency(design: string): ValidationRuleResult {
         return {
           ruleId: "arch-dependency",
           ruleName: "依存方向",
-          severity: "error",
+          severity: "warning",
           status: "fail",
           message: "Service層からCommand層への参照が検出されました",
           location: { line: i + 1, content: line.trim() },
@@ -137,14 +137,14 @@ function checkArchDependency(design: string): ValidationRuleResult {
   return {
     ruleId: "arch-dependency",
     ruleName: "依存方向",
-    severity: "error",
+    severity: "warning",
     status: "pass",
   };
 }
 
 function checkNamingConvention(
   design: string,
-  structure: unknown,
+  _structure: unknown,
 ): ValidationRuleResult {
   // Check for consistent naming patterns in the design
   // Look for component names that follow kebab-case for files and PascalCase for types
@@ -185,7 +185,7 @@ function checkDepConflict(
     return {
       ruleId: "dep-conflict",
       ruleName: "依存関係矛盾",
-      severity: "warning",
+      severity: "error",
       status: "pass",
     };
   }
@@ -207,7 +207,7 @@ function checkDepConflict(
     return {
       ruleId: "dep-conflict",
       ruleName: "依存関係矛盾",
-      severity: "warning",
+      severity: "error",
       status: "fail",
       message: `依存先要件にSpecificationが未作成: ${missingSpecDeps.join(", ")}`,
     };
@@ -216,7 +216,7 @@ function checkDepConflict(
   return {
     ruleId: "dep-conflict",
     ruleName: "依存関係矛盾",
-    severity: "warning",
+    severity: "error",
     status: "pass",
   };
 }
