@@ -152,8 +152,13 @@ export function SpecificationTable({
                       {spec.id}
                     </Link>
                   </td>
-                  <td className="px-4 py-3 text-sm text-gray-700">
-                    {spec.title || <span className="italic text-gray-400">Untitled</span>}
+                  <td className="px-4 py-3 text-sm">
+                    <Link
+                      href={`/specifications/${spec.id}`}
+                      className="text-gray-900 hover:text-blue-600"
+                    >
+                      {spec.title || <span className="italic text-gray-400">Untitled</span>}
+                    </Link>
                   </td>
                   <td className="px-4 py-3 text-sm">
                     <Link
