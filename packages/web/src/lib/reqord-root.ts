@@ -27,3 +27,7 @@ export function getRequirementsDir(): string {
 export function getSpecificationsDir(): string {
   return fs.joinPath(getReqordRoot(), REQORD_DIR, SPECIFICATIONS_DIR);
 }
+
+export function getFeedbackDir(): string {
+  return fs.joinPath(getReqordRoot(), REQORD_DIR, "feedback");
+}
