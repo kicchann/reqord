@@ -1,9 +1,9 @@
 id: spec-000018
 requirementId: req-000018
 title: '実装検証'
-requirementVersion: '3.0'
+requirementVersion: '4.0'
 version: '1.0'
-status: implemented
+status: draft
 createdAt: 2026-02-08T14:08:08.067Z
 updatedAt: 2026-02-08T14:08:08.067Z
 versionHistory: []

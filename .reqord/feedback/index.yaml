@@ -178,6 +178,10 @@ feedbacks:
       createdRequirements: []
       specifications: []
       createdSpecifications: []
+      resolved:
+        requirements:
+          - req-000018
+        specifications: []
     syncedAt: 2026-02-13T15:40:05.017Z
     status: closed
   - githubIssue: 220
