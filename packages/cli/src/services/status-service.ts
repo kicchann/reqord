@@ -84,6 +84,18 @@ export interface SpecificationDetailStatus {
   coverageStatus: "covered" | "partial" | "not-covered";
 }
 
+function hasGapAnalysis(
+  req: Requirement,
+): req is Requirement & {
+  gapAnalysis: { coverage?: string; missingCount?: number; conflictCount?: number };
+} {
+  return (
+    "gapAnalysis" in req &&
+    req.gapAnalysis != null &&
+    typeof req.gapAnalysis === "object"
+  );
+}
+
 export function buildStatusSummary(
   items: Array<{ status: string }>,
 ): StatusSummary {
@@ -171,15 +183,9 @@ export function detectWarnings(
     );
     const consistencyWarnings = checkConsistency(req, relatedSpecs);
     for (const cw of consistencyWarnings) {
-      // Determine type from message pattern
-      const warnType: Warning["type"] = cw.message.includes(
-        "still approved",
-      )
-        ? "all-specs-implemented"
-        : "deprecated-with-active-specs";
       warnings.push({
         id: req.id,
-        type: warnType,
+        type: cw.type,
         message: cw.message,
         severity: "warning",
       });
@@ -324,19 +330,20 @@ export async function getRequirementStatus(
     }
   }
 
-  // gapAnalysis from requirement (if it has the field)
-  const reqAny = requirement as Record<string, unknown>;
-  const gap = reqAny.gapAnalysis as
-    | { coverage?: string; missingCount?: number; conflictCount?: number }
-    | undefined;
-  const gapAnalysis: RequirementDetailStatus["gapAnalysis"] = gap
-    ? {
-        hasAnalysis: true,
-        coverage: gap.coverage as "full" | "partial" | "none" | undefined,
-        missingCount: gap.missingCount,
-        conflictCount: gap.conflictCount,
-      }
-    : { hasAnalysis: false };
+  // gapAnalysis from requirement (if it has the field via extended schema)
+  const gapAnalysis: RequirementDetailStatus["gapAnalysis"] =
+    hasGapAnalysis(requirement)
+      ? {
+          hasAnalysis: true,
+          coverage: requirement.gapAnalysis.coverage as
+            | "full"
+            | "partial"
+            | "none"
+            | undefined,
+          missingCount: requirement.gapAnalysis.missingCount,
+          conflictCount: requirement.gapAnalysis.conflictCount,
+        }
+      : { hasAnalysis: false };
 
   return {
     requirement,
