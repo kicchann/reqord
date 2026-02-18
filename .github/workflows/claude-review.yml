@@ -4,6 +4,7 @@ on:
   pull_request:
     types: [opened]
     paths:
+      - "plugins/**"
       - ".reqord/**"
       - "packages/**/*.ts"
       - "packages/**/*.tsx"
