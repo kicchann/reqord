@@ -65,10 +65,110 @@ export function getReqordDir(cwd: string, ...subPaths: string[]): string {
   return join(cwd, ".reqord", ...subPaths);
 }
 
+export function fixUnquotedHash(content: string, filePath: string): string {
+  const lines = content.split("\n");
+  const fixedLines: string[] = [];
+  let modified = false;
+  let inBlockScalar = false;
+  let blockIndent = -1;
+
+  for (const line of lines) {
+    // Skip empty lines
+    if (line.trim() === "") {
+      fixedLines.push(line);
+      continue;
+    }
+
+    // Skip comment-only lines
+    if (/^\s*#/.test(line)) {
+      fixedLines.push(line);
+      continue;
+    }
+
+    // Detect block scalar indicators (>-, |, >, |-)
+    if (/:\s+[>|][-+]?\s*$/.test(line)) {
+      inBlockScalar = true;
+      blockIndent = -1;
+      fixedLines.push(line);
+      continue;
+    }
+
+    // If in block scalar, check indentation to detect end
+    if (inBlockScalar) {
+      const currentIndent = line.length - line.trimStart().length;
+      if (blockIndent === -1) {
+        blockIndent = currentIndent;
+        fixedLines.push(line);
+        continue;
+      }
+      if (currentIndent >= blockIndent && blockIndent > 0) {
+        fixedLines.push(line);
+        continue;
+      }
+      inBlockScalar = false;
+    }
+
+    // Skip lines that don't contain ' #' with digits
+    if (!/ #\d/.test(line)) {
+      fixedLines.push(line);
+      continue;
+    }
+
+    // Check if it's a key-value line with quoted value
+    const kvMatch = line.match(/^(\s*[\w-]+:\s+)('.*'|".*")\s*$/);
+    if (kvMatch) {
+      fixedLines.push(line);
+      continue;
+    }
+
+    // Check if it's a list item with quoted value
+    const listMatch = line.match(/^(\s*-\s+)('.*'|".*")\s*$/);
+    if (listMatch) {
+      fixedLines.push(line);
+      continue;
+    }
+
+    // Key-value line with unquoted value containing ' #\d'
+    const kvUnquoted = line.match(/^(\s*[\w-]+:\s+)(.+)$/);
+    if (kvUnquoted) {
+      const [, prefix, value] = kvUnquoted;
+      if (/ #\d/.test(value) && !(/^'.*'$/.test(value) || /^".*"$/.test(value))) {
+        const escaped = value.replace(/'/g, "''");
+        fixedLines.push(`${prefix}'${escaped}'`);
+        modified = true;
+        continue;
+      }
+    }
+
+    // List item with unquoted value containing ' #\d'
+    const listUnquoted = line.match(/^(\s*-\s+)(.+)$/);
+    if (listUnquoted) {
+      const [, prefix, value] = listUnquoted;
+      if (/ #\d/.test(value) && !(/^'.*'$/.test(value) || /^".*"$/.test(value))) {
+        const escaped = value.replace(/'/g, "''");
+        fixedLines.push(`${prefix}'${escaped}'`);
+        modified = true;
+        continue;
+      }
+    }
+
+    fixedLines.push(line);
+  }
+
+  if (modified) {
+    console.warn(
+      `[reqord] Warning: Auto-fixed unquoted ' #' in YAML plain scalar (${filePath}). Data would be silently truncated by js-yaml.`,
+    );
+  }
+
+  return fixedLines.join("\n");
+}
+
 export async function readYAML<T>(filePath: string): Promise<T> {
   const content = await readFile(filePath, "utf-8");
+  const fixed = fixUnquotedHash(content, filePath);
   try {
-    return yamlLoad(content, { schema: JSON_SCHEMA }) as T;
+    return yamlLoad(fixed, { schema: JSON_SCHEMA }) as T;
   } catch (error) {
     throw new Error(
       `YAML構文エラー (${filePath}): ${error instanceof Error ? error.message : String(error)}`,
