@@ -2,8 +2,9 @@
 name: git
 description: Specification参照付きのGit操作（ブランチ作成・コミット・PR）。spec-idベースの命名規則とトレーサビリティ情報をPRに含める。Spec-aware Git operations - create branches, commit, push, and create PRs with automatic traceability. Use when branching for a specification, committing implementation, or creating pull requests.
 argument-hint: "<branch|commit> <spec-id> (branch: [type], commit: [message])"
-disable-model-invocation: true
 ---
+
+> **ユーザー確認必須**: このスキルはGit操作（ブランチ作成・コミット・プッシュ・PR作成）を伴います。自律実行時は操作内容をユーザーに提示し、承認を得てから実行してください。
 
 # reqord-git: Specification連携Git操作
 

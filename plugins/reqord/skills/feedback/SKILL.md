@@ -2,8 +2,9 @@
 name: feedback
 description: Feedback運用（同期・分類・リンク・クローズ・フラグ解消）。GitHub Issueとして報告されたフィードバックの取り込みワークフローを実行する。Manage feedback lifecycle - sync GitHub issues, classify, link to requirements/specifications, close, and resolve flags. Use when processing issues, triaging bugs, or linking feedback.
 argument-hint: "[issue-number...] (省略時は未処理一覧から選択)"
-disable-model-invocation: true
 ---
+
+> **ユーザー確認必須**: このスキルはGitHub Issue操作（クローズ・コメント）を伴います。自律実行時は操作内容をユーザーに提示し、承認を得てから実行してください。
 
 # Feedback運用コマンド
 

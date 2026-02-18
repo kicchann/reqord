@@ -2,8 +2,9 @@
 name: verify
 description: Specificationの実装検証・トレーサビリティ確認・完了処理。紐づくRequirementのsuccess criteriaに対する充足確認からステータス更新までをカバーする。Validate implementation against success criteria, trace requirement-to-code links, and mark specifications as complete. Use when verifying features, checking traceability, or completing implementation.
 argument-hint: "<validate|trace|done> <id> (validate/done: spec-id, trace: spec-id|req-id)"
-disable-model-invocation: true
 ---
+
+> **ユーザー確認必須**: `done`サブコマンドはSpecificationステータスを変更します。自律実行時はステータス変更前にユーザーの承認を得てください。
 
 # reqord-verify: 実装検証・トレーサビリティ確認
 

@@ -2,8 +2,9 @@
 name: setup
 description: Reqordプラグインの環境セットアップと前提条件チェック。初回利用時に実行し、必要なツールの可用性を確認する。Verify environment prerequisites for the Reqord plugin - CLI tools, GitHub authentication, and project initialization. Run on first use or when troubleshooting.
 argument-hint: "[--check] (省略時はフルセットアップ、--checkは確認のみ)"
-disable-model-invocation: true
 ---
+
+> **ユーザー確認必須**: このスキルは環境設定の変更を伴います。自律実行時はセットアップ内容をユーザーに提示し、承認を得てから実行してください。
 
 # Reqordプラグイン環境セットアップ
 
