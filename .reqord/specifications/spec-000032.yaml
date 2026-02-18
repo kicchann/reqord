@@ -1,6 +1,6 @@
 id: spec-000032
 requirementId: req-000001
-title: 'CLI初期化コマンド'
+title: '承認PRマージ後の自動ステータス更新'
 requirementVersion: '1.0'
 version: '1.0'
 status: implemented

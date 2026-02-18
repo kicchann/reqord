@@ -1,6 +1,6 @@
 id: spec-000033
 requirementId: req-000005
-title: 'Requirement/Specificationバージョン管理'
+title: '[非推奨] Specificationバージョン管理'
 requirementVersion: '4.0'
 version: '2.1'
 status: deprecated

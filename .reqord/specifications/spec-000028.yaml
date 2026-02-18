@@ -1,6 +1,6 @@
 id: spec-000028
 requirementId: req-000023
-title: Feedback管理 (GitHub Issue連携)
+title: Feedback操作CLI
 requirementVersion: '4.0'
 version: '3.0'
 status: implemented

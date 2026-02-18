@@ -1,6 +1,6 @@
 id: spec-000023
 requirementId: req-000007
-title: 'ローカルUI基本機能'
+title: 'ローカルUI - 依存関係グラフ'
 requirementVersion: '1.0'
 version: '1.0'
 status: implemented

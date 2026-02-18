@@ -1,6 +1,6 @@
 id: spec-000024
 requirementId: req-000016
-title: 'GitHub Issue生成・管理'
+title: 'GitHub Issue同期・進捗追跡'
 requirementVersion: '1.0'
 version: '1.0'
 status: implemented

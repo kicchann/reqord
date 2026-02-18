@@ -1,6 +1,6 @@
 id: spec-000030
 requirementId: req-000027
-title: 'データ形式のYAML移行'
+title: 'YAML変換レイヤー実装'
 requirementVersion: '3.0'
 version: '3.0'
 status: implemented

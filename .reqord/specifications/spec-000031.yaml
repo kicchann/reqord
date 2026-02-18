@@ -1,6 +1,6 @@
 id: spec-000031
 requirementId: req-000027
-title: 'データ形式のYAML移行'
+title: 'migrate-to-yamlコマンド'
 requirementVersion: '3.0'
 version: '3.0'
 status: implemented
