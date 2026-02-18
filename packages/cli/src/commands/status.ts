@@ -79,11 +79,25 @@ async function showProjectStatus(
     console.log(chalk.gray("  No issues tracked."));
   }
 
-  // Warnings
-  if (status.warnings.length > 0) {
+  // Warnings (severity: warning)
+  const warningItems = status.warnings.filter(
+    (w) => w.severity === "warning",
+  );
+  if (warningItems.length > 0) {
     console.log(chalk.bold.yellow("\n⚠ 警告:"));
-    for (const w of status.warnings) {
+    for (const w of warningItems) {
       console.log(chalk.yellow(`  - ${w.id}: ${w.message}`));
+    }
+  }
+
+  // Info items (severity: info)
+  const infoItems = status.warnings.filter(
+    (w) => w.severity === "info",
+  );
+  if (infoItems.length > 0) {
+    console.log(chalk.bold.blue("\nℹ 情報:"));
+    for (const w of infoItems) {
+      console.log(chalk.blue(`  - ${w.id}: ${w.message}`));
     }
   }
 
@@ -169,6 +183,18 @@ async function showRequirementStatus(
     console.log(table.toString());
   }
 
+  // Gap Analysis
+  if (status.gapAnalysis.hasAnalysis) {
+    console.log(chalk.bold("\nGap Analysis:"));
+    console.log(`  カバレッジ:   ${status.gapAnalysis.coverage ?? "unknown"}`);
+    if (status.gapAnalysis.missingCount != null) {
+      console.log(`  不足機能:     ${status.gapAnalysis.missingCount}件`);
+    }
+    if (status.gapAnalysis.conflictCount != null) {
+      console.log(`  矛盾:         ${status.gapAnalysis.conflictCount}件`);
+    }
+  }
+
   // Dependencies
   if (status.dependencyStatus.length > 0) {
     console.log(chalk.bold("\n依存関係:"));
@@ -240,6 +266,14 @@ async function showSpecificationStatus(
     );
   }
 
+  // Design Validation
+  if (status.designValidation) {
+    console.log(chalk.bold("\n設計検証:"));
+    console.log(
+      `  passed: ${status.designValidation.passed}, warnings: ${status.designValidation.warnings}, errors: ${status.designValidation.errors}`,
+    );
+  }
+
   // Issue Progress
   if (status.issueProgress.total > 0) {
     const pct = Math.round(
@@ -250,6 +284,11 @@ async function showSpecificationStatus(
         `${renderProgressBar(pct)}  ${pct}% (${status.issueProgress.completed}/${status.issueProgress.total})`,
     );
   }
+
+  // Coverage Status
+  console.log(
+    `  カバレッジ:   ${status.coverageStatus}`,
+  );
 
   console.log();
 }

@@ -1,4 +1,5 @@
 import type { Requirement, Specification } from "@reqord/shared";
+import { checkConsistency } from "@reqord/shared";
 import * as reqRepo from "../repositories/requirement.js";
 import * as specRepo from "../repositories/specification.js";
 
@@ -6,6 +7,7 @@ export interface StatusSummary {
   total: number;
   byStatus: Record<string, number>;
   implementedPercentage: number;
+  approvedPercentage: number;
 }
 
 export interface IssueSummary {
@@ -20,8 +22,14 @@ export interface Warning {
   type:
     | "no-specification"
     | "blocked-dependency"
-    | "status-inconsistency";
+    | "status-inconsistency"
+    | "gap-missing"
+    | "validation-failed"
+    | "all-specs-implemented"
+    | "deprecated-with-active-specs"
+    | "feedback-review";
   message: string;
+  severity: "warning" | "info";
 }
 
 export interface ProjectStatus {
@@ -39,6 +47,12 @@ export interface RequirementDetailStatus {
     title?: string;
     status: string;
   }>;
+  gapAnalysis: {
+    hasAnalysis: boolean;
+    coverage?: "full" | "partial" | "none";
+    missingCount?: number;
+    conflictCount?: number;
+  };
   dependencyStatus: Array<{
     id: string;
     title: string;
@@ -58,10 +72,16 @@ export interface SpecificationDetailStatus {
     title: string;
     status: string;
   } | null;
+  designValidation?: {
+    passed: number;
+    warnings: number;
+    errors: number;
+  };
   issueProgress: {
     total: number;
     completed: number;
   };
+  coverageStatus: "covered" | "partial" | "not-covered";
 }
 
 export function buildStatusSummary(
@@ -75,7 +95,10 @@ export function buildStatusSummary(
   const implementedCount = byStatus["implemented"] ?? 0;
   const implementedPercentage =
     total > 0 ? Math.round((implementedCount / total) * 100) : 0;
-  return { total, byStatus, implementedPercentage };
+  const approvedCount = (byStatus["approved"] ?? 0) + implementedCount;
+  const approvedPercentage =
+    total > 0 ? Math.round((approvedCount / total) * 100) : 0;
+  return { total, byStatus, implementedPercentage, approvedPercentage };
 }
 
 export function buildIssueSummary(specs: Specification[]): IssueSummary {
@@ -103,6 +126,19 @@ export function detectWarnings(
   for (const req of requirements) {
     if (req.status === "deprecated") continue;
 
+    // Gap Analysisが未実行の承認済み要件
+    if (
+      !("gapAnalysis" in req && req.gapAnalysis) &&
+      req.status === "approved"
+    ) {
+      warnings.push({
+        id: req.id,
+        type: "gap-missing",
+        message: `Gap Analysisが未実行です`,
+        severity: "warning",
+      });
+    }
+
     // Specificationが存在しない非draft要件
     const hasSpec = specifications.some(
       (s) => s.requirementId === req.id && s.status !== "deprecated",
@@ -112,6 +148,7 @@ export function detectWarnings(
         id: req.id,
         type: "no-specification",
         message: `Specificationが作成されていません`,
+        severity: "warning",
       });
     }
 
@@ -123,19 +160,52 @@ export function detectWarnings(
           id: req.id,
           type: "blocked-dependency",
           message: `依存先 ${depId} が未承認です（現在: ${dep.status}）`,
+          severity: "warning",
         });
       }
     }
+
+    // checkConsistency integration from @reqord/shared
+    const relatedSpecs = specifications.filter(
+      (s) => s.requirementId === req.id,
+    );
+    const consistencyWarnings = checkConsistency(req, relatedSpecs);
+    for (const cw of consistencyWarnings) {
+      // Determine type from message pattern
+      const warnType: Warning["type"] = cw.message.includes(
+        "still approved",
+      )
+        ? "all-specs-implemented"
+        : "deprecated-with-active-specs";
+      warnings.push({
+        id: req.id,
+        type: warnType,
+        message: cw.message,
+        severity: "warning",
+      });
+    }
+
+    // feedback-review flag detection
+    const feedbackFlags =
+      req.flags?.filter((f) => f.type === "feedback-review") ?? [];
+    for (const flag of feedbackFlags) {
+      warnings.push({
+        id: req.id,
+        type: "feedback-review",
+        message: `フィードバックレビュー待ち: ${flag.reason}（関連Issue: ${flag.relatedIssues.map((n) => `#${n}`).join(", ")}）`,
+        severity: "info",
+      });
+    }
   }
 
-  // Req/Spec間のステータス整合性チェック
+  // Spec-level warnings
   for (const spec of specifications) {
     if (spec.status === "deprecated") continue;
     const req = requirements.find((r) => r.id === spec.requirementId);
-    if (!req) continue;
 
     // Specがapproved以上なのにReqがdraft
     if (
+      req &&
       (spec.status === "approved" || spec.status === "implemented") &&
       req.status === "draft"
     ) {
@@ -143,6 +213,29 @@ export function detectWarnings(
         id: spec.id,
         type: "status-inconsistency",
         message: `Specificationが${spec.status}ですが、要件 ${req.id} がまだdraftです`,
+        severity: "warning",
+      });
+    }
+
+    // 設計検証エラー
+    if (spec.designValidation && spec.designValidation.errors > 0) {
+      warnings.push({
+        id: spec.id,
+        type: "validation-failed",
+        message: `設計検証が失敗しています（${spec.designValidation.errors} error）`,
+        severity: "warning",
+      });
+    }
+
+    // Specificationのfeedback-reviewフラグ
+    const specFeedbackFlags =
+      spec.flags?.filter((f) => f.type === "feedback-review") ?? [];
+    for (const flag of specFeedbackFlags) {
+      warnings.push({
+        id: spec.id,
+        type: "feedback-review",
+        message: `フィードバックレビュー待ち: ${flag.reason}（関連Issue: ${flag.relatedIssues.map((n) => `#${n}`).join(", ")}）`,
+        severity: "info",
       });
     }
   }
@@ -231,9 +324,24 @@ export async function getRequirementStatus(
     }
   }
 
+  // gapAnalysis from requirement (if it has the field)
+  const reqAny = requirement as Record<string, unknown>;
+  const gap = reqAny.gapAnalysis as
+    | { coverage?: string; missingCount?: number; conflictCount?: number }
+    | undefined;
+  const gapAnalysis: RequirementDetailStatus["gapAnalysis"] = gap
+    ? {
+        hasAnalysis: true,
+        coverage: gap.coverage as "full" | "partial" | "none" | undefined,
+        missingCount: gap.missingCount,
+        conflictCount: gap.conflictCount,
+      }
+    : { hasAnalysis: false };
+
   return {
     requirement,
     specifications,
+    gapAnalysis,
     dependencyStatus,
     issueProgress: { total: totalIssues, completed: completedIssues },
   };
@@ -255,12 +363,33 @@ export async function getSpecificationStatus(
     }
   }
 
+  // Design validation
+  const designValidation = specification.designValidation
+    ? {
+        passed: specification.designValidation.passed,
+        warnings: specification.designValidation.warnings,
+        errors: specification.designValidation.errors,
+      }
+    : undefined;
+
+  // Coverage status: based on issue progress
+  let coverageStatus: "covered" | "partial" | "not-covered";
+  if (totalIssues === 0) {
+    coverageStatus = "not-covered";
+  } else if (completedIssues === totalIssues) {
+    coverageStatus = "covered";
+  } else {
+    coverageStatus = "partial";
+  }
+
   return {
     specification,
     requirement: req
       ? { id: req.id, title: req.title, status: req.status }
       : null,
+    designValidation,
     issueProgress: { total: totalIssues, completed: completedIssues },
+    coverageStatus,
   };
 }
 
