@@ -32,6 +32,17 @@ $ARGUMENTSを解析してサブコマンドを振り分ける。
 2. `reqord spec show <spec-id> --json` で存在確認
 3. specのstatusが `approved` であることを確認（`draft`なら承認を促す、`implemented`なら再実装の確認）
 
+### Human-in-the-loop: 承認PRの待機
+
+specのstatusが `draft` の場合、**手動でYAMLファイルを編集してstatusを変更してはならない**。
+承認フローを遵守し、以下の手順で進める:
+
+1. `reqord spec approve <spec-id>` で承認依頼PRを作成する（未作成の場合）
+2. 承認PRがマージされるまで待機する
+3. PRがマージされてstatusが `approved` に遷移したことを確認してから実装に進む
+
+承認PRが既に作成済みでマージ待ちの場合は、PR URLを表示してユーザーにマージを促す。
+
 ---
 
 ## Step 1: コンテキスト読み込み

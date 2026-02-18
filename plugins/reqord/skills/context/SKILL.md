@@ -189,7 +189,13 @@ context.yamlの`files`フィールドが参照するファイルをReadツール
 Phase 0: 状況把握
   /reqord:status → 進捗確認、次に着手すべきspecを特定
 
-Phase 1: 計画・開発
+Phase 0.5: Specification承認（Human-in-the-loop）
+  /reqord:design <spec-id> → design.md作成
+  reqord spec approve <spec-id> → 承認依頼PR作成
+  [PR承認・マージを待機] → status: approved に遷移
+  ※ 手動でYAMLのstatusを変更してはならない
+
+Phase 1: 計画・開発（specがapprovedであること）
   /check-branch → /reqord:git branch <spec-id>
   → /reqord:dev <spec-id> → /test → /lint
 
