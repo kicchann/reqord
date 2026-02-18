@@ -2,8 +2,9 @@
 name: dev
 description: Specificationのdesign.mdに基づく機能開発。実装計画の生成からTDD実装・レビューまでを一貫して行う。planサブコマンドで計画のみも可能。Feature development from design.md through TDD implementation and code review. Use when implementing features, coding specifications, or running the full dev cycle.
 argument-hint: <spec-id> [plan]
-disable-model-invocation: true
 ---
+
+> **ユーザー確認必須**: このスキルはコード生成・ファイル変更を伴います。自律実行時は実装開始前にユーザーの承認を得てください。
 
 # Specification機能開発コマンド
 

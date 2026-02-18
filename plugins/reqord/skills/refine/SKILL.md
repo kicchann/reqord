@@ -2,7 +2,6 @@
 name: refine
 description: 要件詳細化。バリデーション結果・既存コード実装状況・ドメイン知識を基にRequirementのSMART品質スコアを向上させる。Refine and improve requirement quality by analyzing SMART scores, validation issues, and existing code. Use when improving requirements, fixing validation warnings, or enhancing success criteria.
 argument-hint: "[req-id...] (省略時は対話選択、複数指定可)"
-disable-model-invocation: true
 ---
 
 # 要件詳細化コマンド

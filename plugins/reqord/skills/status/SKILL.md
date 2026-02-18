@@ -2,7 +2,6 @@
 name: status
 description: Reqordの要件・仕様の実装進捗ダッシュボードを表示する。Show requirement and specification implementation progress dashboard. Use when checking project status, finding next tasks, or reviewing progress.
 argument-hint: "[approved|implemented|all] (デフォルト: approved)"
-disable-model-invocation: true
 ---
 
 # Reqord進捗ダッシュボード

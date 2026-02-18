@@ -2,7 +2,6 @@
 name: design
 description: Specification設計書作成。Requirementの内容・ProjectContext・既存コード実装状況を基にdesign.md（技術設計書）を生成する。Generate technical design documents (design.md) for specifications. Use when creating architecture blueprints, planning implementation, or designing features.
 argument-hint: "[spec-id...|req-id...|--all] (省略時は対話選択、複数指定可)"
-disable-model-invocation: true
 ---
 
 # Specification設計書作成コマンド
