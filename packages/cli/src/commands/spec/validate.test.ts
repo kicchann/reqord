@@ -134,6 +134,27 @@ describe("spec validate command", () => {
     );
   });
 
+  it("criteria-4: design.md不在時のエラー結果も永続化される", async () => {
+    const result = makeValidateResult({
+      rules: [
+        { ruleId: "design-exists", ruleName: "設計文書存在", severity: "error" as const, status: "fail" as const, message: "design.mdが存在しません" },
+      ],
+      passed: 0,
+      warnings: 0,
+      errors: 1,
+    });
+
+    mockValidateSpecDesign.mockResolvedValue(result);
+    mockSave.mockResolvedValue(undefined);
+
+    await specValidateCommand.parseAsync(["node", "test", "spec-000001"]);
+
+    expect(mockSave).toHaveBeenCalledOnce();
+    const savedSpec = mockSave.mock.calls[0][1];
+    expect(savedSpec.designValidation?.errors).toBe(1);
+    expect(savedSpec.designValidation?.rules[0].ruleId).toBe("design-exists");
+  });
+
   it("errorsが1以上の場合、exitCodeが1になる", async () => {
     const result = makeValidateResult({
       rules: [

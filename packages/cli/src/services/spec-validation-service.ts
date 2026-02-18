@@ -1,3 +1,4 @@
+import type { Specification } from "@reqord/shared";
 import * as specRepo from "../repositories/specification.js";
 import * as reqRepo from "../repositories/requirement.js";
 import * as contextRepo from "../repositories/project-context.js";
@@ -22,7 +23,7 @@ export interface DesignValidation {
 
 export interface ValidateSpecDesignResult {
   validation: DesignValidation;
-  spec: import("@reqord/shared").Specification;
+  spec: Specification;
 }
 
 const REQUIRED_SECTIONS = [

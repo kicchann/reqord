@@ -21,6 +21,8 @@ export const specValidateCommand = new Command("validate")
           passed: result.passed,
           warnings: result.warnings,
           errors: result.errors,
+          // location is excluded intentionally: DesignValidationRuleSchema (shared)
+          // does not include it. Location info is display-only, not persisted.
           rules: result.rules.map((r) => ({
             ruleId: r.ruleId,
             status: r.status,
