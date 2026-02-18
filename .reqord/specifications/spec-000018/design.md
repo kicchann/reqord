@@ -4,12 +4,18 @@
 
 `reqord validate impl <spec-id>` コマンドにより、Specificationの実装完了度を3つの観点で検証する。(1) GitHub Issueの完了状態、(2) design.mdから抽出したコンポーネントの実装ファイル存在確認、(3) テストファイルの存在確認。design.mdのコンポーネント設計セクションとテスト方針セクションをパースしてファイルパスを抽出し、ファイルシステムの実在性とGitHub Issueの状態をチェックする。`--json` オプションでCI/CD連携、`--strict` オプションで未完了時にexit code 1を返すCIモードを提供する。
 
+また、`reqord req implement <req-id>` コマンド実行時に、Requirement配下の全Specificationがimplementedであるか、全紐付きIssueがclosedであるかの整合性チェックを実施し、不整合があれば警告を表示する（Feedback #221）。
+
 ## 2. アーキテクチャ
 
 ```
 Command Layer:  commands/validate/impl.ts        (新規)
+                commands/req/implement.ts         (既存: 拡張)
                     ↓
 Service Layer:  services/impl-validation-service.ts (新規)
+                    ↓
+Shared:         @reqord/shared
+                  rules/consistency.ts            (既存: checkConsistency)
                     ↓
 Repository:     repositories/specification.ts     (既存)
                 repositories/requirement.ts       (既存)
@@ -183,6 +189,110 @@ function determineOverallStatus(
 }
 ```
 
+### 3.6 `reqord req implement` 整合性チェック（Feedback #221）
+
+**責務:** Requirementをimplementedに遷移させる前に、配下のSpecificationとIssueの整合性を検証し、不整合があれば警告を表示する。
+
+**対象ファイル:** `commands/req/implement.ts` (既存: 拡張)
+
+**チェック内容:**
+
+1. **Specification実装状態チェック:** 対象RequirementにリンクされたSpecificationのうち、statusが`implemented`でないものがあれば警告
+2. **Issue完了状態チェック:** 各Specificationの`implementation.issues`から全Issueを収集し、statusが`closed`でないものがあれば警告
+
+**整合性チェックの結果型:**
+
+```typescript
+export interface ImplementConsistencyResult {
+  canProceed: boolean;
+  warnings: ImplementConsistencyWarning[];
+}
+
+export interface ImplementConsistencyWarning {
+  type: "spec-not-implemented" | "issue-not-closed";
+  message: string;
+  details: {
+    id: string;         // spec-id or issue number
+    currentStatus: string;
+  };
+}
+```
+
+**チェックロジック:**
+
+```typescript
+export async function checkImplementConsistency(
+  cwd: string,
+  reqId: string,
+): Promise<ImplementConsistencyResult> {
+  const specs = await specRepo.findByRequirementId(cwd, reqId);
+  const warnings: ImplementConsistencyWarning[] = [];
+
+  // 1. 全Specificationがimplementedか
+  for (const spec of specs) {
+    if (spec.status !== "implemented") {
+      warnings.push({
+        type: "spec-not-implemented",
+        message: `${spec.id} のステータスが ${spec.status} です（implementedではありません）`,
+        details: { id: spec.id, currentStatus: spec.status },
+      });
+    }
+  }
+
+  // 2. 全Issueがclosedか
+  for (const spec of specs) {
+    if (spec.implementation?.issues) {
+      for (const issue of spec.implementation.issues) {
+        if (issue.status !== "closed") {
+          warnings.push({
+            type: "issue-not-closed",
+            message: `#${issue.number} (${issue.title}) が ${issue.status} です`,
+            details: { id: String(issue.number), currentStatus: issue.status },
+          });
+        }
+      }
+    }
+  }
+
+  return {
+    canProceed: true,  // 警告は表示するが、実行はブロックしない
+    warnings,
+  };
+}
+```
+
+**コマンド拡張:**
+
+```typescript
+// commands/req/implement.ts への追加
+// 既存のステータスチェック（approved確認）の後に実行
+
+const consistencyResult = await checkImplementConsistency(cwd, reqId);
+
+if (consistencyResult.warnings.length > 0) {
+  console.warn("\n⚠ 整合性チェック警告:");
+  for (const w of consistencyResult.warnings) {
+    console.warn(`  - ${w.message}`);
+  }
+  console.warn("");
+}
+
+// 警告があっても処理は続行（ブロックしない）
+// ユーザーは警告を確認した上で判断可能
+```
+
+**表示形式:**
+```
+reqord req implement req-000016
+
+⚠ 整合性チェック警告:
+  - spec-000016 のステータスが approved です（implementedではありません）
+  - #44 (Service実装) が open です
+  - #45 (Command実装) が open です
+
+ステータス変更: approved → implemented
+```
+
 ## 4. データフロー
 
 ### 実装検証フロー
@@ -217,6 +327,23 @@ function determineOverallStatus(
   → stderr: "実装検証失敗: 未完了項目があります"
 ```
 
+### `reqord req implement` 整合性チェックフロー
+
+```
+ユーザー → reqord req implement req-000016
+  → implementCommand.action("req-000016")
+    → requirementService.showRequirement(cwd, "req-000016") → Requirement取得
+    → ステータスチェック: status === "approved" を確認
+    → checkImplementConsistency(cwd, "req-000016")
+      → specRepo.findByRequirementId(cwd, "req-000016") → 関連Spec取得
+      → 各Specのstatusがimplementedかチェック
+      → 各Specのimplementation.issuesのstatusがclosedかチェック
+      → ImplementConsistencyResult返却
+    → 警告があれば表示（処理はブロックしない）
+    → requirementService.updateRequirement(cwd, "req-000016", { status: "implemented" })
+  → ステータス変更結果表示
+```
+
 ## 5. テスト方針
 
 ### ユニットテスト
@@ -234,12 +361,20 @@ function determineOverallStatus(
   - 一部完了: partial
   - Issue未設定時（total=0）のスキップ動作
 - **Issue状態チェック**: githubRepoのモックによる状態取得検証
+- **checkImplementConsistency**:
+  - 全Specがimplemented・全Issueclosed: warnings空配列
+  - 一部Specがdraft/approved: spec-not-implemented警告が含まれる
+  - 一部IssueがOpen: issue-not-closed警告が含まれる
+  - Specが0件: warnings空配列（関連Specなしでも警告なし）
+  - implementationフィールドなしのSpec: Issueチェックをスキップ
 
 ### 統合テスト
 
 - テスト用のspec-NNNNNN + design.md + 実装ファイルを用意し、検証結果が正確であることを確認
 - `--strict` モードでexit codeが1になること
 - `--json` 出力がJSON.parseableであること
+- `reqord req implement` 実行時に整合性チェック警告が表示されること
+- 警告があっても `implemented` への遷移が完了すること
 
 ## 6. 技術的決定事項
 
