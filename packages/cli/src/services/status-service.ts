@@ -1,4 +1,5 @@
 import type { Requirement, Specification } from "@reqord/shared";
+import { checkConsistency } from "@reqord/shared";
 import * as reqRepo from "../repositories/requirement.js";
 import * as specRepo from "../repositories/specification.js";
 
@@ -6,6 +7,7 @@ export interface StatusSummary {
   total: number;
   byStatus: Record<string, number>;
   implementedPercentage: number;
+  approvedPercentage: number;
 }
 
 export interface IssueSummary {
@@ -20,8 +22,13 @@ export interface Warning {
   type:
     | "no-specification"
     | "blocked-dependency"
-    | "status-inconsistency";
+    | "status-inconsistency"
+    | "validation-failed"
+    | "all-specs-implemented"
+    | "deprecated-with-active-specs"
+    | "feedback-review";
   message: string;
+  severity: "warning" | "info";
 }
 
 export interface ProjectStatus {
@@ -58,10 +65,16 @@ export interface SpecificationDetailStatus {
     title: string;
     status: string;
   } | null;
+  designValidation?: {
+    passed: number;
+    warnings: number;
+    errors: number;
+  };
   issueProgress: {
     total: number;
     completed: number;
   };
+  coverageStatus: "covered" | "partial" | "not-covered";
 }
 
 export function buildStatusSummary(
@@ -75,7 +88,10 @@ export function buildStatusSummary(
   const implementedCount = byStatus["implemented"] ?? 0;
   const implementedPercentage =
     total > 0 ? Math.round((implementedCount / total) * 100) : 0;
-  return { total, byStatus, implementedPercentage };
+  const approvedCount = (byStatus["approved"] ?? 0) + implementedCount;
+  const approvedPercentage =
+    total > 0 ? Math.round((approvedCount / total) * 100) : 0;
+  return { total, byStatus, implementedPercentage, approvedPercentage };
 }
 
 export function buildIssueSummary(specs: Specification[]): IssueSummary {
@@ -101,6 +117,20 @@ export function detectWarnings(
   const warnings: Warning[] = [];
 
   for (const req of requirements) {
+    // checkConsistency runs before deprecated skip to detect deprecated-with-active-specs
+    const relatedSpecs = specifications.filter(
+      (s) => s.requirementId === req.id,
+    );
+    const consistencyWarnings = checkConsistency(req, relatedSpecs);
+    for (const cw of consistencyWarnings) {
+      warnings.push({
+        id: req.id,
+        type: cw.type,
+        message: cw.message,
+        severity: "warning",
+      });
+    }
+
     if (req.status === "deprecated") continue;
 
     // Specificationが存在しない非draft要件
@@ -112,6 +142,7 @@ export function detectWarnings(
         id: req.id,
         type: "no-specification",
         message: `Specificationが作成されていません`,
+        severity: "warning",
       });
     }
 
@@ -123,19 +154,32 @@ export function detectWarnings(
           id: req.id,
           type: "blocked-dependency",
           message: `依存先 ${depId} が未承認です（現在: ${dep.status}）`,
+          severity: "warning",
         });
       }
     }
+
+    // feedback-review flag detection
+    const feedbackFlags =
+      req.flags?.filter((f) => f.type === "feedback-review") ?? [];
+    for (const flag of feedbackFlags) {
+      warnings.push({
+        id: req.id,
+        type: "feedback-review",
+        message: `フィードバックレビュー待ち: ${flag.reason}（関連Issue: ${flag.relatedIssues.map((n) => `#${n}`).join(", ")}）`,
+        severity: "info",
+      });
+    }
   }
 
-  // Req/Spec間のステータス整合性チェック
+  // Spec-level warnings
   for (const spec of specifications) {
     if (spec.status === "deprecated") continue;
     const req = requirements.find((r) => r.id === spec.requirementId);
-    if (!req) continue;
 
     // Specがapproved以上なのにReqがdraft
     if (
+      req &&
       (spec.status === "approved" || spec.status === "implemented") &&
       req.status === "draft"
     ) {
@@ -143,6 +187,29 @@ export function detectWarnings(
         id: spec.id,
         type: "status-inconsistency",
         message: `Specificationが${spec.status}ですが、要件 ${req.id} がまだdraftです`,
+        severity: "warning",
+      });
+    }
+
+    // 設計検証エラー
+    if (spec.designValidation && spec.designValidation.errors > 0) {
+      warnings.push({
+        id: spec.id,
+        type: "validation-failed",
+        message: `設計検証が失敗しています（${spec.designValidation.errors} error）`,
+        severity: "warning",
+      });
+    }
+
+    // Specificationのfeedback-reviewフラグ
+    const specFeedbackFlags =
+      spec.flags?.filter((f) => f.type === "feedback-review") ?? [];
+    for (const flag of specFeedbackFlags) {
+      warnings.push({
+        id: spec.id,
+        type: "feedback-review",
+        message: `フィードバックレビュー待ち: ${flag.reason}（関連Issue: ${flag.relatedIssues.map((n) => `#${n}`).join(", ")}）`,
+        severity: "info",
       });
     }
   }
@@ -255,12 +322,33 @@ export async function getSpecificationStatus(
     }
   }
 
+  // Design validation
+  const designValidation = specification.designValidation
+    ? {
+        passed: specification.designValidation.passed,
+        warnings: specification.designValidation.warnings,
+        errors: specification.designValidation.errors,
+      }
+    : undefined;
+
+  // Coverage status: based on issue progress
+  let coverageStatus: "covered" | "partial" | "not-covered";
+  if (totalIssues === 0) {
+    coverageStatus = "not-covered";
+  } else if (completedIssues === totalIssues) {
+    coverageStatus = "covered";
+  } else {
+    coverageStatus = "partial";
+  }
+
   return {
     specification,
     requirement: req
       ? { id: req.id, title: req.title, status: req.status }
       : null,
+    designValidation,
     issueProgress: { total: totalIssues, completed: completedIssues },
+    coverageStatus,
   };
 }
 

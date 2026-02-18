@@ -49,6 +49,7 @@ describe("checkConsistency", () => {
 
     expect(warnings).toHaveLength(1);
     expect(warnings[0]).toEqual({
+      type: "all-specs-implemented",
       requirementId: "req-000001",
       specificationIds: ["spec-000001", "spec-000002"],
       message: expect.stringContaining("implemented"),
@@ -68,6 +69,7 @@ describe("checkConsistency", () => {
 
     expect(warnings).toHaveLength(1);
     expect(warnings[0]).toEqual({
+      type: "deprecated-with-active-specs",
       requirementId: "req-000001",
       specificationIds: ["spec-000001", "spec-000002"],
       message: expect.stringContaining("deprecated"),

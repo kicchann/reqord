@@ -1,7 +1,12 @@
 import type { Requirement } from "../schemas/requirement.js";
 import type { Specification } from "../schemas/specification.js";
 
+export type ConsistencyWarningType =
+  | "all-specs-implemented"
+  | "deprecated-with-active-specs";
+
 export type ConsistencyWarning = {
+  type: ConsistencyWarningType;
   requirementId: string;
   specificationIds: string[];
   message: string;
@@ -23,6 +28,7 @@ export function checkConsistency(
     const allImplemented = specs.every((s) => s.status === "implemented");
     if (allImplemented) {
       warnings.push({
+        type: "all-specs-implemented",
         requirementId: req.id,
         specificationIds: specs.map((s) => s.id),
         message: `All specifications are implemented but requirement ${req.id} is still approved`,
@@ -38,6 +44,7 @@ export function checkConsistency(
     );
     if (activeSpecs.length > 0) {
       warnings.push({
+        type: "deprecated-with-active-specs",
         requirementId: req.id,
         specificationIds: activeSpecs.map((s) => s.id),
         message: `Requirement ${req.id} is deprecated but has active specifications`,
