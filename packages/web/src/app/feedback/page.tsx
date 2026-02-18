@@ -22,7 +22,7 @@ async function FeedbackContent() {
     requirements.map((r) => [r.id, r.title]),
   );
   const specTitleMap: Record<string, string> = Object.fromEntries(
-    specifications.map((s) => [s.id, s.title]),
+    specifications.map((s) => [s.id, s.title ?? s.id]),
   );
 
   return (
