@@ -473,3 +473,23 @@ feedbacks:
       createdSpecifications: []
     syncedAt: 2026-02-18T14:41:24.029Z
     status: open
+  - githubIssue: 402
+    type: improvement
+    severity: medium
+    linkedTo:
+      requirements: []
+      createdRequirements: []
+      specifications: []
+      createdSpecifications: []
+    syncedAt: 2026-02-18T14:46:49.595Z
+    status: open
+  - githubIssue: 403
+    type: requirement-gap
+    severity: medium
+    linkedTo:
+      requirements: []
+      createdRequirements: []
+      specifications: []
+      createdSpecifications: []
+    syncedAt: 2026-02-18T14:46:53.590Z
+    status: open
