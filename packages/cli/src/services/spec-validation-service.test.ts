@@ -77,20 +77,20 @@ describe("validateSpecDesign", () => {
   it("design.mdが存在しない場合はerror", async () => {
     vi.mocked(specRepo.loadFile).mockResolvedValue(null);
 
-    const result = await validateSpecDesign("/tmp", "spec-000001");
+    const { validation } = await validateSpecDesign("/tmp", "spec-000001");
 
-    expect(result.errors).toBe(1);
-    expect(result.rules[0].ruleId).toBe("design-exists");
-    expect(result.rules[0].status).toBe("fail");
+    expect(validation.errors).toBe(1);
+    expect(validation.rules[0].ruleId).toBe("design-exists");
+    expect(validation.rules[0].status).toBe("fail");
   });
 
   it("正しい設計文書は全ルールpass", async () => {
     vi.mocked(specRepo.loadFile).mockResolvedValue(GOOD_DESIGN);
 
-    const result = await validateSpecDesign("/tmp", "spec-000001");
+    const { validation } = await validateSpecDesign("/tmp", "spec-000001");
 
-    expect(result.errors).toBe(0);
-    for (const rule of result.rules) {
+    expect(validation.errors).toBe(0);
+    for (const rule of validation.rules) {
       expect(rule.status).toBe("pass");
     }
   });
@@ -98,9 +98,9 @@ describe("validateSpecDesign", () => {
   it("必須セクション不足でdesign-sections warning", async () => {
     vi.mocked(specRepo.loadFile).mockResolvedValue("# 簡易設計\n\n内容");
 
-    const result = await validateSpecDesign("/tmp", "spec-000001");
+    const { validation } = await validateSpecDesign("/tmp", "spec-000001");
 
-    const sectionRule = result.rules.find(
+    const sectionRule = validation.rules.find(
       (r) => r.ruleId === "design-sections",
     );
     expect(sectionRule?.status).toBe("fail");
@@ -118,23 +118,78 @@ Command → Service → Repository
 `;
     vi.mocked(specRepo.loadFile).mockResolvedValue(design);
 
-    const result = await validateSpecDesign("/tmp", "spec-000001");
+    const { validation } = await validateSpecDesign("/tmp", "spec-000001");
 
-    const testRule = result.rules.find((r) => r.ruleId === "test-strategy");
+    const testRule = validation.rules.find((r) => r.ruleId === "test-strategy");
     expect(testRule?.status).toBe("fail");
     expect(testRule?.severity).toBe("warning");
   });
 
-  it("--json出力用の構造が正しい", async () => {
+  it("戻り値にvalidationとspecが含まれる", async () => {
     vi.mocked(specRepo.loadFile).mockResolvedValue(GOOD_DESIGN);
 
     const result = await validateSpecDesign("/tmp", "spec-000001");
 
-    expect(result).toHaveProperty("specId", "spec-000001");
-    expect(result).toHaveProperty("rules");
-    expect(result).toHaveProperty("passed");
-    expect(result).toHaveProperty("warnings");
-    expect(result).toHaveProperty("errors");
-    expect(result).toHaveProperty("validatedAt");
+    expect(result.validation).toHaveProperty("specId", "spec-000001");
+    expect(result.validation).toHaveProperty("rules");
+    expect(result.validation).toHaveProperty("passed");
+    expect(result.validation).toHaveProperty("warnings");
+    expect(result.validation).toHaveProperty("errors");
+    expect(result.validation).toHaveProperty("validatedAt");
+    expect(result.spec).toHaveProperty("id", "spec-000001");
+  });
+
+  it("criteria-6: technical.yaml のパースエラー時も検証が続行され、エラー原因が表示される", async () => {
+    vi.mocked(specRepo.loadFile).mockResolvedValue(GOOD_DESIGN);
+    vi.mocked(contextRepo.loadContextFile).mockImplementation(
+      async (_cwd, filename) => {
+        if (filename === "technical") {
+          throw new Error("YAMLパースエラー: unexpected token");
+        }
+        return null;
+      },
+    );
+
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+    const { validation } = await validateSpecDesign("/tmp", "spec-000001");
+
+    expect(validation.specId).toBe("spec-000001");
+    expect(validation.rules.length).toBeGreaterThan(0);
+    expect(warnSpy).toHaveBeenCalledWith(
+      expect.stringContaining("technical.yaml のパースに失敗しました"),
+    );
+    expect(warnSpy).toHaveBeenCalledWith(
+      expect.stringContaining("unexpected token"),
+    );
+
+    warnSpy.mockRestore();
+  });
+
+  it("criteria-6: structure.yaml のパースエラー時も検証が続行され、エラー原因が表示される", async () => {
+    vi.mocked(specRepo.loadFile).mockResolvedValue(GOOD_DESIGN);
+    vi.mocked(contextRepo.loadContextFile).mockImplementation(
+      async (_cwd, filename) => {
+        if (filename === "structure") {
+          throw new Error("YAMLパースエラー: invalid yaml");
+        }
+        return null;
+      },
+    );
+
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+    const { validation } = await validateSpecDesign("/tmp", "spec-000001");
+
+    expect(validation.specId).toBe("spec-000001");
+    expect(validation.rules.length).toBeGreaterThan(0);
+    expect(warnSpy).toHaveBeenCalledWith(
+      expect.stringContaining("structure.yaml のパースに失敗しました"),
+    );
+    expect(warnSpy).toHaveBeenCalledWith(
+      expect.stringContaining("invalid yaml"),
+    );
+
+    warnSpy.mockRestore();
   });
 });

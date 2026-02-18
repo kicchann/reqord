@@ -20,6 +20,11 @@ export interface DesignValidation {
   validatedAt: string;
 }
 
+export interface ValidateSpecDesignResult {
+  validation: DesignValidation;
+  spec: import("@reqord/shared").Specification;
+}
+
 const REQUIRED_SECTIONS = [
   "設計概要",
   "アーキテクチャ",
@@ -223,32 +228,51 @@ function checkDepConflict(
 export async function validateSpecDesign(
   cwd: string,
   specId: string,
-): Promise<DesignValidation> {
+): Promise<ValidateSpecDesignResult> {
   const spec = await specRepo.findByIdOrThrow(cwd, specId);
   const design = await specRepo.loadFile(cwd, specId, "design.md");
 
   if (!design) {
     return {
-      specId,
-      rules: [
-        {
-          ruleId: "design-exists",
-          ruleName: "設計文書存在",
-          severity: "error",
-          status: "fail",
-          message: "design.mdが存在しません",
-        },
-      ],
-      passed: 0,
-      warnings: 0,
-      errors: 1,
-      validatedAt: new Date().toISOString(),
+      validation: {
+        specId,
+        rules: [
+          {
+            ruleId: "design-exists",
+            ruleName: "設計文書存在",
+            severity: "error",
+            status: "fail",
+            message: "design.mdが存在しません",
+          },
+        ],
+        passed: 0,
+        warnings: 0,
+        errors: 1,
+        validatedAt: new Date().toISOString(),
+      },
+      spec,
     };
   }
 
-  // Load project context (optional)
-  const technical = await contextRepo.loadContextFile(cwd, "technical");
-  const structure = await contextRepo.loadContextFile(cwd, "structure");
+  // Load project context (optional) - errors are caught to avoid interrupting validation
+  let technical: unknown = null;
+  try {
+    technical = await contextRepo.loadContextFile(cwd, "technical");
+  } catch (err) {
+    console.warn(
+      `警告: technical.yaml のパースに失敗しました: ${err instanceof Error ? err.message : String(err)}`,
+    );
+  }
+
+  let structure: unknown = null;
+  try {
+    structure = await contextRepo.loadContextFile(cwd, "structure");
+  } catch (err) {
+    console.warn(
+      `警告: structure.yaml のパースに失敗しました: ${err instanceof Error ? err.message : String(err)}`,
+    );
+  }
+
   const allReqs = await reqRepo.findAll(cwd);
   const allSpecs = await specRepo.findAll(cwd);
 
@@ -270,11 +294,14 @@ export async function validateSpecDesign(
   ).length;
 
   return {
-    specId,
-    rules,
-    passed,
-    warnings,
-    errors,
-    validatedAt: new Date().toISOString(),
+    validation: {
+      specId,
+      rules,
+      passed,
+      warnings,
+      errors,
+      validatedAt: new Date().toISOString(),
+    },
+    spec,
   };
 }
