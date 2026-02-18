@@ -1,26 +1,26 @@
 id: req-000019
 version: '2.0'
 title: ステータス表示コマンド
-status: draft
+status: approved
 priority: medium
 createdAt: 2026-02-07T12:00:00Z
-updatedAt: 2026-02-18T00:00:00Z
+updatedAt: 2026-02-18T04:41:16.091Z
 versionHistory:
   - version: 1.0.0
-    changedAt: 2026-02-07T12:00:00Z
-    summary: 初版作成
     status: approved
     gitCommit: legacy
+    changedAt: 2026-02-07T12:00:00Z
+    summary: 初版作成
   - version: 1.0.1
-    changedAt: 2026-02-09T12:00:00Z
-    summary: 実装完了
     status: implemented
     gitCommit: legacy
+    changedAt: 2026-02-09T12:00:00Z
+    summary: 実装完了
   - version: 2.0.0
-    changedAt: 2026-02-18T00:00:00Z
-    summary: 'Feedback #16（ステータス整合性チェックルール具体化）を成功基準に追加'
     status: draft
     gitCommit: d0d2c84
+    changedAt: 2026-02-18T00:00:00Z
+    summary: 'Feedback #16（ステータス整合性チェックルール具体化）を成功基準に追加'
 files:
   description: requirements/req-000019/description.md
   supplementary: []
@@ -50,4 +50,10 @@ dependencies:
     - req-000013
 estimatedComplexity: small
 estimatedHours: 10
+currentApproval:
+  version: '2.0'
+  phase: requirement
+  prNumber: 368
+  prUrl: https://github.com/kicchann/reqord/pull/368
+  approvedBy: []
 flags: []
