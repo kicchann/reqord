@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import type { ProjectStatus, RequirementDetailStatus, SpecificationDetailStatus } from "../services/status-service.js";
+import type { ProjectStatus } from "../services/status-service.js";
 import { statusCommand } from "./status.js";
 
 vi.mock("../services/status-service.js", () => ({
