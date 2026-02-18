@@ -212,3 +212,49 @@ export async function validateImplementation(
     validatedAt: new Date().toISOString(),
   };
 }
+
+export interface ImplementConsistencyWarning {
+  type: "spec-not-implemented" | "issue-not-closed";
+  message: string;
+  details: {
+    id: string;
+    currentStatus: string;
+  };
+}
+
+export interface ImplementConsistencyResult {
+  warnings: ImplementConsistencyWarning[];
+}
+
+export async function checkImplementConsistency(
+  cwd: string,
+  reqId: string,
+): Promise<ImplementConsistencyResult> {
+  const specs = await specRepo.findAll(cwd);
+  const relatedSpecs = specs.filter((s) => s.requirementId === reqId);
+  const warnings: ImplementConsistencyWarning[] = [];
+
+  for (const spec of relatedSpecs) {
+    if (spec.status !== "implemented") {
+      warnings.push({
+        type: "spec-not-implemented",
+        message: `${spec.id} のステータスが ${spec.status} です（implementedではありません）`,
+        details: { id: spec.id, currentStatus: spec.status },
+      });
+    }
+
+    if (spec.implementation?.issues) {
+      for (const issue of spec.implementation.issues) {
+        if (issue.status !== "closed") {
+          warnings.push({
+            type: "issue-not-closed",
+            message: `#${issue.number} (${issue.title}) が ${issue.status} です`,
+            details: { id: String(issue.number), currentStatus: issue.status },
+          });
+        }
+      }
+    }
+  }
+
+  return { warnings };
+}

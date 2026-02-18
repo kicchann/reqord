@@ -3,7 +3,10 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 vi.mock("../repositories/specification.js", () => ({
   findByIdOrThrow: vi.fn(),
   loadFile: vi.fn(),
+  findAll: vi.fn(),
 }));
+
+vi.mock("../repositories/requirement.js", () => ({}));
 
 vi.mock("../repositories/file-system.js", () => ({
   joinPath: vi.fn((...parts: string[]) => parts.join("/")),
@@ -14,6 +17,7 @@ import {
   parseDesignPaths,
   determineOverallStatus,
   validateImplementation,
+  checkImplementConsistency,
 } from "./impl-validation-service.js";
 import type {
   IssueCheckResult,
@@ -101,6 +105,40 @@ Also see \`packages/cli/src/services/foo.ts\` for details.
 
   it("returns empty when no paths found", () => {
     const result = parseDesignPaths("No paths here, just text.");
+    expect(result.components).toEqual([]);
+    expect(result.tests).toEqual([]);
+  });
+
+  it("returns empty for template design.md content", () => {
+    const content = `# タイトル - 技術設計書
+
+## 1. 設計概要
+
+（ここに設計概要を記述）
+
+## 2. アーキテクチャ
+
+（ここにアーキテクチャ図を記述）
+
+## 3. コンポーネント設計
+
+（ここにコンポーネント設計を記述）
+
+## 4. データフロー
+
+（ここにデータフローを記述）
+
+## 5. テスト方針
+
+（ここにテスト方針を記述）
+`;
+    const result = parseDesignPaths(content);
+    expect(result.components).toEqual([]);
+    expect(result.tests).toEqual([]);
+  });
+
+  it("returns empty for empty string", () => {
+    const result = parseDesignPaths("");
     expect(result.components).toEqual([]);
     expect(result.tests).toEqual([]);
   });
@@ -241,6 +279,146 @@ describe("validateImplementation", () => {
     const result = await validateImplementation("/project", "spec-000003");
 
     expect(result.issueCheck.issues[0].state).toBe("in_progress");
+  });
+});
+
+describe("checkImplementConsistency", () => {
+  beforeEach(() => {
+    vi.resetAllMocks();
+  });
+
+  it("全Spec implemented + 全Issue closed → warnings空", async () => {
+    vi.mocked(specRepo.findAll).mockResolvedValue([
+      {
+        id: "spec-000001",
+        requirementId: "req-000001",
+        version: "1.0.0",
+        status: "implemented",
+        createdAt: "2024-01-01",
+        updatedAt: "2024-01-01",
+        versionHistory: [],
+        files: { design: "design.md", supplementary: [] },
+        flags: [],
+        implementation: {
+          issues: [
+            { number: 1, title: "Task 1", url: "http://x", priority: "P1" as const, status: "closed" as const },
+          ],
+          totalEstimatedHours: 5,
+          createdAt: "2024-01-01",
+        },
+      },
+    ]);
+
+    const result = await checkImplementConsistency("/project", "req-000001");
+    expect(result.warnings).toEqual([]);
+  });
+
+  it("一部Spec draft/approved → spec-not-implemented警告", async () => {
+    vi.mocked(specRepo.findAll).mockResolvedValue([
+      {
+        id: "spec-000001",
+        requirementId: "req-000001",
+        version: "1.0.0",
+        status: "approved",
+        createdAt: "2024-01-01",
+        updatedAt: "2024-01-01",
+        versionHistory: [],
+        files: { design: "design.md", supplementary: [] },
+        flags: [],
+      },
+    ]);
+
+    const result = await checkImplementConsistency("/project", "req-000001");
+    expect(result.warnings).toContainEqual(
+      expect.objectContaining({
+        type: "spec-not-implemented",
+        details: expect.objectContaining({ id: "spec-000001", currentStatus: "approved" }),
+      }),
+    );
+  });
+
+  it("一部Issue open → issue-not-closed警告", async () => {
+    vi.mocked(specRepo.findAll).mockResolvedValue([
+      {
+        id: "spec-000001",
+        requirementId: "req-000001",
+        version: "1.0.0",
+        status: "implemented",
+        createdAt: "2024-01-01",
+        updatedAt: "2024-01-01",
+        versionHistory: [],
+        files: { design: "design.md", supplementary: [] },
+        flags: [],
+        implementation: {
+          issues: [
+            { number: 42, title: "Open task", url: "http://x", priority: "P1" as const, status: "open" as const },
+          ],
+          totalEstimatedHours: 5,
+          createdAt: "2024-01-01",
+        },
+      },
+    ]);
+
+    const result = await checkImplementConsistency("/project", "req-000001");
+    expect(result.warnings).toContainEqual(
+      expect.objectContaining({
+        type: "issue-not-closed",
+        details: expect.objectContaining({ id: "42", currentStatus: "open" }),
+      }),
+    );
+  });
+
+  it("Spec 0件 → warnings空", async () => {
+    vi.mocked(specRepo.findAll).mockResolvedValue([]);
+
+    const result = await checkImplementConsistency("/project", "req-000001");
+    expect(result.warnings).toEqual([]);
+  });
+
+  it("deprecated Spec → spec-not-implemented警告が出る（意図的な動作）", async () => {
+    vi.mocked(specRepo.findAll).mockResolvedValue([
+      {
+        id: "spec-000001",
+        requirementId: "req-000001",
+        version: "1.0.0",
+        status: "deprecated",
+        createdAt: "2024-01-01",
+        updatedAt: "2024-01-01",
+        versionHistory: [],
+        files: { design: "design.md", supplementary: [] },
+        flags: [],
+      },
+    ]);
+
+    const result = await checkImplementConsistency("/project", "req-000001");
+    // deprecated specs are reported as "not implemented" — user should review
+    // whether the spec was superseded or still needs implementation
+    expect(result.warnings).toContainEqual(
+      expect.objectContaining({
+        type: "spec-not-implemented",
+        details: expect.objectContaining({ id: "spec-000001", currentStatus: "deprecated" }),
+      }),
+    );
+  });
+
+  it("implementationフィールドなし → Issueチェックスキップ", async () => {
+    vi.mocked(specRepo.findAll).mockResolvedValue([
+      {
+        id: "spec-000001",
+        requirementId: "req-000001",
+        version: "1.0.0",
+        status: "implemented",
+        createdAt: "2024-01-01",
+        updatedAt: "2024-01-01",
+        versionHistory: [],
+        files: { design: "design.md", supplementary: [] },
+        flags: [],
+      },
+    ]);
+
+    const result = await checkImplementConsistency("/project", "req-000001");
+    // No issue-not-closed warnings since implementation is undefined
+    expect(result.warnings.filter((w) => w.type === "issue-not-closed")).toEqual([]);
   });
 });
 
