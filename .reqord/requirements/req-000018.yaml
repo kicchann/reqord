@@ -7,7 +7,7 @@ createdAt: 2026-02-07T12:00:00Z
 updatedAt: 2026-02-18T04:41:05.797Z
 versionHistory:
   - version: 2.0.0
-    status: approved
+    status: pending_approval
     gitCommit: 4a1fcac
     changedAt: 2026-02-11T08:05:04.580Z
     summary: Status changed from draft to pending_approval

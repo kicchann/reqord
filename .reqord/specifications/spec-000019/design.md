@@ -246,14 +246,15 @@ function detectWarnings(
     }
 
     // --- 整合性チェック（@reqord/shared checkConsistency使用）--- (Feedback #16)
+    // checkConsistency() の ConsistencyWarning 型に type フィールドを追加する前提:
+    //   type ConsistencyWarningType = "all-specs-implemented" | "deprecated-with-active-specs";
+    //   type ConsistencyWarning = { ..., type: ConsistencyWarningType };
     const relatedSpecs = specifications.filter(s => s.requirementId === req.id);
     const consistencyWarnings = checkConsistency(req, relatedSpecs);
     for (const cw of consistencyWarnings) {
-      // checkConsistencyの結果をWarning型にマッピング
-      const type = cw.message.includes("implemented") ? "all-specs-implemented" : "deprecated-with-active-specs";
       warnings.push({
         id: req.id,
-        type,
+        type: cw.type,  // ConsistencyWarning.type を直接使用（メッセージ文字列判定ではない）
         message: cw.message,
         severity: "warning",
       });

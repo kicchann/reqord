@@ -336,7 +336,7 @@ reqord req implement req-000016
     → ステータスチェック: status === "approved" を確認
     → checkImplementConsistency(cwd, "req-000016")
       → specRepo.findByRequirementId(cwd, "req-000016") → 関連Spec取得
-      → 各SpecのstatusがimplementedかチェックS
+      → 各Specのstatusがimplementedかチェック
       → 各Specのimplementation.issuesのstatusがclosedかチェック
       → ImplementConsistencyResult返却
     → 警告があれば表示（処理はブロックしない）

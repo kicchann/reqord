@@ -25,6 +25,7 @@ packages/web/src/
   │   │   ├── flag-list.tsx                    (フラグ一覧セクション)
   │   │   └── flag-badge.tsx                   (フラグ種別バッジ)
   │   ├── feedback/                            (新規ディレクトリ)
+  │   │   ├── feedback-client-view.tsx         (フィルタ状態管理 - Client Component境界)
   │   │   ├── feedback-table.tsx               (一覧テーブル)
   │   │   ├── feedback-filters.tsx             (フィルタUI)
   │   │   └── feedback-linked-items.tsx        (関連Req/Specリンク表示)
@@ -157,8 +158,8 @@ interface FlagBadgeProps {
 
 interface FeedbackTableProps {
   feedbacks: FeedbackEntry[];
-  requirementTitles: Map<string, string>;
-  specificationTitles: Map<string, string>;
+  requirementTitles: Record<string, string>;
+  specificationTitles: Record<string, string>;
 }
 ```
 
@@ -210,8 +211,8 @@ interface FeedbackFilters {
 ```typescript
 interface FeedbackLinkedItemsProps {
   linkedTo: FeedbackLinkedTo;
-  requirementTitles: Map<string, string>;
-  specificationTitles: Map<string, string>;
+  requirementTitles: Record<string, string>;
+  specificationTitles: Record<string, string>;
 }
 ```
 
@@ -222,7 +223,7 @@ interface FeedbackLinkedItemsProps {
 
 ### 3.8 Feedbackページ (`app/feedback/page.tsx` - 新規)
 
-**責務:** Feedback一覧ページのServer Component。
+**責務:** Feedback一覧ページのServer Component。データ取得のみを担当し、Client Componentにデータを委譲する。
 
 ```typescript
 export const dynamic = "force-dynamic";
@@ -234,19 +235,64 @@ export default async function FeedbackPage() {
     getAllSpecifications(),
   ]);
 
-  const reqTitleMap = new Map(requirements.map(r => [r.id, r.title]));
-  const specTitleMap = new Map(specifications.map(s => [s.id, s.title]));
+  const reqTitleMap = Object.fromEntries(requirements.map(r => [r.id, r.title]));
+  const specTitleMap = Object.fromEntries(specifications.map(s => [s.id, s.title]));
 
   return (
     <div className="space-y-6 p-6">
       <h1 className="text-2xl font-bold">Feedback</h1>
-      <FeedbackFilters onFilterChange={...} activeFilters={...} />
-      <FeedbackTable
+      <FeedbackClientView
         feedbacks={feedbacks}
         requirementTitles={reqTitleMap}
         specificationTitles={specTitleMap}
       />
     </div>
+  );
+}
+```
+
+**注意:** `Map` はシリアライズ不可のため、Server → Client のprops受け渡しには `Record<string, string>` を使用する。
+
+### 3.8.1 FeedbackClientView (`components/feedback/feedback-client-view.tsx` - 新規)
+
+**責務:** フィルタ状態の管理とフィルタ済みデータの配信。Server ComponentとClient Componentの境界を担う。
+
+```typescript
+"use client";
+
+import { useState, useMemo } from "react";
+
+interface FeedbackClientViewProps {
+  feedbacks: FeedbackEntry[];
+  requirementTitles: Record<string, string>;
+  specificationTitles: Record<string, string>;
+}
+
+export function FeedbackClientView({
+  feedbacks,
+  requirementTitles,
+  specificationTitles,
+}: FeedbackClientViewProps) {
+  const [filters, setFilters] = useState<FeedbackFilters>({});
+
+  const filteredFeedbacks = useMemo(() => {
+    return feedbacks.filter(fb => {
+      if (filters.type && fb.type !== filters.type) return false;
+      if (filters.severity && fb.severity !== filters.severity) return false;
+      if (filters.status && fb.status !== filters.status) return false;
+      return true;
+    });
+  }, [feedbacks, filters]);
+
+  return (
+    <>
+      <FeedbackFilters activeFilters={filters} onFilterChange={setFilters} />
+      <FeedbackTable
+        feedbacks={filteredFeedbacks}
+        requirementTitles={requirementTitles}
+        specificationTitles={specificationTitles}
+      />
+    </>
   );
 }
 ```
