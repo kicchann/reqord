@@ -5,9 +5,20 @@ import { LocalFeedbackRepository } from "./local-feedback-repository";
 let instance: FeedbackRepository | null = null;
 
 function getFeedbackRepository(): FeedbackRepository {
-  if (!instance) {
-    instance = new LocalFeedbackRepository();
+  if (instance) {
+    return instance;
   }
+
+  const dataSource = process.env.REQORD_DATA_SOURCE ?? "local";
+
+  switch (dataSource) {
+    case "local":
+      instance = new LocalFeedbackRepository();
+      break;
+    default:
+      throw new Error(`Unknown REQORD_DATA_SOURCE: ${dataSource}`);
+  }
+
   return instance;
 }
 

@@ -31,6 +31,8 @@ function SegmentedButtons({
           <button
             key={opt}
             onClick={() => onChange(opt)}
+            aria-label={`${label} ${opt}`}
+            aria-pressed={value === opt}
             className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
               value === opt
                 ? "bg-blue-600 text-white"
