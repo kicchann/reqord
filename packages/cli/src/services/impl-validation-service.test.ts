@@ -337,6 +337,30 @@ describe("checkImplementConsistency", () => {
     );
   });
 
+  it("一部Spec deprecated → spec-not-implemented警告", async () => {
+    vi.mocked(specRepo.findAll).mockResolvedValue([
+      {
+        id: "spec-000001",
+        requirementId: "req-000001",
+        version: "1.0.0",
+        status: "deprecated",
+        createdAt: "2024-01-01",
+        updatedAt: "2024-01-01",
+        versionHistory: [],
+        files: { design: "design.md", supplementary: [] },
+        flags: [],
+      },
+    ]);
+
+    const result = await checkImplementConsistency("/project", "req-000001");
+    expect(result.warnings).toContainEqual(
+      expect.objectContaining({
+        type: "spec-not-implemented",
+        details: expect.objectContaining({ id: "spec-000001", currentStatus: "deprecated" }),
+      }),
+    );
+  });
+
   it("一部Issue open → issue-not-closed警告", async () => {
     vi.mocked(specRepo.findAll).mockResolvedValue([
       {
