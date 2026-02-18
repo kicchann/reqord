@@ -1,12 +1,19 @@
 id: spec-000014
 requirementId: req-000014
-title: '設計検証・要件カバレッジ'
+title: 設計検証・要件カバレッジ
 requirementVersion: '3.0'
 version: '1.0'
-status: draft
+status: approved
 createdAt: 2026-02-08T14:08:07.721Z
-updatedAt: 2026-02-08T14:08:07.721Z
+updatedAt: 2026-02-18T00:52:40.466Z
 versionHistory: []
 files:
   design: specifications/spec-000014/design.md
   supplementary: []
+flags: []
+currentApproval:
+  version: '1.0'
+  phase: specification
+  prNumber: 358
+  prUrl: https://github.com/kicchann/reqord/pull/358
+  approvedBy: []
