@@ -104,6 +104,40 @@ Also see \`packages/cli/src/services/foo.ts\` for details.
     expect(result.components).toEqual([]);
     expect(result.tests).toEqual([]);
   });
+
+  it("returns empty for template design.md content", () => {
+    const content = `# タイトル - 技術設計書
+
+## 1. 設計概要
+
+（ここに設計概要を記述）
+
+## 2. アーキテクチャ
+
+（ここにアーキテクチャ図を記述）
+
+## 3. コンポーネント設計
+
+（ここにコンポーネント設計を記述）
+
+## 4. データフロー
+
+（ここにデータフローを記述）
+
+## 5. テスト方針
+
+（ここにテスト方針を記述）
+`;
+    const result = parseDesignPaths(content);
+    expect(result.components).toEqual([]);
+    expect(result.tests).toEqual([]);
+  });
+
+  it("returns empty for empty string", () => {
+    const result = parseDesignPaths("");
+    expect(result.components).toEqual([]);
+    expect(result.tests).toEqual([]);
+  });
 });
 
 describe("determineOverallStatus", () => {
