@@ -1,6 +1,7 @@
 import React from "react";
+import type { Flag } from "@reqord/shared";
 
-type FlagType = "feedback-review" | "security-review" | "breaking-change";
+type FlagType = Flag["type"];
 
 const TYPE_STYLES: Record<FlagType, { bg: string; label: string }> = {
   "feedback-review": { bg: "bg-amber-100 text-amber-800", label: "Feedback Review" },

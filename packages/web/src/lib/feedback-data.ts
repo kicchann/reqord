@@ -1,9 +1,10 @@
 import type { FeedbackEntry } from "@reqord/shared";
+import type { FeedbackRepository } from "./feedback-repository";
 import { LocalFeedbackRepository } from "./local-feedback-repository";
 
-let instance: LocalFeedbackRepository | null = null;
+let instance: FeedbackRepository | null = null;
 
-function getFeedbackRepository(): LocalFeedbackRepository {
+function getFeedbackRepository(): FeedbackRepository {
   if (!instance) {
     instance = new LocalFeedbackRepository();
   }

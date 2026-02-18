@@ -11,9 +11,9 @@ export function FlagList({ flags }: { flags: Flag[] }) {
         Flags ({flags.length})
       </h2>
       <div className="space-y-3">
-        {flags.map((flag, i) => (
+        {flags.map((flag) => (
           <div
-            key={i}
+            key={`${flag.type}-${flag.createdAt}`}
             className="rounded-md border border-gray-100 bg-gray-50 p-3"
             data-testid="flag-item"
           >
