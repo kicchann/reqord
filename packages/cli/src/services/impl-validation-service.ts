@@ -1,5 +1,4 @@
 import * as specRepo from "../repositories/specification.js";
-import * as reqRepo from "../repositories/requirement.js";
 import * as fs from "../repositories/file-system.js";
 
 export interface IssueCheckResult {
