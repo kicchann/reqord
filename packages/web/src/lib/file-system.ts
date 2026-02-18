@@ -71,7 +71,7 @@ export function fixUnquotedHash(content: string, filePath: string): string {
       continue;
     }
 
-    if (/:\s+[>|]/.test(line)) {
+    if (/:\s+[>|][-+]?\s*$/.test(line)) {
       inBlockScalar = true;
       blockIndent = -1;
       fixedLines.push(line);
@@ -97,13 +97,13 @@ export function fixUnquotedHash(content: string, filePath: string): string {
       continue;
     }
 
-    const kvMatch = line.match(/^(\s*[\w-]+:\s+)(['"].*['"])\s*$/);
+    const kvMatch = line.match(/^(\s*[\w-]+:\s+)('.*'|".*")\s*$/);
     if (kvMatch) {
       fixedLines.push(line);
       continue;
     }
 
-    const listMatch = line.match(/^(\s*-\s+)(['"].*['"])\s*$/);
+    const listMatch = line.match(/^(\s*-\s+)('.*'|".*")\s*$/);
     if (listMatch) {
       fixedLines.push(line);
       continue;

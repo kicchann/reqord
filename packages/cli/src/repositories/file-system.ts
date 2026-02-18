@@ -86,7 +86,7 @@ export function fixUnquotedHash(content: string, filePath: string): string {
     }
 
     // Detect block scalar indicators (>-, |, >, |-)
-    if (/:\s+[>|]/.test(line)) {
+    if (/:\s+[>|][-+]?\s*$/.test(line)) {
       inBlockScalar = true;
       blockIndent = -1;
       fixedLines.push(line);
@@ -115,14 +115,14 @@ export function fixUnquotedHash(content: string, filePath: string): string {
     }
 
     // Check if it's a key-value line with quoted value
-    const kvMatch = line.match(/^(\s*[\w-]+:\s+)(['"].*['"])\s*$/);
+    const kvMatch = line.match(/^(\s*[\w-]+:\s+)('.*'|".*")\s*$/);
     if (kvMatch) {
       fixedLines.push(line);
       continue;
     }
 
     // Check if it's a list item with quoted value
-    const listMatch = line.match(/^(\s*-\s+)(['"].*['"])\s*$/);
+    const listMatch = line.match(/^(\s*-\s+)('.*'|".*")\s*$/);
     if (listMatch) {
       fixedLines.push(line);
       continue;

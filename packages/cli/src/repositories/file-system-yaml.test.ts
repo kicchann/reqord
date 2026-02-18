@@ -192,6 +192,23 @@ describe("fixUnquotedHash", () => {
     expect(result).not.toContain("'And more");
   });
 
+  it("does not treat '>' or '|' in mid-value as block scalar start", () => {
+    const input = "description: comparison a > b issue #42\npattern: regex|value #3 here\n";
+    const result = fixUnquotedHash(input, "test.yaml");
+    // These should be fixed (not skipped as block scalars)
+    expect(result).toContain("'comparison a > b issue #42'");
+    expect(result).toContain("'regex|value #3 here'");
+  });
+
+  it("does not fix mismatched quote pairs (e.g. single open, double close)", () => {
+    // A line like: summary: 'text with "inner" #42
+    // The value is NOT properly quoted — should be fixed
+    const input = 'summary: \'text with "inner" #42\n';
+    const result = fixUnquotedHash(input, "test.yaml");
+    // Should be treated as unquoted and fixed
+    expect(result).toContain("'");
+  });
+
   it("does not modify lines without ' #digit' pattern", () => {
     const input = "name: reqord\nversion: 1\n";
     const result = fixUnquotedHash(input, "test.yaml");
