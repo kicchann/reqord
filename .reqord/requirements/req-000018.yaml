@@ -1,10 +1,10 @@
 id: req-000018
 version: '4.0'
 title: 実装検証
-status: draft
+status: approved
 priority: low
 createdAt: 2026-02-07T12:00:00Z
-updatedAt: 2026-02-18T00:00:00Z
+updatedAt: 2026-02-18T04:41:05.797Z
 versionHistory:
   - version: 2.0.0
     status: approved
@@ -38,7 +38,9 @@ successCriteria:
   - テスト記述の有無が検証され、unit test / integration testのカバレッジが表示される
   - 検証結果が--jsonオプションで構造化出力され、CI連携が可能である
   - '--strict オプション使用時、Issue完了率100%・コンポーネント実装率100%・テストカバレッジ80%以上でない場合はexit code 1で終了する'
-  - reqord req implement 実行時に、対応する全Specificationがimplementedであるか・紐付きIssueが全てclosedであるかの整合性チェックが行われ、不整合があれば警告が表示される（Feedback #221）
+  - >-
+    reqord req implement
+    実行時に、対応する全Specificationがimplementedであるか・紐付きIssueが全てclosedであるかの整合性チェックが行われ、不整合があれば警告が表示される（Feedback
 format:
   type: user-story
   userStory:
@@ -54,3 +56,9 @@ dependencies:
 estimatedComplexity: medium
 estimatedHours: 12
 flags: []
+currentApproval:
+  version: '4.0'
+  phase: requirement
+  prNumber: 0
+  prUrl: ''
+  approvedBy: []
