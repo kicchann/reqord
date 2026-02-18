@@ -2,8 +2,8 @@ import Link from "next/link";
 import type { Requirement, Specification } from "@reqord/shared";
 import { StatusBadge, PriorityBadge, ComplexityBadge } from "@/components/ui/badge";
 import { FlagList } from "@/components/flags/flag-list";
-import { MarkdownRenderer } from "./markdown-renderer";
 import { DeleteButton } from "./delete-button";
+import { RequirementTabs } from "./requirement-tabs";
 
 export function RequirementDetail({
   requirement,
@@ -138,18 +138,6 @@ export function RequirementDetail({
         </div>
       ) : null}
 
-      {/* Success Criteria */}
-      {requirement.successCriteria.length > 0 ? (
-        <div className="rounded-lg border border-gray-200 bg-white p-4">
-          <h2 className="mb-2 text-sm font-semibold text-gray-700">Success Criteria</h2>
-          <ul className="list-inside list-disc space-y-1 text-sm">
-            {requirement.successCriteria.map((criterion, i) => (
-              <li key={i}>{criterion}</li>
-            ))}
-          </ul>
-        </div>
-      ) : null}
-
       {/* Flags */}
       {requirement.flags.length > 0 ? (
         <FlagList flags={requirement.flags} />
@@ -228,13 +216,11 @@ export function RequirementDetail({
         )}
       </div>
 
-      {/* Description (Markdown) */}
-      {description ? (
-        <div className="rounded-lg border border-gray-200 bg-white p-4">
-          <h2 className="mb-2 text-sm font-semibold text-gray-700">Description</h2>
-          <MarkdownRenderer content={description} />
-        </div>
-      ) : null}
+      {/* Success Criteria & Description Tabs */}
+      <RequirementTabs
+        successCriteria={requirement.successCriteria}
+        description={description}
+      />
     </div>
   );
 }

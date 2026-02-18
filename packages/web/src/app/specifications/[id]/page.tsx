@@ -12,7 +12,10 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   if (!specification) {
     return { title: "Not Found - Reqord" };
   }
-  return { title: `${specification.id} - Reqord` };
+  const title = specification.title
+    ? `${specification.id}: ${specification.title} - Reqord`
+    : `${specification.id} - Reqord`;
+  return { title };
 }
 
 export default async function SpecificationPage({
