@@ -433,3 +433,43 @@ feedbacks:
       createdSpecifications: []
     syncedAt: 2026-02-18T02:38:42.790Z
     status: open
+  - githubIssue: 398
+    type: improvement
+    severity: medium
+    linkedTo:
+      requirements: []
+      createdRequirements: []
+      specifications: []
+      createdSpecifications: []
+    syncedAt: 2026-02-18T14:40:54.671Z
+    status: open
+  - githubIssue: 399
+    type: improvement
+    severity: low
+    linkedTo:
+      requirements: []
+      createdRequirements: []
+      specifications: []
+      createdSpecifications: []
+    syncedAt: 2026-02-18T14:41:04.220Z
+    status: open
+  - githubIssue: 400
+    type: improvement
+    severity: medium
+    linkedTo:
+      requirements: []
+      createdRequirements: []
+      specifications: []
+      createdSpecifications: []
+    syncedAt: 2026-02-18T14:41:13.656Z
+    status: open
+  - githubIssue: 401
+    type: improvement
+    severity: medium
+    linkedTo:
+      requirements: []
+      createdRequirements: []
+      specifications: []
+      createdSpecifications: []
+    syncedAt: 2026-02-18T14:41:24.029Z
+    status: open
