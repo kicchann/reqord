@@ -11,6 +11,10 @@ versionHistory:
     gitCommit: legacy
     changedAt: 2026-02-09T12:00:00Z
     summary: 初版作成・実装完了
+  - version: 2.0.0
+    status: draft
+    changedAt: 2026-02-18T00:00:00Z
+    summary: Feedback #169（Flags UI表示）・#170（Feedback一覧表示）を成功基準に追加
 files:
   description: requirements/req-000022/description.md
   supplementary: []
@@ -19,8 +23,8 @@ successCriteria:
   - インタラクティブな依存関係グラフが表示される
   - Gantt ChartでIssue進捗とクリティカルパスが可視化される
   - Specification詳細画面（Research/Design/Coverage/Issues/History タブ）が表示される
-  - Requirement/Specificationの詳細画面でflagsが一覧表示され、feedback-reviewフラグの存在に気づける（Feedback
-  - GitHub Issueに登録されたfeedbackがUI上で一覧・詳細表示でき、関連Requirement/Specificationとの紐付けが確認できる（Feedback
+  - Requirement/Specificationの詳細画面でflagsが一覧表示され、feedback-reviewフラグの存在に気づける（Feedback #169）
+  - GitHub Issueに登録されたfeedbackがUI上で一覧・詳細表示でき、関連Requirement/Specificationとの紐付けが確認できる（Feedback #170）
 format:
   type: user-story
   userStory:
