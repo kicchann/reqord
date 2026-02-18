@@ -153,11 +153,11 @@ export function SpecificationTable({
                       className="text-blue-600 hover:text-blue-800 hover:underline"
                     >
                       <span className="font-mono">{spec.requirementId}</span>
-                      {requirementTitleMap[spec.requirementId] && (
-                        <span className="ml-2 text-gray-600">
-                          {requirementTitleMap[spec.requirementId]}
-                        </span>
-                      )}
+                      <span className="ml-2 text-gray-600">
+                        {requirementTitleMap[spec.requirementId] || (
+                          <span className="italic text-gray-400">Untitled</span>
+                        )}
+                      </span>
                     </Link>
                   </td>
                   <td className="whitespace-nowrap px-4 py-3">

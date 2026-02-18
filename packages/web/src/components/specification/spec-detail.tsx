@@ -26,7 +26,12 @@ export function SpecDetail({
           {" / "}
           <span className="font-mono">{specification.id}</span>
         </p>
-        <h1 className="mt-1 text-2xl font-bold font-mono">{specification.id}</h1>
+        <h1 className="mt-1 text-2xl font-bold">
+          <span className="font-mono">{specification.id}</span>
+          {specification.title && (
+            <span className="ml-3 font-sans text-gray-700">{specification.title}</span>
+          )}
+        </h1>
       </div>
 
       {/* Badge */}
