@@ -50,10 +50,10 @@ dependencies:
     - req-000013
 estimatedComplexity: small
 estimatedHours: 10
-flags: []
 currentApproval:
   version: '2.0'
   phase: requirement
-  prNumber: 0
-  prUrl: ''
+  prNumber: 368
+  prUrl: https://github.com/kicchann/reqord/pull/368
   approvedBy: []
+flags: []
