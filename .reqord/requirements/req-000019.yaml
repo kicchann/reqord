@@ -1,26 +1,26 @@
 id: req-000019
 version: '2.0'
 title: ステータス表示コマンド
-status: draft
+status: approved
 priority: medium
 createdAt: 2026-02-07T12:00:00Z
-updatedAt: 2026-02-18T00:00:00Z
+updatedAt: 2026-02-18T04:41:16.091Z
 versionHistory:
   - version: 1.0.0
-    changedAt: 2026-02-07T12:00:00Z
-    summary: 初版作成
     status: approved
     gitCommit: legacy
+    changedAt: 2026-02-07T12:00:00Z
+    summary: 初版作成
   - version: 1.0.1
-    changedAt: 2026-02-09T12:00:00Z
-    summary: 実装完了
     status: implemented
     gitCommit: legacy
+    changedAt: 2026-02-09T12:00:00Z
+    summary: 実装完了
   - version: 2.0.0
-    changedAt: 2026-02-18T00:00:00Z
-    summary: 'Feedback #16（ステータス整合性チェックルール具体化）を成功基準に追加'
     status: draft
     gitCommit: d0d2c84
+    changedAt: 2026-02-18T00:00:00Z
+    summary: 'Feedback #16（ステータス整合性チェックルール具体化）を成功基準に追加'
 files:
   description: requirements/req-000019/description.md
   supplementary: []
@@ -29,7 +29,7 @@ successCriteria:
   - reqord status <req-id> でRequirementの詳細ステータスが表示される
   - reqord status <spec-id> でSpecificationの詳細ステータスが表示される
   - Requirements/Specifications/Issues の進捗が数値とプログレスバーで表示される
-  - Requirement/Specification間のステータス整合性チェックが実行され、不整合が警告表示される（@reqord/shared checkConsistencyルールを使用。Feedback #16）
+  - Requirement/Specification間のステータス整合性チェックが実行され、不整合が警告表示される（@reqord/shared checkConsistencyルールを使用。Feedback
   - '整合性チェックルール(1): 全関連SpecがimplementedだがReqがapproved → 警告'
   - '整合性チェックルール(2): Reqがdeprecatedだが関連Specがactive → 警告'
   - '整合性チェックルール(3): feedback-reviewフラグあり → 情報表示'
@@ -51,3 +51,9 @@ dependencies:
 estimatedComplexity: small
 estimatedHours: 10
 flags: []
+currentApproval:
+  version: '2.0'
+  phase: requirement
+  prNumber: 0
+  prUrl: ''
+  approvedBy: []
