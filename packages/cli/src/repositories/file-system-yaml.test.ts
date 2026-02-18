@@ -1,8 +1,8 @@
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { mkdtemp, readFile, writeFile, rm } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
-import { readYAML, writeYAML } from "./file-system.js";
+import { readYAML, writeYAML, fixUnquotedHash } from "./file-system.js";
 
 let tmpDir: string;
 
@@ -142,6 +142,102 @@ describe("writeYAML", () => {
     const content = await readFile(filePath, "utf-8");
     expect(content).toContain("2026-01-15T10:30:00Z");
     expect(content).toContain("2026-02-01");
+  });
+});
+
+describe("fixUnquotedHash", () => {
+  it("fixes unquoted ' #digit' in key-value lines", () => {
+    const input = "summary: Fixed issue（Feedback #169）\n";
+    const result = fixUnquotedHash(input, "test.yaml");
+    expect(result).toBe("summary: 'Fixed issue（Feedback #169）'\n");
+  });
+
+  it("fixes unquoted ' #digit' in list items", () => {
+    const input = "items:\n  - Resolved bug #42 in module\n";
+    const result = fixUnquotedHash(input, "test.yaml");
+    expect(result).toContain("  - 'Resolved bug #42 in module'");
+  });
+
+  it("escapes single quotes in values when fixing", () => {
+    const input = "summary: It's issue #123 here\n";
+    const result = fixUnquotedHash(input, "test.yaml");
+    expect(result).toBe("summary: 'It''s issue #123 here'\n");
+  });
+
+  it("does not modify already-quoted values (single quotes)", () => {
+    const input = "summary: 'Fixed issue #169'\n";
+    const result = fixUnquotedHash(input, "test.yaml");
+    expect(result).toBe("summary: 'Fixed issue #169'\n");
+  });
+
+  it("does not modify already-quoted values (double quotes)", () => {
+    const input = 'summary: "Fixed issue #169"\n';
+    const result = fixUnquotedHash(input, "test.yaml");
+    expect(result).toBe('summary: "Fixed issue #169"\n');
+  });
+
+  it("does not modify comment lines", () => {
+    const input = "# This is a comment #123\n";
+    const result = fixUnquotedHash(input, "test.yaml");
+    expect(result).toBe("# This is a comment #123\n");
+  });
+
+  it("does not modify block scalar continuation lines", () => {
+    const input = "description: >-\n  This has #1 inside block\n  And more #2 text\nnext: value\n";
+    const result = fixUnquotedHash(input, "test.yaml");
+    expect(result).toContain("  This has #1 inside block");
+    expect(result).toContain("  And more #2 text");
+    // These lines should NOT be quoted
+    expect(result).not.toContain("'This has");
+    expect(result).not.toContain("'And more");
+  });
+
+  it("does not modify lines without ' #digit' pattern", () => {
+    const input = "name: reqord\nversion: 1\n";
+    const result = fixUnquotedHash(input, "test.yaml");
+    expect(result).toBe("name: reqord\nversion: 1\n");
+  });
+
+  it("emits console.warn when fixing", () => {
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    fixUnquotedHash("summary: Issue #42\n", "test.yaml");
+    expect(warnSpy).toHaveBeenCalledOnce();
+    expect(warnSpy.mock.calls[0][0]).toContain("test.yaml");
+    warnSpy.mockRestore();
+  });
+
+  it("does not emit console.warn when no fix needed", () => {
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    fixUnquotedHash("name: reqord\n", "test.yaml");
+    expect(warnSpy).not.toHaveBeenCalled();
+    warnSpy.mockRestore();
+  });
+});
+
+describe("readYAML with unquoted hash auto-fix", () => {
+  it("reads data correctly when unquoted ' #digit' is present", async () => {
+    const filePath = join(tmpDir, "unquoted-hash.yaml");
+    await writeFile(filePath, "summary: Fixed issue #169 in module\nstatus: done\n", "utf-8");
+
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const result = await readYAML<{ summary: string; status: string }>(filePath);
+
+    expect(result.summary).toBe("Fixed issue #169 in module");
+    expect(result.status).toBe("done");
+    expect(warnSpy).toHaveBeenCalled();
+    warnSpy.mockRestore();
+  });
+
+  it("reads quoted values without modification", async () => {
+    const filePath = join(tmpDir, "quoted-hash.yaml");
+    await writeFile(filePath, "summary: 'Fixed issue #169'\n", "utf-8");
+
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const result = await readYAML<{ summary: string }>(filePath);
+
+    expect(result.summary).toBe("Fixed issue #169");
+    expect(warnSpy).not.toHaveBeenCalled();
+    warnSpy.mockRestore();
   });
 });
 
