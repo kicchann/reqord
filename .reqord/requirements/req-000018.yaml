@@ -38,9 +38,7 @@ successCriteria:
   - テスト記述の有無が検証され、unit test / integration testのカバレッジが表示される
   - 検証結果が--jsonオプションで構造化出力され、CI連携が可能である
   - '--strict オプション使用時、Issue完了率100%・コンポーネント実装率100%・テストカバレッジ80%以上でない場合はexit code 1で終了する'
-  - >-
-    reqord req implement
-    実行時に、対応する全Specificationがimplementedであるか・紐付きIssueが全てclosedであるかの整合性チェックが行われ、不整合があれば警告が表示される（Feedback
+  - 'reqord req implement 実行時に、対応する全Specificationがimplementedであるか・紐付きIssueが全てclosedであるかの整合性チェックが行われ、不整合があれば警告が表示される（Feedback #221）'
 format:
   type: user-story
   userStory:
