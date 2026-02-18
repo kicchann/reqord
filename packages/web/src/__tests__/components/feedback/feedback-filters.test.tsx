@@ -3,7 +3,7 @@ import React from "react";
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { render, screen, cleanup, fireEvent } from "@testing-library/react";
 import "@testing-library/jest-dom/vitest";
-import { FeedbackFilters, type FeedbackFilterState } from "../../../components/feedback/feedback-filters";
+import { FeedbackFilters } from "../../../components/feedback/feedback-filters";
 
 describe("FeedbackFilters", () => {
   afterEach(() => cleanup());
