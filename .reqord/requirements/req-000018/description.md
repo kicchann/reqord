@@ -47,6 +47,17 @@ Implementation Validation: spec-001
 - `--strict` で全項目通過必須モード（CI向け）
   - Issue完了率100%・コンポーネント実装率100%・テストカバレッジ80%以上でない場合はexit code 1
 
+### reqord req implement 時のステータス整合性チェック（Feedback #221）
+
+`reqord req implement` 実行時に、以下の整合性チェックを行い、不整合があれば警告を表示する:
+
+- 対応する全Specificationが `implemented` であるかを確認
+  - `implemented` でないSpecがある場合は警告表示（ブロックはしない）
+- 紐付きGitHub Issueが全て `closed` であるかを確認
+  - `open` のIssueがある場合は警告表示
+
+**自動ステータス変更は行わない。** 警告表示のみでユーザーの判断に委ねる（human-in-the-loop）。
+
 ## 技術的制約
 
 - GitHub API + ファイルシステム走査を併用

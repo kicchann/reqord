@@ -1,10 +1,10 @@
 id: req-000018
-version: '3.0'
+version: '4.0'
 title: 実装検証
-status: implemented
+status: draft
 priority: low
 createdAt: 2026-02-07T12:00:00Z
-updatedAt: 2026-02-11T08:05:04.761Z
+updatedAt: 2026-02-18T00:00:00Z
 versionHistory:
   - version: 2.0.0
     status: approved
@@ -18,6 +18,14 @@ versionHistory:
     summary: Status changed from pending_approval to approved
     approvedAt: 2026-02-11T08:05:04.762Z
     approvedBy: []
+  - version: 3.0.1
+    status: implemented
+    changedAt: 2026-02-12T00:00:00Z
+    summary: 実装完了
+  - version: 4.0.0
+    status: draft
+    changedAt: 2026-02-18T00:00:00Z
+    summary: Feedback #221（req implement時のステータス整合性チェック）を成功基準に追加
 files:
   description: requirements/req-000018/description.md
   supplementary: []
@@ -28,6 +36,7 @@ successCriteria:
   - テスト記述の有無が検証され、unit test / integration testのカバレッジが表示される
   - 検証結果が--jsonオプションで構造化出力され、CI連携が可能である
   - '--strict オプション使用時、Issue完了率100%・コンポーネント実装率100%・テストカバレッジ80%以上でない場合はexit code 1で終了する'
+  - reqord req implement 実行時に、対応する全Specificationがimplementedであるか・紐付きIssueが全てclosedであるかの整合性チェックが行われ、不整合があれば警告が表示される（Feedback #221）
 format:
   type: user-story
   userStory:
@@ -42,10 +51,4 @@ dependencies:
   relatedTo: []
 estimatedComplexity: medium
 estimatedHours: 12
-flags:
-  - type: feedback-review
-    reason: 'Feedback from issue #221'
-    createdAt: 2026-02-12T22:05:51.814Z
-    relatedIssues:
-      - 221
-    severity: medium
+flags: []
