@@ -4,7 +4,7 @@
 
 プロジェクト全体および個別のRequirement/Specificationの進捗状況を俯瞰的に表示するコマンド。ステータス整合性チェックにより、Req/Spec間の不整合を警告する。
 
-> **実装予定機能**: Req/Specステータス整合性チェック・警告表示（Feedback #16）。整合性ルールはreq-000004（shared）で定義。自動ステータス変更は行わず、警告表示でhuman-in-the-loopを維持。
+> **Feedback #16対応**: Req/Specステータス整合性チェック・警告表示。整合性ルールは@reqord/shared `checkConsistency`で定義済み。CLIの`detectWarnings`が`checkConsistency`を呼び出し、全ルールを統合する必要あり。自動ステータス変更は行わず、警告表示でhuman-in-the-loopを維持。
 
 ## ユーザーストーリー
 
@@ -45,9 +45,9 @@ Specification個別の詳細ステータス:
 - 親Requirementとの整合性チェック
 - Issue進捗（完了/進行中/ブロック）
 
-## ステータス整合性チェック（計画中）
+## ステータス整合性チェック（Feedback #16）
 
-req-000004（shared）で定義されたルールに基づき、以下の不整合を検出・警告する:
+@reqord/shared `checkConsistency` で定義されたルールに基づき、以下の不整合を検出・警告する。CLIの`status-service.ts` `detectWarnings`から`checkConsistency`を呼び出して統合する:
 
 | 条件 | 警告レベル | メッセージ |
 |------|-----------|----------|
