@@ -1,6 +1,7 @@
 import { Command } from "commander";
 import chalk from "chalk";
 import { validateSpecDesign } from "../../services/spec-validation-service.js";
+import * as specRepo from "../../repositories/specification.js";
 import { handleError } from "../../utils/error-handler.js";
 
 export const specValidateCommand = new Command("validate")
@@ -11,7 +12,26 @@ export const specValidateCommand = new Command("validate")
     const cwd = process.cwd();
 
     try {
-      const result = await validateSpecDesign(cwd, id);
+      const { validation: result, spec } = await validateSpecDesign(cwd, id);
+
+      // Persist validation result to spec's designValidation field
+      await specRepo.save(cwd, {
+        ...spec,
+        designValidation: {
+          passed: result.passed,
+          warnings: result.warnings,
+          errors: result.errors,
+          // location is excluded intentionally: DesignValidationRuleSchema (shared)
+          // does not include it. Location info is display-only, not persisted.
+          rules: result.rules.map((r) => ({
+            ruleId: r.ruleId,
+            status: r.status,
+            severity: r.severity,
+            message: r.message,
+          })),
+          validatedAt: result.validatedAt,
+        },
+      });
 
       if (options.json) {
         console.log(JSON.stringify(result, null, 2));
