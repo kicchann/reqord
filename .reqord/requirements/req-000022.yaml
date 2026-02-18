@@ -1,7 +1,7 @@
 id: req-000022
 version: '2.0'
 title: Web UI拡張 (Dashboard・依存グラフ・Gantt Chart)
-status: draft
+status: approved
 priority: medium
 createdAt: 2026-02-07T12:00:00Z
 updatedAt: 2026-02-18T00:00:00Z

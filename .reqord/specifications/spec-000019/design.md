@@ -4,6 +4,8 @@
 
 `reqord status` コマンドにより、プロジェクト全体の進捗ダッシュボードを提供する。Requirements・Specifications・GitHub Issuesの各カテゴリのステータス集計とASCIIプログレスバーで視覚的に進捗を表示する。`reqord status <req-id>` で要件単位の詳細ステータス（関連Specification・Gap Analysis結果）、`reqord status <spec-id>` で仕様単位の詳細（カバレッジ・Issue進捗）を表示する。`--json` と `--quiet`（CI用の数値のみ出力）オプションをサポートする。
 
+Requirement/Specification間のステータス整合性チェックは `@reqord/shared` の `checkConsistency()` ルールを使用し、不整合を警告表示する（Feedback #16）。また、`feedback-review` フラグを持つRequirement/Specificationについて情報表示を行う。
+
 ## 2. アーキテクチャ
 
 ```
@@ -18,6 +20,7 @@ Repository:     repositories/requirement.ts       (既存)
 Shared:         @reqord/shared
                   schemas/requirement.ts          (既存: gapAnalysisフィールド参照)
                   schemas/specification.ts        (既存: implementationフィールド参照)
+                  rules/consistency.ts            (既存: checkConsistency)
                     ↓
 Storage:        .reqord/requirements/req-NNNNNN.yaml
                 .reqord/specifications/spec-NNNNNN.yaml
@@ -75,6 +78,11 @@ Issues:
   - req-000010: Gap Analysisが未実行です
   - spec-000014: 設計検証が失敗しています（1 error）
   - req-000012: 依存先 req-000011 が未承認です
+  - req-000016: 全関連Specificationがimplementedですが、Requirementがapprovedのままです
+  - req-000020: deprecatedですが、関連Specificationがactiveです
+
+ℹ 情報:
+  - req-000015: フィードバックレビュー待ち: セキュリティ関連の指摘（関連Issue: #42, #43）
 ```
 
 ### 3.3 StatusService (`services/status-service.ts` - 新規)
@@ -105,8 +113,10 @@ export interface IssueSummary {
 
 export interface Warning {
   id: string;
-  type: "gap-missing" | "validation-failed" | "blocked-dependency" | "no-specification";
+  type: "gap-missing" | "validation-failed" | "blocked-dependency" | "no-specification"
+    | "all-specs-implemented" | "deprecated-with-active-specs" | "feedback-review";
   message: string;
+  severity: "warning" | "info";  // warningはデフォルト、feedback-reviewはinfo
 }
 
 export async function getProjectStatus(cwd: string): Promise<ProjectStatus>;
@@ -192,6 +202,8 @@ export interface SpecificationDetailStatus {
 ### 3.6 警告検出ロジック
 
 ```typescript
+import { checkConsistency } from "@reqord/shared";
+
 function detectWarnings(
   requirements: Requirement[],
   specifications: Specification[],
@@ -205,6 +217,7 @@ function detectWarnings(
         id: req.id,
         type: "gap-missing",
         message: `Gap Analysisが未実行です`,
+        severity: "warning",
       });
     }
 
@@ -215,6 +228,7 @@ function detectWarnings(
         id: req.id,
         type: "no-specification",
         message: `Specificationが作成されていません`,
+        severity: "warning",
       });
     }
 
@@ -226,8 +240,34 @@ function detectWarnings(
           id: req.id,
           type: "blocked-dependency",
           message: `依存先 ${depId} が未承認です（現在: ${dep.status}）`,
+          severity: "warning",
         });
       }
+    }
+
+    // --- 整合性チェック（@reqord/shared checkConsistency使用）--- (Feedback #16)
+    const relatedSpecs = specifications.filter(s => s.requirementId === req.id);
+    const consistencyWarnings = checkConsistency(req, relatedSpecs);
+    for (const cw of consistencyWarnings) {
+      // checkConsistencyの結果をWarning型にマッピング
+      const type = cw.message.includes("implemented") ? "all-specs-implemented" : "deprecated-with-active-specs";
+      warnings.push({
+        id: req.id,
+        type,
+        message: cw.message,
+        severity: "warning",
+      });
+    }
+
+    // --- feedback-reviewフラグ情報表示 --- (Feedback #16)
+    const feedbackFlags = req.flags?.filter(f => f.type === "feedback-review") ?? [];
+    for (const flag of feedbackFlags) {
+      warnings.push({
+        id: req.id,
+        type: "feedback-review",
+        message: `フィードバックレビュー待ち: ${flag.reason}（関連Issue: ${flag.relatedIssues.map(n => `#${n}`).join(", ")}）`,
+        severity: "info",
+      });
     }
   }
 
@@ -238,6 +278,18 @@ function detectWarnings(
         id: spec.id,
         type: "validation-failed",
         message: `設計検証が失敗しています（${spec.designValidation.errors} error）`,
+        severity: "warning",
+      });
+    }
+
+    // --- Specificationのfeedback-reviewフラグ情報表示 --- (Feedback #16)
+    const specFeedbackFlags = spec.flags?.filter(f => f.type === "feedback-review") ?? [];
+    for (const flag of specFeedbackFlags) {
+      warnings.push({
+        id: spec.id,
+        type: "feedback-review",
+        message: `フィードバックレビュー待ち: ${flag.reason}（関連Issue: ${flag.relatedIssues.map(n => `#${n}`).join(", ")}）`,
+        severity: "info",
       });
     }
   }
@@ -319,6 +371,15 @@ function renderProgressBar(percentage: number, width: number = 20): string {
   - 未承認の依存先がある要件
   - Specificationが存在しない非draft要件
   - 設計検証エラーがあるSpecification
+  - 整合性チェック（checkConsistency統合）:
+    - 全関連SpecがimplementedだがReqがapproved → `all-specs-implemented` 警告
+    - Reqがdeprecatedだが関連Specがdraft/approved → `deprecated-with-active-specs` 警告
+    - Specが0件の場合: 整合性警告なし
+  - feedback-reviewフラグ検出:
+    - Requirementにfeedback-reviewフラグ → `feedback-review` info表示
+    - Specificationにfeedback-reviewフラグ → `feedback-review` info表示
+    - フラグなし: 情報表示なし
+    - severity: "info"であること（"warning"ではない）
 - **renderProgressBar**: 0%, 50%, 100%での正しいバー生成
 - **routeStatus**: req-NNNNNN/spec-NNNNNNの正しいルーティング、不正ID時のエラー
 
@@ -344,3 +405,13 @@ function renderProgressBar(percentage: number, width: number = 20): string {
 
 **決定:** ステータス表示時に自動的に警告を検出・表示
 **理由:** ユーザーが個別の検証コマンド（validate, coverage等）を実行しなくても、`reqord status` だけでプロジェクトの潜在的な問題を把握できるようにする。ただし、警告検出はローカルデータのみを使用し、外部API呼び出しは行わない。
+
+### @reqord/shared checkConsistencyルールの統合（Feedback #16）
+
+**決定:** `detectWarnings` 内で `@reqord/shared` の `checkConsistency()` を呼び出し、その結果をWarning型にマッピングする
+**理由:** 整合性チェックロジックを `@reqord/shared` に集約することで、CLI（status-service）とWeb（dashboard-data）の両方で同一ルールを再利用可能にする。`checkConsistency` は純粋関数であり、Requirement + Specification[] を受け取って `ConsistencyWarning[]` を返すため、呼び出し元を選ばない。
+
+### feedback-reviewフラグの情報表示レベル
+
+**決定:** `feedback-review` フラグの表示は `severity: "info"` とし、警告（warning）とは区別して表示する
+**理由:** フィードバックレビューは「対応が必要な問題」ではなく「レビュー待ちの情報」であり、他の警告（整合性エラー、未承認依存等）とは性質が異なる。info レベルとすることで、ユーザーが緊急度を正しく判断できる。表示時にはアイコン（`ℹ`）と色分けで警告（`⚠`）と区別する。
