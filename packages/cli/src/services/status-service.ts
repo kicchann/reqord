@@ -23,7 +23,6 @@ export interface Warning {
     | "no-specification"
     | "blocked-dependency"
     | "status-inconsistency"
-    | "gap-missing"
     | "validation-failed"
     | "all-specs-implemented"
     | "deprecated-with-active-specs"
@@ -47,12 +46,6 @@ export interface RequirementDetailStatus {
     title?: string;
     status: string;
   }>;
-  gapAnalysis: {
-    hasAnalysis: boolean;
-    coverage?: "full" | "partial" | "none";
-    missingCount?: number;
-    conflictCount?: number;
-  };
   dependencyStatus: Array<{
     id: string;
     title: string;
@@ -82,18 +75,6 @@ export interface SpecificationDetailStatus {
     completed: number;
   };
   coverageStatus: "covered" | "partial" | "not-covered";
-}
-
-function hasGapAnalysis(
-  req: Requirement,
-): req is Requirement & {
-  gapAnalysis: { coverage?: string; missingCount?: number; conflictCount?: number };
-} {
-  return (
-    "gapAnalysis" in req &&
-    req.gapAnalysis != null &&
-    typeof req.gapAnalysis === "object"
-  );
 }
 
 export function buildStatusSummary(
@@ -136,20 +117,21 @@ export function detectWarnings(
   const warnings: Warning[] = [];
 
   for (const req of requirements) {
-    if (req.status === "deprecated") continue;
-
-    // Gap Analysisが未実行の承認済み要件
-    if (
-      !("gapAnalysis" in req && req.gapAnalysis) &&
-      req.status === "approved"
-    ) {
+    // checkConsistency runs before deprecated skip to detect deprecated-with-active-specs
+    const relatedSpecs = specifications.filter(
+      (s) => s.requirementId === req.id,
+    );
+    const consistencyWarnings = checkConsistency(req, relatedSpecs);
+    for (const cw of consistencyWarnings) {
       warnings.push({
         id: req.id,
-        type: "gap-missing",
-        message: `Gap Analysisが未実行です`,
+        type: cw.type,
+        message: cw.message,
         severity: "warning",
       });
     }
+
+    if (req.status === "deprecated") continue;
 
     // Specificationが存在しない非draft要件
     const hasSpec = specifications.some(
@@ -175,20 +157,6 @@ export function detectWarnings(
           severity: "warning",
         });
       }
-    }
-
-    // checkConsistency integration from @reqord/shared
-    const relatedSpecs = specifications.filter(
-      (s) => s.requirementId === req.id,
-    );
-    const consistencyWarnings = checkConsistency(req, relatedSpecs);
-    for (const cw of consistencyWarnings) {
-      warnings.push({
-        id: req.id,
-        type: cw.type,
-        message: cw.message,
-        severity: "warning",
-      });
     }
 
     // feedback-review flag detection
@@ -330,25 +298,9 @@ export async function getRequirementStatus(
     }
   }
 
-  // gapAnalysis from requirement (if it has the field via extended schema)
-  const gapAnalysis: RequirementDetailStatus["gapAnalysis"] =
-    hasGapAnalysis(requirement)
-      ? {
-          hasAnalysis: true,
-          coverage: requirement.gapAnalysis.coverage as
-            | "full"
-            | "partial"
-            | "none"
-            | undefined,
-          missingCount: requirement.gapAnalysis.missingCount,
-          conflictCount: requirement.gapAnalysis.conflictCount,
-        }
-      : { hasAnalysis: false };
-
   return {
     requirement,
     specifications,
-    gapAnalysis,
     dependencyStatus,
     issueProgress: { total: totalIssues, completed: completedIssues },
   };

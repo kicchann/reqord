@@ -73,7 +73,7 @@ describe("status command", () => {
           flags: [],
         },
         specifications: [],
-        gapAnalysis: { hasAnalysis: false },
+
         dependencyStatus: [],
         issueProgress: { total: 0, completed: 0 },
       });
@@ -169,7 +169,6 @@ describe("status command", () => {
         specifications: [
           { id: "spec-000001", title: "Spec A", status: "approved" },
         ],
-        gapAnalysis: { hasAnalysis: true, coverage: "partial", missingCount: 2, conflictCount: 1 },
         dependencyStatus: [
           { id: "req-000002", title: "Dep", status: "approved", relation: "blockedBy" },
         ],
@@ -180,39 +179,6 @@ describe("status command", () => {
 
       expect(consoleLogSpy).toHaveBeenCalledWith(
         expect.stringContaining("要件ステータス"),
-      );
-    });
-
-    it("Gap Analysis表示", async () => {
-      mockGetRequirementStatus.mockResolvedValue({
-        requirement: {
-          id: "req-000001",
-          version: "1.0",
-          title: "テスト",
-          status: "approved",
-          priority: "medium",
-          createdAt: "2026-01-01T00:00:00Z",
-          updatedAt: "2026-01-01T00:00:00Z",
-          versionHistory: [],
-          files: { description: "desc.md", supplementary: [] },
-          successCriteria: [],
-          format: { type: "free-form" },
-          dependencies: { blockedBy: [], blocks: [], relatedTo: [] },
-          flags: [],
-        },
-        specifications: [],
-        gapAnalysis: { hasAnalysis: true, coverage: "partial", missingCount: 3, conflictCount: 1 },
-        dependencyStatus: [],
-        issueProgress: { total: 0, completed: 0 },
-      });
-
-      await statusCommand.parseAsync(["node", "test", "req-000001"]);
-
-      expect(consoleLogSpy).toHaveBeenCalledWith(
-        expect.stringContaining("Gap Analysis"),
-      );
-      expect(consoleLogSpy).toHaveBeenCalledWith(
-        expect.stringContaining("partial"),
       );
     });
 

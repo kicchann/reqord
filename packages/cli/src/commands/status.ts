@@ -183,18 +183,6 @@ async function showRequirementStatus(
     console.log(table.toString());
   }
 
-  // Gap Analysis
-  if (status.gapAnalysis.hasAnalysis) {
-    console.log(chalk.bold("\nGap Analysis:"));
-    console.log(`  カバレッジ:   ${status.gapAnalysis.coverage ?? "unknown"}`);
-    if (status.gapAnalysis.missingCount != null) {
-      console.log(`  不足機能:     ${status.gapAnalysis.missingCount}件`);
-    }
-    if (status.gapAnalysis.conflictCount != null) {
-      console.log(`  矛盾:         ${status.gapAnalysis.conflictCount}件`);
-    }
-  }
-
   // Dependencies
   if (status.dependencyStatus.length > 0) {
     console.log(chalk.bold("\n依存関係:"));
