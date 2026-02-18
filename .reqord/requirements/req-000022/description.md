@@ -42,6 +42,21 @@
 - ノードクリックで詳細画面に遷移
 - ステータスに応じたノード色
 
+### Flags表示（Feedback #169）
+
+Requirement/Specificationの詳細画面にflagsセクションを追加:
+- feedback-reviewフラグの一覧表示（type, reason, severity, 関連Issue番号）
+- フラグがある場合は詳細画面上部に警告バッジを表示
+- フラグの有無でフィルタリング可能
+
+### Feedback一覧表示（Feedback #170）
+
+GitHub Issueに登録されたfeedbackをUI上で確認できるようにする:
+- Feedback一覧ページ（`.reqord/feedback/index.yaml`のデータを表示）
+- フィードバック種別（bug, requirement-gap, improvement等）でフィルタリング
+- 関連Requirement/Specificationへのリンク表示
+- ステータス（open/closed/resolved）の表示
+
 ## 技術的制約
 
 - ローカルファイルシステムからのデータ読み取りのみ（バックエンドレス）

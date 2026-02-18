@@ -1,11 +1,20 @@
 id: req-000022
-version: '1.0'
+version: '2.0'
 title: Web UI拡張 (Dashboard・依存グラフ・Gantt Chart)
-status: implemented
+status: draft
 priority: medium
 createdAt: 2026-02-07T12:00:00Z
-updatedAt: 2026-02-09T12:00:00Z
-versionHistory: []
+updatedAt: 2026-02-18T00:00:00Z
+versionHistory:
+  - version: 1.0.0
+    status: implemented
+    gitCommit: legacy
+    changedAt: 2026-02-09T12:00:00Z
+    summary: 初版作成・実装完了
+  - version: 2.0.0
+    status: draft
+    changedAt: 2026-02-18T00:00:00Z
+    summary: Feedback #169（Flags UI表示）・#170（Feedback一覧表示）を成功基準に追加
 files:
   description: requirements/req-000022/description.md
   supplementary: []
@@ -14,6 +23,8 @@ successCriteria:
   - インタラクティブな依存関係グラフが表示される
   - Gantt ChartでIssue進捗とクリティカルパスが可視化される
   - Specification詳細画面（Research/Design/Coverage/Issues/History タブ）が表示される
+  - Requirement/Specificationの詳細画面でflagsが一覧表示され、feedback-reviewフラグの存在に気づける（Feedback #169）
+  - GitHub Issueに登録されたfeedbackがUI上で一覧・詳細表示でき、関連Requirement/Specificationとの紐付けが確認できる（Feedback #170）
 format:
   type: user-story
   userStory:
@@ -29,22 +40,4 @@ dependencies:
     - req-000016
 estimatedComplexity: large
 estimatedHours: 32
-flags:
-  - type: feedback-review
-    reason: Req→Spec→Issueトレーサビリティグラフのビュー切り替えUX（ノード内ボタン・滑らかなトランジション）の仕様レベル明確化が必要
-    createdAt: 2026-02-09T15:00:00Z
-    relatedIssues:
-      - 21
-    severity: low
-  - type: feedback-review
-    reason: 'Feedback from issue #169'
-    createdAt: 2026-02-11T07:42:19.687Z
-    relatedIssues:
-      - 169
-    severity: low
-  - type: feedback-review
-    reason: 'Feedback from issue #170'
-    createdAt: 2026-02-11T07:42:24.638Z
-    relatedIssues:
-      - 170
-    severity: low
+flags: []
