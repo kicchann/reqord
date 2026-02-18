@@ -3,7 +3,7 @@ requirementId: req-000018
 title: '実装検証'
 requirementVersion: '4.0'
 version: '1.0'
-status: draft
+status: implemented
 createdAt: 2026-02-08T14:08:08.067Z
 updatedAt: 2026-02-18T00:00:00Z
 versionHistory: []

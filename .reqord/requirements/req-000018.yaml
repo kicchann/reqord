@@ -1,13 +1,13 @@
 id: req-000018
 version: '4.0'
 title: 実装検証
-status: approved
+status: implemented
 priority: low
 createdAt: 2026-02-07T12:00:00Z
-updatedAt: 2026-02-18T04:41:05.797Z
+updatedAt: 2026-02-18T15:18:42.714Z
 versionHistory:
   - version: 2.0.0
-    status: pending_approval
+    status: approved
     gitCommit: 4a1fcac
     changedAt: 2026-02-11T08:05:04.580Z
     summary: Status changed from draft to pending_approval
@@ -33,12 +33,14 @@ files:
   supplementary: []
 successCriteria:
   - reqord validate impl <spec-id> で実装完了度が検証され、Issue完了率・コンポーネント実装率・テストカバレッジが数値で表示される
-  - 全GitHub Issueの完了状態が確認され、未完了Issue数とopen/closedの内訳が表示される
-  - Specificationのdesign.mdに記載されたコンポーネント（ファイルパス）の実装有無が検証され、存在率が80%以上であればPASSとなる
+  - Specificationに紐づくGitHub Issueの完了状態が確認され、未完了Issue数とopen/closedの内訳が表示される
+  - Specificationのdesign.mdに記載されたコンポーネント（ファイルパス）の実装有無が検証され、全件一致でPASSとなる
   - テスト記述の有無が検証され、unit test / integration testのカバレッジが表示される
   - 検証結果が--jsonオプションで構造化出力され、CI連携が可能である
-  - '--strict オプション使用時、Issue完了率100%・コンポーネント実装率100%・テストカバレッジ80%以上でない場合はexit code 1で終了する'
-  - 'reqord req implement 実行時に、対応する全Specificationがimplementedであるか・紐付きIssueが全てclosedであるかの整合性チェックが行われ、不整合があれば警告が表示される（Feedback #221）'
+  - '--strict オプション使用時、全チェック項目がcompleteでない場合はexit code 1で終了する'
+  - >-
+    reqord req implement
+    実行時に、対応する全Specificationがimplementedであるか・紐付きIssueが全てclosedであるかの整合性チェックが行われ、不整合があれば警告が表示される（Feedback #221）
 format:
   type: user-story
   userStory:

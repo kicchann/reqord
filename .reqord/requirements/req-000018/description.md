@@ -32,8 +32,8 @@ Implementation Validation: spec-001
     ✅ #123: IFC4 schema (closed)
     🔄 #124: Attribute mapper (open)
     ☐ #125: UI button (open)
-    Progress: 1/3 (33%) [Threshold: 80%]
-    Status: ❌ FAIL (below threshold)
+    Progress: 1/3 (33%)
+    Status: ❌ FAIL
   Components:
     ✅ src/export/ifc-exporter.ts
     ❌ src/export/attribute-mapper.ts (missing)
@@ -45,7 +45,7 @@ Implementation Validation: spec-001
 
 - `--json` で構造化出力
 - `--strict` で全項目通過必須モード（CI向け）
-  - Issue完了率100%・コンポーネント実装率100%・テストカバレッジ80%以上でない場合はexit code 1
+  - 全チェック項目がcompleteでない場合はexit code 1
 
 ### reqord req implement 時のステータス整合性チェック（Feedback #221）
 
@@ -60,5 +60,5 @@ Implementation Validation: spec-001
 
 ## 技術的制約
 
-- GitHub API + ファイルシステム走査を併用
+- Specification YAMLの保存値 + ファイルシステム走査を併用
 - design.mdのパース精度に依存（セクション構造が標準化されている前提）

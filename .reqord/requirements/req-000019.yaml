@@ -1,10 +1,10 @@
 id: req-000019
 version: '2.0'
 title: ステータス表示コマンド
-status: approved
+status: implemented
 priority: medium
 createdAt: 2026-02-07T12:00:00Z
-updatedAt: 2026-02-18T04:41:16.091Z
+updatedAt: 2026-02-18T15:08:18.073Z
 versionHistory:
   - version: 1.0.0
     status: approved
