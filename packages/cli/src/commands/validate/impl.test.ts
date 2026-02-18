@@ -93,6 +93,18 @@ describe("validate impl command", () => {
     );
   });
 
+  it("--strict: not-started時にexit code 1", async () => {
+    mockValidateImplementation.mockResolvedValue(
+      makeValidation({ overallStatus: "not-started" }),
+    );
+
+    await implValidateCommand.parseAsync([
+      "node", "test", "spec-000001", "--strict",
+    ]);
+
+    expect(process.exitCode).toBe(1);
+  });
+
   it("--strict: 完了時にexit code 0", async () => {
     mockValidateImplementation.mockResolvedValue(
       makeValidation({ overallStatus: "complete" }),

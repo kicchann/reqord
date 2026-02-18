@@ -224,7 +224,6 @@ export interface ImplementConsistencyWarning {
 }
 
 export interface ImplementConsistencyResult {
-  canProceed: boolean;
   warnings: ImplementConsistencyWarning[];
 }
 
@@ -258,8 +257,5 @@ export async function checkImplementConsistency(
     }
   }
 
-  return {
-    canProceed: true,
-    warnings,
-  };
+  return { warnings };
 }

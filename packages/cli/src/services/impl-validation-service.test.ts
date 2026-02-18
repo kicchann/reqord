@@ -310,7 +310,6 @@ describe("checkImplementConsistency", () => {
     ]);
 
     const result = await checkImplementConsistency("/project", "req-000001");
-    expect(result.canProceed).toBe(true);
     expect(result.warnings).toEqual([]);
   });
 

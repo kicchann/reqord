@@ -80,7 +80,7 @@ describe("req implement command", () => {
     // Reset Commander option state
     implementCommand.setOptionValue("json", undefined);
     // Default: no consistency warnings
-    mockCheckConsistency.mockResolvedValue({ canProceed: true, warnings: [] });
+    mockCheckConsistency.mockResolvedValue({ warnings: [] });
   });
 
   it("approved → implementedへの遷移", async () => {
@@ -275,7 +275,6 @@ describe("req implement command", () => {
     mockListSpecifications.mockResolvedValue([]);
     mockUpdateRequirement.mockResolvedValue({ before, after, descriptionUpdated: false });
     mockCheckConsistency.mockResolvedValue({
-      canProceed: true,
       warnings: [
         {
           type: "spec-not-implemented",
@@ -313,7 +312,6 @@ describe("req implement command", () => {
     mockListSpecifications.mockResolvedValue([]);
     mockUpdateRequirement.mockResolvedValue({ before, after, descriptionUpdated: false });
     mockCheckConsistency.mockResolvedValue({
-      canProceed: true,
       warnings: [
         {
           type: "spec-not-implemented",
