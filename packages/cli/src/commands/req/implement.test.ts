@@ -12,12 +12,18 @@ vi.mock("../../services/specification-service.js", () => ({
   listSpecifications: vi.fn(),
 }));
 
+vi.mock("../../services/impl-validation-service.js", () => ({
+  checkImplementConsistency: vi.fn(),
+}));
+
 import { updateRequirement, showRequirement } from "../../services/requirement-service.js";
 import { listSpecifications } from "../../services/specification-service.js";
+import { checkImplementConsistency } from "../../services/impl-validation-service.js";
 
 const mockUpdateRequirement = vi.mocked(updateRequirement);
 const mockShowRequirement = vi.mocked(showRequirement);
 const mockListSpecifications = vi.mocked(listSpecifications);
+const mockCheckConsistency = vi.mocked(checkImplementConsistency);
 
 function makeRequirement(overrides: Partial<Requirement> = {}): Requirement {
   return {
@@ -63,13 +69,18 @@ describe("req implement command", () => {
   let consoleLogSpy: ReturnType<typeof vi.spyOn>;
   let consoleErrorSpy: ReturnType<typeof vi.spyOn>;
 
+  let consoleWarnSpy: ReturnType<typeof vi.spyOn>;
+
   beforeEach(() => {
     vi.clearAllMocks();
     process.exitCode = 0;
     consoleLogSpy = vi.spyOn(console, "log").mockImplementation(() => {});
     consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    consoleWarnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
     // Reset Commander option state
     implementCommand.setOptionValue("json", undefined);
+    // Default: no consistency warnings
+    mockCheckConsistency.mockResolvedValue({ canProceed: true, warnings: [] });
   });
 
   it("approved → implementedへの遷移", async () => {
@@ -253,6 +264,69 @@ describe("req implement command", () => {
 
     expect(consoleLogSpy).not.toHaveBeenCalledWith(
       expect.stringContaining("Related specifications"),
+    );
+  });
+
+  it("整合性チェック警告がある場合に表示する", async () => {
+    const before = makeRequirement({ status: "approved" });
+    const after = makeRequirement({ status: "implemented" });
+
+    mockShowRequirement.mockResolvedValue({ requirement: before, description: null });
+    mockListSpecifications.mockResolvedValue([]);
+    mockUpdateRequirement.mockResolvedValue({ before, after, descriptionUpdated: false });
+    mockCheckConsistency.mockResolvedValue({
+      canProceed: true,
+      warnings: [
+        {
+          type: "spec-not-implemented",
+          message: "spec-000001 のステータスが approved です（implementedではありません）",
+          details: { id: "spec-000001", currentStatus: "approved" },
+        },
+        {
+          type: "issue-not-closed",
+          message: "#44 (Service実装) が open です",
+          details: { id: "44", currentStatus: "open" },
+        },
+      ],
+    });
+
+    await implementCommand.parseAsync(["node", "test", "req-000001"]);
+
+    expect(consoleWarnSpy).toHaveBeenCalledWith(
+      expect.stringContaining("整合性チェック警告"),
+    );
+    expect(consoleWarnSpy).toHaveBeenCalledWith(
+      expect.stringContaining("spec-000001 のステータスが approved"),
+    );
+    expect(consoleWarnSpy).toHaveBeenCalledWith(
+      expect.stringContaining("#44 (Service実装) が open"),
+    );
+    // Still proceeds to implement
+    expect(mockUpdateRequirement).toHaveBeenCalled();
+  });
+
+  it("整合性チェック警告があってもimplemented遷移完了", async () => {
+    const before = makeRequirement({ status: "approved" });
+    const after = makeRequirement({ status: "implemented" });
+
+    mockShowRequirement.mockResolvedValue({ requirement: before, description: null });
+    mockListSpecifications.mockResolvedValue([]);
+    mockUpdateRequirement.mockResolvedValue({ before, after, descriptionUpdated: false });
+    mockCheckConsistency.mockResolvedValue({
+      canProceed: true,
+      warnings: [
+        {
+          type: "spec-not-implemented",
+          message: "spec-000001 のステータスが draft です",
+          details: { id: "spec-000001", currentStatus: "draft" },
+        },
+      ],
+    });
+
+    await implementCommand.parseAsync(["node", "test", "req-000001"]);
+
+    expect(consoleLogSpy).toHaveBeenCalledWith(
+      expect.stringContaining("Marked requirement as implemented"),
     );
   });
 });

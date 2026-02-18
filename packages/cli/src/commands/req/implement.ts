@@ -6,6 +6,7 @@ import {
   type UpdateOptions,
 } from "../../services/requirement-service.js";
 import { listSpecifications } from "../../services/specification-service.js";
+import { checkImplementConsistency } from "../../services/impl-validation-service.js";
 import { handleError } from "../../utils/error-handler.js";
 import { AppError, ErrorCode } from "../../utils/errors.js";
 
@@ -42,6 +43,16 @@ export const implementCommand = new Command("implement")
             console.log(`  - ${spec.id}: ${spec.status} (v${spec.version})`);
           }
           console.log();
+        }
+
+        // Consistency check: warn if specs are not implemented or issues are open
+        const consistencyResult = await checkImplementConsistency(cwd, id);
+        if (consistencyResult.warnings.length > 0 && !options.json) {
+          console.warn(chalk.yellow("\n⚠ 整合性チェック警告:"));
+          for (const w of consistencyResult.warnings) {
+            console.warn(chalk.yellow(`  - ${w.message}`));
+          }
+          console.warn("");
         }
 
         const updateOpts: UpdateOptions = {
