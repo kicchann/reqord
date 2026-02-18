@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useSyncExternalStore } from "react";
 import { Tabs } from "@/components/ui/tabs";
 import { MarkdownRenderer } from "./markdown-renderer";
 
@@ -17,25 +17,24 @@ const TABS = [
 const TAB_IDS = new Set(TABS.map((tab) => tab.id));
 const DEFAULT_TAB = "criteria";
 
-function getInitialTab(): string {
-  if (typeof window === "undefined") {
-    return DEFAULT_TAB;
-  }
+function getHashTab(): string {
   const hash = window.location.hash.slice(1);
   return TAB_IDS.has(hash) ? hash : DEFAULT_TAB;
 }
+
+const subscribeHash = (callback: () => void) => {
+  window.addEventListener("hashchange", callback);
+  return () => window.removeEventListener("hashchange", callback);
+};
 
 export function RequirementTabs({
   successCriteria,
   description,
 }: RequirementTabsProps) {
-  const [activeTab, setActiveTab] = useState(getInitialTab);
+  const activeTab = useSyncExternalStore(subscribeHash, getHashTab, () => DEFAULT_TAB);
 
   const handleTabChange = (tabId: string) => {
-    setActiveTab(tabId);
-    if (typeof window !== "undefined") {
-      window.location.hash = tabId;
-    }
+    window.location.hash = tabId;
   };
 
   return (

@@ -22,6 +22,7 @@ export function CriticalPathDisplay({ items }: CriticalPathDisplayProps) {
           {openItems.length} open / {closedItems.length} closed
         </span>
       </h2>
+      {/* Show only open items when they exist; closed items are accessible via the expand button below */}
       <div className="space-y-3">
         {(openItems.length > 0
           ? openItems
