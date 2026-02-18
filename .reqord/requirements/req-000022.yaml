@@ -13,8 +13,9 @@ versionHistory:
     summary: 初版作成・実装完了
   - version: 2.0.0
     status: draft
+    gitCommit: f133c38
     changedAt: 2026-02-18T00:00:00Z
-    summary: Feedback #169（Flags UI表示）・#170（Feedback一覧表示）を成功基準に追加
+    summary: 'Feedback #169（Flags UI表示）・#170（Feedback一覧表示）を成功基準に追加'
 files:
   description: requirements/req-000022/description.md
   supplementary: []

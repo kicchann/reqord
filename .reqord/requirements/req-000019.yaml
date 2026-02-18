@@ -18,8 +18,9 @@ versionHistory:
     gitCommit: legacy
   - version: 2.0.0
     changedAt: 2026-02-18T00:00:00Z
-    summary: Feedback #16（ステータス整合性チェックルール具体化）を成功基準に追加
+    summary: 'Feedback #16（ステータス整合性チェックルール具体化）を成功基準に追加'
     status: draft
+    gitCommit: d0d2c84
 files:
   description: requirements/req-000019/description.md
   supplementary: []
