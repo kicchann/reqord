@@ -399,7 +399,7 @@ feedbacks:
         requirements:
           - req-000015
         specifications: []
-    syncedAt: 2026-02-14T21:43:20.689Z
+    syncedAt: 2026-02-18T02:38:42.790Z
     status: open
   - githubIssue: 273
     linkedTo:
@@ -407,5 +407,29 @@ feedbacks:
       createdRequirements: []
       specifications: []
       createdSpecifications: []
-    syncedAt: 2026-02-14T21:43:20.704Z
+    syncedAt: 2026-02-18T02:38:42.790Z
+    status: open
+  - githubIssue: 335
+    linkedTo:
+      requirements: []
+      createdRequirements: []
+      specifications: []
+      createdSpecifications: []
+    syncedAt: 2026-02-18T02:38:42.790Z
+    status: open
+  - githubIssue: 328
+    linkedTo:
+      requirements: []
+      createdRequirements: []
+      specifications: []
+      createdSpecifications: []
+    syncedAt: 2026-02-18T02:38:42.790Z
+    status: open
+  - githubIssue: 327
+    linkedTo:
+      requirements: []
+      createdRequirements: []
+      specifications: []
+      createdSpecifications: []
+    syncedAt: 2026-02-18T02:38:42.790Z
     status: open

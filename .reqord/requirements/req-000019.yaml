@@ -1,16 +1,25 @@
 id: req-000019
-version: '1.0'
+version: '2.0'
 title: ステータス表示コマンド
-status: implemented
+status: draft
 priority: medium
 createdAt: 2026-02-07T12:00:00Z
-updatedAt: 2026-02-09T12:00:00Z
+updatedAt: 2026-02-18T00:00:00Z
 versionHistory:
   - version: 1.0.0
     changedAt: 2026-02-07T12:00:00Z
     summary: 初版作成
     status: approved
     gitCommit: legacy
+  - version: 1.0.1
+    changedAt: 2026-02-09T12:00:00Z
+    summary: 実装完了
+    status: implemented
+    gitCommit: legacy
+  - version: 2.0.0
+    changedAt: 2026-02-18T00:00:00Z
+    summary: Feedback #16（ステータス整合性チェックルール具体化）を成功基準に追加
+    status: draft
 files:
   description: requirements/req-000019/description.md
   supplementary: []
@@ -19,7 +28,10 @@ successCriteria:
   - reqord status <req-id> でRequirementの詳細ステータスが表示される
   - reqord status <spec-id> でSpecificationの詳細ステータスが表示される
   - Requirements/Specifications/Issues の進捗が数値とプログレスバーで表示される
-  - Requirement/Specification間のステータス整合性チェックが実行され、不整合が警告表示される
+  - Requirement/Specification間のステータス整合性チェックが実行され、不整合が警告表示される（@reqord/shared checkConsistencyルールを使用。Feedback #16）
+  - '整合性チェックルール(1): 全関連SpecがimplementedだがReqがapproved → 警告'
+  - '整合性チェックルール(2): Reqがdeprecatedだが関連Specがactive → 警告'
+  - '整合性チェックルール(3): feedback-reviewフラグあり → 情報表示'
   - '--jsonオプションで構造化出力される'
 format:
   type: user-story
@@ -37,10 +49,4 @@ dependencies:
     - req-000013
 estimatedComplexity: small
 estimatedHours: 10
-flags:
-  - type: feedback-review
-    reason: Req/Specステータス整合性チェック・警告表示を追加（成功基準5）。遷移ルールはreq-000004で定義
-    createdAt: 2026-02-09T11:00:00Z
-    relatedIssues:
-      - 16
-    severity: medium
+flags: []
