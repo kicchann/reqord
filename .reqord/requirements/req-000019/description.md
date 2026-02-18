@@ -67,4 +67,4 @@ Specification個別の詳細ステータス:
 
 - Specification/Issue データが存在しない場合はRequirement情報のみ表示
 - GitHub Issue状態は最後のsync結果を使用（リアルタイム取得しない）
-- 整合性ルールはreq-000004（@reqord/shared）から参照
+- 整合性ルールは@reqord/shared `checkConsistency` から参照（冒頭注記参照）

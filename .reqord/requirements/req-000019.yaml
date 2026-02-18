@@ -16,6 +16,10 @@ versionHistory:
     summary: 実装完了
     status: implemented
     gitCommit: legacy
+  - version: 2.0.0
+    changedAt: 2026-02-18T00:00:00Z
+    summary: Feedback #16（ステータス整合性チェックルール具体化）を成功基準に追加
+    status: draft
 files:
   description: requirements/req-000019/description.md
   supplementary: []
@@ -25,7 +29,9 @@ successCriteria:
   - reqord status <spec-id> でSpecificationの詳細ステータスが表示される
   - Requirements/Specifications/Issues の進捗が数値とプログレスバーで表示される
   - Requirement/Specification間のステータス整合性チェックが実行され、不整合が警告表示される（@reqord/shared checkConsistencyルールを使用。Feedback #16）
-  - '整合性チェックルール: (1) 全関連SpecがimplementedだがReqがapproved → 警告 (2) Reqがdeprecatedだが関連Specがactive → 警告 (3) feedback-reviewフラグあり → 情報表示'
+  - '整合性チェックルール(1): 全関連SpecがimplementedだがReqがapproved → 警告'
+  - '整合性チェックルール(2): Reqがdeprecatedだが関連Specがactive → 警告'
+  - '整合性チェックルール(3): feedback-reviewフラグあり → 情報表示'
   - '--jsonオプションで構造化出力される'
 format:
   type: user-story
