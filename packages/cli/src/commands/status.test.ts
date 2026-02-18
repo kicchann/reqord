@@ -147,4 +147,135 @@ describe("status command", () => {
       expect(consoleLogSpy).toHaveBeenCalledWith("60");
     });
   });
+
+  describe("要件詳細ステータス", () => {
+    it("関連Specification表示", async () => {
+      mockGetRequirementStatus.mockResolvedValue({
+        requirement: {
+          id: "req-000001",
+          version: "1.0",
+          title: "テスト",
+          status: "approved",
+          priority: "high",
+          createdAt: "2026-01-01T00:00:00Z",
+          updatedAt: "2026-01-01T00:00:00Z",
+          versionHistory: [],
+          files: { description: "desc.md", supplementary: [] },
+          successCriteria: [],
+          format: { type: "free-form" },
+          dependencies: { blockedBy: [], blocks: [], relatedTo: [] },
+          flags: [],
+        },
+        specifications: [
+          { id: "spec-000001", title: "Spec A", status: "approved" },
+        ],
+        gapAnalysis: { hasAnalysis: true, coverage: "partial", missingCount: 2, conflictCount: 1 },
+        dependencyStatus: [
+          { id: "req-000002", title: "Dep", status: "approved", relation: "blockedBy" },
+        ],
+        issueProgress: { total: 5, completed: 4 },
+      });
+
+      await statusCommand.parseAsync(["node", "test", "req-000001"]);
+
+      expect(consoleLogSpy).toHaveBeenCalledWith(
+        expect.stringContaining("要件ステータス"),
+      );
+    });
+
+    it("Gap Analysis表示", async () => {
+      mockGetRequirementStatus.mockResolvedValue({
+        requirement: {
+          id: "req-000001",
+          version: "1.0",
+          title: "テスト",
+          status: "approved",
+          priority: "medium",
+          createdAt: "2026-01-01T00:00:00Z",
+          updatedAt: "2026-01-01T00:00:00Z",
+          versionHistory: [],
+          files: { description: "desc.md", supplementary: [] },
+          successCriteria: [],
+          format: { type: "free-form" },
+          dependencies: { blockedBy: [], blocks: [], relatedTo: [] },
+          flags: [],
+        },
+        specifications: [],
+        gapAnalysis: { hasAnalysis: true, coverage: "partial", missingCount: 3, conflictCount: 1 },
+        dependencyStatus: [],
+        issueProgress: { total: 0, completed: 0 },
+      });
+
+      await statusCommand.parseAsync(["node", "test", "req-000001"]);
+
+      expect(consoleLogSpy).toHaveBeenCalledWith(
+        expect.stringContaining("Gap Analysis"),
+      );
+      expect(consoleLogSpy).toHaveBeenCalledWith(
+        expect.stringContaining("partial"),
+      );
+    });
+
+    it("存在しないIDへのエラーハンドリング", async () => {
+      mockGetRequirementStatus.mockRejectedValue(
+        new Error("Requirement not found: req-999999"),
+      );
+
+      await statusCommand.parseAsync(["node", "test", "req-999999"]);
+
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        expect.stringContaining("Requirement not found"),
+      );
+    });
+  });
+
+  describe("仕様詳細ステータス", () => {
+    it("親Requirement整合性とIssue進捗表示", async () => {
+      mockGetSpecificationStatus.mockResolvedValue({
+        specification: {
+          id: "spec-000001",
+          requirementId: "req-000001",
+          version: "1.0",
+          status: "approved",
+          createdAt: "2026-01-01T00:00:00Z",
+          updatedAt: "2026-01-01T00:00:00Z",
+          versionHistory: [],
+          files: { design: "design.md", supplementary: [] },
+          flags: [],
+          designValidation: {
+            passed: 5,
+            warnings: 1,
+            errors: 0,
+            rules: [],
+            validatedAt: "2026-01-01T00:00:00Z",
+          },
+        },
+        requirement: { id: "req-000001", title: "テスト", status: "approved" },
+        designValidation: { passed: 5, warnings: 1, errors: 0 },
+        issueProgress: { total: 3, completed: 2 },
+        coverageStatus: "partial",
+      });
+
+      await statusCommand.parseAsync(["node", "test", "spec-000001"]);
+
+      expect(consoleLogSpy).toHaveBeenCalledWith(
+        expect.stringContaining("仕様ステータス"),
+      );
+      expect(consoleLogSpy).toHaveBeenCalledWith(
+        expect.stringContaining("設計検証"),
+      );
+    });
+
+    it("存在しないIDへのエラーハンドリング", async () => {
+      mockGetSpecificationStatus.mockRejectedValue(
+        new Error("Specification not found: spec-999999"),
+      );
+
+      await statusCommand.parseAsync(["node", "test", "spec-999999"]);
+
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        expect.stringContaining("Specification not found"),
+      );
+    });
+  });
 });
