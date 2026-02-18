@@ -1,9 +1,9 @@
 id: spec-000029
 requirementId: req-000022
 title: 'Web UI拡張 (Dashboard・依存グラフ・Gantt Chart)'
-requirementVersion: '1.0'
+requirementVersion: '2.0'
 version: '1.0'
-status: implemented
+status: draft
 createdAt: 2026-02-10T23:14:41.029Z
 updatedAt: 2026-02-12T15:13:20.606Z
 versionHistory: []
