@@ -29,7 +29,7 @@ successCriteria:
   - reqord status <req-id> でRequirementの詳細ステータスが表示される
   - reqord status <spec-id> でSpecificationの詳細ステータスが表示される
   - Requirements/Specifications/Issues の進捗が数値とプログレスバーで表示される
-  - Requirement/Specification間のステータス整合性チェックが実行され、不整合が警告表示される（@reqord/shared checkConsistencyルールを使用。Feedback #16）
+  - 'Requirement/Specification間のステータス整合性チェックが実行され、不整合が警告表示される（@reqord/shared checkConsistencyルールを使用。Feedback #16）'
   - '整合性チェックルール(1): 全関連SpecがimplementedだがReqがapproved → 警告'
   - '整合性チェックルール(2): Reqがdeprecatedだが関連Specがactive → 警告'
   - '整合性チェックルール(3): feedback-reviewフラグあり → 情報表示'
