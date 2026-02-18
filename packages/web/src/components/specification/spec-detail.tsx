@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Specification, Requirement } from "@reqord/shared";
 import { StatusBadge } from "@/components/ui/badge";
+import { FlagList } from "@/components/flags/flag-list";
 import { SpecTabs } from "./spec-tabs";
 
 export function SpecDetail({
@@ -75,6 +76,11 @@ export function SpecDetail({
             ))}
           </ul>
         </div>
+      ) : null}
+
+      {/* Flags */}
+      {specification.flags.length > 0 ? (
+        <FlagList flags={specification.flags} />
       ) : null}
 
       {/* Tabs for Design, Research, Coverage, Issues, and History */}

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Requirement, Specification } from "@reqord/shared";
 import { StatusBadge, PriorityBadge, ComplexityBadge } from "@/components/ui/badge";
+import { FlagList } from "@/components/flags/flag-list";
 import { MarkdownRenderer } from "./markdown-renderer";
 import { DeleteButton } from "./delete-button";
 
@@ -147,6 +148,11 @@ export function RequirementDetail({
             ))}
           </ul>
         </div>
+      ) : null}
+
+      {/* Flags */}
+      {requirement.flags.length > 0 ? (
+        <FlagList flags={requirement.flags} />
       ) : null}
 
       {/* Dependencies */}
