@@ -5,7 +5,7 @@ import Link from "next/link";
 import type { Specification, Status } from "@reqord/shared";
 import { StatusBadge } from "@/components/ui/badge";
 
-type SortKey = "id" | "requirementId" | "status" | "version" | "updatedAt";
+type SortKey = "id" | "title" | "requirementId" | "status" | "version" | "updatedAt";
 type SortDir = "asc" | "desc";
 
 const STATUS_OPTIONS: { value: Status | "all"; label: string }[] = [
@@ -40,6 +40,7 @@ export function SpecificationTable({
       result = result.filter(
         (s) =>
           s.id.toLowerCase().includes(q) ||
+          (s.title ?? "").toLowerCase().includes(q) ||
           s.requirementId.toLowerCase().includes(q) ||
           (requirementTitleMap[s.requirementId] ?? "").toLowerCase().includes(q),
       );
@@ -50,6 +51,9 @@ export function SpecificationTable({
       switch (sortKey) {
         case "id":
           cmp = a.id.localeCompare(b.id);
+          break;
+        case "title":
+          cmp = (a.title ?? "").localeCompare(b.title ?? "");
           break;
         case "requirementId":
           cmp = a.requirementId.localeCompare(b.requirementId);
@@ -97,7 +101,7 @@ export function SpecificationTable({
       <div className="flex flex-wrap items-center gap-3">
         <input
           type="text"
-          placeholder="Search by ID or requirement..."
+          placeholder="Search by ID, title, or requirement..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
@@ -123,6 +127,7 @@ export function SpecificationTable({
           <thead className="bg-gray-50">
             <tr>
               {renderSortHeader("id", "ID")}
+              {renderSortHeader("title", "Title")}
               {renderSortHeader("requirementId", "Requirement")}
               {renderSortHeader("status", "Status")}
               {renderSortHeader("version", "Version")}
@@ -132,7 +137,7 @@ export function SpecificationTable({
           <tbody className="divide-y divide-gray-200">
             {filtered.length === 0 ? (
               <tr>
-                <td colSpan={5} className="px-4 py-8 text-center text-sm text-gray-500">
+                <td colSpan={6} className="px-4 py-8 text-center text-sm text-gray-500">
                   No specifications found.
                 </td>
               </tr>
@@ -145,6 +150,14 @@ export function SpecificationTable({
                       className="text-blue-600 hover:text-blue-800 hover:underline"
                     >
                       {spec.id}
+                    </Link>
+                  </td>
+                  <td className="px-4 py-3 text-sm">
+                    <Link
+                      href={`/specifications/${spec.id}`}
+                      className="text-gray-900 hover:text-blue-600"
+                    >
+                      {spec.title || <span className="italic text-gray-400">Untitled</span>}
                     </Link>
                   </td>
                   <td className="px-4 py-3 text-sm">
