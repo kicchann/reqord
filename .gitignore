@@ -28,6 +28,10 @@ Thumbs.db
 apps/
 plans/
 
+# Claude Code (local-only)
+CLAUDE.md
+.claude/
+
 # Node.js
 node_modules/
 dist/
