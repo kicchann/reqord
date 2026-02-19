@@ -1,8 +1,12 @@
-完全にその通りです！非常に重要な指摘をありがとうございます。
+# Feedback Guide -- フィードバック運用ガイド
+
+> [English](./guide-feedback.md)
+
+GitHub Issueを活用したフィードバック管理の設計と運用ガイドです。
 
 ---
 
-## 🎯 現実的なFeedback/Issue運用
+## 現実的なFeedback/Issue運用
 
 ### ❌ 理想論（現実的でない）
 ```
@@ -381,14 +385,9 @@ body:
 詳細は全てGitHub Issueに。
 ```
 
-これなら自然で、OSSの運用と同じですね！
-
-
-素晴らしい視点です！熟考しました。
-
 ---
 
-## 🎯 Status設計の選択肢
+## Status設計の選択肢
 
 ### オプション1: Statusに `under-review` を追加
 
@@ -814,4 +813,4 @@ reqord req unflag req-005 --issue 123
 reqord req list --with-flags
 ```
 
-この方式なら、「承認済みだけどFeedbackで再検討中」という状態を明確に表現できます！
+この方式により、「承認済みだけどFeedbackで再検討中」という状態を明確に表現できます。

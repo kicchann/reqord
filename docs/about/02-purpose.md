@@ -1,23 +1,25 @@
 ---
-対象読者: 開発者、テックリード、プロダクトオーナー、AIエージェント
-前提知識: なし
-関連文書: docs/main.md, .reqord/context/
+audience: Developers, tech leads, product owners, AI agents
+prerequisites: None
+related: docs/advanced/specification.md, .reqord/context/
 ---
 
-> **この文書のまとめ**: Reqordが何を達成するのか、誰のために作られたのか。機能概要とスコープの定義。
+> **Summary**: What Reqord achieves and who it is built for. Feature overview and scope definition.
 
-# Purpose — 何を達成するのか、誰のためか
+# Purpose — What It Achieves and For Whom
 
-## ビジョン
+> [日本語](./02-purpose.ja.md)
 
-"考えたこと" から "実装可能なタスク" への変換を、構造的かつ追跡可能にする。
+## Vision
 
-## ワークフロー全体像
+Make the transformation from "ideas" to "implementable tasks" structural and traceable.
+
+## Workflow Overview
 
 ```mermaid
 graph LR
-    R[Requirement<br/>何を作るか] --> S[Specification<br/>どう作るか]
-    S --> I[GitHub Issue<br/>実装タスク]
+    R[Requirement<br/>What to build] --> S[Specification<br/>How to build it]
+    S --> I[GitHub Issue<br/>Implementation task]
     I --> |Feedback| R
 
     style R fill:#e1f5fe
@@ -25,142 +27,142 @@ graph LR
     style I fill:#e8f5e9
 ```
 
-Reqordの3層モデル:
+Reqord's 3-layer model:
 
-| 層                | 役割               | 例                                      |
-| ----------------- | ------------------ | --------------------------------------- |
-| **Requirement**   | 何を作るか（What） | 「ユーザーがメールでログインできる」    |
-| **Specification** | どう作るか（How）  | 「OAuth2 + JWT、セッション管理はRedis」 |
-| **GitHub Issue**  | 実装タスク         | 「POST /auth/login エンドポイント実装」 |
+| Layer             | Role              | Example                                        |
+| ----------------- | ----------------- | ---------------------------------------------- |
+| **Requirement**   | What to build     | "Users can log in via email"                   |
+| **Specification** | How to build it   | "OAuth2 + JWT, session management with Redis"  |
+| **GitHub Issue**  | Implementation task | "Implement POST /auth/login endpoint"        |
 
-フィードバックループにより、実装後の知見が要件・仕様の更新に還流する。
+The feedback loop ensures that insights from implementation flow back into requirement and specification updates.
 
-## ターゲットユーザー
+## Target Users
 
-### 開発チーム（テックリード + 開発者）
+### Development Teams (Tech Leads + Developers)
 
-**課題**: 品質の担保、設計判断のトレーサビリティ、チームの要件理解のばらつき
+**Challenges**: Ensuring quality, traceability of design decisions, inconsistent understanding of requirements across the team
 
-**Reqordが提供する価値**:
+**Value Reqord Provides**:
 
-- PRベースの承認ワークフロー（CODEOWNERSレビュー）
-- Requirement → Specification → Issue の追跡チェーン
-- SMARTバリデーションによる要件品質の客観的評価
-- 依存関係グラフで変更の影響範囲を可視化
+- PR-based approval workflow (CODEOWNERS review)
+- Requirement -> Specification -> Issue tracing chain
+- Objective evaluation of requirement quality via SMART validation
+- Visualize the impact scope of changes through a dependency graph
 
-### プロダクトオーナー
+### Product Owners
 
-**課題**: 進捗の把握、要件の全体像の把握、機能間の依存関係の理解
+**Challenges**: Tracking progress, grasping the full picture of requirements, understanding dependencies between features
 
-**Reqordが提供する価値**:
+**Value Reqord Provides**:
 
-- Web UIのダッシュボードで進捗を一覧
-- 依存関係グラフで機能間の関係を視覚化
-- ステータスライフサイクル（draft → approved → implemented）で状態を明確に
+- Overview of progress on the Web UI dashboard
+- Visualize relationships between features with a dependency graph
+- Clear state tracking via status lifecycle (draft -> approved -> implemented)
 
-### AI駆動開発チーム
+### AI-Driven Development Teams
 
-**課題**: AIへの指示が曖昧で出力品質が安定しない、セッション間でコンテキストが消失する
+**Challenges**: Ambiguous instructions to AI result in unstable output quality, context is lost between sessions
 
-**Reqordが提供する追加価値**:
+**Additional Value Reqord Provides**:
 
-- 構造化された要件がAIへの明確な入力になる
-- ProjectContext（product.yaml, technical.yaml, domain/\*.md）で毎回のAIセッションに一貫した文脈を提供
-- 人間がReqordを通じて「何が決まり、何が実装され、何が残っているか」を常に把握できる
+- Structured requirements serve as clear input for AI
+- ProjectContext (product.yaml, technical.yaml, domain/\*.md) provides consistent context for every AI session
+- Humans can always understand "what has been decided, what has been implemented, and what remains" through Reqord
 
-## 中核機能の概要
+## Core Features Overview
 
-### ProjectContext管理
+### ProjectContext Management
 
-プロジェクト全体のコンテキストを構造化して管理:
+Manage project-wide context in a structured manner:
 
-- `context.json` — プロジェクトメタデータ
-- `product.yaml` — ビジョン、課題、ターゲットユーザー
-- `technical.yaml` — 技術スタック、アーキテクチャ
-- `structure.yaml` — 命名規則、ディレクトリ構造
-- `domain/*.md` — ドメイン固有の知識
+- `context.json` — Project metadata
+- `product.yaml` — Vision, challenges, target users
+- `technical.yaml` — Technology stack, architecture
+- `structure.yaml` — Naming conventions, directory structure
+- `domain/*.md` — Domain-specific knowledge
 
-### 要件CRUD + SMARTバリデーション
+### Requirement CRUD + SMART Validation
 
-- 要件の作成・一覧・更新・削除
-- EARS / User Story / Free-form 形式をサポート
-- SMART基準（Specific, Measurable, Achievable, Relevant, Time-bound）での品質スコアリング
+- Create, list, update, and delete requirements
+- Supports EARS / User Story / Free-form formats
+- Quality scoring based on SMART criteria (Specific, Measurable, Achievable, Relevant, Time-bound)
 
-### 仕様設計
+### Specification Design
 
-- 要件に紐づく仕様（design.md）の作成・管理
-- AI支援による技術設計の生成
-- Mermaid図、コード例を含む詳細な仕様ドキュメント
+- Create and manage specifications (design.md) linked to requirements
+- AI-assisted technical design generation
+- Detailed specification documents including Mermaid diagrams and code examples
 
-### GitHub Issue生成
+### GitHub Issue Generation
 
-- 仕様から実装タスクへの分解
-- 依存関係を反映した実行順序の定義
-- 並列実行可能なタスクのグルーピング
+- Break down specifications into implementation tasks
+- Define execution order reflecting dependencies
+- Group tasks that can be executed in parallel
 
-### PRベース承認フロー
+### PR-Based Approval Flow
 
-- `reqord req approve` でPRを作成、ステータスを pending_approval に変更
-- CODEOWNERSによるレビュー
-- PRマージでステータスが approved に確定
+- `reqord req approve` creates a PR and changes status to pending_approval
+- Review by CODEOWNERS
+- PR merge finalizes the status as approved
 
-### フィードバック同期
+### Feedback Synchronization
 
-- GitHub Issueのフィードバックを要件・仕様に還流
-- flagシステムで「承認済みだがフィードバックあり」の状態を管理
-- 段階的な構造化（まずIssueで議論 → 必要に応じてReqordに構造化）
+- Feed GitHub Issue feedback back into requirements and specifications
+- Flag system to manage the "approved but has feedback" state
+- Gradual structuring (discuss in Issues first -> structure in Reqord as needed)
 
 ### Web UI
 
-- ダッシュボードでの進捗可視化
-- 依存関係グラフ
-- 要件・仕様の閲覧・編集
+- Progress visualization on the dashboard
+- Dependency graph
+- Browse and edit requirements and specifications
 
-## スコープ
+## Scope
 
-### IN（対象範囲）
+### IN (Covered)
 
-- 要件のライフサイクル管理（作成→承認→実装追跡→フィードバック→更新）
-- 仕様設計と管理
-- GitHub Issue生成
-- PRベースの承認ワークフロー
-- SMARTバリデーションによる品質評価
-- AI支援（要件詳細化、仕様設計、タスク分解）
-- Web UIでの可視化
+- Requirements lifecycle management (creation -> approval -> implementation tracking -> feedback -> updates)
+- Specification design and management
+- GitHub Issue generation
+- PR-based approval workflow
+- Quality evaluation via SMART validation
+- AI assistance (requirement refinement, specification design, task breakdown)
+- Visualization via Web UI
 
-### OUT（対象外）
+### OUT (Not Covered)
 
-- **コード生成**: Reqordは要件・仕様まで。コードは書かない
-- **リアルタイム共同編集**: Gitベースの非同期コラボレーション
-- **プロジェクト管理全般**: スプリント計画、リソース配分、ガントチャート
+- **Code generation**: Reqord covers requirements and specifications only. It does not write code
+- **Real-time collaborative editing**: Git-based asynchronous collaboration
+- **General project management**: Sprint planning, resource allocation, Gantt charts
 
-## 向くプロジェクト / 向かないプロジェクト
+## Good Fit / Not a Good Fit
 
-### 向くプロジェクト
+### Good Fit
 
-- 要件→実装のトレーサビリティが求められる
-- 複数人で要件をレビュー・承認するフローがある
-- 中〜大規模（要件が10件以上）のプロジェクト
-- AI駆動開発で要件の品質・一貫性を高めたい
+- Traceability from requirements to implementation is needed
+- A flow exists for multiple people to review and approve requirements
+- Medium to large projects (10+ requirements)
+- Want to improve requirement quality and consistency in AI-driven development
 
-### 向かないプロジェクト
+### Not a Good Fit
 
-- プロトタイプ・ハッカソン（スピード優先、構造化のオーバーヘッドが見合わない）
-- 1人で完結する小規模スクリプト
-- 要件が頻繁に大幅変更されるフェーズ（方向性が固まってからの導入が効果的）
+- Prototypes and hackathons (speed is the priority; the overhead of structuring is not worth it)
+- Small scripts completed by a single person
+- Phases where requirements change drastically and frequently (more effective to introduce once the direction is established)
 
-## 段階的に使える
+## Start Gradually
 
-Reqordは最小構成から始められる:
+Reqord can be started with a minimal configuration:
 
-1. **最小構成**: `reqord init` + 要件3-5件を作成
-2. **AI活用**: ProjectContextを充実させ、enhance/refine を使い始める
-3. **承認フロー**: チームメンバーとPRベースレビューを導入
-4. **仕様・Issue**: 仕様設計とGitHub Issue生成を活用
-5. **フルスタック**: Web UI、フィードバック同期、ダッシュボード
+1. **Minimal setup**: `reqord init` + create 3-5 requirements
+2. **AI utilization**: Enrich ProjectContext and start using enhance/refine
+3. **Approval flow**: Introduce PR-based reviews with team members
+4. **Specifications & Issues**: Leverage specification design and GitHub Issue generation
+5. **Full stack**: Web UI, feedback synchronization, dashboard
 
-すべてを一度に導入する必要はない。プロジェクトの成熟度に合わせて段階的に拡大できる。
+There is no need to adopt everything at once. Scale gradually to match your project's maturity.
 
 ---
 
-**次へ**: [03-theory.md](./03-theory.md) — 採用した手法と選定理由
+**Next**: [03-theory.md](./03-theory.md) — Adopted methodologies and rationale

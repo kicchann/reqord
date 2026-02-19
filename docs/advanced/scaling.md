@@ -1,45 +1,49 @@
-## 要件100個超えた場合の対策
+# Scaling
 
-### オプション1: **ハイブリッド構造**(推奨)
+> [日本語](./scaling.ja.md)
+
+## Strategies for 100+ Requirements
+
+### Option 1: **Hybrid Structure** (Recommended)
 
 ```
 .reqord/
-├── index.db                    # SQLite (検索・集計用)
+├── index.db                    # SQLite (for search & aggregation)
 ├── requirements/
-│   ├── req-001.json           # Git差分管理用(マスター)
+│   ├── req-001.json           # For Git diff management (master)
 │   └── req-001/
 │       └── description.md
 ```
 
-**仕組み:**
+**How it works:**
 
-- JSON/Markdownが**真の情報源**(SSOT)
-- SQLiteは**検索インデックス**(再生成可能)
-- `reqord sync-db` でJSON→SQLite同期
+- JSON/Markdown is the **single source of truth** (SSOT)
+- SQLite serves as a **search index** (can be regenerated)
+- `reqord sync-db` syncs JSON → SQLite
 
-**メリット:**
+**Benefits:**
 
-- Git差分は従来通り見える
-- 大量データの検索・集計は高速
-- SQLite削除しても再構築可能
+- Git diffs remain readable as usual
+- Search and aggregation over large datasets is fast
+- Even if SQLite is deleted, it can be rebuilt
 
-### オプション2: **分割管理**
+### Option 2: **Partitioned Management**
 
 ```
 .reqord/
 ├── requirements/
-│   ├── auth/          # ドメイン別
+│   ├── auth/          # By domain
 │   ├── payment/
 │   └── reporting/
 ```
 
-各ドメイン10-20個程度に抑える
+Keep each domain to around 10-20 requirements
 
 ---
 
-## バグ発見・要求不足時のフロー
+## Flow When Bugs Are Found or Requirements Are Missing
 
-### 新しいエンティティ: **Feedback**
+### New Entity: **Feedback**
 
 ```
 .reqord/
@@ -51,7 +55,7 @@
 │           └── screenshot.png
 ```
 
-### Feedback構造
+### Feedback Structure
 
 ```typescript
 {
@@ -60,14 +64,14 @@
   "severity": "critical" | "high" | "medium" | "low",
   "
 
-  // 紐付け
+  // Linking
   "linkedTo": {
     "requirement": "req-001",
     "specification": "spec-001",
     "issue": 123
   },
 
-  // 発見情報
+  // Discovery information
   "discovered": {
     "phase": "implementation" | "review" | "testing" | "production",
     "discoveredAt": "2026-02-15T10:00:00Z",
@@ -75,18 +79,18 @@
     "environment": "staging"
   },
 
-  // 外部ファイル
+  // External files
   "files": {
     "report": "feedback/fb-001/report.md",
     "evidence": ["feedback/fb-001/evidence/screenshot.png"]
   },
 
-  // 対応
+  // Resolution
   "resolution": {
     "status": "open" | "in-progress" | "resolved" | "wont-fix",
     "action": "requirement-update" | "spec-update" | "bug-fix" | "documentation",
 
-    // 影響
+    // Impact
     "impacts": {
       "requirementChanges": ["req-001"],
       "specificationChanges": ["spec-001"],
@@ -99,64 +103,65 @@
 }
 ```
 
-### フロー図
+### Flow Diagram
 
 ```
-実装完了
+Implementation complete
     ↓
-レビュー/テスト
+Review / Testing
     ↓
-問題発見！
+Problem found!
     ↓
 ┌─────────────────┬──────────────────┬─────────────────┐
 │ Bug             │ Requirement Gap  │ Spec Mismatch   │
-│ (実装ミス)      │ (要件不足)       │ (設計ミス)      │
+│ (impl error)    │ (missing req)    │ (design error)  │
 └────┬────────────┴────┬─────────────┴────┬────────────┘
      │                  │                   │
      ▼                  ▼                   ▼
-Feedback作成       Feedback作成        Feedback作成
+Create Feedback    Create Feedback     Create Feedback
      │                  │                   │
      ▼                  ▼                   ▼
-GitHub Issue修正   Requirement v1.1.0   Specification v1.1.0
-     │             (新バージョン)        (新バージョン)
+Fix GitHub Issue   Requirement v1.1.0   Specification v1.1.0
+     │             (new version)        (new version)
      │                  │                   │
      ▼                  ▼                   ▼
-  完了              承認フロー           承認フロー
+  Done             Approval flow       Approval flow
                         │                   │
                         ▼                   ▼
-                    新Issue生成         既存Issue更新
+                    Generate new        Update existing
+                    Issues              Issues
 ```
 
-### コマンド
+### Commands
 
 ```bash
-# Feedback作成
+# Create Feedback
 reqord feedback create bug \
   --issue 123 \
   --spec spec-001 \
   --severity high \
   --description "Token validation fails for expired tokens"
 
-# 証拠添付
+# Attach evidence
 reqord feedback attach fb-001 screenshot.png
 
-# Feedback一覧
+# List Feedback
 reqord feedback list --status open
 reqord feedback list --spec spec-001
 
-# 対応アクション
+# Resolution actions
 reqord feedback resolve fb-001 requirement-update
-# → Requirement新バージョン作成を提案
+# → Suggests creating a new Requirement version
 
 reqord feedback resolve fb-002 bug-fix
-# → 該当Issueに自動コメント
+# → Automatically comments on the relevant Issue
 
-# 影響分析
+# Impact analysis
 reqord feedback impact fb-001
-# → 影響を受けるReq/Spec/Issueを表示
+# → Shows affected Req/Spec/Issues
 ```
 
-### UI表示
+### UI Display
 
 ```
 ┌─────────────────────────────────────────────────┐
@@ -169,7 +174,7 @@ reqord feedback impact fb-001
 │ - Issue: #123 (closed)                          │
 │                                                  │
 │ Problem:                                         │
-│ Token refresh機能が要件に含まれていなかった    │
+│ Token refresh feature was not included in reqs  │
 │                                                  │
 │ Evidence:                                        │
 │ [screenshot.png] [error-log.txt]                │
@@ -190,9 +195,9 @@ reqord feedback impact fb-001
 └─────────────────────────────────────────────────┘
 ```
 
-### GitHub Issue連携
+### GitHub Issue Integration
 
-Feedbackから自動コメント:
+Automatic comment from Feedback:
 
 ```markdown
 ## 🔍 Feedback from Reqord
@@ -222,4 +227,4 @@ Token refresh functionality was missing from the original requirements.
 _Auto-generated by Reqord Feedback System_
 ```
 
-これで**実装→発見→フィードバック→改善**のループが回ります！
+This completes the **Implementation → Discovery → Feedback → Improvement** loop!

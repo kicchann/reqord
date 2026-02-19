@@ -1,155 +1,157 @@
-# 要件定義ガイド
+# Requirements Writing Guide
 
-reqordで要件（Requirement）を作成・管理する際のガイドラインです。
+> [日本語](./guide-requirements.ja.md)
+
+Guidelines for creating and managing requirements in reqord.
 
 ---
 
-## 要件の粒度
+## Requirement Granularity
 
-1つの要件は **1つの機能・振る舞い** に対応させてください。
+Each requirement should correspond to **one feature or behavior**.
 
-**適切な粒度:**
-- 「ユーザーがログインできる」
-- 「CSVエクスポート機能」
+**Appropriate granularity:**
+- "User can log in"
+- "CSV export feature"
 
-**粒度が大きすぎる:**
-- 「ユーザー管理機能」（ログイン、登録、プロフィール編集、パスワードリセットが混在）
+**Too coarse-grained:**
+- "User management feature" (mixes login, registration, profile editing, and password reset)
 
-**粒度が小さすぎる:**
-- 「ログインボタンの色を青にする」（UIの詳細はSpecification側で扱う）
+**Too fine-grained:**
+- "Make the login button blue" (UI details belong in the Specification)
 
-迷った場合の目安: 1つの要件から1〜3件のSpecificationが作られるのが理想です。
+Rule of thumb when in doubt: ideally, 1 to 3 Specifications should be derived from a single requirement.
 
 ---
 
 ## Status
 
-要件のstatusは **要件定義の承認ライフサイクルと実装状態** を表します。
+A requirement's status represents the **approval lifecycle and implementation state**.
 
-| Status | 意味 | 遷移条件 |
-|--------|------|---------|
-| `draft` | 作成中・編集中 | 初期状態 |
-| `pending_approval` | レビュー待ち | `reqord req approve` でPR作成時 |
-| `approved` | 承認済み・実装可能 | PRマージ時 |
-| `implemented` | 実装完了 | 実装が完了した場合 |
-| `deprecated` | 廃止 | 要件が不要になった場合 |
+| Status | Meaning | Transition Condition |
+|--------|---------|---------------------|
+| `draft` | Being created or edited | Initial state |
+| `pending_approval` | Awaiting review | When a PR is created via `reqord req approve` |
+| `approved` | Approved and ready for implementation | When the PR is merged |
+| `implemented` | Implementation complete | When implementation is finished |
+| `deprecated` | Retired | When the requirement is no longer needed |
 
-- `approved` は「この要件は正しく定義され、実装してよい」という意味です
-- `implemented` は実装が完了したことを示します。GitHub Issueの有無に関わらず設定できます
+- `approved` means "this requirement is correctly defined and cleared for implementation"
+- `implemented` indicates that implementation is complete. It can be set regardless of whether a GitHub Issue exists
 
 ---
 
 ## Priority
 
-| Priority | 使い分け |
-|----------|---------|
-| `high` | プロジェクトのコア機能。他の要件がこれに依存している |
-| `medium` | 標準的な機能。デフォルト値 |
-| `low` | あると良いが、なくてもプロジェクトは成り立つ |
+| Priority | Usage |
+|----------|-------|
+| `high` | Core project feature. Other requirements depend on this |
+| `medium` | Standard feature. Default value |
+| `low` | Nice to have, but the project can work without it |
 
 ---
 
 ## Dependencies
 
-要件間の関係を3種類で表現します。
+There are 3 types of relationships between requirements.
 
 ### blockedBy / blocks
 
-**「これが完了しないと着手できない」** という実装順序の制約です。
+Represents an **implementation order constraint: "cannot start until this is done"**.
 
 ```
-req-000001 (DB設計)
+req-000001 (DB Design)
   └── blocks: ["req-000002"]
 
-req-000002 (認証API)
+req-000002 (Auth API)
   └── blockedBy: ["req-000001"]
 ```
 
-`blocks` と `blockedBy` は常に対になります。片方を設定したら、もう片方にも反映してください。
+`blocks` and `blockedBy` always come in pairs. When you set one side, make sure to reflect it on the other.
 
-**使う場面:**
-- 技術的に先行実装が必要な場合（DBスキーマ → API → UI）
-- 共通基盤が必要な場合（認証基盤 → 各機能の認証連携）
+**When to use:**
+- When a preceding implementation is technically required (DB schema -> API -> UI)
+- When shared infrastructure is needed (auth foundation -> auth integration in each feature)
 
 ### relatedTo
 
-**「独立に実装可能だが、設計・レビュー時に一緒に考慮すべき」** 参照リンクです。実装順序の制約はありません。
+A **reference link for items that can be implemented independently but should be considered together during design and review**. There is no implementation order constraint.
 
 ```
-req-000003 (ログイン)
+req-000003 (Login)
   └── relatedTo: ["req-000004"]
 
-req-000004 (パスワードリセット)
+req-000004 (Password Reset)
   └── relatedTo: ["req-000003"]
 ```
 
-`relatedTo` は双方向です。片方に設定したら、もう片方にも設定してください。
+`relatedTo` is bidirectional. When you set it on one side, set it on the other as well.
 
-**使う場面:**
+**When to use:**
 
-1. **共通ドメイン** — 同じ機能領域に属し、設計の一貫性を保つべき要件同士
-   > 「ユーザー登録」と「プロフィール編集」— 両方ともユーザーモデルに関わる
+1. **Shared domain** -- Requirements that belong to the same feature area and should maintain design consistency
+   > "User Registration" and "Profile Editing" -- both involve the user model
 
-2. **共通基盤** — 実装で同じインフラやライブラリを使う可能性がある
-   > 「メール通知」と「Slack通知」— 通知基盤を共有する可能性がある
+2. **Shared infrastructure** -- May use the same infrastructure or libraries in implementation
+   > "Email Notifications" and "Slack Notifications" -- may share a notification foundation
 
-3. **仕様の整合性** — 矛盾しないように揃えるべき要件
-   > 「CSVエクスポート」と「CSVインポート」— フォーマットの定義を揃える必要がある
+3. **Specification consistency** -- Requirements that should be aligned to avoid contradictions
+   > "CSV Export" and "CSV Import" -- need to align on format definitions
 
-**relatedTo を見た人が取るべきアクション:**
-- **Specification作成時**: 関連要件のSpecを参照し、設計の整合性を確認する
-- **レビュー時**: 関連要件への影響がないか確認する
-- **変更時**: 関連要件のSpecにも変更が必要か検討する
+**Actions to take when you see relatedTo:**
+- **During Specification creation**: Review related requirement Specs to verify design consistency
+- **During review**: Check for impacts on related requirements
+- **During changes**: Consider whether related requirement Specs also need changes
 
-**blockedBy と relatedTo の判断基準:**
-- 「先にこれが実装されていないと技術的に不可能」→ `blockedBy`
-- 「同時に考えた方が設計が良くなる」→ `relatedTo`
+**Criteria for choosing blockedBy vs relatedTo:**
+- "Technically impossible without this being implemented first" -> `blockedBy`
+- "Design would be better if considered together" -> `relatedTo`
 
 ---
 
 ## Format
 
-要件の記述形式を3種類から選択します。
+Choose one of 3 formats for describing requirements.
 
 ### User Story
 
-ユーザー視点で「誰が・何を・なぜ」を記述します。最も一般的な形式です。
+Describes "who, what, why" from the user's perspective. This is the most common format.
 
 ```json
 {
   "type": "user-story",
   "userStory": {
-    "as": "開発者",
-    "iWant": "CLIコマンドで要件を管理したい",
-    "soThat": "手動での管理ミスを防げる"
+    "as": "Developer",
+    "iWant": "to manage requirements via CLI commands",
+    "soThat": "I can prevent manual management mistakes"
   }
 }
 ```
 
-**向いている場面:** エンドユーザー向けの機能要件
+**Best suited for:** Functional requirements targeting end users
 
 ### EARS (Easy Approach to Requirements Syntax)
 
-システムの振る舞いを条件付きで記述します。
+Describes system behavior with conditions.
 
 ```json
 {
   "type": "ears",
   "ears": {
     "type": "event-driven",
-    "trigger": "ユーザーがエクスポートボタンを押した",
-    "condition": "モデルに構造要素が含まれている",
-    "action": "IFC4形式でファイルをエクスポートする",
-    "response": "完了通知を表示する"
+    "trigger": "User presses the export button",
+    "condition": "Model contains structural elements",
+    "action": "Export file in IFC4 format",
+    "response": "Display completion notification"
   }
 }
 ```
 
-**向いている場面:** 非機能要件、システム間連携、条件分岐がある要件
+**Best suited for:** Non-functional requirements, system integrations, requirements with conditional branching
 
 ### Free-form
 
-定型に当てはまらない場合のフリーテキスト。description.md に詳細を記述します。
+Free text for cases that don't fit a standard format. Write details in description.md.
 
 ```json
 {
@@ -157,19 +159,19 @@ req-000004 (パスワードリセット)
 }
 ```
 
-**向いている場面:** 技術的な制約、調査タスク、プロトタイプ
+**Best suited for:** Technical constraints, research tasks, prototypes
 
 ---
 
 ## Files
 
-### description（必須）
+### description (required)
 
-要件の詳細を記述するMarkdownファイルです。テンプレートに沿って記述してください。
+A Markdown file that describes the requirement details. Write it following the template.
 
-### supplementary（任意）
+### supplementary (optional)
 
-要件の補助資料を自由に追加できます。specificationディレクトリ配下と同様に、reqordはJSONの `supplementary` 配列から補助資料の存在を認識します。
+You can freely add supplementary materials for a requirement. Similar to the specification directory, reqord recognizes supplementary materials from the `supplementary` array in the JSON.
 
 ```json
 {
@@ -183,24 +185,24 @@ req-000004 (パスワードリセット)
 }
 ```
 
-配置できるファイルの例:
-- 画面モックアップ（PNG、PDF）
-- フロー図（Mermaid `.mmd`）
-- 参考資料（PDF）
-- データサンプル（CSV、JSON）
+Examples of files you can include:
+- Screen mockups (PNG, PDF)
+- Flow diagrams (Mermaid `.mmd`)
+- Reference materials (PDF)
+- Data samples (CSV, JSON)
 
 ---
 
 ## estimatedComplexity / estimatedHours
 
-要件整理時の **直感的な難易度と工数の見積もり** です。精密な見積もりではなく、優先度判断の参考値として使います。
+These are **intuitive difficulty and effort estimates** made during requirements gathering. They are not precise estimates but rather reference values for prioritization decisions.
 
-| Complexity | 目安 |
-|-----------|------|
-| `small` | 数時間〜1日で完了する見込み |
-| `medium` | 数日程度かかる見込み |
-| `large` | 1週間以上かかる見込み |
-| `xlarge` | 複数週間にわたる見込み。分割を検討 |
+| Complexity | Guideline |
+|-----------|-----------|
+| `small` | Expected to be completed in a few hours to 1 day |
+| `medium` | Expected to take a few days |
+| `large` | Expected to take 1 week or more |
+| `xlarge` | Expected to span multiple weeks. Consider splitting |
 
-- `estimatedHours` は `estimatedComplexity` と矛盾しない範囲で設定してください
-- 精密な見積もりはSpecificationからのIssue分解で行います
+- Set `estimatedHours` within a range consistent with `estimatedComplexity`
+- Precise estimates are done when breaking down Issues from Specifications

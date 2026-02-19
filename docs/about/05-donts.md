@@ -1,303 +1,305 @@
 ---
-対象読者: 開発者、テックリード、AIエージェント
-前提知識: Reqordの基本概念（02-purpose.md を推奨）
-関連文書: docs/guide-requirements.md, docs/feedback-control.md
+target audience: Developers, tech leads, AI agents
+prerequisites: Basic Reqord concepts (02-purpose.md recommended)
+related documents: docs/guide-requirements.md, docs/guide-feedback.md
 ---
 
-> **この文書のまとめ**: Reqord利用時のアンチパターンと回避策。各パターンは「症状→なぜ問題か→どうすべきか」の構造。チェックリストとしても使える。
+> **Summary of this document**: Anti-patterns and how to avoid them when using Reqord. Each pattern follows a "Symptoms → Why it's a problem → What to do instead" structure. Can also be used as a checklist.
 
-# Don'ts — やってはいけないこと
+# Don'ts — Anti-Patterns to Avoid
 
-## 要件定義のアンチパターン
+> [日本語](./05-donts.ja.md)
 
-### 巨大要件（God Requirement）
+## Requirement Definition Anti-Patterns
 
-**症状**: 1つの要件に複数の機能が混在。工数が40時間を超える。成功基準が10個以上ある。
+### God Requirement
 
-**なぜ問題か**:
+**Symptoms**: Multiple features crammed into a single requirement. Estimated effort exceeds 40 hours. More than 10 success criteria.
 
-- レビューの負荷が高く、承認が滞る
-- 仕様が複雑になり、Issue分解が困難
-- 部分的な実装完了が判定できない
+**Why it's a problem**:
 
-**どうすべきか**:
+- High review burden, causing approval bottlenecks
+- Specifications become overly complex, making Issue decomposition difficult
+- Impossible to determine partial completion
 
-- 1要件 = 1機能/1振る舞い
-- 40時間を超えたら分割を検討
-- 「この要件を1文で説明できるか？」を判定基準に
+**What to do instead**:
 
----
-
-### 曖昧要件
-
-**症状**: 「適切に処理する」「高速に応答する」「使いやすいUIにする」のような表現。
-
-**なぜ問題か**:
-
-- 人によって解釈が異なる
-- 成功基準が定義できない → テスト不可能
-- ツールによる自動処理（仕様設計、バリデーション等）の精度が下がる
-
-**どうすべきか**:
-
-- 数値や条件を明示する: 「3秒以内に応答」「入力フィールドを3つ以下に」
-- SMARTバリデーションを実行し、Specificスコアが低い要件を改善
-
-**特に避けるべき表現**:
-
-| カテゴリ     | 表現例                                                 |
-| ------------ | ------------------------------------------------------ |
-| 程度の曖昧さ | 適切に、なるべく、できるだけ、可能な限り、必要に応じて |
-| 品質の曖昧さ | 高速、効率的、柔軟、簡単、使いやすい、わかりやすい     |
-| 相対表現     | 多い、少ない、大きい、小さい、良い、悪い               |
-| 包括表現     | 等、など、その他、ある程度、十分に                     |
-
-> これらの表現はSMARTバリデーションで自動検出される。詳細: [packages/shared/src/validation/ambiguous-phrases.ts](../../packages/shared/src/validation/ambiguous-phrases.ts)
+- 1 requirement = 1 feature / 1 behavior
+- Consider splitting if effort exceeds 40 hours
+- Use this test: "Can I describe this requirement in one sentence?"
 
 ---
 
-### 実装詳細の混入
+### Vague Requirements
 
-**症状**: 要件に「Reactで実装」「PostgreSQLに保存」「REST APIで提供」等の技術選択が含まれる。
+**Symptoms**: Expressions like "handle appropriately," "respond quickly," or "make the UI user-friendly."
 
-**なぜ問題か**:
+**Why it's a problem**:
 
-- 要件（What）と仕様（How）の境界が曖昧になる
-- 技術スタックの変更時に要件まで変更が必要になる
-- 代替案の検討を阻害する
+- Different people interpret them differently
+- Success criteria cannot be defined → untestable
+- Reduces accuracy of automated processing (specification design, validation, etc.)
 
-**どうすべきか**:
+**What to do instead**:
 
-- 要件には「何をしたいか」だけを書く
-- 技術選択は仕様（Specification）で行う
-- 例: ×「JWTでセッション管理」→ ○「ログイン状態を保持できること」
+- Use explicit numbers and conditions: "Respond within 3 seconds," "Limit input fields to 3 or fewer"
+- Run SMART validation and improve requirements with low Specific scores
 
----
+**Expressions to especially avoid**:
 
-### 依存関係の放置
+| Category              | Examples                                                                   |
+| --------------------- | -------------------------------------------------------------------------- |
+| Degree ambiguity      | appropriately, as much as possible, if possible, as needed                 |
+| Quality ambiguity     | fast, efficient, flexible, easy, user-friendly, intuitive                  |
+| Relative expressions  | many, few, large, small, good, bad                                         |
+| Catch-all expressions | etc., and so on, other, to some extent, sufficiently                       |
 
-**症状**: blockedByだけ設定してblocks未設定。relatedToが全く使われていない。
-
-**なぜ問題か**:
-
-- 片方向リンクでは影響分析が不完全
-- 関連する要件の変更が見落とされる
-- 依存グラフが不正確
-
-**どうすべきか**:
-
-- blockedBy を設定したら、相手側の blocks も必ず設定
-- 関連するが独立して実装可能な要件には relatedTo を設定
-- 定期的に依存関係グラフを確認
+> These expressions are automatically detected by SMART validation. Details: [packages/shared/src/validation/ambiguous-phrases.ts](../../packages/shared/src/validation/ambiguous-phrases.ts)
 
 ---
 
-### 循環依存
+### Implementation Details Leaking into Requirements
 
-**症状**: A→B→C→A のように要件の依存関係がループしている。
+**Symptoms**: Requirements contain technology choices such as "Implement with React," "Store in PostgreSQL," or "Provide via REST API."
 
-**なぜ問題か**:
+**Why it's a problem**:
 
-- どこから実装すればよいか決められない
-- 影響分析が無限ループに陥る
+- The boundary between requirements (What) and specifications (How) becomes blurred
+- Changes to the tech stack require modifying requirements as well
+- Inhibits consideration of alternatives
 
-**どうすべきか**:
+**What to do instead**:
 
-- 循環の原因を分析し、依存の方向を整理する
-- 必要に応じて要件を分割し、循環を解消する
-- 共通部分を別の要件として切り出す
-
-## ワークフローのアンチパターン
-
-### 承認スキップ
-
-**症状**: draftのまま実装を開始。pending_approvalを経由せずにimplementedにする。
-
-**なぜ問題か**:
-
-- レビューを受けていない要件に基づく実装は手戻りリスクが高い
-- 承認の記録が残らず、トレーサビリティが損なわれる
-- チームの合意なく実装が進む
-
-**どうすべきか**:
-
-- 必ず draft → pending_approval → approved のフローを踏む
-- 急ぎの場合でも、簡易レビュー + 承認を実施
-- 承認前の実装着手は「プロトタイプ」と位置づけ、承認後に本実装
+- Write only "what you want to achieve" in requirements
+- Make technology choices in Specifications
+- Example: Bad: "Manage sessions with JWT" → Good: "Users can maintain their login state"
 
 ---
 
-### 過度な構造化
+### Neglecting Dependency Management
 
-**症状**: バグ報告やちょっとした改善要望を、最初からフル構造化しようとする。
+**Symptoms**: Only blockedBy is set without blocks. relatedTo is never used.
 
-**なぜ問題か**:
+**Why it's a problem**:
 
-- 情報が不十分な段階での構造化は無駄になりやすい
-- フィードバックの初動が遅れる
-- 構造化のオーバーヘッドで、本来の議論・調査が後回しに
+- One-directional links make impact analysis incomplete
+- Changes to related requirements get overlooked
+- Dependency graphs become inaccurate
 
-**どうすべきか**:
+**What to do instead**:
 
-- まずGitHub Issueでシンプルに報告・議論
-- 調査が進み、構造化が有益と判断してからReqordに取り込む
-- フィードバックの3段階: シンプル報告 → 調査・議論 → 構造化（必要な場合のみ）
-
-> 詳細: [docs/feedback-control.md](../feedback-control.md)
+- When setting blockedBy, always set blocks on the other side as well
+- Use relatedTo for requirements that are related but can be implemented independently
+- Periodically review the dependency graph
 
 ---
 
-### コンテキスト不足でのAI利用
+### Circular Dependencies
 
-**症状**: ProjectContextが空、またはほぼ空の状態でAIのenhance/refineを実行。
+**Symptoms**: Requirement dependencies form a loop like A → B → C → A.
 
-**なぜ問題か**:
+**Why it's a problem**:
 
-- AIがプロジェクトの文脈を理解できず、汎用的で的外れな出力になる
-- ドメイン用語が正しく使われない
-- 技術スタックに合わない提案が出る
+- Cannot determine where to start implementation
+- Impact analysis falls into infinite loops
 
-**どうすべきか**:
+**What to do instead**:
 
-- AI利用前にProjectContextの編集対象4ファイルを充実させる（`context.json` はツールが自動管理）
-  - `product.yaml` — ビジョン、課題、ターゲットユーザー
-  - `technical.yaml` — 技術スタック、アーキテクチャ
-  - `structure.yaml` — 命名規則、ディレクトリ構造
-  - `domain/*.md` — ドメイン固有の知識
-- 最低限 product.yaml と technical.yaml があればAIの出力品質は大幅に向上する
+- Analyze the root cause of the cycle and reorganize dependency directions
+- Split requirements as needed to break the cycle
+- Extract common parts into separate requirements
 
----
+## Workflow Anti-Patterns
 
-### バージョン管理の軽視
+### Skipping Approval
 
-**症状**: approved済みの要件をステータス変更せずに直接編集。変更履歴が追えない。
+**Symptoms**: Starting implementation while still in draft. Moving directly to implemented without going through pending_approval.
 
-**なぜ問題か**:
+**Why it's a problem**:
 
-- 承認済みの要件が無断で変わると、実装との乖離が起きる
-- 変更の影響範囲が把握できない
-- 過去の承認が無効になる
+- Implementation based on unreviewed requirements has high rework risk
+- No approval record remains, compromising traceability
+- Implementation proceeds without team consensus
 
-**どうすべきか**:
+**What to do instead**:
 
-- approved要件の変更は新バージョンとして扱う
-- 変更内容をPRで提出し、再承認を受ける
-- versionHistoryで変更履歴を追跡
-
-## AI利用のアンチパターン
-
-### AI出力の無批判な受け入れ
-
-**症状**: enhanceやrefineの結果をレビューせずにそのまま承認。
-
-**なぜ問題か**:
-
-- AIはドメイン知識の不足や文脈の誤解により、不正確な内容を生成することがある
-- ビジネスルールの微妙なニュアンスをAIは捉えきれない
-- セキュリティ要件の見落としリスク
-
-**どうすべきか**:
-
-- AI出力は「下書き」として扱い、必ず人間がレビュー
-- 特に確認すべきポイント:
-  - ドメイン用語の正確性
-  - ビジネスルールとの整合性
-  - セキュリティ・プライバシーの考慮
-  - 成功基準の検証可能性
+- Always follow the draft → pending_approval → approved flow
+- Even in urgent cases, perform a brief review + approval
+- Treat pre-approval implementation as a "prototype," then do the real implementation after approval
 
 ---
 
-### AIに全てを任せる
+### Over-Structuring
 
-**症状**: 要件定義からIssue生成まで、人間の判断なしにAIに一括実行させる。
+**Symptoms**: Trying to fully structure bug reports or minor improvement requests from the start.
 
-**なぜ問題か**:
+**Why it's a problem**:
 
-- 要件の優先度・スコープはビジネス判断であり、AIだけでは決められない
-- ドメイン知識は人間が持っている
-- 責任の所在が不明確になる
+- Structuring at a stage when information is insufficient tends to be wasteful
+- Delays the initial response to feedback
+- The overhead of structuring pushes the actual discussion and investigation to the back burner
 
-**どうすべきか**:
+**What to do instead**:
 
-- AIは**支援ツール**として活用する
-- 判断ポイント（優先度、スコープ、承認）は人間が担う
-- AIの役割: 構造化、詳細化、一貫性チェック、タスク分解
-- 人間の役割: 方向性の決定、ドメイン知識の提供、最終判断
+- First, report and discuss simply via GitHub Issues
+- Only bring it into Reqord once investigation has progressed and structuring would be beneficial
+- Three stages of feedback: Simple report → Investigation & discussion → Structuring (only when necessary)
 
----
-
-### 構造化せずにAI投入
-
-**症状**: free-formで漠然とした文章を書き、AIにenhanceさせようとする。
-
-**なぜ問題か**:
-
-- 入力が曖昧だとAIの出力も曖昧になる（Garbage In, Garbage Out）
-- AIが意図を推測して補完するため、本来の意図と乖離しやすい
-- 後からの修正コストが高い
-
-**どうすべきか**:
-
-- まず人間がUser StoryまたはEARSのテンプレートに沿って骨格を書く
-- その上でAIに詳細化（enhance）を依頼する
-- テンプレート: `As [role], I want [action], so that [benefit]` または `When [trigger], the system shall [action]`
-
-## データ管理のアンチパターン
-
-### .reqord/ をgitignore
-
-**症状**: `.gitignore` に `.reqord/` を追加している。
-
-**なぜ問題か**:
-
-- トレーサビリティが完全に消滅する
-- チームメンバーが要件にアクセスできない
-- PRベースの承認フローが機能しない
-- Git履歴による変更追跡が不可能
-
-**どうすべきか**:
-
-- `.reqord/` はGit管理下に置く（これがReqordの基本設計）
-- `.reqord/settings/` 内の個人設定のみ `.gitignore` に追加する
+> Details: [docs/guide-feedback.md](../guide-feedback.md)
 
 ---
 
-### JSON手動編集でバリデーション無視
+### Using AI Without Sufficient Context
 
-**症状**: テキストエディタで `.reqord/requirements/req-*.json` を直接編集。
+**Symptoms**: Running AI enhance/refine when ProjectContext is empty or nearly empty.
 
-**なぜ問題か**:
+**Why it's a problem**:
 
-- Zodスキーマによるバリデーションがスキップされる
-- 必須フィールドの欠落、型の不一致が起きる
-- ステータス遷移ルールが守られない可能性
+- AI cannot understand the project context, resulting in generic and off-target output
+- Domain terminology is not used correctly
+- Suggestions incompatible with the tech stack are generated
 
-**どうすべきか**:
+**What to do instead**:
 
-- CLIコマンド経由で操作する（`reqord req create`, `reqord req update` 等）
-- CLIが対応していない操作が必要な場合は、変更後に `reqord validate` でバリデーションを実行
-
----
-
-## チェックリスト
-
-要件作成時の最終確認:
-
-- [ ] 1要件 = 1機能/1振る舞いになっているか
-- [ ] 曖昧な表現（適切に、高速に、等）が含まれていないか
-- [ ] 成功基準が3〜7個あり、検証可能か
-- [ ] 実装詳細（技術選択）が混入していないか
-- [ ] 依存関係が双方向に設定されているか
-- [ ] SMARTバリデーションを実行したか
-- [ ] 工数見積もり（complexity + hours）が設定されているか
-
-ワークフロー確認:
-
-- [ ] 承認フロー（draft → pending_approval → approved）を経由しているか
-- [ ] AI出力を人間がレビューしたか
-- [ ] ProjectContextが充実しているか（最低限 product.yaml + technical.yaml）
-- [ ] `.reqord/` がGit管理下にあるか
+- Before using AI, populate the 4 editable ProjectContext files (`context.json` is auto-managed by the tool)
+  - `product.yaml` — Vision, challenges, target users
+  - `technical.yaml` — Tech stack, architecture
+  - `structure.yaml` — Naming conventions, directory structure
+  - `domain/*.md` — Domain-specific knowledge
+- Having at least product.yaml and technical.yaml significantly improves AI output quality
 
 ---
 
-**次へ**: [06-ai-integration.md](./06-ai-integration.md) — AI駆動開発での活用
+### Neglecting Version Control
+
+**Symptoms**: Directly editing approved requirements without changing their status. Change history cannot be tracked.
+
+**Why it's a problem**:
+
+- If approved requirements change without notice, divergence from implementation occurs
+- The scope of impact cannot be assessed
+- Previous approvals become invalidated
+
+**What to do instead**:
+
+- Treat changes to approved requirements as a new version
+- Submit changes via PR and obtain re-approval
+- Track change history with versionHistory
+
+## AI Usage Anti-Patterns
+
+### Uncritical Acceptance of AI Output
+
+**Symptoms**: Approving enhance or refine results without review.
+
+**Why it's a problem**:
+
+- AI may generate inaccurate content due to insufficient domain knowledge or misunderstanding of context
+- AI cannot capture subtle nuances of business rules
+- Risk of overlooking security requirements
+
+**What to do instead**:
+
+- Treat AI output as a "draft" and always have a human review it
+- Key points to verify:
+  - Accuracy of domain terminology
+  - Consistency with business rules
+  - Security and privacy considerations
+  - Verifiability of success criteria
+
+---
+
+### Delegating Everything to AI
+
+**Symptoms**: Having AI execute everything from requirement definition to Issue generation without human judgment.
+
+**Why it's a problem**:
+
+- Requirement priority and scope are business decisions that AI alone cannot make
+- Domain knowledge resides with humans
+- Accountability becomes unclear
+
+**What to do instead**:
+
+- Use AI as a **support tool**
+- Humans should handle decision points (priority, scope, approval)
+- AI's role: Structuring, detailing, consistency checking, task decomposition
+- Human's role: Setting direction, providing domain knowledge, making final decisions
+
+---
+
+### Feeding AI Unstructured Input
+
+**Symptoms**: Writing vague free-form text and asking AI to enhance it.
+
+**Why it's a problem**:
+
+- Vague input leads to vague output (Garbage In, Garbage Out)
+- AI guesses and fills in the intent, easily diverging from the original intention
+- High cost of corrections afterward
+
+**What to do instead**:
+
+- First, have a human write the skeleton using a User Story or EARS template
+- Then ask AI to detail (enhance) it
+- Templates: `As [role], I want [action], so that [benefit]` or `When [trigger], the system shall [action]`
+
+## Data Management Anti-Patterns
+
+### Adding .reqord/ to .gitignore
+
+**Symptoms**: `.reqord/` is added to `.gitignore`.
+
+**Why it's a problem**:
+
+- Traceability is completely lost
+- Team members cannot access requirements
+- PR-based approval workflow stops functioning
+- Change tracking via Git history becomes impossible
+
+**What to do instead**:
+
+- Keep `.reqord/` under Git version control (this is Reqord's fundamental design)
+- Only add personal settings within `.reqord/settings/` to `.gitignore`
+
+---
+
+### Bypassing Validation by Manually Editing JSON
+
+**Symptoms**: Directly editing `.reqord/requirements/req-*.json` with a text editor.
+
+**Why it's a problem**:
+
+- Zod schema validation is bypassed
+- Missing required fields and type mismatches occur
+- Status transition rules may not be enforced
+
+**What to do instead**:
+
+- Operate through CLI commands (`reqord req create`, `reqord req update`, etc.)
+- If an operation not supported by the CLI is needed, run `reqord validate` after making changes
+
+---
+
+## Checklist
+
+Final checks when creating requirements:
+
+- [ ] Is each requirement scoped to 1 feature / 1 behavior?
+- [ ] Does it avoid vague expressions (appropriately, quickly, etc.)?
+- [ ] Are there 3–7 success criteria, and are they verifiable?
+- [ ] Are implementation details (technology choices) absent from the requirement?
+- [ ] Are dependencies set bidirectionally?
+- [ ] Has SMART validation been run?
+- [ ] Have effort estimates (complexity + hours) been set?
+
+Workflow checks:
+
+- [ ] Has the approval flow (draft → pending_approval → approved) been followed?
+- [ ] Has a human reviewed AI output?
+- [ ] Is ProjectContext well-populated (at minimum product.yaml + technical.yaml)?
+- [ ] Is `.reqord/` under Git version control?
+
+---
+
+**Next**: [06-ai-integration.md](./06-ai-integration.md) — Leveraging Reqord in AI-Driven Development

@@ -8,7 +8,7 @@ GitHub Issueをベースとしたフィードバック管理機能。feedbackラ
 
 > **v4.0変更点**: feedback運用の完全化。unlinkコマンド追加（linkの逆操作）、createコマンド追加（GitHub Issue作成）、close時の残存flag警告追加。
 
-設計方針は docs/feedback-control.md を参照。
+設計方針は docs/guide-feedback.md を参照。
 
 ## ユーザーストーリー
 

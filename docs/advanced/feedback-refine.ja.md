@@ -1,4 +1,6 @@
-# Plan: ラベル方式廃止 → HTMLコメントタグ方式への移行
+# ラベル方式廃止 → HTMLコメントタグ方式への移行
+
+> [English](./feedback-refine.md)
 
 ## Context
 
@@ -83,7 +85,7 @@ export function upsertReqordComment(
 
 ## Step 3: ドキュメント更新
 
-### docs/feedback-control.md
+### docs/guide-feedback.md
 
 - 141-145行目「Labels追加」セクション削除
 - ラベル方式への言及を全削除

@@ -1,70 +1,68 @@
 ---
-対象読者: すべての人（開発者、テックリード、PO、AIエージェント）
-前提知識: なし
-関連文書: docs/main.md, docs/guide-requirements.md
+audience: Everyone (developers, tech leads, POs, AI agents)
+prerequisites: None
+related: docs/advanced/specification.md, docs/guide-requirements.md
 ---
 
-> **この文書のまとめ**: Reqordの30秒要約と、読者に合わせた最適な読み進め方の案内。
+> **Summary**: A 30-second overview of Reqord and a guide to the best reading path for your role.
 
-# Reqord について
+# About Reqord
 
-## Reqord とは
+> [日本語](./index.ja.md)
 
-**Reqord** は、プロダクトの要件・仕様・実装タスクを構造化し、
-ライフサイクル全体を管理・可視化するCLIツールです。
+## What is Reqord?
 
-「何を作るか」「なぜ作るか」の情報をコードと同じリポジトリで運用し、
-実装との同期を保ちます。
+**Reqord** is a CLI tool that structures product requirements, specifications, and implementation tasks, managing and visualizing the entire lifecycle.
 
-### AI駆動開発での価値
+It keeps "what to build" and "why to build it" in the same repository as your code, maintaining synchronization with the implementation.
 
-AIがコードを高速に生成する時代、「何を作っているか」の管理はより重要になります。
-Reqordの構造化データはAIへの明確な入力となり、
-人間が状況を把握し続けるための基盤を提供します。
+### Value in AI-Driven Development
 
-### 具体的なユースケース
+In an era where AI generates code at high speed, managing "what we are building" becomes even more important. Reqord's structured data serves as clear input for AI, providing a foundation for humans to maintain situational awareness.
 
-1. **CLIで要件を作成** — `reqord req create` で構造化された要件を記述
-2. **AIで詳細化・レビュー** — EARS形式への変換、SMARTバリデーション、仕様設計を支援
-3. **PRで承認** — Gitベースの承認フロー（CODEOWNERS レビュー → マージで承認確定）
-4. **GitHub Issueに分解** — 仕様から実装タスクを自動生成、依存関係も反映
+### Concrete Use Cases
 
-## このドキュメント群の構成
+1. **Create requirements with the CLI** — Write structured requirements with `reqord req create`
+2. **Refine and review with AI** — Supports EARS format conversion, SMART validation, and specification design
+3. **Approve via PR** — Git-based approval flow (CODEOWNERS review -> merge to confirm approval)
+4. **Break down into GitHub Issues** — Auto-generate implementation tasks from specifications, reflecting dependencies
 
-| ファイル | 内容 | こんなときに読む |
-|---------|------|-----------------|
-| [01-philosophy.md](./01-philosophy.md) | なぜReqordが存在するのか | 設計判断の背景を知りたい |
-| [02-purpose.md](./02-purpose.md) | 何を達成するのか、誰のためか | Reqordで何ができるか知りたい |
-| [03-theory.md](./03-theory.md) | 採用した手法と選定理由 | EARS・SMART等の理論的背景を知りたい |
-| [04-best-practices.md](./04-best-practices.md) | 効果的な使い方のパターン | 実践的なノウハウが欲しい |
-| [05-donts.md](./05-donts.md) | やってはいけないこと | 典型的な失敗を避けたい |
-| [06-ai-integration.md](./06-ai-integration.md) | AI駆動開発での活用 | AIツールとの連携方法を知りたい |
+## Document Structure
 
-各文書は独立して読めますが、番号順に読むと体系的に理解できます。
+| File | Content | When to Read |
+|------|---------|--------------|
+| [01-philosophy.md](./01-philosophy.md) | Why Reqord exists | To understand the rationale behind design decisions |
+| [02-purpose.md](./02-purpose.md) | What it achieves and for whom | To learn what Reqord can do |
+| [03-theory.md](./03-theory.md) | Adopted methodologies and rationale | To understand the theoretical background of EARS, SMART, etc. |
+| [04-best-practices.md](./04-best-practices.md) | Effective usage patterns | To get practical know-how |
+| [05-donts.md](./05-donts.md) | Things to avoid | To prevent common mistakes |
+| [06-ai-integration.md](./06-ai-integration.md) | Usage in AI-driven development | To learn how to integrate with AI tools |
 
-## ペルソナ別の推奨パス
+Each document can be read independently, but reading them in order provides a systematic understanding.
 
-### AI駆動開発を既にやっている人
-→ [philosophy](./01-philosophy.md) → [purpose](./02-purpose.md) → [ai-integration](./06-ai-integration.md)
-- spec-kit/kiro等との違い、Reqordのポジショニングが分かる
-- AI活用の具体的なフローとツール別パターンを知れる
+## Recommended Paths by Persona
 
-### 要件管理が初めての人
-→ [purpose](./02-purpose.md) → [theory](./03-theory.md) → [best-practices](./04-best-practices.md)
-- 基礎概念から実践パターンまで段階的に学べる
+### Already Doing AI-Driven Development
+-> [philosophy](./01-philosophy.md) -> [purpose](./02-purpose.md) -> [ai-integration](./06-ai-integration.md)
+- Understand how Reqord differs from spec-kit/kiro and its positioning
+- Learn concrete AI workflows and tool-specific patterns
 
-### すぐに使いたい人
-→ [purpose](./02-purpose.md) → [best-practices](./04-best-practices.md) → [donts](./05-donts.md)
-- 最短で効果的に使い始められる
+### New to Requirements Management
+-> [purpose](./02-purpose.md) -> [theory](./03-theory.md) -> [best-practices](./04-best-practices.md)
+- Learn step by step from basic concepts to practical patterns
 
-### AIエージェント
-→ [philosophy](./01-philosophy.md) + [purpose](./02-purpose.md) → [best-practices](./04-best-practices.md) + [donts](./05-donts.md) → [ai-integration](./06-ai-integration.md)
-- 設計意図と制約を正確に把握できる
-- AI連携のフェーズとProjectContextの構成を理解できる
+### Want to Get Started Quickly
+-> [purpose](./02-purpose.md) -> [best-practices](./04-best-practices.md) -> [donts](./05-donts.md)
+- Start using Reqord effectively in the shortest time
 
-## 関連ドキュメント
+### AI Agents
+-> [philosophy](./01-philosophy.md) + [purpose](./02-purpose.md) -> [best-practices](./04-best-practices.md) + [donts](./05-donts.md) -> [ai-integration](./06-ai-integration.md)
+- Accurately grasp design intent and constraints
+- Understand AI integration phases and ProjectContext structure
 
-- [docs/main.md](../main.md) — 技術仕様・設計原則の詳細
-- [docs/guide-requirements.md](../guide-requirements.md) — 要件の書き方ガイド（実装詳細）
-- [docs/feedback-control.md](../feedback-control.md) — フィードバック管理の設計
-- [.reqord/context/domain/](../../.reqord/context/domain/) — AIが参照するドメイン知識
+## Related Documents
+
+- [docs/advanced/specification.md](../advanced/specification.md) — Detailed technical specifications and design principles
+- [docs/guide-requirements.md](../guide-requirements.md) — Requirements writing guide (implementation details)
+- [docs/guide-feedback.md](../guide-feedback.md) — Feedback management design
+- [.reqord/context/domain/](../../.reqord/context/domain/) — Domain knowledge referenced by AI

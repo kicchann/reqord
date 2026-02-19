@@ -1,196 +1,198 @@
 ---
-対象読者: AI駆動開発を行うチーム（開発者、テックリード）
-前提知識: Reqordの基本概念（02-purpose.md を推奨）
-関連文書: .reqord/context/domain/ai-integration.md, docs/reqord-claude-code-commands.md
+target audience: Teams practicing AI-driven development (developers, tech leads)
+prerequisites: Basic Reqord concepts (02-purpose.md recommended)
+related documents: .reqord/context/domain/ai-integration.md, docs/integrations/claude-code-plugin.md
 ---
 
-> **この文書のまとめ**: AI駆動開発においてReqordをどう活かすか。「なぜ構造化データがAIに効くのか」と、ツール別の実践パターン。
+> **Summary of this document**: How to leverage Reqord in AI-driven development. Covers "why structured data is effective for AI" and practical patterns by tool.
 
-# AI Integration — AI駆動開発での活用
+# AI Integration — Leveraging Reqord in AI-Driven Development
 
-## なぜReqordとAIの組み合わせが有効か
+> [日本語](./06-ai-integration.ja.md)
 
-Reqordの本質はAI無しでも成立する（[01-philosophy.md](./01-philosophy.md) 〜 [05-donts.md](./05-donts.md) 参照）。
-構造化・承認フロー・トレーサビリティは、人間のチームだけでも価値がある。
+## Why the Combination of Reqord and AI Is Effective
 
-AI時代には、これらに**追加で**以下の価値が生まれる:
+Reqord's core value holds even without AI (see [01-philosophy.md](./01-philosophy.md) through [05-donts.md](./05-donts.md)).
+Structuring, approval workflows, and traceability are valuable for human teams alone.
 
-1. **構造化データ → AIへの明確な入力**
-   - 曖昧な自然言語ではなく、型付きのJSON + Markdownを渡せる
-   - EARS形式の要件はAIが解釈しやすい（トリガー・条件・アクションが明示的）
+In the AI era, these provide **additional** value:
 
-2. **ProjectContext → セッション間の一貫性**
-   - AIセッションが切れても、product.yaml / technical.yaml / domain/\*.md で文脈を再現できる
-   - 「毎回プロジェクトの説明からやり直す」問題を解消
+1. **Structured data → Clear input for AI**
+   - Instead of ambiguous natural language, you can pass typed YAML + Markdown
+   - EARS-format requirements are easy for AI to interpret (triggers, conditions, and actions are explicit)
 
-3. **可視化 → 人間の状況把握**
-   - AIがコードを高速に生成する環境では、「何を作っているか」を見失いやすい
-   - Reqordのダッシュボード・依存グラフが、人間の把握を支える
+2. **ProjectContext → Consistency across sessions**
+   - Even when an AI session ends, context can be restored via product.yaml / technical.yaml / domain/\*.md
+   - Eliminates the "starting from scratch explaining the project every time" problem
 
-**核心**: コード実装だけが先行するのを防ぎ、人間がReqordを通じて「何が決まり、何が実装され、何が残っているか」を常に把握し続ける。
+3. **Visualization → Human situational awareness**
+   - In environments where AI generates code rapidly, it's easy to lose track of "what's being built"
+   - Reqord's dashboard and dependency graphs support human oversight
 
-## ReqordのAI支援フェーズ
+**The core idea**: Prevent code implementation from racing ahead, and ensure humans can always understand — through Reqord — "what has been decided, what has been implemented, and what remains."
 
-Reqordは4つのフェーズでAIを活用する（詳細: [.reqord/context/domain/ai-integration.md](../../.reqord/context/domain/ai-integration.md)）。
+## Reqord's AI-Assisted Phases
 
-### 1. 要件詳細化（Enhancement）
+Reqord leverages AI across four phases (details: [.reqord/context/domain/ai-integration.md](../../.reqord/context/domain/ai-integration.md)).
 
-ユーザーの簡単なタイトル・説明から、AIが詳細な要件定義を生成する。
+### 1. Requirement Enhancement
 
-- EARS形式 / User Story形式への変換
-- 成功基準（Success Criteria）の定義
-- 複雑度の見積もり、依存関係の推定
-- SMARTバリデーションによる品質スコアの改善
+AI generates detailed requirement definitions from the user's brief title and description.
+
+- Conversion to EARS format / User Story format
+- Definition of Success Criteria
+- Complexity estimation and dependency inference
+- Quality score improvement through SMART validation
 
 ### 2. Gap Analysis
 
-既存コードベースと新要件の差分をAIが分析する。
+AI analyzes the gap between the existing codebase and new requirements.
 
-- 既存実装のカバレッジ評価（full / partial / no coverage）
-- 不足機能の特定
-- コンフリクト検出（API変更、データモデル不整合等）
+- Coverage evaluation of existing implementations (full / partial / no coverage)
+- Identification of missing features
+- Conflict detection (API changes, data model inconsistencies, etc.)
 
-### 3. 仕様設計（Specification Design）
+### 3. Specification Design
 
-要件とProjectContextから、AIが技術設計書を生成する。
+AI generates a technical design document from requirements and ProjectContext.
 
-- アーキテクチャ図（Mermaid形式）
-- コンポーネント設計とインターフェース定義
-- 技術的決定の文書化（Rationale、Alternatives、Tradeoffs）
+- Architecture diagrams (Mermaid format)
+- Component design and interface definitions
+- Documentation of technical decisions (Rationale, Alternatives, Tradeoffs)
 
-### 4. タスク分解（Task Decomposition）
+### 4. Task Decomposition
 
-仕様からAIが実装タスクに分解する。
+AI breaks specifications down into implementation tasks.
 
-- レイヤー別 / 機能別 / 要件別の分解戦略
-- 並列実行分析（Parallel Group: P0, P1, P2）
-- クリティカルパスの特定
-- GitHub Issueテンプレートの適用
+- Decomposition strategies by layer / feature / requirement
+- Parallel execution analysis (Parallel Group: P0, P1, P2)
+- Critical path identification
+- Application of GitHub Issue templates
 
-## ProjectContext: AIへの入力品質を決める鍵
+## ProjectContext: The Key to AI Input Quality
 
-AIの出力品質は入力の質に直結する。Reqordでは **ProjectContext** がその入力品質を決める。
+AI output quality is directly tied to input quality. In Reqord, **ProjectContext** determines that input quality.
 
-### 構成ファイルと優先順位
+### Configuration Files and Priority
 
-| 優先度      | ファイル         | 役割                                             |
-| ----------- | ---------------- | ------------------------------------------------ |
-| 1（必須）   | `context.json`   | プロジェクトメタデータ（名前、バージョン等）     |
-| 2（必須）   | `product.yaml`   | ビジョン、課題、ターゲットユーザー               |
-| 3（必須）   | `technical.yaml` | 技術スタック、設計原則、アーキテクチャ           |
-| 4（推奨）   | `structure.yaml` | 命名規則、ディレクトリ構造、アーキテクチャルール |
-| 5（必要時） | `domain/*.md`    | ドメイン固有の知識（AI連携、承認フロー等）       |
+| Priority        | File             | Role                                                  |
+| --------------- | ---------------- | ----------------------------------------------------- |
+| 1 (Required)    | `context.json`   | Project metadata (name, version, etc.)                |
+| 2 (Required)    | `product.yaml`   | Vision, challenges, target users                      |
+| 3 (Required)    | `technical.yaml` | Tech stack, design principles, architecture           |
+| 4 (Recommended) | `structure.yaml` | Naming conventions, directory structure, architecture rules |
+| 5 (As needed)   | `domain/*.md`    | Domain-specific knowledge (AI integration, approval workflows, etc.) |
 
-### 「ProjectContextが貧弱 → AI出力も貧弱」の原則
+### The "Poor ProjectContext → Poor AI Output" Principle
 
-- **context無し**: AIは汎用的で的外れな出力をする（ドメイン用語を間違える、技術スタックに合わない提案をする）
-- **最低限（product.yaml + technical.yaml）**: 出力品質が大幅に向上する
-- **充実（全ファイル + domain/\*.md）**: プロジェクト固有の正確な出力が得られる
+- **No context**: AI produces generic, off-target output (misuses domain terminology, suggests incompatible tech stacks)
+- **Minimum (product.yaml + technical.yaml)**: Output quality improves significantly
+- **Rich (all files + domain/\*.md)**: Accurate, project-specific output is achieved
 
-ProjectContextの整備はAI無しでも価値がある（チームの知識共有、オンボーディング）。AI活用はその延長線上にある。
+Maintaining ProjectContext is valuable even without AI (team knowledge sharing, onboarding). AI utilization is a natural extension of that.
 
-## ツール別の活用パターン
+## Usage Patterns by Tool
 
 ### Claude Code
 
-Reqordとの親和性が最も高い。CLI同士の統合により、シームレスな連携が可能。
+Has the highest affinity with Reqord. CLI-to-CLI integration enables seamless collaboration.
 
-**仕様設計の生成フロー（`/reqord:design`）:**
+**Specification design generation flow (`/reqord:design`):**
 
-1. 対象の要件を選択
-2. ProjectContextを自動読み込み
-3. AIが技術設計書（design.md）を生成
-4. 人間がレビュー・修正 → 承認
+1. Select the target requirement
+2. Automatically load ProjectContext
+3. AI generates a technical design document (design.md)
+4. Human reviews, modifies → approves
 
-**要件品質の改善フロー（`/reqord:refine`）:**
+**Requirement quality improvement flow (`/reqord:refine`):**
 
-1. SMARTスコアが低い要件を選択
-2. AIが具体化・改善案を提示
-3. 曖昧な表現を検出し、数値・条件に置き換え
+1. Select requirements with low SMART scores
+2. AI presents suggestions for concretization and improvement
+3. Detects vague expressions and replaces them with numbers and conditions
 
-**ProjectContextの自動活用:**
+**Automatic ProjectContext utilization:**
 
-- Claude Codeのセッション開始時に `.reqord/context/` が文脈として提供される
-- domain/\*.md がRulesのように機能し、AIの出力を制約する
+- At the start of a Claude Code session, `.reqord/context/` is provided as context
+- domain/\*.md functions like Rules, constraining AI output
 
-### Cursor / Windsurf（IDE統合型）
+### Cursor / Windsurf (IDE-Integrated)
 
-`.reqord/` をワークスペースに含めることで、IDEのAI機能が要件・仕様を参照できる。
+By including `.reqord/` in the workspace, the IDE's AI features can reference requirements and specifications.
 
-**実装時の参照パターン:**
+**Reference pattern during implementation:**
 
-- 「この要件（req-000042）の仕様に基づいて実装して」と指示
-- AIが `.reqord/requirements/req-000042/` の内容を参照して実装
-- 成功基準をテストケースに変換
+- Instruct: "Implement based on the specification for this requirement (req-000042)"
+- AI references the contents of `.reqord/requirements/req-000042/` for implementation
+- Converts success criteria into test cases
 
-**ProjectContextの活用:**
+**ProjectContext utilization:**
 
-- `domain/*.md` をCursorのRules / WindsurfのRulesに設定
-- 技術スタック・命名規則がAIの実装に反映される
+- Set `domain/*.md` as Cursor Rules / Windsurf Rules
+- Tech stack and naming conventions are reflected in AI-generated implementations
 
-### Codex / その他CLIエージェント
+### Codex / Other CLI Agents
 
-CLIの出力をパイプで渡すことで、任意のAIエージェントと連携できる。
+By piping CLI output, you can integrate with any AI agent.
 
 ```bash
-# 要件の内容をAIに渡す
-reqord req show req-000042 | codex "この要件の実装方針を提案して"
+# Pass requirement content to AI
+reqord req show req-000042 | codex "Suggest an implementation approach for this requirement"
 
-# 仕様を参照してタスク分解
-reqord spec show req-000042 | codex "この仕様をGitHub Issueに分解して"
+# Reference spec for task decomposition
+reqord spec show req-000042 | codex "Break this specification into GitHub Issues"
 ```
 
-タスク分解結果をGitHub Issueとして登録し、Issue駆動で実装を進めるフローが構築できる。
+You can build a flow where task decomposition results are registered as GitHub Issues, driving implementation in an Issue-driven manner.
 
-## Human-in-the-loop: AIに任せる境界
+## Human-in-the-Loop: Boundaries of What to Delegate to AI
 
-### AIに任せてよいこと
+### What AI can handle
 
-- **構造化**: 自然言語 → EARS/User Story形式への変換
-- **詳細化**: タイトル+概要 → 成功基準・複雑度見積もりの生成
-- **一貫性チェック**: 要件間の矛盾検出、依存関係の推定
-- **タスク分解**: 仕様 → GitHub Issue への変換
+- **Structuring**: Converting natural language → EARS/User Story format
+- **Detailing**: Generating success criteria and complexity estimates from title + summary
+- **Consistency checking**: Detecting contradictions between requirements, inferring dependencies
+- **Task decomposition**: Converting specifications → GitHub Issues
 
-### 人間が判断すべきこと
+### What humans should decide
 
-- **優先度**: ビジネス判断に基づく優先順位付け
-- **スコープ**: 何を含め、何を含めないかの決定
-- **承認**: 要件・仕様の最終承認（PRマージ）
-- **セキュリティ**: 認証・決済・個人情報に関する設計判断
+- **Priority**: Prioritization based on business judgment
+- **Scope**: Deciding what to include and what to exclude
+- **Approval**: Final approval of requirements and specifications (PR merge)
+- **Security**: Design decisions regarding authentication, payments, and personal data
 
-ReqordのPRベース承認フローが、AI出力の品質ゲートとして機能する。AIが生成した要件・仕様も、人間のレビュー → 承認を経てはじめて確定する。
+Reqord's PR-based approval workflow functions as a quality gate for AI output. Even requirements and specifications generated by AI are only finalized after human review → approval.
 
-## 段階的な導入
+## Gradual Adoption
 
-すべてを一度に導入する必要はない。
+You don't need to adopt everything at once.
 
-### Step 1: ProjectContextの整備
+### Step 1: Set Up ProjectContext
 
-AI無しでも価値がある。チームの知識を構造化し、共有する。
+Valuable even without AI. Structure and share team knowledge.
 
 ```bash
 reqord init
-# product.yaml, technical.yaml を記述
+# Write product.yaml, technical.yaml
 ```
 
-### Step 2: enhance / refine でAI詳細化を試す
+### Step 2: Try AI Enhancement with enhance / refine
 
-既存の要件をAIで改善し、効果を実感する。
+Improve existing requirements with AI and experience the benefits.
 
 ```bash
-reqord req create  # まず骨格を書く
-reqord req enhance req-000001  # AIが詳細化
+reqord req create  # Write the skeleton first
+reqord req enhance req-000001  # AI details it
 ```
 
-### Step 3: 仕様設計・タスク分解にAIを活用
+### Step 3: Use AI for Specification Design and Task Decomposition
 
-要件が充実したら、仕様設計とIssue生成をAIに支援させる。
+Once requirements are well-developed, let AI assist with specification design and Issue generation.
 
-### Step 4: フルフロー
+### Step 4: Full Flow
 
-要件作成 → AI詳細化 → 仕様設計 → タスク分解 → Issue生成 → 実装 → フィードバック。
-人間は各フェーズで判断・承認を行い、AIが構造化・詳細化を担う。
+Requirement creation → AI enhancement → Specification design → Task decomposition → Issue generation → Implementation → Feedback.
+Humans make judgments and approvals at each phase, while AI handles structuring and detailing.
 
 ---
 
-**最初に戻る**: [index.md](./index.md) — ドキュメント一覧とナビゲーション
+**Back to start**: [index.md](./index.md) — Document list and navigation
