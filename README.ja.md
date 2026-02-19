@@ -1,8 +1,8 @@
 # Reqord
 
-**ソフトウェア開発のための要件管理システム -- Git-native, AI-ready, Local-first**
+> [English](./README.md)
 
-[English](README.md)
+**ソフトウェア開発のための要件管理システム -- Git-native, AI-ready, Local-first**
 
 [![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL--3.0-blue.svg)](LICENSE)
 [![Tests](https://img.shields.io/badge/tests-675%20passing-brightgreen.svg)]()
@@ -64,43 +64,22 @@ draft --> pending_approval --> approved --> implemented --> deprecated
 
 ## クイックスタート
 
-### 前提条件
-
-- Node.js 20 以上
-- pnpm 10 以上
-- Git
-
 ### インストール
 
 ```bash
-git clone https://github.com/kicchann/reqord.git
-cd reqord
-pnpm install
-pnpm build
+npm install -g @reqord/cli
 ```
 
 ### プロジェクトの初期化
 
 ```bash
+cd /path/to/your/project
+
 # .reqord/ ディレクトリ構造を作成
 reqord init
 
 # プロジェクトコンテキストを設定（名前・言語など）
 reqord context init
-```
-
-`reqord init` を実行すると、プロジェクトルートに以下の構造が生成されます。
-
-```
-.reqord/
-├── context/          # プロジェクトコンテキスト
-│   ├── context.yaml
-│   ├── product.yaml
-│   ├── technical.yaml
-│   └── domain/
-├── requirements/     # 要件データ
-├── specifications/   # 仕様データ
-└── settings/         # テンプレート・ルール
 ```
 
 ### 最初の要件を作成
@@ -112,22 +91,26 @@ reqord req create
 # 作成した要件を一覧表示
 reqord req list
 
-# 要件の詳細を確認
-reqord req show req-000001
-
 # SMART基準で要件の品質をスコアリング
 reqord req validate req-000001
 ```
 
-### 仕様を作成
+詳しい手順は [Getting Started](./docs/getting-started.ja.md) を参照してください。
+
+<details>
+<summary>開発者向けセットアップ（ソースからビルド）</summary>
+
+**前提条件:** Node.js 20+, pnpm 10+, Git
 
 ```bash
-# 要件に紐づく仕様を作成
-reqord spec create req-000001
-
-# 設計ドキュメントを確認
-reqord spec design spec-000001
+git clone https://github.com/kicchann/reqord.git
+cd reqord
+pnpm install
+pnpm build
+cd packages/cli && pnpm link --global
 ```
+
+</details>
 
 ---
 
@@ -145,9 +128,15 @@ reqord spec design spec-000001
 
 要件・仕様の承認に、コードレビューと同じ GitHub の PR ワークフローを活用します。CODEOWNERS によるレビュー、マージで承認確定というフローにより、既存の開発習慣をそのまま要件管理に適用できます。
 
-### 依存グラフと Web ダッシュボード
+### Web ダッシュボード
 
-`@reqord/web`（Next.js 15 + React 19）が提供する Web UI で、要件間の依存関係をインタラクティブなグラフとして可視化します。プロジェクトヘルスメトリクス、Gantt Chart、仕様詳細ビューなどのダッシュボード機能を備えています。
+組み込みの Web UI で、要件間の依存関係をインタラクティブなグラフとして可視化します:
+
+```bash
+reqord ui
+```
+
+プロジェクトヘルスメトリクス、Gantt Chart、仕様詳細ビューなどのダッシュボード機能を備えています。
 
 ### AI 連携（ProjectContext）
 
@@ -206,60 +195,22 @@ Git リポジトリがシングルソースオブトゥルースです。SaaS �
 
 ## アーキテクチャ
 
-### モノレポ構成
+Reqord は3つのパッケージで構成されたモノレポです:
 
-```
-reqord/
-├── packages/
-│   ├── shared/     @reqord/shared   -- Zod スキーマ、型定義、共通ロジック
-│   ├── cli/        @reqord/cli      -- CLI ツール（Commander.js）
-│   └── web/        @reqord/web      -- Web UI（Next.js 15 + React 19）
-├── docs/                            -- ドキュメント
-└── vitest.config.ts                 -- テスト設定（675 テスト）
-```
-
-### 技術スタック
-
-| レイヤー       | 技術                                             |
-| -------------- | ------------------------------------------------ |
-| 言語           | TypeScript 5.x（ESM）                            |
-| パッケージ管理 | pnpm workspaces                                  |
-| スキーマ / 型  | Zod（CLI と Web で共有）                         |
-| CLI            | Commander.js, chalk, cli-table3                  |
-| Web UI         | Next.js 15, React 19, Tailwind CSS 4, React Flow |
-| テスト         | Vitest, Testing Library                          |
-| 品質           | ESLint 9, TypeScript strict mode                 |
-
-### データフロー
-
-```
-@reqord/shared (Zod スキーマ -- Single Source of Truth)
-       |
-       +---> @reqord/cli (要件 CRUD, バリデーション, GitHub 連携)
-       |
-       +---> @reqord/web (ダッシュボード, 依存グラフ, Gantt)
-```
+- **[@reqord/shared](./packages/shared/)** -- Zod スキーマ、型定義、共通ロジック
+- **[@reqord/cli](./packages/cli/)** -- CLI ツール（Commander.js）
+- **[@reqord/web](./packages/web/)** -- Web UI（Next.js 15 + React 19）
 
 ---
 
 ## ドキュメント
 
-Reqord の設計思想、理論的背景、実践ガイドは `docs/about/` にまとめられています。
+- **[Getting Started](./docs/getting-started.ja.md)** -- インストールから初回利用まで
+- **[要件の書き方ガイド](./docs/guide-requirements.ja.md)** -- EARS / User Story の書き方と改善例
+- **[CLI コマンド一覧](./docs/cli-reference.ja.md)** -- 実装済み・未実装コマンドの全リスト
+- **[About Reqord](./docs/about/index.ja.md)** -- 設計思想・理論的背景・ベストプラクティス
 
-| ドキュメント                                      | 内容                                                      |
-| ------------------------------------------------- | --------------------------------------------------------- |
-| [Philosophy](docs/about/01-philosophy.md)         | なぜ Reqord が存在するのか -- 設計原則と解決する課題      |
-| [Purpose](docs/about/02-purpose.md)               | 何を達成するのか -- 機能概要とターゲットユーザー          |
-| [Theory](docs/about/03-theory.md)                 | 採用した手法 -- EARS, SMART, トレーサビリティの理論的背景 |
-| [Best Practices](docs/about/04-best-practices.md) | 効果的な使い方のパターン                                  |
-| [Don'ts](docs/about/05-donts.md)                  | やってはいけないこと -- 典型的な失敗パターン              |
-| [AI Integration](docs/about/06-ai-integration.md) | AI 駆動開発での活用 -- ツール別の実践パターン             |
-
-その他:
-
-- [CLI コマンド一覧](docs/reqord-cli-commands.md) -- 実装済み・未実装コマンドの全リスト
-- [要件の書き方ガイド](docs/guide-requirements.md) -- EARS / User Story の書き方と改善例
-- [フィードバック管理](docs/feedback-control.md) -- フィードバックループの設計詳細
+詳細は [docs/README.md](./docs/README.ja.md) を参照してください。
 
 ---
 
@@ -275,7 +226,7 @@ Reqord は現在 v0.1.0（プレリリース）です。要件 CRUD、SMART バ�
 - **ステータスダッシュボード** -- `reqord status` によるプロジェクト全体の進捗表示
 - **コンテキスト統合出力** -- 外部ツール向けの `reqord context export`
 
-詳細は [CLI コマンド一覧](docs/reqord-cli-commands.md) の未実装コマンドを参照してください。
+詳細は [CLI コマンド一覧](./docs/cli-reference.ja.md) の未実装コマンドを参照してください。
 
 ---
 

@@ -1,141 +1,143 @@
 ---
-対象読者: 開発者、テックリード、AIエージェント
-前提知識: ソフトウェア開発の基本的な理解
-関連文書: docs/main.md
+audience: Developers, tech leads, AI agents
+prerequisites: Basic understanding of software development
+related: docs/advanced/specification.md
 ---
 
-> **この文書のまとめ**: Reqordが解決する課題と5つの設計原則。「なぜこのツールが存在するのか」を理解するための文書。
+> **Summary**: The problems Reqord solves and its 5 design principles. A document for understanding "why this tool exists."
 
-# Philosophy — なぜReqordが存在するのか
+# Philosophy — Why Reqord Exists
 
-## 解決する課題
+> [日本語](./01-philosophy.ja.md)
 
-### 要件の散在
+## Problems We Solve
 
-ソフトウェア開発では「何を作るか」の情報が断片化しやすい:
+### Scattered Requirements
 
-- チャット履歴の中に埋もれた要件
-- メモアプリに書いた仕様の断片
-- 口頭で合意した機能の記録なし
-- Issue本文とコメントに散らばる追加要件
+In software development, information about "what to build" tends to become fragmented:
 
-結果として、同じ議論を繰り返し、矛盾する仕様が生まれる。
+- Requirements buried in chat histories
+- Specification fragments written in note-taking apps
+- No record of verbally agreed-upon features
+- Additional requirements scattered across issue bodies and comments
 
-### コンテキストの消失
+The result: repeated discussions and contradictory specifications.
 
-プロジェクトの文脈が失われ続ける:
+### Loss of Context
 
-- 新メンバーやツールがプロジェクトの背景を理解できない
-- 過去のセッションで合意した設計判断が引き継がれない
-- 「このAPIはなぜこの設計なのか」に答えられるドキュメントがない
+Project context is continuously lost:
 
-### 仕様の劣化（Spec Drift）
+- New team members and tools cannot understand the project's background
+- Design decisions agreed upon in past sessions are not carried forward
+- No documentation that can answer "why is this API designed this way?"
 
-一度作った仕様が実装後にメンテナンスされない:
+### Spec Drift
 
-- 実装が仕様と乖離しても気づかない
-- 半年後に「この仕様は今も正しいのか」が分からない
-- 次の機能追加時に、前提となる仕様が古い
+Specifications created once are not maintained after implementation:
 
-### トレーサビリティの断絶
+- Implementation diverges from specifications without anyone noticing
+- Six months later, "is this spec still valid?" becomes unanswerable
+- When adding the next feature, the underlying specifications are outdated
 
-「なぜこの機能を作ったか」を追跡できない:
+### Broken Traceability
 
-- 要件→仕様→コードの紐付けが不明
-- 変更の影響範囲が見えず、予期しない破壊が起きる
-- 過去の意思決定の根拠が失われる
+"Why did we build this feature?" cannot be traced:
 
-## 5つの設計原則
+- The link between requirements -> specifications -> code is unclear
+- The impact scope of changes is invisible, leading to unexpected breakage
+- The rationale behind past decisions is lost
 
-### 1. 構造化第一（Structure First）
+## 5 Design Principles
 
-要件をプレーンテキストではなく、構造化データとして管理する。
+### 1. Structure First
 
-- **JSON（メタデータ）+ Markdown（コンテンツ）** のハイブリッド形式
-- JSON: ステータス、優先度、依存関係、バージョン履歴 — 機械処理に適した部分
-- Markdown: 説明文、成功基準、背景 — 人間が読み書きしやすい部分
-- **Zodスキーマ** で型安全性を確保、CLIとWeb UIで同一のバリデーションを共有
+Manage requirements as structured data, not plain text.
 
-### 2. ローカル完結（Local-First）
+- **JSON (metadata) + Markdown (content)** hybrid format
+- JSON: Status, priority, dependencies, version history — parts suited for machine processing
+- Markdown: Descriptions, success criteria, background — parts easy for humans to read and write
+- **Zod schemas** ensure type safety, sharing the same validation across CLI and Web UI
 
-Gitリポジトリがシングルソースオブトゥルース（SSoT）。
+### 2. Local-First
 
-- `.reqord/` ディレクトリにすべてのデータを格納
-- SaaSやバックエンドサーバーは不要
-- オフラインで完全に動作
-- `git clone` だけでプロジェクトの全コンテキストを再現可能
+The Git repository is the Single Source of Truth (SSoT).
 
-### 3. 機械可読性（Machine-Readable）
+- All data is stored in the `.reqord/` directory
+- No SaaS or backend server required
+- Works completely offline
+- `git clone` alone reproduces the entire project context
 
-構造化されたデータは、人間だけでなくツールにとっても扱いやすい。
+### 3. Machine-Readable
 
-- JSON + Markdown のハイブリッド形式は、プログラムによる解析・変換が容易
-- CLIが構造を保証するため、外部ツールとの連携に一貫したインターフェースを提供
-- ProjectContextにより、プロジェクト全体の文脈を構造的に蓄積・参照できる
+Structured data is easy to work with not only for humans but also for tools.
 
-この設計は副次的に、AIエージェントが要件を正確に解釈するための基盤にもなる。
+- The JSON + Markdown hybrid format is easy to parse and transform programmatically
+- The CLI guarantees structure, providing a consistent interface for integration with external tools
+- ProjectContext allows structured accumulation and reference of project-wide context
+
+This design also serves as a foundation for AI agents to accurately interpret requirements.
 
 ### 4. Human-in-the-loop
 
-自動化・ツール支援と人間の判断を適切に分離する。
+Appropriately separate automation/tool support from human judgment.
 
-- 要件の承認: PRベースのレビュー → CODEOWNERSによるApprove → マージで確定
-- 仕様の承認: 同様のPRベースフロー
-- ツール出力のレビュー: 自動生成された内容は必ず人間が確認してから適用
-- **セキュリティ関連**（認証、決済、個人情報）は常に人間によるレビューが必須
+- Requirement approval: PR-based review -> Approve by CODEOWNERS -> Finalized on merge
+- Specification approval: Same PR-based flow
+- Tool output review: Auto-generated content must always be reviewed by humans before applying
+- **Security-related** items (authentication, payments, personal data) always require human review
 
 ### 5. Living Documentation
 
-要件は使い捨てではなく「生きたドキュメント」。
+Requirements are not disposable — they are "living documents."
 
-- **バージョン管理**: 承認履歴（version, gitCommit, approvedBy, approvedAt）を追跡
-- **ステータスライフサイクル**: draft → pending_approval → approved → implemented → deprecated
-- **フィードバックループ**: 実装後のフィードバックが要件・仕様の更新につながる
-- **影響分析**: 依存関係グラフで変更の波及範囲を把握
+- **Version control**: Track approval history (version, gitCommit, approvedBy, approvedAt)
+- **Status lifecycle**: draft -> pending_approval -> approved -> implemented -> deprecated
+- **Feedback loop**: Post-implementation feedback feeds back into requirement and specification updates
+- **Impact analysis**: Understand the ripple effect of changes through a dependency graph
 
 ## What Reqord is NOT
 
-Reqordの位置づけを明確にする。
+Clarifying Reqord's positioning.
 
-### Spec-driven developmentツールではない
+### Not a Spec-Driven Development Tool
 
-spec-kit や kiro のようなコード生成ツールとは異なる:
+Different from code generation tools like spec-kit or kiro:
 
-- Reqordは**要件のライフサイクル管理**に特化
-- コード生成はスコープ外
-- 出力はGitHub Issue（実装タスク）であり、コードではない
+- Reqord specializes in **requirements lifecycle management**
+- Code generation is out of scope
+- The output is GitHub Issues (implementation tasks), not code
 
-### Jira/Asanaの代替ではない
+### Not a Jira/Asana Replacement
 
-プロジェクト管理全般をカバーするものではない:
+It does not cover project management in general:
 
-- スプリント計画、リソース管理、ガントチャート等は対象外
-- 要件管理という一つの領域に集中
-- 既存のプロジェクト管理ツールと**併用**する設計
+- Sprint planning, resource management, Gantt charts, etc. are out of scope
+- It focuses on a single domain: requirements management
+- Designed to be **used alongside** existing project management tools
 
-### IDE拡張ではない
+### Not an IDE Extension
 
-特定のエディタに依存しない:
+It does not depend on a specific editor:
 
-- CLI + Web UIの独立ツール
-- どのエディタ/IDE/ターミナルからでも使える
+- An independent CLI + Web UI tool
+- Usable from any editor/IDE/terminal
 
-### Reqordの本質
+### The Essence of Reqord
 
-**要件のライフサイクル管理** — 作成→承認→実装→フィードバック→更新のサイクルを回し続けること。
+**Requirements lifecycle management** — continuously running the cycle of creation -> approval -> implementation tracking -> feedback -> updates.
 
-## Gitが基盤であることの意味
+## Why Git as the Foundation
 
-Reqordは意図的にGitを基盤に選んでいる:
+Reqord deliberately chose Git as its foundation:
 
-- **変更履歴の完全な追跡**: `git log` で要件の変更経緯を辿れる
-- **PRベースのレビュー・承認**: コードレビューと同じ習慣で要件をレビューできる
-- **ブランチ戦略**: 要件の変更もfeatureブランチで安全に作業
-- **既存CI/CDとの親和性**: GitHub Actionsで要件のバリデーションを自動化可能
-- **アクセス制御**: リポジトリの権限管理をそのまま活用
+- **Complete change tracking**: Trace the history of requirement changes with `git log`
+- **PR-based review and approval**: Review requirements using the same workflow as code reviews
+- **Branching strategy**: Safely work on requirement changes in feature branches
+- **CI/CD compatibility**: Automate requirement validation with GitHub Actions
+- **Access control**: Leverage existing repository permission management
 
-コードと要件を同じリポジトリ・同じワークフローで管理することで、トレーサビリティが自然に実現される。
+By managing code and requirements in the same repository with the same workflow, traceability is naturally achieved.
 
 ---
 
-**次へ**: [02-purpose.md](./02-purpose.md) — 何を達成するのか、誰のためか
+**Next**: [02-purpose.md](./02-purpose.md) — What it achieves and for whom

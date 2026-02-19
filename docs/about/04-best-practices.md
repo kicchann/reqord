@@ -1,173 +1,175 @@
 ---
-対象読者: 開発者、テックリード、AIエージェント
-前提知識: Reqordの基本概念（02-purpose.md を推奨）
-関連文書: docs/guide-requirements.md, docs/feedback-control.md, .reqord/context/domain/ai-integration.md
+audience: Developers, tech leads, AI agents
+prerequisites: Basic Reqord concepts (02-purpose.md recommended)
+related: docs/guide-requirements.md, docs/guide-feedback.md, .reqord/context/domain/ai-integration.md
 ---
 
-> **この文書のまとめ**: Reqordを効果的に使うための実践パターン。要件の書き方、ワークフロー、AI連携、スケーリングのベストプラクティス。
+> **Summary**: Practical patterns for using Reqord effectively. Best practices for writing requirements, workflows, AI integration, and scaling.
 
-# Best Practices — 効果的な使い方のパターン
+# Best Practices — Patterns for Effective Usage
 
-## 要件の書き方
+> [日本語](./04-best-practices.ja.md)
 
-### 粒度
+## Writing Requirements
 
-**1要件 = 1機能/1振る舞い** を基本とする。
+### Granularity
 
-- 目安: 1要件から1〜3件の仕様が生まれる
-- 工数: 1〜40時間の範囲（xlarge以上は分割を推奨）
-- 判定基準: 「この要件を1文で説明できるか？」 — できなければ分割が必要
+**1 requirement = 1 feature / 1 behavior** as a general rule.
 
-| 複雑度 | 工数目安 | 特徴                             |
-| ------ | -------- | -------------------------------- |
-| small  | 1-8h     | 単一コンポーネント、明確なパス   |
-| medium | 8-24h    | 複数コンポーネント、設計判断あり |
-| large  | 24-40h   | アーキテクチャへの影響あり       |
-| xlarge | 40h+     | 分割を推奨                       |
+- Guideline: 1 requirement should produce 1-3 specifications
+- Effort: 1-40 hours range (splitting is recommended for xlarge and above)
+- Decision criterion: "Can you explain this requirement in one sentence?" — if not, it needs to be split
 
-> 詳細: [docs/guide-requirements.md](../guide-requirements.md)
+| Complexity | Effort Estimate | Characteristics |
+| ---------- | --------------- | --------------- |
+| small  | 1-8h     | Single component, clear path |
+| medium | 8-24h    | Multiple components, design decisions involved |
+| large  | 24-40h   | Impact on architecture |
+| xlarge | 40h+     | Splitting recommended |
 
-### 成功基準（Success Criteria）
+> Details: [docs/guide-requirements.md](../guide-requirements.md)
 
-- **3〜7個** が適切な範囲
-- **数値を含める**: 「レスポンスタイム3秒以内」「カバレッジ80%以上」
-- **検証可能であること**: テストで確認できる、または手動で確認する手順が明確
-- 「〜できること」で終わる形式が書きやすい
+### Success Criteria
 
-良い例:
+- **3-7** is the appropriate range
+- **Include numbers**: "Response time under 3 seconds," "Coverage of 80% or higher"
+- **Must be verifiable**: Can be confirmed by tests, or the manual verification steps are clear
+- A format ending with "...can be done" or "...is confirmed" is easy to write
 
-```
-- ユーザーがメールアドレスとパスワードでログインできること
-- 不正なパスワードで3回失敗するとアカウントが一時ロックされること
-- ログイン成功時にJWTトークンが発行され、有効期限が24時間であること
-```
-
-### フォーマット選択
-
-| ユースケース                   | 推奨フォーマット |
-| ------------------------------ | ---------------- |
-| ユーザーが直接操作する機能     | User Story       |
-| システムの振る舞い・非機能要件 | EARS             |
-| 調査・技術検証・その他         | Free-form        |
-
-迷ったらUser Storyから始め、システム側の制約が中心ならEARSに切り替える。
-
-### 依存関係
-
-- **常に双方向リンク**: blockedBy を設定したら blocks も設定
-- **深い依存チェーンを避ける**: 3段以上のチェーンは設計の見直しを検討
-- **relatedTo の活用**: 直接の順序制約がない関連要件はrelatedToでグルーピング
-
-## ワークフローパターン
-
-### 新規プロジェクト
+Good examples:
 
 ```
-1. reqord init           — .reqord/ ディレクトリを初期化
-2. ProjectContext充実    — product.yaml, technical.yaml を記述
-3. コア要件3-5件作成    — プロジェクトの骨格となる要件
-4. AI詳細化             — enhance で EARS/User Story に変換、成功基準を生成
-5. SMARTバリデーション   — スコアが低い部分を改善
-6. 仕様設計             — 各要件に対して仕様を作成
-7. GitHub Issue生成      — 仕様から実装タスクを分解
+- Users can log in with email and password
+- After 3 failed login attempts with incorrect passwords, the account is temporarily locked
+- Upon successful login, a JWT token is issued with a 24-hour expiration
 ```
 
-最初から完璧を目指さない。3-5件のコア要件から始めて、実装しながら追加・改善していく。
+### Format Selection
 
-### 既存プロジェクト
+| Use Case | Recommended Format |
+| -------- | ------------------ |
+| Features directly operated by users | User Story |
+| System behavior / non-functional requirements | EARS |
+| Research, technical investigation, etc. | Free-form |
 
-```
-1. reqord init                — 既存リポジトリに .reqord/ を追加
-2. 重要な未文書化要件の洗い出し  — 暗黙知になっている要件を言語化
-3. 段階的に構造化              — まず重要度の高い要件から構造化
-4. 新規機能から本格活用         — 今後の機能追加でフルフローを実践
-```
+When in doubt, start with User Story. Switch to EARS if system-side constraints are the focus.
 
-既存の全要件を一度に構造化する必要はない。重要なものから段階的に取り込む。
+### Dependencies
 
-### フィードバックサイクル
+- **Always use bidirectional links**: When setting blockedBy, also set blocks
+- **Avoid deep dependency chains**: Consider redesigning if chains exceed 3 levels
+- **Use relatedTo**: Group related requirements without direct ordering constraints using relatedTo
 
-```
-1. GitHub Issue でフィードバック受領（feedbackラベル）
-2. Issue のコメントで議論・調査
-3. 必要に応じてReqordに構造化（flagシステムで追跡）
-4. 要件/仕様の更新
-5. 更新内容のレビュー・承認
-```
+## Workflow Patterns
 
-すべてのフィードバックを即座に構造化する必要はない。まずGitHub Issueで議論し、構造化が有益と判断した段階でReqordに取り込む。
-
-### 要件のメンテナンス
-
-要件はLiving Document — 実装後も更新し続ける:
-
-- 実装中に発見した制約や変更点を要件に反映
-- テスト結果から成功基準を見直す
-- 関連する新機能追加時に依存関係を更新
-- 廃止された要件は deprecated に変更（削除ではなく履歴を残す）
-
-## AI連携のベストプラクティス
-
-> Reqordの構造化データは、AI活用時に特に大きな効果を発揮する。
-> このセクションはAIと併用するチーム向けのプラクティスを扱う。
-
-### ProjectContextの充実が出力品質を左右する
-
-AIの出力品質は入力の質に比例する。ProjectContextのうち、ユーザーが編集する4つのファイルを充実させることが最も効果的（`context.json` はツールが自動管理するメタデータのため、通常は手動編集不要）:
-
-| ファイル         | 内容                               | AIへの影響                 |
-| ---------------- | ---------------------------------- | -------------------------- |
-| `product.yaml`   | ビジョン、課題、ターゲットユーザー | 要件の妥当性判断に使われる |
-| `technical.yaml` | 技術スタック、アーキテクチャ       | 仕様設計の品質に直結       |
-| `structure.yaml` | 命名規則、ディレクトリ構造         | Issue分解の精度に影響      |
-| `domain/*.md`    | ドメイン固有の知識                 | 専門用語の正確な使用       |
-
-### 段階的詳細化
-
-一度にすべてを書こうとしない:
+### New Projects
 
 ```
-1. 簡潔なタイトル + 1行の説明で作成
-2. AI enhance で EARS/User Story に変換、成功基準を生成
-3. AI refine で細部を調整
-4. 人間がレビューし、ドメイン知識で補正
-5. SMARTバリデーションで品質確認
+1. reqord init           — Initialize the .reqord/ directory
+2. Enrich ProjectContext — Write product.yaml, technical.yaml
+3. Create 3-5 core requirements — Requirements forming the project's backbone
+4. AI refinement         — Convert to EARS/User Story with enhance, generate success criteria
+5. SMART validation      — Improve areas with low scores
+6. Specification design  — Create specifications for each requirement
+7. GitHub Issue generation — Break down specifications into implementation tasks
 ```
 
-### AI出力のレビュー（Human-in-the-loopの実践）
+Don't aim for perfection from the start. Begin with 3-5 core requirements and add/improve as you implement.
 
-AI出力を受け取ったら、以下をチェック:
+### Existing Projects
 
-- **ドメイン知識の正確性**: AIが知らないビジネスルール・制約がないか
-- **スコープの妥当性**: 要件の範囲が広すぎ/狭すぎないか
-- **成功基準の検証可能性**: 実際にテストで確認できるか
-- **依存関係の正確性**: 実装順序の前提が正しいか
-- **セキュリティの考慮**: 認証・認可・個人情報に関する要件が漏れていないか
+```
+1. reqord init                    — Add .reqord/ to existing repository
+2. Identify undocumented requirements — Verbalize implicit knowledge
+3. Structure incrementally        — Start with high-priority requirements
+4. Full adoption from new features — Practice the full flow for future feature additions
+```
 
-## スケーリング
+You don't need to structure all existing requirements at once. Incorporate them incrementally, starting with the most important ones.
 
-要件数が増えた場合の対策:
+### Feedback Cycle
 
-### ドメイン別整理
+```
+1. Receive feedback via GitHub Issues (feedback label)
+2. Discuss and investigate in Issue comments
+3. Structure in Reqord as needed (track with flag system)
+4. Update requirements/specifications
+5. Review and approve updates
+```
 
-要件が数十件を超えたら、ドメイン（機能領域）でグルーピングする:
+Not all feedback needs to be structured immediately. First discuss in GitHub Issues, and incorporate into Reqord when structuring would be beneficial.
 
-- タグやカテゴリで分類
-- 関連する要件同士を relatedTo でリンク
-- ドメインごとにProjectContextの domain/\*.md を充実
+### Requirement Maintenance
 
-### インデックスの活用
+Requirements are a Living Document — continue updating them even after implementation:
 
-100件以上の要件を扱う場合、SQLiteインデックスによる検索・集計が有効になる設計方針がある。
+- Reflect constraints and changes discovered during implementation back into requirements
+- Revisit success criteria based on test results
+- Update dependencies when adding related new features
+- Change retired requirements to deprecated (preserve history rather than deleting)
 
-> 詳細: [docs/appendix_many_req_and_feedback.md](../appendix_many_req_and_feedback.md)
+## Best Practices for AI Integration
 
-### メンテナンスの習慣
+> Reqord's structured data delivers especially significant value when used with AI.
+> This section covers practices for teams that use AI alongside Reqord.
 
-- 定期的にdeprecatedな要件を確認
-- 依存関係グラフで孤立した要件がないかチェック
-- SMARTスコアの低い要件を優先的に改善
+### ProjectContext Quality Drives Output Quality
+
+AI output quality is proportional to input quality. Enriching the four user-editable files in ProjectContext is the most effective approach (`context.json` is tool-managed metadata and typically does not require manual editing):
+
+| File | Contents | Impact on AI |
+| ---- | -------- | ------------ |
+| `product.yaml` | Vision, problems, target users | Used for requirement validity assessment |
+| `technical.yaml` | Tech stack, architecture | Directly affects specification design quality |
+| `structure.yaml` | Naming conventions, directory structure | Affects Issue decomposition accuracy |
+| `domain/*.md` | Domain-specific knowledge | Accurate use of specialized terminology |
+
+### Progressive Refinement
+
+Don't try to write everything at once:
+
+```
+1. Create with a concise title + one-line description
+2. Convert to EARS/User Story with AI enhance, generate success criteria
+3. Fine-tune details with AI refine
+4. Human reviews and corrects with domain knowledge
+5. Confirm quality with SMART validation
+```
+
+### Reviewing AI Output (Human-in-the-loop in Practice)
+
+When receiving AI output, check the following:
+
+- **Domain knowledge accuracy**: Are there business rules or constraints the AI doesn't know about?
+- **Scope appropriateness**: Is the requirement scope too broad or too narrow?
+- **Success criteria verifiability**: Can they actually be confirmed through testing?
+- **Dependency accuracy**: Are the implementation order assumptions correct?
+- **Security considerations**: Are requirements related to authentication, authorization, and personal data not missing?
+
+## Scaling
+
+Strategies for when the number of requirements grows:
+
+### Organizing by Domain
+
+When requirements exceed several dozen, group them by domain (functional area):
+
+- Classify with tags and categories
+- Link related requirements with relatedTo
+- Enrich domain/\*.md in ProjectContext for each domain
+
+### Leveraging Indexes
+
+For handling 100+ requirements, there is a design direction where SQLite indexes become effective for search and aggregation.
+
+> Details: [docs/advanced/scaling.md](../advanced/scaling.md)
+
+### Maintenance Habits
+
+- Regularly review deprecated requirements
+- Check the dependency graph for orphaned requirements
+- Prioritize improving requirements with low SMART scores
 
 ---
 
-**次へ**: [05-donts.md](./05-donts.md) — やってはいけないこと
+**Next**: [05-donts.md](./05-donts.md) — Things to avoid

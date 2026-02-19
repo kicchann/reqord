@@ -1,117 +1,119 @@
 ---
-対象読者: 開発者、テックリード、AIエージェント
-前提知識: ソフトウェア開発の基本的な理解
-関連文書: docs/guide-requirements.md, .reqord/context/domain/requirements-engineering.md
+audience: Developers, tech leads, AI agents
+prerequisites: Basic understanding of software development
+related: docs/guide-requirements.md, .reqord/context/domain/requirements-engineering.md
 ---
 
-> **この文書のまとめ**: Reqordが採用した要件工学の手法とその選定理由。各トピックの概念を紹介し、「なぜReqordはこれを選んだか」を説明する。
+> **Summary**: The requirements engineering methods adopted by Reqord and the rationale behind each choice. Introduces each concept and explains "why Reqord chose this."
 
-# Theory — 採用した手法と選定理由
+# Theory — Adopted Methods and Rationale
 
-各トピックは「概念 → なぜReqordはこれを選んだか → 詳細参照」の構造で説明する。
+> [日本語](./03-theory.ja.md)
 
-## 要件と仕様の分離
+Each topic follows the structure: "Concept -> Why Reqord chose this -> Further reading."
 
-### 概念
+## Separation of Requirements and Specifications
 
-- **要件（Requirement）**: 何を作るか（What） — ユーザーやビジネスの視点
-- **仕様（Specification）**: どう作るか（How） — 技術的な設計と実装方針
+### Concept
 
-### なぜReqordはこれを選んだか
+- **Requirement**: What to build (What) — from the user's or business perspective
+- **Specification**: How to build it (How) — technical design and implementation approach
 
-要件と仕様を明示的に分離することで:
+### Why Reqord Chose This
 
-- **役割の明確化**: PO/ビジネス側は要件に集中、エンジニアは仕様に集中
-- **変更の局所化**: 技術スタックが変わっても要件は変わらない。逆に、ビジネス要件の変更は仕様の再設計を促す
-- **レビューの効率化**: 要件レビュー（What の妥当性）と仕様レビュー（How の妥当性）を分けて行える
+Explicitly separating requirements from specifications provides:
 
-Reqordではさらに **GitHub Issue**（実装タスク）を第3層として加え、3層モデルを構成:
+- **Clear role boundaries**: POs/business stakeholders focus on requirements, engineers focus on specifications
+- **Localized changes**: Even if the tech stack changes, requirements remain the same. Conversely, changes in business requirements prompt specification redesign
+- **Efficient reviews**: Requirement reviews (validity of What) and specification reviews (validity of How) can be conducted separately
+
+Reqord further adds **GitHub Issues** (implementation tasks) as a third layer, forming a 3-layer model:
 
 ```
-Requirement（What） → Specification（How） → GitHub Issue（タスク）
+Requirement (What) → Specification (How) → GitHub Issue (Task)
      req-NNNNNN            spec-NNNNNN           #123, #124, #125
 ```
 
-各層はIDで紐付けられ、トレーサビリティを実現する。
+Each layer is linked by ID, enabling traceability.
 
-## EARS形式
+## EARS Format
 
-### 概念
+### Concept
 
-EARS（Easy Approach to Requirements Syntax）は、自然言語の要件記述に構造を持たせる5つのパターン:
+EARS (Easy Approach to Requirements Syntax) provides five patterns that add structure to natural language requirements:
 
-| パターン | テンプレート | 用途 |
-|---------|------------|------|
-| **Ubiquitous** | The system shall [action] | 常に成り立つ振る舞い |
-| **Event-driven** | When [trigger], the system shall [action] | イベント起因の振る舞い |
-| **State-driven** | While [state], the system shall [action] | 状態依存の振る舞い |
-| **Optional** | Where [feature enabled], the system shall [action] | オプション機能 |
-| **Unwanted** | If [condition], then the system shall [action] | 異常系・エラー処理 |
+| Pattern | Template | Use Case |
+|---------|----------|----------|
+| **Ubiquitous** | The system shall [action] | Behavior that always holds |
+| **Event-driven** | When [trigger], the system shall [action] | Behavior triggered by events |
+| **State-driven** | While [state], the system shall [action] | State-dependent behavior |
+| **Optional** | Where [feature enabled], the system shall [action] | Optional features |
+| **Unwanted** | If [condition], then the system shall [action] | Error handling / abnormal cases |
 
-### なぜReqordはこれを選んだか
+### Why Reqord Chose This
 
-- **曖昧性の排除**: パターンに沿って書くことで「いつ」「何が」「どうなるか」が明確になる
-- **学習コストの低さ**: 5パターンだけで大半のシステム要件をカバーできる
-- **機械可読性**: 構造化されたフォーマットはツールやAIによる解析にも適している
+- **Eliminates ambiguity**: Following patterns makes "when," "what," and "what happens" explicit
+- **Low learning curve**: Five patterns cover the majority of system requirements
+- **Machine-readable**: The structured format is well-suited for tool and AI analysis
 
-**注**: Reqordのスキーマでは `ears.type` を自由文字列で受け付ける設計としている。5パターンは推奨だが、プロジェクト固有のパターンも許容する柔軟性を持たせている。
+**Note**: In Reqord's schema, `ears.type` is designed to accept free-form strings. The five patterns are recommended, but the design allows flexibility for project-specific patterns.
 
-> 詳細: [.reqord/context/domain/requirements-engineering.md](../../.reqord/context/domain/requirements-engineering.md)
+> Details: [.reqord/context/domain/requirements-engineering.md](../../.reqord/context/domain/requirements-engineering.md)
 
-## User Story形式
+## User Story Format
 
-### 概念
+### Concept
 
 ```
 As [role], I want [action], so that [benefit]
 ```
 
-ユーザー視点で機能を記述する形式。3つの要素で「誰が」「何を」「なぜ」を明確にする。
+A format that describes features from the user's perspective. Three elements clarify "who," "what," and "why."
 
-### EARS形式との使い分け
+### Choosing Between EARS and User Story
 
-| 観点 | User Story | EARS |
-|------|-----------|------|
-| 視点 | ユーザー | システム |
-| 適する要件 | ユーザー向け機能 | システム振る舞い・非機能要件 |
-| 例 | ログイン、検索、購入 | バリデーション、エラー処理、パフォーマンス |
+| Aspect | User Story | EARS |
+|--------|-----------|------|
+| Perspective | User | System |
+| Best for | User-facing features | System behavior / non-functional requirements |
+| Examples | Login, search, purchase | Validation, error handling, performance |
 
-迷ったら:
-- ユーザーが直接操作する機能 → **User Story**
-- システム内部の振る舞い・制約 → **EARS**
-- 調査・技術検証 → **Free-form**
+When in doubt:
+- Features directly operated by users -> **User Story**
+- Internal system behavior / constraints -> **EARS**
+- Research / technical investigation -> **Free-form**
 
-## SMART基準
+## SMART Criteria
 
-### 概念
+### Concept
 
-要件の品質を5つの観点で評価する基準:
+A set of criteria that evaluates requirement quality across five dimensions:
 
-| 基準 | 意味 | 良い例 | 悪い例 |
-|------|------|-------|-------|
-| **S**pecific | 具体的・明確 | 「レスポンスタイム3秒以内」 | 「高速に」 |
-| **M**easurable | 測定・検証可能 | 「カバレッジ80%以上」 | 「十分にテスト」 |
-| **A**chievable | 技術的に実現可能 | 現在のスタックで対応可能 | 非現実的な要求 |
-| **R**elevant | プロダクトビジョンと整合 | コア機能に関連 | スコープ外 |
-| **T**ime-bound | 工数見積もり可能 | complexity: medium, 8-24h | 見積もりなし |
+| Criterion | Meaning | Good Example | Bad Example |
+|-----------|---------|-------------|-------------|
+| **S**pecific | Clear and unambiguous | "Response time under 3 seconds" | "Fast" |
+| **M**easurable | Can be measured/verified | "Coverage of 80% or higher" | "Sufficiently tested" |
+| **A**chievable | Technically feasible | Achievable with current stack | Unrealistic demands |
+| **R**elevant | Aligned with product vision | Related to core features | Out of scope |
+| **T**ime-bound | Effort can be estimated | complexity: medium, 8-24h | No estimate |
 
-### なぜReqordはこれを選んだか
+### Why Reqord Chose This
 
-- **ルールベース（AI不要）**: オフラインで即座に評価可能
-- **客観的評価**: 人によるばらつきを最小化
-- **段階的改善**: スコアが低い部分を特定し、ピンポイントで改善できる
+- **Rule-based (no AI required)**: Can be evaluated instantly and offline
+- **Objective evaluation**: Minimizes variation between reviewers
+- **Incremental improvement**: Identifies low-scoring areas for targeted improvement
 
-スコアリングの仕組み: タイトルの充実度、description の長さ、成功基準の具体性と数、曖昧表現の少なさ、工数見積もりの有無等を総合的に評価する。
+Scoring mechanism: Comprehensively evaluates title completeness, description length, specificity and count of success criteria, absence of ambiguous language, presence of effort estimates, and more.
 
-> 詳細: [packages/shared/src/validation/smart-scoring.ts](../../packages/shared/src/validation/smart-scoring.ts)
+> Details: [packages/shared/src/validation/smart-scoring.ts](../../packages/shared/src/validation/smart-scoring.ts)
 
-## トレーサビリティ
+## Traceability
 
-### 概念
+### Concept
 
-ある成果物から、関連する他の成果物への追跡可能性。
+The ability to trace from one artifact to related artifacts.
 
-### Reqordにおけるトレーサビリティチェーン
+### Traceability Chain in Reqord
 
 ```
 Requirement (req-NNNNNN)
@@ -123,59 +125,59 @@ GitHub Issue (#NNN)
 Code
 ```
 
-- 上流（なぜ作ったか）: Issue → Spec → Requirement で「この機能はどの要件から来たか」を追跡
-- 下流（何に影響するか）: Requirement → Spec → Issue で「この要件を変えたら何に影響するか」を把握
+- Upstream (why was it built): Issue -> Spec -> Requirement traces "which requirement did this feature originate from"
+- Downstream (what does it affect): Requirement -> Spec -> Issue identifies "what is impacted if this requirement changes"
 
-変更影響分析の基盤となる。
+This forms the foundation for change impact analysis.
 
-## 承認ワークフロー
+## Approval Workflow
 
-### 概念
+### Concept
 
-要件の品質と合意を担保するためのレビュープロセス。
+A review process to ensure requirement quality and consensus.
 
-### Reqordのステータスライフサイクル
+### Reqord's Status Lifecycle
 
 ```
 draft → pending_approval → approved → implemented → deprecated
 ```
 
-| ステータス | 意味 | トリガー |
-|-----------|------|---------|
-| draft | 作成・編集中 | 初期状態 |
-| pending_approval | レビュー待ち | `reqord req approve` でPR作成 |
-| approved | 承認済み・実装可能 | PRマージ |
-| implemented | 実装完了 | 実装終了時 |
-| deprecated | 廃止 | 要件が不要になった時 |
+| Status | Meaning | Trigger |
+|--------|---------|---------|
+| draft | Being created/edited | Initial state |
+| pending_approval | Awaiting review | PR created via `reqord req approve` |
+| approved | Approved, ready for implementation | PR merged |
+| implemented | Implementation complete | When implementation finishes |
+| deprecated | Retired | When the requirement is no longer needed |
 
-### なぜPRベースなのか
+### Why PR-based?
 
-- **既存の習慣を活用**: コードレビューと同じワークフローを要件レビューに適用
-- **CODEOWNERS**: レビュー担当者を自動割り当て
-- **変更差分の可視化**: JSON/Markdown の diff が見える
-- **承認の記録**: PRのマージ履歴が承認の証跡になる
+- **Leverages existing habits**: Applies the same workflow as code review to requirement review
+- **CODEOWNERS**: Automatically assigns reviewers
+- **Visible diffs**: JSON/Markdown diffs are clearly visible
+- **Approval records**: PR merge history serves as evidence of approval
 
-## 依存関係モデル
+## Dependency Model
 
-### 概念
+### Concept
 
-要件間の関係性を明示的に定義する。
+Explicitly defines relationships between requirements.
 
-### Reqordの2種類の依存関係
+### Reqord's Two Types of Dependencies
 
-| 種類 | 意味 | 例 |
-|------|------|---|
-| **blockedBy / blocks** | 順序制約（実装順序に影響） | 「認証」が完了しないと「ユーザープロフィール」を実装できない |
-| **relatedTo** | 論理グルーピング（実装順序は自由） | 「検索機能」と「フィルター機能」は関連するが独立して実装可能 |
+| Type | Meaning | Example |
+|------|---------|---------|
+| **blockedBy / blocks** | Ordering constraint (affects implementation order) | "Authentication" must be completed before "User Profile" can be implemented |
+| **relatedTo** | Logical grouping (implementation order is flexible) | "Search" and "Filter" are related but can be implemented independently |
 
-### 設計方針
+### Design Principles
 
-- **循環依存は禁止**: A→B→C→A のようなループは設計上避けるべき
-- **依存チェーンは浅く保つ**: 深いチェーンは並列実装を阻害する
-- **双方向リンク**: blockedBy を設定したら、相手側の blocks も設定する
+- **Circular dependencies are prohibited**: Loops like A->B->C->A should be avoided by design
+- **Keep dependency chains shallow**: Deep chains hinder parallel implementation
+- **Bidirectional links**: When setting blockedBy, also set blocks on the other side
 
-> 詳細: [docs/guide-requirements.md](../guide-requirements.md)
+> Details: [docs/guide-requirements.md](../guide-requirements.md)
 
 ---
 
-**次へ**: [04-best-practices.md](./04-best-practices.md) — 効果的な使い方のパターン
+**Next**: [04-best-practices.md](./04-best-practices.md) — Patterns for effective usage

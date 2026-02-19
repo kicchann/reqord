@@ -1,58 +1,60 @@
-# Reqord - 完全仕様書 v2.0
+# Reqord - Full Specification v2.0
 
-## コンセプト
+> [日本語](./specification.ja.md)
 
-**「構造化されたAI駆動開発のための要件管理ツール」**
+## Concept
 
-AI駆動開発者が、要件定義から仕様設計、GitHub Issue生成までをシームレスに行うための、ローカルファーストな要件管理ツール。
+**"A requirements management tool for structured AI-driven development"**
 
-### 設計原則
+A local-first requirements management tool for AI-driven developers to seamlessly handle the entire workflow from requirements definition to specification design and GitHub Issue generation.
 
-1. **構造化第一** - JSON(メタデータ) + Markdown(コンテンツ)のハイブリッド
-2. **ローカル完結** - GitHubリポジトリがSSoT、バックエンドレス
-3. **AI駆動最適化** - Claude Code等のLLMツールとの統合を前提
-4. **視覚化重視** - Web UIでの依存関係グラフ、進捗追跡
+### Design Principles
+
+1. **Structure First** - Hybrid of JSON (metadata) + Markdown (content)
+2. **Local Complete** - GitHub repository as SSoT, no backend required
+3. **AI-Driven Optimization** - Designed for integration with LLM tools like Claude Code
+4. **Visualization Focus** - Dependency graphs and progress tracking via Web UI
 
 ---
 
-## ディレクトリ構成
+## Directory Structure
 
 ```
 project-root/
 ├── .reqord/
-│   ├── context/                          # プロジェクトコンテキスト(Steering)
-│   │   ├── context.json                  # メタデータ
+│   ├── context/                          # Project context (Steering)
+│   │   ├── context.json                  # Metadata
 │   │   ├── product.yaml                    # Product vision
 │   │   ├── technical.yaml                  # Tech stack, Architecture
 │   │   ├── structure.yaml                  # Code structure, Naming conventions
-│   │   └── domain/                       # ドメイン知識(カスタム)
+│   │   └── domain/                       # Domain knowledge (custom)
 │   │       ├── api-standards.md
 │   │       ├── security.md
 │   │       └── accessibility.md
 │   │
-│   ├── requirements/                     # 要件
-│   │   ├── req-001.json                  # メタデータのみ
+│   ├── requirements/                     # Requirements
+│   │   ├── req-001.json                  # Metadata only
 │   │   ├── req-001/
-│   │   │   ├── description.md            # 詳細説明(Markdown、必須)
-│   │   │   ├── mockup.png               # 補助: 画像等
-│   │   │   └── diagram.mmd              # 補助: Mermaid図等
+│   │   │   ├── description.md            # Detailed description (Markdown, required)
+│   │   │   ├── mockup.png               # Supplementary: images, etc.
+│   │   │   └── diagram.mmd              # Supplementary: Mermaid diagrams, etc.
 │   │   ├── req-002.json
 │   │   └── req-002/
 │   │       └── description.md
 │   │
-│   ├── specifications/                   # 仕様
-│   │   ├── spec-001.json                 # メタデータのみ
+│   ├── specifications/                   # Specifications
+│   │   ├── spec-001.json                 # Metadata only
 │   │   ├── spec-001/
-│   │   │   ├── design.md                 # 設計書（必須）
-│   │   │   ├── research.md               # 補助: 調査ノート
-│   │   │   ├── architecture.mmd          # 補助: Mermaid図
-│   │   │   └── examples/                 # 補助: コード例
+│   │   │   ├── design.md                 # Design document (required)
+│   │   │   ├── research.md               # Supplementary: research notes
+│   │   │   ├── architecture.mmd          # Supplementary: Mermaid diagrams
+│   │   │   └── examples/                 # Supplementary: code examples
 │   │   │       └── api-example.ts
 │   │   ├── spec-002.json
 │   │   └── spec-002/
 │   │       └── design.md
 │   │
-│   ├── settings/                         # テンプレート・ルール
+│   ├── settings/                         # Templates & rules
 │   │   ├── templates/
 │   │   │   ├── requirement-description.md
 │   │   │   ├── specification-design.md
@@ -62,36 +64,36 @@ project-root/
 │   │       ├── design-review.md
 │   │       └── parallel-analysis.md
 │   │
-│   └── assets/                           # 画像等の共有アセット
+│   └── assets/                           # Shared assets such as images
 │       └── logo.png
 │
 ├── .github/
 │   ├── ISSUE_TEMPLATE/                   # GitHub Issue Templates
-│   │   ├── reqord-implementation.yml     # 基本実装タスク
-│   │   ├── reqord-database.yml           # DB実装
-│   │   ├── reqord-api.yml                # API実装
-│   │   ├── reqord-ui.yml                 # UI実装
-│   │   └── reqord-test.yml               # テスト実装
-│   └── CODEOWNERS                        # 承認権限管理
+│   │   ├── reqord-implementation.yml     # Basic implementation task
+│   │   ├── reqord-database.yml           # DB implementation
+│   │   ├── reqord-api.yml                # API implementation
+│   │   ├── reqord-ui.yml                 # UI implementation
+│   │   └── reqord-test.yml               # Test implementation
+│   └── CODEOWNERS                        # Approval authority management
 │
-└── (プロジェクトファイル)
+└── (project files)
 ```
 
 ---
 
-## データ構造
+## Data Structures
 
 ### ProjectContext (context.json)
 
 ```typescript
 {
-  // メタ情報
+  // Meta information
   "id": "llyssm",
   "name": "LLySSM",
   "version": "1.0.0",
-  "language": "en",  // 生成ドキュメントの言語
+  "language": "en",  // Language for generated documents
 
-  // 外部ファイル参照
+  // External file references
   "files": {
     "product": "context/product.yaml",
     "technical": "context/technical.yaml",
@@ -111,30 +113,30 @@ project-root/
 
 ## Vision
 
-なぜ作るか（200字以内）
+Why we build this (200 characters or less)
 
 ## Problem Statement
 
-解決する課題（200字以内）
+The problem to solve (200 characters or less)
 
 ## Target Users
 
-- 構造エンジニア
-- BIM担当者
+- Structural engineers
+- BIM specialists
 
 ## Core Features
 
-- 主要機能1
-- 主要機能2
+- Core feature 1
+- Core feature 2
 
 ## Value Proposition
 
-独自価値（100字以内）
+Unique value (100 characters or less)
 
 ## Out of Scope
 
-- やらないこと1
-- やらないこと2
+- Out of scope item 1
+- Out of scope item 2
 ```
 
 ### Technical Context (context/technical.yaml)
@@ -154,11 +156,11 @@ graph TB
 
 ### Language
 
-- **TypeScript 5.x** - 型安全な開発
+- **TypeScript 5.x** - Type-safe development
 
 ### Runtime
 
-- **Node.js 20+** - モダンなJavaScript実行環境
+- **Node.js 20+** - Modern JavaScript runtime
 
 ### Framework
 
@@ -166,7 +168,7 @@ graph TB
 
 ### Library
 
-- **xBIM Toolkit** - IFC処理
+- **xBIM Toolkit** - IFC processing
 
 ## Development Environment
 
@@ -184,13 +186,13 @@ npm run dev
 
 ## Common Commands
 
-- `npm run dev` - 開発サーバー起動
-- `npm run build` - ビルド
+- `npm run dev` - Start development server
+- `npm run build` - Build
 
 ## Design Patterns
 
-- **Repository Pattern** - データアクセス層の抽象化
-- **Factory Pattern** - オブジェクト生成
+- **Repository Pattern** - Abstraction of the data access layer
+- **Factory Pattern** - Object creation
 ````
 
 ### Structure Context (context/structure.yaml)
@@ -248,24 +250,24 @@ graph TB
 
 ## Architectural Rules
 
-- 各レイヤーは上位レイヤーに依存しない
-- Domain層はフレームワークに依存しない
+- Each layer must not depend on upper layers
+- The Domain layer must not depend on any framework
 ````
 
 ### Requirement (requirements/req-001.json)
 
 ```typescript
 {
-  // メタ情報
+  // Meta information
   "id": "req-001",
   "version": "1.1.0",
-  "title": "IFCエクスポート機能",
+  "title": "IFC Export Feature",
   "status": "approved",  // draft | pending_approval | approved | implemented | deprecated
   "priority": "high",    // low | medium | high
   "createdAt": "2026-02-01T10:00:00Z",
   "updatedAt": "2026-02-05T15:30:00Z",
 
-  // バージョン履歴（承認トラッキング）
+  // Version history (approval tracking)
   "versionHistory": [
     {
       "version": "1.0.0",
@@ -283,7 +285,7 @@ graph TB
     }
   ],
 
-  // 外部ファイル参照
+  // External file references
   "files": {
     "description": "requirements/req-001/description.md",
     "supplementary": [
@@ -292,14 +294,14 @@ graph TB
     ]
   },
 
-  // 構造化データ(JSON内)
+  // Structured data (in JSON)
   "successCriteria": [
-    "IFC4形式で出力される",
-    "構造要素のみ抽出される",
-    "属性が完全に保持される"
+    "Output in IFC4 format",
+    "Only structural elements are extracted",
+    "Attributes are fully preserved"
   ],
 
-  // フォーマット
+  // Format
   "format": {
     "type": "ears",  // ears | user-story | free-form
     "ears": {
@@ -311,44 +313,44 @@ graph TB
     }
   },
 
-  // 依存関係
+  // Dependencies
   "dependencies": {
     "blockedBy": [],
     "blocks": ["req-003"],
     "relatedTo": ["req-002"]
   },
 
-  // 影響範囲(自動計算)
+  // Impact scope (auto-calculated)
   "impact": {
     "specifications": ["spec-001"],
     "issues": [],
     "requirements": ["req-003"]
   },
 
-  // Gap Analysis結果
+  // Gap Analysis results
   "gapAnalysis": {
     "analyzedAt": "2026-02-10T14:00:00Z",
     "existingImplementations": [
       {
         "file": "src/export/ifc-exporter.ts",
         "coverage": "partial",
-        "notes": "IFC2x3のみ対応、IFC4未対応"
+        "notes": "Only supports IFC2x3, IFC4 not yet supported"
       }
     ],
     "missingFeatures": [
-      "IFC4スキーマ対応",
-      "属性マッピング"
+      "IFC4 schema support",
+      "Attribute mapping"
     ],
     "conflicts": [
       {
-        "requirement": "IFC4形式",
+        "requirement": "IFC4 format",
         "existingCode": "src/export/ifc-exporter.ts:45",
-        "issue": "現在IFC2x3で実装されている"
+        "issue": "Currently implemented with IFC2x3"
       }
     ]
   },
 
-  // 見積もり
+  // Estimation
   "estimatedComplexity": "medium",  // small | medium | large | xlarge
   "estimatedHours": 16
 }
@@ -357,35 +359,35 @@ graph TB
 ### Requirement Description (requirements/req-001/description.md)
 
 ```markdown
-# IFCエクスポート機能
+# IFC Export Feature
 
-## 概要
+## Overview
 
-Revit APIを使用してモデルデータをIFC形式でエクスポートする機能。
+A feature to export model data to IFC format using the Revit API.
 
-## 詳細要件
+## Detailed Requirements
 
-### EARS形式要件
+### EARS Format Requirement
 
 When a user exports a model,
 if the model contains structural elements,
 the system shall export to IFC4 format,
 preserving all structural attributes.
 
-### 技術的制約
+### Technical Constraints
 
-- IFC4形式準拠
-- 構造要素のみ対象(意匠要素は除外)
-- 属性マッピング必須
+- IFC4 format compliant
+- Structural elements only (architectural elements excluded)
+- Attribute mapping required
 
-## ユースケース
+## Use Cases
 
-1. ユーザーがRevitでモデルを作成
-2. "Export to IFC"ボタンをクリック
-3. 構造要素のみを抽出
-4. IFC4形式でファイル保存
+1. User creates a model in Revit
+2. Clicks the "Export to IFC" button
+3. Only structural elements are extracted
+4. File is saved in IFC4 format
 
-## 参考資料
+## References
 
 - [IFC4 Specification](https://standards.buildingsmart.org/IFC/RELEASE/IFC4/ADD2_TC1/HTML/)
 - [xBIM Toolkit Documentation](https://docs.xbim.net/)
@@ -395,7 +397,7 @@ preserving all structural attributes.
 
 ```typescript
 {
-  // メタ情報
+  // Meta information
   "id": "spec-001",
   "requirementId": "req-001",
   "version": "1.0.0",
@@ -403,7 +405,7 @@ preserving all structural attributes.
   "createdAt": "2026-02-06T10:00:00Z",
   "updatedAt": "2026-02-06T16:00:00Z",
 
-  // バージョン履歴（承認トラッキング）
+  // Version history (approval tracking)
   "versionHistory": [
     {
       "version": "1.0.0",
@@ -414,7 +416,7 @@ preserving all structural attributes.
     }
   ],
 
-  // 外部ファイル参照
+  // External file references
   "files": {
     "design": "specifications/spec-001/design.md",
     "supplementary": [
@@ -432,9 +434,9 @@ preserving all structural attributes.
 ````markdown
 # IFC Exporter - Technical Design
 
-## 1. 設計概要
+## 1. Design Overview
 
-Revit APIを使用してモデルデータをIFC4形式でエクスポートする機能の設計。
+Design for the feature that exports model data to IFC4 format using the Revit API.
 
 ## 2. Architecture
 
@@ -444,9 +446,9 @@ See [architecture.mmd](./architecture.mmd) for interactive diagram.
 
 ### 3.1 IFC Exporter Module
 
-**責務:** Revitモデルを読み込み、IFC4形式に変換
+**Responsibility:** Read a Revit model and convert it to IFC4 format
 
-**インターフェース:**
+**Interface:**
 
 ```typescript
 interface IFCExporter {
@@ -454,13 +456,13 @@ interface IFCExporter {
 }
 ```
 
-**実装:** See [examples/ifc-exporter.ts](./examples/ifc-exporter.ts)
+**Implementation:** See [examples/ifc-exporter.ts](./examples/ifc-exporter.ts)
 
 ### 3.2 Attribute Mapper
 
-**責務:** Revit属性をIFC属性にマッピング
+**Responsibility:** Map Revit attributes to IFC attributes
 
-**インターフェース:**
+**Interface:**
 
 ```typescript
 interface AttributeMapper {
@@ -468,7 +470,7 @@ interface AttributeMapper {
 }
 ```
 
-**実装:** See [examples/attribute-mapper.ts](./examples/attribute-mapper.ts)
+**Implementation:** See [examples/attribute-mapper.ts](./examples/attribute-mapper.ts)
 
 ## 4. Data Flow
 
@@ -483,72 +485,72 @@ interface AttributeMapper {
 
 ### Unit Tests
 
-- IFCExporter単体テスト
-- AttributeMapper単体テスト
+- IFCExporter unit tests
+- AttributeMapper unit tests
 
 ### Integration Tests
 
-- End-to-endエクスポートテスト
-- 各種Revitモデルでの検証
+- End-to-end export tests
+- Verification with various Revit models
 
 ## 6. Technical Decisions
 
-### Decision 1: xBIM Toolkit採用
+### Decision 1: Adopt xBIM Toolkit
 
-**Rationale:** オープンソース、実績あり、C#ネイティブ
-**Alternatives:** IfcOpenShell (Python), 独自実装
-**Tradeoffs:** C#依存だがパフォーマンス良好
+**Rationale:** Open source, proven track record, C# native
+**Alternatives:** IfcOpenShell (Python), custom implementation
+**Tradeoffs:** C# dependency, but good performance
 ````
 
 ---
 
-## ワークフロー
+## Workflow
 
-### 全体フロー
+### Overall Flow
 
 ```
 
-1. ProjectContext作成 (初回のみ)
+1. Create ProjectContext (first time only)
    ↓
-2. Requirement作成 (Draft)
+2. Create Requirement (Draft)
    ↓
-3. AI詳細化 (オプション)
+3. AI Refinement (optional)
    ↓
-4. Gap Analysis (既存プロジェクトのみ)
+4. Gap Analysis (existing projects only)
    ↓
-5. 承認依頼 (Requirements Phase)
-   - Git branch作成
-   - Pull Request作成
+5. Request Approval (Requirements Phase)
+   - Create Git branch
+   - Create Pull Request
      ↓
-6. レビュー・承認
-   - CODEOWNERS承認
+6. Review & Approval
+   - CODEOWNERS approval
    - Merge → Approved
      ↓
-7. Specification作成 (Draft)
-   - Design (設計書作成)
+7. Create Specification (Draft)
+   - Design (create design document)
      ↓
 8. Design Validation
    ↓
-9. 承認依頼 (Specification Phase)
+9. Request Approval (Specification Phase)
    ↓
-10. GitHub Issue生成
-    - AI分解 (並列分析含む)
-    - Issue Template適用
-    - GitHub Issue作成
+10. Generate GitHub Issues
+    - AI decomposition (including parallel analysis)
+    - Apply Issue Templates
+    - Create GitHub Issues
       ↓
-11. 実装 (GitHub Issue上)
+11. Implementation (on GitHub Issues)
     ↓
-12. Issue完了 → Specification進捗更新
+12. Issue Completed → Update Specification progress
 
 ```
 
-### バージョン管理フロー
+### Version Management Flow
 
 ```
 
 Requirement v1.0.0 (Approved)
 ↓
-変更が必要
+Change needed
 ↓
 ┌────────────┬────────────┐
 │ Option A │ Option B │
@@ -558,78 +560,78 @@ Requirement v1.0.0 (Approved)
 v1.0.0 (draft) v1.0.0 (deprecated)
 v1.1.0 (draft)
 ↓ ↓
-影響範囲分析
+Impact analysis
 
 - spec-001 (outdated)
 - Issue #12, #13 (flagged)
 - req-003 (may need review)
   ↓
-  編集 → 再承認依頼 → PR作成
+  Edit → Request re-approval → Create PR
   ↓
-  承認 → 新バージョン Approved
+  Approved → New version Approved
 
 ```
 
 ---
 
-## CLI コマンド
+## CLI Commands
 
 ```bash
-# 初期化
-reqord init                                    # .reqord/ + GitHub Issue Templates作成
-reqord context init                            # ProjectContext作成
+# Initialization
+reqord init                                    # Create .reqord/ + GitHub Issue Templates
+reqord context init                            # Create ProjectContext
 
-# Context管理
-reqord context edit                            # Web UIで編集
-reqord context domain add api-standards        # ドメインルール追加
+# Context management
+reqord context edit                            # Edit in Web UI
+reqord context domain add api-standards        # Add domain rule
 
-# Requirement管理
-reqord req create "IFCエクスポート機能"
-reqord req enhance req-001                     # AI詳細化
-reqord req format req-001 ears                 # EARS形式に変換
-reqord req gap-analysis req-001                # 既存コードとの差分分析
-reqord req approve req-001                     # 承認依頼(PR作成)
-reqord req version create req-001              # 新バージョン作成
-reqord req version list req-001                # バージョン一覧
+# Requirement management
+reqord req create "IFC Export Feature"
+reqord req enhance req-001                     # AI refinement
+reqord req format req-001 ears                 # Convert to EARS format
+reqord req gap-analysis req-001                # Diff analysis against existing code
+reqord req approve req-001                     # Request approval (create PR)
+reqord req version create req-001              # Create new version
+reqord req version list req-001                # List versions
 
-# Specification管理
+# Specification management
 reqord spec create req-001
-reqord spec design spec-001                    # 設計書の閲覧・更新
-reqord spec validate spec-001                  # 設計検証
-reqord spec approve spec-001                   # 承認依頼(PR作成)
+reqord spec design spec-001                    # View/update design document
+reqord spec validate spec-001                  # Design validation
+reqord spec approve spec-001                   # Request approval (create PR)
 
-# Issue管理
-reqord issue create spec-001                   # GitHub Issue生成(AI分解)
-reqord issue create spec-001 --strategy by-layer  # レイヤー別分解
-reqord issue sync spec-001                     # Issue状態同期
-reqord issue sync-all                          # 全Spec同期
-reqord issue validate spec-001                 # メタデータ整合性チェック
+# Issue management
+reqord issue create spec-001                   # Generate GitHub Issues (AI decomposition)
+reqord issue create spec-001 --strategy by-layer  # Decompose by layer
+reqord issue sync spec-001                     # Sync Issue status
+reqord issue sync-all                          # Sync all Specs
+reqord issue validate spec-001                 # Metadata consistency check
 
-# 検証
+# Validation
 reqord validate gap req-001                    # Gap Analysis
-reqord validate design spec-001                # 設計検証
-reqord validate impl spec-001                  # 実装検証
+reqord validate design spec-001                # Design validation
+reqord validate impl spec-001                  # Implementation validation
 
-# 影響分析
-reqord impact analyze req-001                  # 影響範囲分析
-reqord impact notify req-001                   # 影響先に通知
+# Impact analysis
+reqord impact analyze req-001                  # Impact scope analysis
+reqord impact notify req-001                   # Notify impacted targets
 
-# プレビュー
-reqord preview                                 # localhost:3000起動
+# Preview
+reqord preview                                 # Launch localhost:3000
 
-# コンテキスト出力(LLM用)
-reqord context req-001                         # LLM用コンテキスト出力
-reqord context req-001 | claude code           # Claude Codeに直接渡す
+# Context output (for LLM)
+reqord context req-001                         # Output context for LLM
+reqord context req-001 | claude code           # Pipe directly to Claude Code
 
-# ステータス
-reqord status                                  # プロジェクト全体
-reqord status req-001                          # Requirement詳細
-reqord status spec-001                         # Specification詳細
+# Status
+reqord status                                  # Entire project
+reqord status req-001                          # Requirement details
+reqord status spec-001                         # Specification details
 ```
 
 ---
 
-## Web UI 画面構成
+## Web UI Screen Layout
 
 ### Dashboard
 
@@ -655,14 +657,14 @@ reqord status spec-001                         # Specification詳細
 └─────────────────────────────────────────────────┘
 ```
 
-### Requirement詳細
+### Requirement Details
 
 ```
 ┌─────────────────────────────────────────────────┐
-│ req-001: IFCエクスポート機能        v1.1.0 ✅   │
+│ req-001: IFC Export Feature           v1.1.0 ✅  │
 │ [Basic] [Gap Analysis] [History]                │
 ├─────────────────────────────────────────────────┤
-│ Title: IFCエクスポート機能                       │
+│ Title: IFC Export Feature                        │
 │                                                  │
 │ Description (Markdown Editor)                    │
 │ [Edit] [Preview]                                 │
@@ -674,12 +676,12 @@ reqord status spec-001                         # Specification詳細
 │ Then: preserving all structural attributes       │
 │                                                  │
 │ Success Criteria                                 │
-│ ☑ IFC4形式で出力される                          │
-│ ☑ 構造要素のみ抽出される                        │
-│ ☑ 属性が完全に保持される                        │
+│ ☑ Output in IFC4 format                         │
+│ ☑ Only structural elements extracted             │
+│ ☑ Attributes fully preserved                     │
 │                                                  │
 │ Dependencies                                     │
-│ Blocked By: なし                                 │
+│ Blocked By: None                                 │
 │ Blocks: req-003                                  │
 │ [View Graph]                                     │
 │                                                  │
@@ -687,7 +689,7 @@ reqord status spec-001                         # Specification詳細
 └─────────────────────────────────────────────────┘
 ```
 
-### Specification詳細
+### Specification Details
 
 ```
 ┌─────────────────────────────────────────────────┐
@@ -716,7 +718,7 @@ reqord status spec-001                         # Specification詳細
 
 ---
 
-## GitHub Issue Template例
+## GitHub Issue Template Example
 
 ```yaml
 # .github/ISSUE_TEMPLATE/reqord-implementation.yml
@@ -803,41 +805,41 @@ body:
 
 ---
 
-## AI機能
+## AI Features
 
-### 1. 要件詳細化
+### 1. Requirement Refinement
 
-- 入力: 簡単なタイトル・説明
-- 出力: 詳細なdescription.md + 成功基準 + 見積もり
+- Input: Simple title and description
+- Output: Detailed description.md + success criteria + estimation
 
 ### 2. Gap Analysis
 
-- 入力: Requirement + 既存コードベース
-- 出力: 既存実装カバレッジ + 不足機能 + コンフリクト
+- Input: Requirement + existing codebase
+- Output: Existing implementation coverage + missing features + conflicts
 
-### 3. 技術スタック提案
+### 3. Tech Stack Suggestions
 
-- 入力: プロジェクト説明
-- 出力: 推奨スタック + パターン
+- Input: Project description
+- Output: Recommended stack + patterns
 
-### 4. 依存関係自動検出
+### 4. Automatic Dependency Detection
 
-- 入力: 複数のRequirement
-- 出力: 依存グラフ
+- Input: Multiple Requirements
+- Output: Dependency graph
 
-### 5. 設計生成
+### 5. Design Generation
 
-- 入力: Requirement + ProjectContext
-- 出力: design.md + 補助資料（architecture図、コード例等）
+- Input: Requirement + ProjectContext
+- Output: design.md + supplementary materials (architecture diagrams, code examples, etc.)
 
-### 6. Issue分解 + 並列分析
+### 6. Issue Decomposition + Parallel Analysis
 
-- 入力: Specification
-- 出力: GitHub Issues + 並列グループ + クリティカルパス
+- Input: Specification
+- Output: GitHub Issues + parallel groups + critical path
 
 ---
 
-## 技術スタック
+## Tech Stack
 
 ### CLI
 
@@ -859,7 +861,7 @@ body:
 ### AI Integration
 
 - Anthropic SDK (Claude API)
-- ユーザー提供APIキー
+- User-provided API key
 
 ### Deployment
 
@@ -868,48 +870,48 @@ body:
 
 ---
 
-## 開発ロードマップ
+## Development Roadmap
 
-### Phase 1: MVP (3-4週間)
+### Phase 1: MVP (3-4 weeks)
 
-- ✅ CLI基本 + ディレクトリ構造
+- ✅ CLI basics + directory structure
 - ✅ ProjectContext CRUD
 - ✅ Requirement CRUD (JSON + Markdown)
-- ✅ ローカルUI (基本CRUD)
-- ✅ AI要件詳細化
+- ✅ Local UI (basic CRUD)
+- ✅ AI requirement refinement
 
-**リリース: v0.1.0**
+**Release: v0.1.0**
 
-### Phase 2: 承認・バージョン管理 (2週間)
+### Phase 2: Approval & Version Management (2 weeks)
 
-- ✅ バージョン管理
-- ✅ GitHub PR承認フロー
-- ✅ CODEOWNERS統合
-- ✅ 影響範囲分析
+- ✅ Version management
+- ✅ GitHub PR approval flow
+- ✅ CODEOWNERS integration
+- ✅ Impact scope analysis
 
-**リリース: v0.2.0**
+**Release: v0.2.0**
 
-### Phase 3: Specification + Issue (2週間)
+### Phase 3: Specification + Issue (2 weeks)
 
 - ✅ Specification CRUD
-- ✅ Design + Supplementary構成
+- ✅ Design + Supplementary structure
 - ✅ GitHub Issue Template
-- ✅ AI Issue分解 + 並列分析
-- ✅ Issue同期
+- ✅ AI Issue decomposition + parallel analysis
+- ✅ Issue sync
 
-**リリース: v0.3.0**
+**Release: v0.3.0**
 
-### Phase 4: 検証機能 (1週間)
+### Phase 4: Validation Features (1 week)
 
 - ✅ Gap Analysis
 - ✅ Design Validation
 
-**リリース: v0.4.0**
+**Release: v0.4.0**
 
-### Phase 5: Web UI公開 (1週間)
+### Phase 5: Public Web UI (1 week)
 
-- ✅ Vercelデプロイ
-- ✅ 依存グラフ可視化
+- ✅ Vercel deployment
+- ✅ Dependency graph visualization
 - ✅ Gantt Chart
 
-**リリース: v1.0.0**
+**Release: v1.0.0**

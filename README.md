@@ -1,5 +1,7 @@
 # Reqord
 
+> [日本語](./README.ja.md)
+
 **Git-native requirements management for traceable, AI-ready software development.**
 
 [![Version](https://img.shields.io/badge/version-0.1.0-blue)](https://github.com/kicchann/reqord)
@@ -55,52 +57,23 @@ Requirements move through a defined lifecycle with PR-based approval gates, so n
 
 ## Quick Start
 
-### Prerequisites
-
-- Node.js 20+
-- pnpm 10+
-- Git
-
 ### Install
 
 ```bash
-# Clone the repository
-git clone https://github.com/kicchann/reqord.git
-cd reqord
-
-# Install dependencies
-pnpm install
-
-# Build all packages
-pnpm build
-
-# Link the CLI globally
-cd packages/cli && pnpm link --global
+npm install -g @reqord/cli
 ```
 
 ### Initialize a project
 
 ```bash
-# Navigate to your target project
 cd /path/to/your/project
 
 # Initialize the .reqord/ directory structure
 reqord init
-```
 
-This creates the `.reqord/` directory with subdirectories for requirements, specifications, context, settings, and assets.
-
-### Set up project context
-
-```bash
-# Initialize project context (name, language, metadata)
+# Set up project context
 reqord context init
-
-# View current context
-reqord context show
 ```
-
-Project context files (`product.yaml`, `technical.yaml`, `structure.yaml`, `domain/*.md`) serve as persistent background for every AI session and team onboarding.
 
 ### Create your first requirement
 
@@ -111,38 +84,32 @@ reqord req create
 # List all requirements
 reqord req list
 
-# View a specific requirement
-reqord req show req-000001
-
 # Validate requirement quality with SMART scoring
 reqord req validate req-000001
 ```
 
-### Create a specification
+See the [Getting Started guide](./docs/getting-started.md) for the full walkthrough.
+
+<details>
+<summary>Development setup (building from source)</summary>
+
+**Prerequisites:** Node.js 20+, pnpm 10+, Git
 
 ```bash
-# Create a specification linked to a requirement
-reqord spec create req-000001
-
-# View specification details
-reqord spec show spec-000001
-
-# View or update the design document
-reqord spec design spec-000001
+git clone https://github.com/kicchann/reqord.git
+cd reqord
+pnpm install
+pnpm build
+cd packages/cli && pnpm link --global
 ```
+
+</details>
 
 ## Key Features
 
 ### Hybrid Storage (YAML + Markdown)
 
 Requirements are stored as YAML metadata (status, priority, dependencies, version history) paired with Markdown content (descriptions, success criteria, use cases). Machine-readable structure with human-readable documentation.
-
-```
-.reqord/requirements/
-  req-000001.yaml          # Metadata: status, priority, dependencies
-  req-000001/
-    description.md         # Content: detailed description, criteria
-```
 
 ### SMART Validation
 
@@ -160,14 +127,13 @@ Supports industry-standard formats out of the box:
 - **User Story** -- "As a [role], I want [feature], so that [benefit]"
 - **Free-form** -- flexible format for early-stage requirements
 
-### Dependency Tracking and Web Dashboard
+### Web Dashboard
 
-The `@reqord/web` package provides a Next.js dashboard with:
+Launch the built-in web dashboard to visualize project health, dependency graphs, and requirement details:
 
-- Project health metrics and status breakdowns
-- Interactive dependency graphs
-- Requirement and specification browsing
-- Markdown rendering with full GFM support
+```bash
+reqord ui
+```
 
 <!-- Screenshot: Dependency graph visualization showing requirement-to-specification-to-issue relationships -->
 
@@ -189,25 +155,12 @@ This context persists across AI sessions, eliminating the "explain the project f
 Track feedback from GitHub Issues back to requirements and specifications:
 
 ```bash
-# Sync feedback from GitHub Issues
-reqord feedback sync
-
-# View feedback items
-reqord feedback list
-
-# Link feedback to a requirement
-reqord feedback link feedback-001
+reqord feedback sync    # Sync feedback from GitHub Issues
+reqord feedback list    # View feedback items
+reqord feedback link feedback-001  # Link feedback to a requirement
 ```
 
 When implementation reveals that a requirement needs updating, the feedback loop ensures that knowledge flows back upstream rather than getting lost in issue comments.
-
-### Version History
-
-Every requirement tracks its full version history with semantic versioning. View the complete audit trail of changes, approvals, and status transitions:
-
-```bash
-reqord req history req-000001
-```
 
 ## Comparison
 
@@ -228,81 +181,20 @@ How Reqord compares to existing tools for managing what to build:
 
 ## Architecture
 
-Reqord is a pnpm workspaces monorepo with three packages:
+Reqord is a monorepo with three packages:
 
-```
-reqord/
-  packages/
-    shared/     @reqord/shared   -- Zod schemas, types, utilities (single source of truth)
-    cli/        @reqord/cli      -- CLI tool (Commander.js)
-    web/        @reqord/web      -- Web dashboard (Next.js 15 + React 19)
-```
-
-**Tech stack:**
-
-- **Language:** TypeScript 5.x (ESM)
-- **Schemas:** Zod (shared across CLI and Web)
-- **CLI:** Commander.js, chalk, cli-table3
-- **Web:** Next.js 15, React 19, Tailwind CSS, React Flow (@xyflow/react)
-- **Testing:** Vitest (675 tests)
-- **Package manager:** pnpm 10 with workspaces
-
-**Data storage format:**
-
-All data lives in the `.reqord/` directory within your project repository:
-
-```
-.reqord/
-  context/           # Project context (product, technical, structure, domain knowledge)
-  requirements/      # Requirement YAML + Markdown files
-  specifications/    # Specification YAML + design documents
-  settings/          # Templates and rules
-  assets/            # Shared assets
-```
-
-## CLI Commands
-
-| Command                       | Description                               |
-| ----------------------------- | ----------------------------------------- |
-| `reqord init`                 | Initialize `.reqord/` directory structure |
-| `reqord context init`         | Set up project context                    |
-| `reqord context show`         | Display project context summary           |
-| `reqord context update`       | Update context metadata                   |
-| `reqord req create`           | Create a new requirement                  |
-| `reqord req list`             | List requirements (with filters)          |
-| `reqord req show <id>`        | Show requirement details                  |
-| `reqord req update <id>`      | Update requirement metadata               |
-| `reqord req delete <id>`      | Delete a requirement                      |
-| `reqord req validate <id>`    | SMART validation scoring                  |
-| `reqord req history <id>`     | View version history                      |
-| `reqord spec create <req-id>` | Create specification for a requirement    |
-| `reqord spec list`            | List specifications                       |
-| `reqord spec show <id>`       | Show specification details                |
-| `reqord spec design <id>`     | View/update design document               |
-| `reqord feedback sync`        | Sync with GitHub Issues                   |
-| `reqord feedback list`        | List feedback items                       |
-| `reqord feedback show <id>`   | Show feedback details                     |
-| `reqord feedback close <id>`  | Close a feedback item                     |
-| `reqord feedback link <id>`   | Link feedback to requirement/spec         |
+- **[@reqord/shared](./packages/shared/)** -- Zod schemas, types, utilities (single source of truth)
+- **[@reqord/cli](./packages/cli/)** -- CLI tool (Commander.js)
+- **[@reqord/web](./packages/web/)** -- Web dashboard (Next.js 15 + React 19)
 
 ## Documentation
 
-Detailed documentation is available in the `docs/about/` series:
+- **[Getting Started](./docs/getting-started.md)** -- installation and first steps
+- **[Requirements Guide](./docs/guide-requirements.md)** -- how to write effective requirements
+- **[CLI Reference](./docs/cli-reference.md)** -- all commands with implementation status
+- **[About Reqord](./docs/about/index.md)** -- design philosophy, theory, and best practices
 
-| Document                                            | Topic                                                      |
-| --------------------------------------------------- | ---------------------------------------------------------- |
-| [Philosophy](./docs/about/01-philosophy.md)         | Why Reqord exists -- problems solved and design principles |
-| [Purpose](./docs/about/02-purpose.md)               | What it achieves, who it is for, feature overview          |
-| [Theory](./docs/about/03-theory.md)                 | EARS, SMART, and other methodologies adopted               |
-| [Best Practices](./docs/about/04-best-practices.md) | Effective usage patterns                                   |
-| [Don'ts](./docs/about/05-donts.md)                  | Common mistakes to avoid                                   |
-| [AI Integration](./docs/about/06-ai-integration.md) | Using Reqord with Claude Code, Cursor, Codex               |
-
-Additional references:
-
-- [Full specification](./docs/main.md) -- complete technical specification
-- [CLI command reference](./docs/reqord-cli-commands.md) -- all commands with implementation status
-- [Requirements guide](./docs/guide-requirements.md) -- how to write effective requirements
+See [docs/README.md](./docs/README.md) for the full documentation index.
 
 ## Roadmap
 
@@ -314,7 +206,7 @@ Reqord is at v0.1.0 (pre-release). Current priorities for upcoming releases:
 - **Status dashboard** -- `reqord status` command for project-wide progress overview
 - **Web UI enhancements** -- Gantt charts, richer dependency visualization, specification editing
 
-See the [CLI command reference](./docs/reqord-cli-commands.md) for the full list of planned commands and their current implementation status.
+See the [CLI Reference](./docs/cli-reference.md) for the full list of planned commands and their current implementation status.
 
 ## Contributing
 
@@ -326,4 +218,3 @@ Contributions are welcome. Please see [CONTRIBUTING.md](./CONTRIBUTING.md) for g
 
 Reqord is licensed under the GNU Affero General Public License v3.0. You can freely use, modify, and distribute Reqord for any purpose, including commercial use. If you run a modified version as a network service, you must make the source code available to users of that service.
 
-[Japanese version / 日本語版](./README.ja.md)

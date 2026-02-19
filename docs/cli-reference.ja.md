@@ -1,5 +1,7 @@
 # Reqord CLI コマンド一覧
 
+> [English](./cli-reference.md)
+
 reqord CLIが提供する（または提供予定の）コマンドの一覧です。
 
 > 🔴 **未実装** = まだコードが存在しないコマンド

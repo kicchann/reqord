@@ -515,7 +515,7 @@ export const syncCommand = new Command("sync")
 
 **理由**:
 - GitHub APIのトークン管理がgh CLIで完結（Octokitだと認証設定が必要）
-- gh CLIは既にrequirementで前提とされている（docs/feedback-control.md参照）
+- gh CLIは既にrequirementで前提とされている（docs/guide-feedback.md参照）
 - JSON出力オプション（`--json`）が充実
 
 **代替案（不採用）**:
