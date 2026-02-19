@@ -181,13 +181,13 @@ ProjectContext + Requirement + Specificationを結合し、外部ツール向け
 - Req/Spec間のステータス不整合を警告
 - `--json` / `--quiet` / `--check` オプション対応
 
-## preview（Web UI）🔴 未実装
+## ui（Web UI）
 
 **出典**: req-000022「Web UI拡張 (Dashboard・依存グラフ・Gantt Chart)」(approved)
 
 | コマンド | 説明 | 状態 |
 |---------|------|------|
-| `reqord preview` | Web UIの開発サーバーを起動（localhost:3000） | 🔴 未実装 |
+| `reqord ui` | Web UIの開発サーバーを起動（localhost:3000） | 実装済み |
 
 - ダッシュボード（プロジェクトヘルスメトリクス）
 - インタラクティブ依存グラフ（Mermaid.js）

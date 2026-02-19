@@ -4,7 +4,7 @@
 
 A list of commands provided (or planned) by the reqord CLI.
 
-> Red circle **Not implemented** = Command code does not yet exist
+> 🔴 **Not implemented** = Command code does not yet exist
 
 ## init
 
@@ -181,13 +181,13 @@ Shows which sections of a Specification cover each success criterion of the requ
 - Warns about status inconsistencies between Requirements and Specifications
 - `--json` / `--quiet` / `--check` options supported
 
-## preview (Web UI) -- Not implemented
+## ui (Web UI)
 
 **Source**: req-000022 "Web UI extensions (Dashboard, Dependency Graph, Gantt Chart)" (approved)
 
 | Command | Description | Status |
 |---------|-------------|--------|
-| `reqord preview` | Start the Web UI development server (localhost:3000) | Not implemented |
+| `reqord ui` | Start the Web UI development server (localhost:3000) | Implemented |
 
 - Dashboard (project health metrics)
 - Interactive dependency graph (Mermaid.js)

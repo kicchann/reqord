@@ -10,7 +10,7 @@ AI駆動開発者が、要件定義から仕様設計、GitHub Issue生成まで
 
 ### 設計原則
 
-1. **構造化第一** - JSON(メタデータ) + Markdown(コンテンツ)のハイブリッド
+1. **構造化第一** - YAML(メタデータ) + Markdown(コンテンツ)のハイブリッド
 2. **ローカル完結** - GitHubリポジトリがSSoT、バックエンドレス
 3. **AI駆動最適化** - Claude Code等のLLMツールとの統合を前提
 4. **視覚化重視** - Web UIでの依存関係グラフ、進捗追跡
@@ -33,24 +33,24 @@ project-root/
 │   │       └── accessibility.md
 │   │
 │   ├── requirements/                     # 要件
-│   │   ├── req-001.json                  # メタデータのみ
+│   │   ├── req-001.yaml                  # メタデータのみ
 │   │   ├── req-001/
 │   │   │   ├── description.md            # 詳細説明(Markdown、必須)
 │   │   │   ├── mockup.png               # 補助: 画像等
 │   │   │   └── diagram.mmd              # 補助: Mermaid図等
-│   │   ├── req-002.json
+│   │   ├── req-002.yaml
 │   │   └── req-002/
 │   │       └── description.md
 │   │
 │   ├── specifications/                   # 仕様
-│   │   ├── spec-001.json                 # メタデータのみ
+│   │   ├── spec-001.yaml                 # メタデータのみ
 │   │   ├── spec-001/
 │   │   │   ├── design.md                 # 設計書（必須）
 │   │   │   ├── research.md               # 補助: 調査ノート
 │   │   │   ├── architecture.mmd          # 補助: Mermaid図
 │   │   │   └── examples/                 # 補助: コード例
 │   │   │       └── api-example.ts
-│   │   ├── spec-002.json
+│   │   ├── spec-002.yaml
 │   │   └── spec-002/
 │   │       └── design.md
 │   │
@@ -254,7 +254,7 @@ graph TB
 - Domain層はフレームワークに依存しない
 ````
 
-### Requirement (requirements/req-001.json)
+### Requirement (requirements/req-001.yaml)
 
 ```typescript
 {
@@ -393,7 +393,7 @@ preserving all structural attributes.
 - [xBIM Toolkit Documentation](https://docs.xbim.net/)
 ```
 
-### Specification (specifications/spec-001.json)
+### Specification (specifications/spec-001.yaml)
 
 ```typescript
 {

@@ -10,7 +10,7 @@ A local-first requirements management tool for AI-driven developers to seamlessl
 
 ### Design Principles
 
-1. **Structure First** - Hybrid of JSON (metadata) + Markdown (content)
+1. **Structure First** - Hybrid of YAML (metadata) + Markdown (content)
 2. **Local Complete** - GitHub repository as SSoT, no backend required
 3. **AI-Driven Optimization** - Designed for integration with LLM tools like Claude Code
 4. **Visualization Focus** - Dependency graphs and progress tracking via Web UI
@@ -33,24 +33,24 @@ project-root/
 │   │       └── accessibility.md
 │   │
 │   ├── requirements/                     # Requirements
-│   │   ├── req-001.json                  # Metadata only
+│   │   ├── req-001.yaml                  # Metadata only
 │   │   ├── req-001/
 │   │   │   ├── description.md            # Detailed description (Markdown, required)
 │   │   │   ├── mockup.png               # Supplementary: images, etc.
 │   │   │   └── diagram.mmd              # Supplementary: Mermaid diagrams, etc.
-│   │   ├── req-002.json
+│   │   ├── req-002.yaml
 │   │   └── req-002/
 │   │       └── description.md
 │   │
 │   ├── specifications/                   # Specifications
-│   │   ├── spec-001.json                 # Metadata only
+│   │   ├── spec-001.yaml                 # Metadata only
 │   │   ├── spec-001/
 │   │   │   ├── design.md                 # Design document (required)
 │   │   │   ├── research.md               # Supplementary: research notes
 │   │   │   ├── architecture.mmd          # Supplementary: Mermaid diagrams
 │   │   │   └── examples/                 # Supplementary: code examples
 │   │   │       └── api-example.ts
-│   │   ├── spec-002.json
+│   │   ├── spec-002.yaml
 │   │   └── spec-002/
 │   │       └── design.md
 │   │
@@ -254,7 +254,7 @@ graph TB
 - The Domain layer must not depend on any framework
 ````
 
-### Requirement (requirements/req-001.json)
+### Requirement (requirements/req-001.yaml)
 
 ```typescript
 {
@@ -393,7 +393,7 @@ preserving all structural attributes.
 - [xBIM Toolkit Documentation](https://docs.xbim.net/)
 ```
 
-### Specification (specifications/spec-001.json)
+### Specification (specifications/spec-001.yaml)
 
 ```typescript
 {

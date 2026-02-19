@@ -53,8 +53,8 @@ Specifications created once are not maintained after implementation:
 
 Manage requirements as structured data, not plain text.
 
-- **JSON (metadata) + Markdown (content)** hybrid format
-- JSON: Status, priority, dependencies, version history — parts suited for machine processing
+- **YAML (metadata) + Markdown (content)** hybrid format
+- YAML: Status, priority, dependencies, version history — parts suited for machine processing
 - Markdown: Descriptions, success criteria, background — parts easy for humans to read and write
 - **Zod schemas** ensure type safety, sharing the same validation across CLI and Web UI
 
@@ -71,7 +71,7 @@ The Git repository is the Single Source of Truth (SSoT).
 
 Structured data is easy to work with not only for humans but also for tools.
 
-- The JSON + Markdown hybrid format is easy to parse and transform programmatically
+- The YAML + Markdown hybrid format is easy to parse and transform programmatically
 - The CLI guarantees structure, providing a consistent interface for integration with external tools
 - ProjectContext allows structured accumulation and reference of project-wide context
 

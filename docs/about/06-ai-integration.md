@@ -18,7 +18,7 @@ Structuring, approval workflows, and traceability are valuable for human teams a
 In the AI era, these provide **additional** value:
 
 1. **Structured data → Clear input for AI**
-   - Instead of ambiguous natural language, you can pass typed JSON + Markdown
+   - Instead of ambiguous natural language, you can pass typed YAML + Markdown
    - EARS-format requirements are easy for AI to interpret (triggers, conditions, and actions are explicit)
 
 2. **ProjectContext → Consistency across sessions**

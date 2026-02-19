@@ -145,7 +145,7 @@
 - 調査が進み、構造化が有益と判断してからReqordに取り込む
 - フィードバックの3段階: シンプル報告 → 調査・議論 → 構造化（必要な場合のみ）
 
-> 詳細: [docs/guide-feedback.md](../guide-feedback.ja.md)
+> 詳細: [docs/guide-feedback.ja.md](../guide-feedback.ja.md)
 
 ---
 
