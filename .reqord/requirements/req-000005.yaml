@@ -1,10 +1,10 @@
 id: req-000005
-version: '4.0'
+version: '5.0'
 title: Requirement/Specificationバージョン管理
 status: implemented
 priority: medium
 createdAt: 2026-02-07T10:00:00Z
-updatedAt: 2026-02-16T03:23:29.162Z
+updatedAt: 2026-02-20T14:13:19.911Z
 versionHistory:
   - version: 1.0.0
     status: implemented
@@ -28,6 +28,11 @@ versionHistory:
     summary: >-
       Major design change: Add reqord version command, fully separate versioning from status transitions. Removes
       --major/--patch from draft command. Backward incompatible with v3.0 (Issue #263)
+  - version: '5.0'
+    status: implemented
+    gitCommit: 273b8b8
+    changedAt: 2026-02-20T14:13:19.911Z
+    summary: 'Remove gitCommit field from versionHistory (feedback #411)'
 files:
   description: requirements/req-000005/description.md
   supplementary: []
@@ -39,7 +44,7 @@ successCriteria:
   - X.Y形式のバージョン番号をサポートする（1.0, 2.0, 1.1など）
   - versionHistory にバージョン履歴が記録される
   - reqord req history <id> / reqord spec history <id> でバージョン履歴を表示できる
-  - Gitコミットとバージョンが紐付けられる
+  - versionHistoryにgitCommitフィールドを持たない（git log -Sで導出する）
 format:
   type: ears
   ears:

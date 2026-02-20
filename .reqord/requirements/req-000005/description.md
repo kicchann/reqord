@@ -84,7 +84,8 @@ reqord version spec-000001 --patch --summary "Fix typo in design document"
 ### reqord req history \<id\> / reqord spec history \<id\>
 
 - バージョン履歴をタイムライン表示
-- 各バージョンのステータス、承認者、Gitコミットを表示
+- 各バージョンのステータス、承認者を表示
+- Gitコミットハッシュは `git log -S` で必要時に導出（YAMLには保存しない）
 
 ### バージョニングのタイミング
 
@@ -101,8 +102,8 @@ reqord version spec-000001 --patch --summary "Fix typo in design document"
 
 ## 技術的制約
 
-- Gitコミットハッシュとの紐付けはGit操作と連携
 - `versionHistory` 配列は追記のみ（履歴改変不可）
+- `versionHistory` にはgitCommitフィールドを持たない（`git log -S` で高速に導出可能なため、YAMLに重複して保持しない）
 
 ## コマンドインターフェースの移行計画（v4.0）
 
@@ -155,6 +156,7 @@ v4.0では、以下のコマンドオプションが廃止されます:
 | #209 | draft化時のバージョン指定（--major/--minor/--patch）を明記。Specificationも対象に拡大 |
 | #247 | セマンティックバージョニングから整数+小数点形式（X.Y）に簡素化（v3.0） |
 | #263 | reqord versionコマンドを追加し、バージョニングとステータス遷移を完全分離（v4.0、後方互換性なし） |
+| #411 | versionHistoryからgitCommitフィールドを削除。git log -Sで導出する方針に変更（v5.0） |
 
 ## 既存データの移行
 
