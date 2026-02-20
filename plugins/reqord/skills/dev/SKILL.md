@@ -51,7 +51,7 @@ contextスキルの「コンテキスト読み込み標準手順」に従い、�
 
 ### グループA（並列実行）
 
-- **Specification**: `.reqord/specifications/<spec-id>/index.yaml` + `design.md`
+- **Specification**: `.reqord/specifications/<spec-id>.yaml` + `design.md`
 - **Requirement**: specのrequirementIdから `.reqord/requirements/<req-id>.yaml` + `<req-id>/description.md`
 - **ProjectContext**: `.reqord/context/context.yaml` → 参照先ファイル群
 
@@ -225,3 +225,5 @@ confidence >= 80 の指摘がある場合:
 - CLAUDE.md更新: /update-claude-md
 - カバレッジ確認: /show-coverage
 ```
+
+**注意**: `.reqord/` 配下のYAMLファイル（req/spec YAML、feedbacks.yaml等）を変更する必要がある場合は、必ず `reqord` CLIコマンドを使用すること。直接編集は禁止。詳細はcontextスキルのセクション2「YAML直接編集禁止ルール」を参照。

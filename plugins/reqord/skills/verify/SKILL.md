@@ -314,6 +314,16 @@ reqord req implement <req-id>
 ✅ <req-id> を「implemented」に更新しました。
 ```
 
+### Step 5: バージョン管理の確認
+
+ステータス変更（`spec implement`, `req implement`）はCLIが自動で処理する。ただし、完了処理に伴いdescription.md/design.mdに変更を加えた場合は、バージョンバンプが必要:
+
+```bash
+reqord version <id> --patch --summary "<変更概要>"
+```
+
+**重要**: `.reqord/` 配下のYAMLファイルのversion/versionHistory/flagsを直接編集してはならない。`reqord version`, `reqord feedback resolve` 等のCLIコマンドを使用すること。
+
 ---
 
 ## エラーハンドリング
@@ -329,7 +339,7 @@ Error: <id> が見つかりません。
 
 直接ファイル読み取りにフォールバック:
 
-1. `.reqord/specifications/<spec-id>/index.yaml` をReadツールで読み取り
+1. `.reqord/specifications/<spec-id>.yaml` をReadツールで読み取り
 2. `.reqord/requirements/<req-id>.yaml` をReadツールで読み取り
 3. yqまたは手動パースでフィールドを抽出
 

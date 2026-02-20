@@ -43,7 +43,7 @@ user-invokable: false
   - `versionHistory`: バージョン履歴配列
   - `flags`: フラグ配列
 - **ファイル構成**:
-  - `.reqord/specifications/<spec-id>/index.yaml` - メタデータ
+  - `.reqord/specifications/<spec-id>.yaml` - メタデータ
   - `.reqord/specifications/<spec-id>/design.md` - 技術設計書
 
 ### ProjectContext（プロジェクトコンテキスト）
@@ -57,13 +57,62 @@ user-invokable: false
 
 ### Feedback（フィードバック）
 
-- **ファイル**: `.reqord/feedback/index.yaml`
+- **ファイル**: `.reqord/issues/feedbacks.yaml`
 - GitHub Issueと同期。type（bug/improvement/requirement-gap/spec-mismatch/security）、severity、linkedTo で分類
 - `reqord feedback sync` でGitHub Issueから取り込み
 
+### Tasks（タスク）
+
+- **ファイル**: `.reqord/issues/tasks.yaml`
+- Specificationに紐づくGitHub Issueのタスク管理
+- `reqord issue sync` でGitHub Issueから同期
+
 ---
 
-## 2. CLIコマンドパターン集
+## 2. YAML直接編集禁止ルール
+
+**`.reqord/` 配下のYAMLファイルは原則として直接編集してはならない。必ず `reqord` CLIコマンドを経由すること。**
+
+CLIコマンドはバリデーション・バージョン管理・監査証跡を自動で処理する。直接編集はこれらを迂回し、データ不整合の原因となる。
+
+### 操作→CLIコマンド対応表
+
+| 操作 | CLIコマンド | 直接編集 |
+|------|-----------|---------|
+| ステータス変更 | `reqord req approve/draft/implement` | ❌ 禁止 |
+| バージョンバンプ | `reqord version <id> --patch\|--major` | ❌ 禁止 |
+| フィールド更新（SC等） | `reqord req update --patch-file` | ❌ 禁止 |
+| description.md更新 | `reqord req update --description-file` | ❌ 禁止 |
+| フラグ除去 | `reqord feedback resolve <id> --issue <N>` | ❌ 禁止 |
+| フィードバック操作 | `reqord feedback link/unlink/close/resolve` | ❌ 禁止 |
+| Issue同期 | `reqord issue sync/sync-all` | ❌ 禁止 |
+| design.md書き込み | Writeツールで直接書き込み | ✅ 許可（CLIコマンドなし） |
+| コンテキスト更新 | `reqord context update` | ❌ 禁止 |
+
+### `reqord version` の使いどころ
+
+**内容を変更したらバージョンを上げる。** 以下のタイミングで `reqord version` を実行する:
+
+| タイミング | コマンド例 | 説明 |
+|-----------|-----------|------|
+| req/specの内容更新後 | `reqord version req-000001 --patch --summary "SC追加"` | SC・description等の内容変更 |
+| 破壊的変更時 | `reqord version spec-000016 --major --summary "API変更"` | インターフェース・データ構造の変更 |
+| `/reqord:refine` 後 | `reqord version <id> --patch --summary "SMART改善"` | 要件詳細化による更新 |
+| `/reqord:design` 後 | `reqord version <spec-id> --patch --summary "設計更新"` | design.md書き換え時 |
+
+**`--patch`（X.Y+1）**: 内容の修正・改善・追記
+**`--major`（X+1.0）**: 破壊的変更・大幅な構造変更
+
+### CLIコマンドが存在しない操作
+
+以下の操作はCLIコマンドが未実装。直接編集が許容されるが、改善が望ましい:
+
+- `tasks.yaml` のフィールド追加・構造変更
+- design.md の書き込み（Writeツール使用）
+
+---
+
+## 3. CLIコマンドパターン集
 
 ### 要件操作
 
@@ -129,13 +178,15 @@ reqord issue validate <issue-number>    # Issue整合性チェック
 ### バージョン操作
 
 ```bash
-reqord version <req-id|spec-id> --patch   # パッチバージョンアップ（X.Y+1）
-reqord version <req-id|spec-id> --major   # メジャーバージョンアップ（X+1.0）
+reqord version <req-id|spec-id> --patch --summary "<変更概要>"   # パッチバージョンアップ（X.Y+1）
+reqord version <req-id|spec-id> --major --summary "<変更概要>"   # メジャーバージョンアップ（X+1.0）
 ```
+
+**重要**: req/specの内容を変更したら必ず `reqord version` を実行すること。`--summary` で変更概要をversionHistoryに記録する。詳細はセクション2「YAML直接編集禁止ルール」を参照。
 
 ---
 
-## 3. コンテキスト読み込み標準手順
+## 4. コンテキスト読み込み標準手順
 
 reqordデータを読み込む際の手順:
 
@@ -163,11 +214,11 @@ context.yamlの`files`フィールドが参照するファイルをReadツール
 ### Step 3: 対象req/specの読み取り
 
 - requirement: `.reqord/requirements/<req-id>.yaml` + `<req-id>/description.md`
-- specification: `.reqord/specifications/<spec-id>/index.yaml` + `design.md`
+- specification: `.reqord/specifications/<spec-id>.yaml` + `design.md`
 
 ---
 
-## 4. 読み込み優先順位（トークン節約時）
+## 5. 読み込み優先順位（トークン節約時）
 
 コンテキストウィンドウの制約がある場合、以下の優先順位で読み込む:
 
@@ -180,7 +231,7 @@ context.yamlの`files`フィールドが参照するファイルをReadツール
 
 ---
 
-## 5. ワークフロー
+## 6. ワークフロー
 
 ```
 初回: 環境セットアップ
@@ -211,7 +262,7 @@ Phase 4: 検証・完了
 
 ---
 
-## 6. トレーサビリティ規約
+## 7. トレーサビリティ規約
 
 ### コミットメッセージ
 
@@ -243,7 +294,7 @@ feature/spec-NNNNNN-<sanitized-title>
 
 ---
 
-## 7. 環境要件
+## 8. 環境要件
 
 ### 必須ツール
 
@@ -259,7 +310,7 @@ feature/spec-NNNNNN-<sanitized-title>
 
 ---
 
-## 8. エラーハンドリング
+## 9. エラーハンドリング
 
 ### `.reqord/` ディレクトリが存在しない場合
 
@@ -282,7 +333,7 @@ design.mdに「Specification Design Template」のみが含まれている場合
 
 ---
 
-## 9. リファレンス（resources/）
+## 10. リファレンス（resources/）
 
 詳細な知見は `resources/` ディレクトリを参照。必要に応じて読み込むこと。
 

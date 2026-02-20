@@ -252,6 +252,16 @@ AskUserQuestionで承認を求める:
 - パス: `.reqord/specifications/<spec-id>/design.md`
 - 書き込み前にReadツールで既存内容を読み取ること（Writeツールの前提条件）
 
+### 6.4 バージョンバンプ
+
+design.mdの内容を更新した場合、対応するspecのバージョンを上げる:
+
+```bash
+reqord version <spec-id> --patch --summary "design.md更新: <変更概要>"
+```
+
+**注意**: design.mdの書き込みはWriteツールで直接行うが、バージョン管理は必ず `reqord version` コマンドで行うこと。YAMLファイルのversion/versionHistoryを手動で編集してはならない。
+
 ---
 
 ## Step 7: 検証
