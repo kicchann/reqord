@@ -37,6 +37,12 @@ flags:
     relatedIssues:
       - 410
     severity: low
+currentApproval:
+  version: '2.0'
+  phase: specification
+  prNumber: 422
+  prUrl: https://github.com/kicchann/reqord/pull/422
+  approvedBy: []
 implementation:
   issues:
     - number: 299
@@ -61,9 +67,3 @@ implementation:
     completed: 3
     percentage: 100
     lastSyncedAt: 2026-02-16T00:47:21.433Z
-currentApproval:
-  version: '2.0'
-  phase: specification
-  prNumber: 0
-  prUrl: ''
-  approvedBy: []
