@@ -3,10 +3,14 @@ requirementId: req-000022
 title: Flags表示・Feedback一覧UI
 requirementVersion: '2.0'
 version: '1.0'
-status: implemented
+status: draft
 createdAt: 2026-02-18T06:51:34.846Z
-updatedAt: 2026-02-18T06:51:34.846Z
-versionHistory: []
+updatedAt: 2026-02-21T00:00:00Z
+versionHistory:
+  - version: '1.0'
+    status: draft
+    changedAt: 2026-02-21T00:00:00Z
+    summary: 'Reverted to draft for issue #432 restructuring'
 files:
   design: specifications/spec-000034/design.md
   supplementary: []

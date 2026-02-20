@@ -3,40 +3,15 @@ requirementId: req-000022
 title: 'Web UI - 2レベルドリルダウングラフ'
 requirementVersion: '2.0'
 version: '1.0'
-status: implemented
+status: draft
 createdAt: 2026-02-10T23:14:41.029Z
-updatedAt: 2026-02-12T15:13:20.606Z
-versionHistory: []
+updatedAt: 2026-02-21T00:00:00Z
+versionHistory:
+  - version: '1.0'
+    status: draft
+    changedAt: 2026-02-21T00:00:00Z
+    summary: 'Reverted to draft for issue #432 restructuring'
 files:
   design: specifications/spec-000029/design.md
   supplementary: []
 flags: []
-implementation:
-  issues:
-    - number: 156
-      title: '[Task] spec-000029-3: Integration - GraphPageClient URL state + DependencyGraph extension'
-      url: https://github.com/kicchann/reqord/issues/156
-      priority: P1
-      status: closed
-    - number: 155
-      title: '[Task] spec-000029-2: UI Components - DrillDownBreadcrumb + DrillDownGraph + RequirementNode'
-      url: https://github.com/kicchann/reqord/issues/155
-      priority: P1
-      status: closed
-    - number: 154
-      title: '[Task] spec-000029-1: Data layer - EDGE_STYLES + buildDrillDownGraphData'
-      url: https://github.com/kicchann/reqord/issues/154
-      priority: P1
-      status: closed
-    - number: 153
-      title: '[Task] spec-000029: 2レベルドリルダウングラフ'
-      url: https://github.com/kicchann/reqord/issues/153
-      priority: P1
-      status: closed
-  totalEstimatedHours: 14
-  createdAt: 2026-02-11T00:00:00.000Z
-  progress:
-    total: 4
-    completed: 4
-    percentage: 100
-    lastSyncedAt: 2026-02-12T15:13:20.606Z

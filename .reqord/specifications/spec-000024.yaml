@@ -3,45 +3,15 @@ requirementId: req-000016
 title: 'GitHub Issue同期・進捗追跡'
 requirementVersion: '1.0'
 version: '1.0'
-status: implemented
+status: draft
 createdAt: 2026-02-08T14:08:15.153Z
-updatedAt: 2026-02-12T15:13:12.425Z
-versionHistory: []
+updatedAt: 2026-02-21T00:00:00Z
+versionHistory:
+  - version: '1.0'
+    status: draft
+    changedAt: 2026-02-21T00:00:00Z
+    summary: 'Reverted to draft for issue #432 restructuring'
 files:
   design: specifications/spec-000024/design.md
   supplementary: []
 flags: []
-implementation:
-  issues:
-    - number: 126
-      title: '[Feature] reqord issue validate コマンド実装'
-      url: https://github.com/kicchann/reqord/issues/126
-      priority: P2
-      status: closed
-    - number: 125
-      title: '[Feature] reqord issue sync / sync-all コマンド実装'
-      url: https://github.com/kicchann/reqord/issues/125
-      priority: P2
-      status: closed
-    - number: 124
-      title: '[Feature] IssueSyncService実装: 同期・検証ロジック'
-      url: https://github.com/kicchann/reqord/issues/124
-      priority: P2
-      status: closed
-    - number: 123
-      title: '[Feature] GitHubClient拡張: Issue詳細取得・一覧取得'
-      url: https://github.com/kicchann/reqord/issues/123
-      priority: P2
-      status: closed
-    - number: 122
-      title: '[Feature] SpecificationSchema拡張: progressフィールド + ProgressCalculator実装'
-      url: https://github.com/kicchann/reqord/issues/122
-      priority: P2
-      status: closed
-  totalEstimatedHours: 0
-  createdAt: 2026-02-10T22:45:11.149Z
-  progress:
-    total: 5
-    completed: 5
-    percentage: 100
-    lastSyncedAt: 2026-02-12T15:13:12.425Z

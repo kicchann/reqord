@@ -3,45 +3,15 @@ requirementId: req-000022
 title: 'Web UI - 依存グラフ拡張・Specification詳細'
 requirementVersion: '2.0'
 version: '1.0'
-status: implemented
+status: draft
 createdAt: 2026-02-08T14:08:15.325Z
-updatedAt: 2026-02-12T15:13:17.785Z
-versionHistory: []
+updatedAt: 2026-02-21T00:00:00Z
+versionHistory:
+  - version: '1.0'
+    status: draft
+    changedAt: 2026-02-21T00:00:00Z
+    summary: 'Reverted to draft for issue #432 restructuring'
 files:
   design: specifications/spec-000026/design.md
   supplementary: []
 flags: []
-implementation:
-  issues:
-    - number: 149
-      title: '[Task] spec-000026-4: Multi-level graph UI & mode selector'
-      url: https://github.com/kicchann/reqord/issues/149
-      priority: P1
-      status: closed
-    - number: 148
-      title: '[Task] spec-000026-3: Multi-level graph data layer'
-      url: https://github.com/kicchann/reqord/issues/148
-      priority: P1
-      status: closed
-    - number: 147
-      title: '[Task] spec-000026-2: Spec detail - Coverage/Issues/History tabs'
-      url: https://github.com/kicchann/reqord/issues/147
-      priority: P1
-      status: closed
-    - number: 146
-      title: '[Task] spec-000026-1: Spec detail - tabs + Design/Research'
-      url: https://github.com/kicchann/reqord/issues/146
-      priority: P1
-      status: closed
-    - number: 140
-      title: '[Task] spec-000026: 依存グラフ拡張・Spec詳細実装'
-      url: https://github.com/kicchann/reqord/issues/140
-      priority: P2
-      status: closed
-  totalEstimatedHours: 26
-  createdAt: 2026-02-10T22:45:11.136Z
-  progress:
-    total: 5
-    completed: 5
-    percentage: 100
-    lastSyncedAt: 2026-02-12T15:13:17.785Z

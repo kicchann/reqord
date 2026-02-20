@@ -1,0 +1,554 @@
+tasks:
+  - number: 112
+    linkedTo:
+      specifications:
+        - spec-000016
+    priority: P2
+    status: closed
+    syncedAt: 2026-02-12T15:13:05.883Z
+  - number: 113
+    linkedTo:
+      specifications:
+        - spec-000016
+    priority: P2
+    status: closed
+    syncedAt: 2026-02-12T15:13:05.883Z
+  - number: 114
+    linkedTo:
+      specifications:
+        - spec-000016
+    priority: P2
+    status: closed
+    syncedAt: 2026-02-12T15:13:05.883Z
+  - number: 115
+    linkedTo:
+      specifications:
+        - spec-000016
+    priority: P2
+    status: closed
+    syncedAt: 2026-02-12T15:13:05.883Z
+  - number: 116
+    linkedTo:
+      specifications:
+        - spec-000016
+    priority: P2
+    status: closed
+    syncedAt: 2026-02-12T15:13:05.883Z
+  - number: 117
+    linkedTo:
+      specifications:
+        - spec-000016
+    priority: P2
+    status: closed
+    syncedAt: 2026-02-12T15:13:05.883Z
+  - number: 118
+    linkedTo:
+      specifications:
+        - spec-000016
+    priority: P2
+    status: closed
+    syncedAt: 2026-02-12T15:13:05.883Z
+  - number: 119
+    linkedTo:
+      specifications:
+        - spec-000016
+    priority: P2
+    status: closed
+    syncedAt: 2026-02-12T15:13:05.883Z
+  - number: 120
+    linkedTo:
+      specifications:
+        - spec-000016
+    priority: P2
+    status: closed
+    syncedAt: 2026-02-12T15:13:05.883Z
+  - number: 121
+    linkedTo:
+      specifications:
+        - spec-000016
+    priority: P2
+    status: closed
+    syncedAt: 2026-02-12T15:13:05.883Z
+  - number: 122
+    linkedTo:
+      specifications:
+        - spec-000024
+    priority: P2
+    status: closed
+    syncedAt: 2026-02-12T15:13:12.425Z
+  - number: 123
+    linkedTo:
+      specifications:
+        - spec-000024
+    priority: P2
+    status: closed
+    syncedAt: 2026-02-12T15:13:12.425Z
+  - number: 124
+    linkedTo:
+      specifications:
+        - spec-000024
+    priority: P2
+    status: closed
+    syncedAt: 2026-02-12T15:13:12.425Z
+  - number: 125
+    linkedTo:
+      specifications:
+        - spec-000024
+    priority: P2
+    status: closed
+    syncedAt: 2026-02-12T15:13:12.425Z
+  - number: 126
+    linkedTo:
+      specifications:
+        - spec-000024
+    priority: P2
+    status: closed
+    syncedAt: 2026-02-12T15:13:12.425Z
+  - number: 132
+    linkedTo:
+      specifications:
+        - spec-000010
+    priority: P2
+    status: closed
+    syncedAt: 2026-02-12T15:12:54.749Z
+  - number: 138
+    linkedTo:
+      specifications:
+        - spec-000022
+    priority: P2
+    status: closed
+    syncedAt: 2026-02-12T15:13:08.865Z
+  - number: 139
+    linkedTo:
+      specifications:
+        - spec-000025
+    priority: P2
+    status: closed
+    syncedAt: 2026-02-12T15:13:14.467Z
+  - number: 140
+    linkedTo:
+      specifications:
+        - spec-000026
+    priority: P2
+    status: closed
+    syncedAt: 2026-02-12T15:13:17.785Z
+  - number: 141
+    linkedTo:
+      specifications:
+        - spec-000022
+    priority: P0
+    status: closed
+    syncedAt: 2026-02-12T15:13:08.865Z
+  - number: 142
+    linkedTo:
+      specifications:
+        - spec-000022
+    priority: P0
+    status: closed
+    syncedAt: 2026-02-12T15:13:08.865Z
+  - number: 143
+    linkedTo:
+      specifications:
+        - spec-000022
+    priority: P1
+    status: closed
+    syncedAt: 2026-02-12T15:13:08.865Z
+  - number: 144
+    linkedTo:
+      specifications:
+        - spec-000025
+    priority: P1
+    status: closed
+    syncedAt: 2026-02-12T15:13:14.467Z
+  - number: 145
+    linkedTo:
+      specifications:
+        - spec-000025
+    priority: P1
+    status: closed
+    syncedAt: 2026-02-12T15:13:14.467Z
+  - number: 146
+    linkedTo:
+      specifications:
+        - spec-000026
+    priority: P1
+    status: closed
+    syncedAt: 2026-02-12T15:13:17.785Z
+  - number: 147
+    linkedTo:
+      specifications:
+        - spec-000026
+    priority: P1
+    status: closed
+    syncedAt: 2026-02-12T15:13:17.785Z
+  - number: 148
+    linkedTo:
+      specifications:
+        - spec-000026
+    priority: P1
+    status: closed
+    syncedAt: 2026-02-12T15:13:17.785Z
+  - number: 149
+    linkedTo:
+      specifications:
+        - spec-000026
+    priority: P1
+    status: closed
+    syncedAt: 2026-02-12T15:13:17.785Z
+  - number: 153
+    linkedTo:
+      specifications:
+        - spec-000029
+    priority: P1
+    status: closed
+    syncedAt: 2026-02-12T15:13:20.606Z
+  - number: 154
+    linkedTo:
+      specifications:
+        - spec-000029
+    priority: P1
+    status: closed
+    syncedAt: 2026-02-12T15:13:20.606Z
+  - number: 155
+    linkedTo:
+      specifications:
+        - spec-000029
+    priority: P1
+    status: closed
+    syncedAt: 2026-02-12T15:13:20.606Z
+  - number: 156
+    linkedTo:
+      specifications:
+        - spec-000029
+    priority: P1
+    status: closed
+    syncedAt: 2026-02-12T15:13:20.606Z
+  - number: 173
+    linkedTo:
+      specifications:
+        - spec-000030
+    priority: P1
+    status: closed
+    syncedAt: 2026-02-12T15:13:23.397Z
+  - number: 174
+    linkedTo:
+      specifications:
+        - spec-000031
+    priority: P2
+    status: closed
+    syncedAt: 2026-02-12T15:13:25.599Z
+  - number: 175
+    linkedTo:
+      specifications:
+        - spec-000030
+    priority: P1
+    status: closed
+    syncedAt: 2026-02-12T15:13:23.397Z
+  - number: 176
+    linkedTo:
+      specifications:
+        - spec-000030
+    priority: P1
+    status: closed
+    syncedAt: 2026-02-12T15:13:23.397Z
+  - number: 177
+    linkedTo:
+      specifications:
+        - spec-000030
+    priority: P1
+    status: closed
+    syncedAt: 2026-02-12T15:13:23.397Z
+  - number: 178
+    linkedTo:
+      specifications:
+        - spec-000031
+    priority: P2
+    status: closed
+    syncedAt: 2026-02-12T15:13:25.599Z
+  - number: 179
+    linkedTo:
+      specifications:
+        - spec-000031
+    priority: P2
+    status: closed
+    syncedAt: 2026-02-12T15:13:25.599Z
+  - number: 211
+    linkedTo:
+      specifications:
+        - spec-000027
+    priority: P2
+    status: closed
+    syncedAt: 2026-02-21T00:00:00Z
+  - number: 212
+    linkedTo:
+      specifications:
+        - spec-000027
+    priority: P2
+    status: closed
+    syncedAt: 2026-02-21T00:00:00Z
+  - number: 213
+    linkedTo:
+      specifications:
+        - spec-000027
+    priority: P2
+    status: closed
+    syncedAt: 2026-02-21T00:00:00Z
+  - number: 214
+    linkedTo:
+      specifications:
+        - spec-000028
+    priority: P2
+    status: closed
+    syncedAt: 2026-02-21T00:00:00Z
+  - number: 215
+    linkedTo:
+      specifications:
+        - spec-000028
+    priority: P2
+    status: closed
+    syncedAt: 2026-02-21T00:00:00Z
+  - number: 216
+    linkedTo:
+      specifications:
+        - spec-000028
+    priority: P2
+    status: closed
+    syncedAt: 2026-02-21T00:00:00Z
+  - number: 217
+    linkedTo:
+      specifications:
+        - spec-000028
+    priority: P2
+    status: closed
+    syncedAt: 2026-02-21T00:00:00Z
+  - number: 251
+    linkedTo:
+      specifications:
+        - spec-000033
+    priority: P1
+    status: open
+    syncedAt: 2026-02-14T00:21:07.020Z
+  - number: 252
+    linkedTo:
+      specifications:
+        - spec-000033
+    priority: P1
+    status: open
+    syncedAt: 2026-02-14T00:21:07.020Z
+  - number: 253
+    linkedTo:
+      specifications:
+        - spec-000033
+    priority: P2
+    status: open
+    syncedAt: 2026-02-14T00:21:07.020Z
+  - number: 254
+    linkedTo:
+      specifications:
+        - spec-000033
+    priority: P2
+    status: open
+    syncedAt: 2026-02-14T00:21:07.020Z
+  - number: 255
+    linkedTo:
+      specifications:
+        - spec-000005
+    priority: P2
+    status: closed
+    syncedAt: 2026-02-21T00:00:00Z
+  - number: 256
+    linkedTo:
+      specifications:
+        - spec-000005
+    priority: P2
+    status: closed
+    syncedAt: 2026-02-21T00:00:00Z
+  - number: 257
+    linkedTo:
+      specifications:
+        - spec-000005
+    priority: P2
+    status: closed
+    syncedAt: 2026-02-21T00:00:00Z
+  - number: 258
+    linkedTo:
+      specifications:
+        - spec-000005
+    priority: P2
+    status: closed
+    syncedAt: 2026-02-21T00:00:00Z
+  - number: 266
+    linkedTo:
+      specifications:
+        - spec-000012
+    priority: P2
+    status: closed
+    syncedAt: 2026-02-21T00:00:00Z
+  - number: 267
+    linkedTo:
+      specifications:
+        - spec-000012
+    priority: P2
+    status: closed
+    syncedAt: 2026-02-21T00:00:00Z
+  - number: 268
+    linkedTo:
+      specifications:
+        - spec-000012
+    priority: P2
+    status: closed
+    syncedAt: 2026-02-21T00:00:00Z
+  - number: 269
+    linkedTo:
+      specifications:
+        - spec-000012
+    priority: P2
+    status: closed
+    syncedAt: 2026-02-21T00:00:00Z
+  - number: 270
+    linkedTo:
+      specifications:
+        - spec-000012
+    priority: P2
+    status: closed
+    syncedAt: 2026-02-21T00:00:00Z
+  - number: 283
+    linkedTo:
+      specifications:
+        - spec-000011
+    priority: P1
+    status: closed
+    syncedAt: 2026-02-15T13:00:03.483Z
+  - number: 284
+    linkedTo:
+      specifications:
+        - spec-000011
+    priority: P1
+    status: closed
+    syncedAt: 2026-02-15T13:00:03.483Z
+  - number: 285
+    linkedTo:
+      specifications:
+        - spec-000011
+    priority: P1
+    status: closed
+    syncedAt: 2026-02-15T13:00:03.483Z
+  - number: 299
+    linkedTo:
+      specifications:
+        - spec-000015
+    priority: P2
+    status: closed
+    syncedAt: 2026-02-16T00:47:21.433Z
+  - number: 300
+    linkedTo:
+      specifications:
+        - spec-000015
+    priority: P2
+    status: closed
+    syncedAt: 2026-02-16T00:47:21.433Z
+  - number: 301
+    linkedTo:
+      specifications:
+        - spec-000015
+    priority: P2
+    status: closed
+    syncedAt: 2026-02-16T00:47:21.433Z
+  - number: 307
+    linkedTo:
+      specifications:
+        - spec-000005
+    priority: P2
+    status: closed
+    syncedAt: 2026-02-21T00:00:00Z
+  - number: 308
+    linkedTo:
+      specifications:
+        - spec-000005
+    priority: P2
+    status: closed
+    syncedAt: 2026-02-21T00:00:00Z
+  - number: 314
+    linkedTo:
+      specifications:
+        - spec-000013
+    priority: P1
+    status: closed
+    syncedAt: 2026-02-16T05:55:46.683Z
+  - number: 315
+    linkedTo:
+      specifications:
+        - spec-000013
+    priority: P1
+    status: closed
+    syncedAt: 2026-02-16T05:55:46.683Z
+  - number: 316
+    linkedTo:
+      specifications:
+        - spec-000013
+    priority: P2
+    status: closed
+    syncedAt: 2026-02-16T05:55:46.683Z
+  - number: 332
+    linkedTo:
+      specifications:
+        - spec-000028
+    priority: P2
+    status: closed
+    syncedAt: 2026-02-16T11:01:02.987Z
+  - number: 333
+    linkedTo:
+      specifications:
+        - spec-000028
+    priority: P2
+    status: closed
+    syncedAt: 2026-02-16T11:01:02.987Z
+  - number: 334
+    linkedTo:
+      specifications:
+        - spec-000028
+    priority: P2
+    status: closed
+    syncedAt: 2026-02-16T11:01:02.987Z
+  - number: 340
+    linkedTo:
+      specifications:
+        - spec-000004
+    priority: P1
+    status: closed
+    syncedAt: 2026-02-16T20:47:30.983Z
+  - number: 341
+    linkedTo:
+      specifications:
+        - spec-000004
+    priority: P2
+    status: closed
+    syncedAt: 2026-02-16T20:47:30.983Z
+  - number: 342
+    linkedTo:
+      specifications:
+        - spec-000004
+    priority: P2
+    status: closed
+    syncedAt: 2026-02-16T20:47:30.983Z
+  - number: 425
+    linkedTo:
+      specifications:
+        - spec-000011
+    priority: P2
+    status: open
+    syncedAt: 2026-02-15T13:00:03.483Z
+  - number: 426
+    linkedTo:
+      specifications:
+        - spec-000015
+    priority: P2
+    status: open
+    syncedAt: 2026-02-16T00:47:21.433Z
+  - number: 430
+    linkedTo:
+      specifications:
+        - spec-000005
+    priority: P2
+    status: open
+    syncedAt: 2026-02-20T15:33:03.698Z

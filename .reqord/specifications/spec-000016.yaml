@@ -3,70 +3,15 @@ requirementId: req-000016
 title: 'GitHub Issue一括生成'
 requirementVersion: '1.0'
 version: '1.0'
-status: implemented
+status: draft
 createdAt: 2026-02-08T14:08:07.899Z
-updatedAt: 2026-02-12T15:13:05.883Z
-versionHistory: []
+updatedAt: 2026-02-21T00:00:00Z
+versionHistory:
+  - version: '1.0'
+    status: draft
+    changedAt: 2026-02-21T00:00:00Z
+    summary: 'Reverted to draft for issue #432 restructuring'
 files:
   design: specifications/spec-000016/design.md
   supplementary: []
 flags: []
-implementation:
-  issues:
-    - number: 121
-      title: '[Feature] reqord issue create コマンド実装'
-      url: https://github.com/kicchann/reqord/issues/121
-      priority: P2
-      status: closed
-    - number: 120
-      title: '[Feature] IssueService実装: タスク定義ファイルからGitHub Issue作成'
-      url: https://github.com/kicchann/reqord/issues/120
-      priority: P2
-      status: closed
-    - number: 119
-      title: '[Feature] GitHubClient拡張: createIssue() 追加'
-      url: https://github.com/kicchann/reqord/issues/119
-      priority: P2
-      status: closed
-    - number: 118
-      title: '[Feature] GitHub Issue Template (reqord-implementation.yml) 作成'
-      url: https://github.com/kicchann/reqord/issues/118
-      priority: P2
-      status: closed
-    - number: 117
-      title: '[Feature] スキーマ定義: TaskDefinition + SpecificationSchema implementation拡張'
-      url: https://github.com/kicchann/reqord/issues/117
-      priority: P2
-      status: closed
-    - number: 116
-      title: '[Feature] reqord issue create コマンド実装'
-      url: https://github.com/kicchann/reqord/issues/116
-      priority: P2
-      status: closed
-    - number: 115
-      title: '[Feature] IssueService実装: タスク定義からGitHub Issue作成'
-      url: https://github.com/kicchann/reqord/issues/115
-      priority: P2
-      status: closed
-    - number: 114
-      title: '[Feature] GitHub Issue Template (reqord-implementation) 生成・配置'
-      url: https://github.com/kicchann/reqord/issues/114
-      priority: P2
-      status: closed
-    - number: 113
-      title: '[Feature] タスク定義ファイル(--tasks-file)スキーマ定義・バリデーション'
-      url: https://github.com/kicchann/reqord/issues/113
-      priority: P2
-      status: closed
-    - number: 112
-      title: '[Feature] SpecificationSchema拡張: implementationフィールド追加'
-      url: https://github.com/kicchann/reqord/issues/112
-      priority: P2
-      status: closed
-  totalEstimatedHours: 0
-  createdAt: 2026-02-10T22:45:11.151Z
-  progress:
-    total: 10
-    completed: 10
-    percentage: 100
-    lastSyncedAt: 2026-02-12T15:13:05.883Z

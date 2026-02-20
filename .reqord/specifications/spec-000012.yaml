@@ -3,10 +3,14 @@ requirementId: req-000012
 title: 影響範囲分析
 requirementVersion: '3.1'
 version: '1.0'
-status: implemented
+status: draft
 createdAt: 2026-02-08T14:08:07.554Z
-updatedAt: 2026-02-17T14:36:06.531Z
+updatedAt: 2026-02-21T00:00:00Z
 versionHistory:
+  - version: '1.0'
+    status: draft
+    changedAt: 2026-02-21T00:00:00Z
+    summary: 'Reverted to draft for issue #432 restructuring'
   - version: '1.0'
     status: approved
     changedAt: 2026-02-14T12:18:12.080Z

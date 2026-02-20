@@ -3,10 +3,14 @@ requirementId: req-000023
 title: Feedback操作CLI
 requirementVersion: '4.0'
 version: '3.0'
-status: implemented
+status: draft
 createdAt: 2026-02-09T05:48:42.351Z
-updatedAt: 2026-02-16T12:01:16.267Z
-versionHistory: []
+updatedAt: 2026-02-21T00:00:00Z
+versionHistory:
+  - version: '3.0'
+    status: draft
+    changedAt: 2026-02-21T00:00:00Z
+    summary: 'Reverted to draft for issue #432 restructuring'
 files:
   design: specifications/spec-000028/design.md
   supplementary: []
@@ -17,22 +21,3 @@ currentApproval:
   prNumber: 331
   prUrl: https://github.com/kicchann/reqord/pull/331
   approvedBy: []
-implementation:
-  issues:
-    - number: 332
-      title: '[spec-000028 v3.0] unlink CLI'
-      url: https://github.com/kicchann/reqord/issues/332
-      priority: P2
-      status: closed
-    - number: 333
-      title: '[spec-000028 v3.0] create CLI'
-      url: https://github.com/kicchann/reqord/issues/333
-      priority: P2
-      status: closed
-    - number: 334
-      title: '[spec-000028 v3.0] close改善 - 残存flag警告'
-      url: https://github.com/kicchann/reqord/issues/334
-      priority: P2
-      status: closed
-  totalEstimatedHours: 8
-  createdAt: 2026-02-16T11:01:02.987Z

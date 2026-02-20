@@ -1,11 +1,15 @@
 id: req-000016
 version: '1.0'
 title: GitHub Issue生成・管理
-status: implemented
+status: draft
 priority: high
 createdAt: 2026-02-07T12:00:00Z
-updatedAt: 2026-02-10T12:00:00Z
+updatedAt: 2026-02-21T00:00:00Z
 versionHistory:
+  - version: '1.0'
+    status: draft
+    changedAt: 2026-02-21T00:00:00Z
+    summary: 'Reverted to draft for issue #432 restructuring'
   - version: 1.0.0
     status: draft
     changedAt: 2026-02-07T12:00:00Z
@@ -42,4 +46,10 @@ dependencies:
   relatedTo: []
 estimatedComplexity: medium
 estimatedHours: 16
-flags: []
+flags:
+  - type: feedback-review
+    reason: 'Feedback from issue #432'
+    createdAt: 2026-02-20T16:17:53.520Z
+    relatedIssues:
+      - 432
+    severity: high
