@@ -8,12 +8,10 @@ updatedAt: 2026-02-16T20:46:29.023Z
 versionHistory:
   - version: 1.0.0
     status: implemented
-    gitCommit: legacy
     changedAt: 2026-02-07T10:00:00Z
     summary: 初版作成
   - version: 1.1.0
     status: approved
-    gitCommit: a4f6165
     changedAt: 2026-02-17T00:00:00Z
     summary: ドキュメント修正 - in-progress削除、遷移ルール未実装注記追加、StatusSchema統一
 files:

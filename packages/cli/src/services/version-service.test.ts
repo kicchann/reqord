@@ -1,18 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
-// Mock declarations BEFORE imports
-const { mockExecSync } = vi.hoisted(() => ({
-  mockExecSync: vi.fn(),
-}));
-vi.mock("node:child_process", () => ({
-  execSync: mockExecSync,
-}));
 import {
   parseVersion,
   formatVersion,
   determineNextVersion,
   createHistoryEntry,
-  getCurrentGitCommit,
   getStateTransitions,
   isValidTransition,
   shouldRevertToDraft,
@@ -22,6 +14,7 @@ import {
   applyVersionBump,
 } from "./version-service.js";
 import type { Requirement, Specification } from "@reqord/shared";
+import { VersionHistoryEntrySchema } from "@reqord/shared";
 
 // Factory function
 function makeRequirement(overrides: Partial<Requirement> = {}): Requirement {
@@ -222,33 +215,6 @@ describe("createHistoryEntry", () => {
     expect(entry.summary).toBeTruthy();
   });
 
-  it("gitCommitが渡された場合に使われる", () => {
-    const req = makeRequirement();
-    const entry = createHistoryEntry(req, { gitCommit: "abc1234" });
-
-    expect(entry.gitCommit).toBe("abc1234");
-  });
-
-  it("gitCommitが渡されなかった場合にexecSyncで自動取得", () => {
-    mockExecSync.mockReturnValue("def5678\n");
-
-    const req = makeRequirement();
-    const entry = createHistoryEntry(req);
-
-    expect(entry.gitCommit).toBe("def5678");
-  });
-
-  it("execSyncが失敗した場合に'unknown'", () => {
-    mockExecSync.mockImplementation(() => {
-      throw new Error("not a git repo");
-    });
-
-    const req = makeRequirement();
-    const entry = createHistoryEntry(req);
-
-    expect(entry.gitCommit).toBe("unknown");
-  });
-
   it("approved状態でapprovedAt/approvedByが設定される", () => {
     const req = makeRequirement({ status: "approved" });
     const entry = createHistoryEntry(req);
@@ -263,19 +229,38 @@ describe("createHistoryEntry", () => {
 
     expect(entry.summary).toBe("カスタムサマリー");
   });
+
+  it("gitCommitフィールドが含まれない", () => {
+    const req = makeRequirement();
+    const entry = createHistoryEntry(req);
+
+    expect(entry).not.toHaveProperty("gitCommit");
+  });
 });
 
-describe("getCurrentGitCommit", () => {
-  it("execSyncの結果を返す", () => {
-    mockExecSync.mockReturnValue("abc1234\n");
-    expect(getCurrentGitCommit()).toBe("abc1234");
+describe("VersionHistoryEntrySchema - 後方互換性", () => {
+  it("gitCommitなしでバリデーション通過", () => {
+    const result = VersionHistoryEntrySchema.safeParse({
+      version: "1.0",
+      status: "draft",
+      changedAt: "2026-01-01T00:00:00Z",
+      summary: "test",
+    });
+    expect(result.success).toBe(true);
   });
 
-  it("失敗時に'unknown'を返す", () => {
-    mockExecSync.mockImplementation(() => {
-      throw new Error("not a git repo");
+  it("旧フォーマット（gitCommitあり）の読み込み成功（stripで自動除去）", () => {
+    const result = VersionHistoryEntrySchema.safeParse({
+      version: "1.0",
+      status: "draft",
+      gitCommit: "abc123",
+      changedAt: "2026-01-01T00:00:00Z",
+      summary: "test",
     });
-    expect(getCurrentGitCommit()).toBe("unknown");
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data).not.toHaveProperty("gitCommit");
+    }
   });
 });
 

@@ -15,21 +15,18 @@ describe("TabHistory", () => {
     {
       version: "2.1.0",
       status: "approved",
-      gitCommit: "abc123",
       changedAt: "2026-02-10T10:00:00Z",
       summary: "Added new feature X",
     },
     {
       version: "2.0.0",
       status: "implemented",
-      gitCommit: "def456",
       changedAt: "2026-02-01T10:00:00Z",
       summary: "Implemented core functionality",
     },
     {
       version: "1.0.0",
       status: "draft",
-      gitCommit: "ghi789",
       changedAt: "2026-01-15T10:00:00Z",
       summary: "Initial draft specification",
     },
@@ -92,7 +89,6 @@ describe("TabHistory", () => {
       {
         version: "1.0.0",
         status: "draft",
-        gitCommit: "abc123",
         changedAt: "2026-02-10T10:00:00Z",
         summary: "Initial version",
       },

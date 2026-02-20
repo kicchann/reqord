@@ -11,17 +11,14 @@ updatedAt: 2026-02-14T12:00:00.000Z
 versionHistory:
   - version: 1.0.0
     status: approved
-    gitCommit: 63e4c1b
     changedAt: 2026-02-13T03:30:00.000Z
     summary: Initial design approved (Specification versioning)
   - version: '2.0'
     status: draft
-    gitCommit: pending
     changedAt: 2026-02-14T00:00:00.000Z
     summary: 'Simplified versioning: semantic versioning → integer-based (X.Y) format (Issue #247)'
   - version: '2.1'
     status: deprecated
-    gitCommit: pending
     changedAt: 2026-02-14T12:00:00.000Z
     summary: 'Deprecated: merged into spec-000005 (unified Requirement/Specification versioning)'
 files:

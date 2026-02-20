@@ -71,7 +71,6 @@ function makeHistoryEntry(overrides: Partial<VersionHistoryEntry> = {}): Version
   return {
     version: "2.0",
     status: "draft",
-    gitCommit: "abc1234",
     changedAt: "2026-01-15T00:00:00Z",
     summary: "Version bumped (major)",
     ...overrides,

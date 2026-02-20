@@ -193,7 +193,6 @@ describe("spec draft command", () => {
         {
           version: "2.0",
           status: "draft",
-          gitCommit: "abc123",
           changedAt: "2026-01-01T00:00:00Z",
           summary: "Status changed from deprecated to draft",
         },

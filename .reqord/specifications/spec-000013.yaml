@@ -9,12 +9,10 @@ updatedAt: 2026-02-16T05:55:52.368Z
 versionHistory:
   - version: '1.0'
     status: draft
-    gitCommit: 6ca43f4
     changedAt: 2026-02-16T01:30:31.353Z
     summary: 'status: implemented → draft'
   - version: '1.1'
     status: draft
-    gitCommit: c32e95b
     changedAt: 2026-02-16T01:53:40.006Z
     summary: Design updated for title and requirementVersion fields (#157,
 files:

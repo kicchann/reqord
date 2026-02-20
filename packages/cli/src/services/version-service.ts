@@ -1,4 +1,3 @@
-import { execSync } from "node:child_process";
 import type { Requirement, Specification, Status, VersionHistoryEntry } from "@reqord/shared";
 
 /**
@@ -71,21 +70,6 @@ export function determineNextVersion(before: Requirement, _after: Requirement): 
 }
 
 /**
- * Get current git commit hash
- */
-export function getCurrentGitCommit(): string {
-  try {
-    const result = execSync("git rev-parse --short HEAD", {
-      encoding: "utf-8",
-      stdio: ["ignore", "pipe", "ignore"],
-    });
-    return result.trim();
-  } catch {
-    return "unknown";
-  }
-}
-
-/**
  * Minimal interface for creating version history entries.
  * Accepts both Requirement and Specification objects.
  */
@@ -99,16 +83,14 @@ interface Versionable {
  */
 export function createHistoryEntry(
   source: Versionable,
-  options?: { gitCommit?: string; summary?: string },
+  options?: { summary?: string },
 ): VersionHistoryEntry {
   const now = new Date().toISOString();
-  const gitCommit = options?.gitCommit ?? getCurrentGitCommit();
   const summary = options?.summary ?? "Updated";
 
   const entry: VersionHistoryEntry = {
     version: source.version,
     status: source.status,
-    gitCommit,
     changedAt: now,
     summary,
   };

@@ -8,19 +8,16 @@ updatedAt: 2026-02-17T14:36:08.697Z
 versionHistory:
   - version: 2.0.0
     status: approved
-    gitCommit: 4a1fcac
     changedAt: 2026-02-11T08:05:03.835Z
     summary: Status changed from draft to pending_approval
   - version: 3.0.0
     status: approved
-    gitCommit: 4a1fcac
     changedAt: 2026-02-11T08:05:04.025Z
     summary: Status changed from pending_approval to approved
     approvedAt: 2026-02-11T08:05:04.025Z
     approvedBy: []
   - version: '3.1'
     status: draft
-    gitCommit: 2cda4bb
     changedAt: 2026-02-14T12:17:44.286Z
     summary: Status changed from approved to draft
 files:

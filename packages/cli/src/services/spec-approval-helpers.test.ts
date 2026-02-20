@@ -131,4 +131,22 @@ describe("buildSpecApprovalPrBody", () => {
 
     expect(result).toContain("specifications/spec-000001/design.md");
   });
+
+  it("PR本文に手動更新指示が含まれない", () => {
+    const result = buildSpecApprovalPrBody({
+      specId: "spec-000015",
+      reqId: "req-000015",
+      reqTitle: "承認フロー実装",
+      version: "2.0",
+      designSummary: "設計の概要説明。",
+      successCriteria: ["基準1", "基準2"],
+      testPlan: "テスト計画",
+      components: ["Component A"],
+    });
+
+    expect(result).not.toMatch(/reqord\s+spec\s+update/);
+    expect(result).not.toMatch(/reqord\s+req\s+update/);
+    expect(result).not.toContain("手動で");
+    expect(result).not.toContain("manually");
+  });
 });
