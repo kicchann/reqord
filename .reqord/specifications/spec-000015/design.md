@@ -48,7 +48,7 @@ reqord spec approve <id> [--dry-run]
 Specification承認の前提条件は、Requirement承認より厳格:
 
 1. **Specificationのステータスがdraft**であること
-2. **関連Requirementのステータスがapprovedまたはapproved**であること
+2. **関連Requirementのステータスがapprovedまたはimplemented**であること
    - 未承認の要件に対する仕様承認は整合性に問題がある
 3. **design.mdが空でない（テンプレートのままではない）**こと
    - 設計文書が実際に記述されている必要がある
@@ -68,7 +68,7 @@ async function checkSpecApprovalPrerequisites(
 
   // 2. 関連Requirementのステータスチェック
   const req = await reqRepo.findById(cwd, spec.requirementId);
-  if (req && req.status !== "approved" && req.status !== "approved") {
+  if (req && req.status !== "approved" && req.status !== "implemented") {
     errors.push(`関連要件 ${spec.requirementId} が未承認です（現在: ${req.status}）`);
   }
 
@@ -192,7 +192,7 @@ status: draft → approved
 - **前提条件チェック（approve）**:
   - Specificationがdraftのときに成功すること
   - Specificationがdraft以外のときにエラーメッセージが返ること
-  - 関連Requirementがapproved/approvedのときに成功すること
+  - 関連Requirementがapproved/implementedのときに成功すること
   - 関連Requirementがdraftのときにエラーメッセージが返ること
   - design.mdがテンプレートのままのときにエラーメッセージが返ること
 - **ApprovalTarget構築**: type="specification"、files配列にdesign.mdが含まれること
@@ -227,8 +227,8 @@ status: draft → approved
 
 ### Requirement承認の前提条件化
 
-**決定:** Specification承認時に関連Requirementのapproved/approvedステータスを前提条件とする
-**理由:** 未承認の要件に対して仕様を承認しても、要件自体が変更される可能性がある。要件→仕様の承認順序を強制することで、手戻りリスクを最小化する。approvedも許容するのは、要件承認と仕様承認を並行して進められるようにするため。
+**決定:** Specification承認時に関連Requirementのapproved/implementedステータスを前提条件とする
+**理由:** 未承認の要件に対して仕様を承認しても、要件自体が変更される可能性がある。要件→仕様の承認順序を強制することで、手戻りリスクを最小化する。implementedも許容するのは、approvedの後の状態であり、仕様の再承認時にも対応するため。
 
 ### design.mdの空チェック
 

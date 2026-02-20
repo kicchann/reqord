@@ -162,7 +162,7 @@ export async function checkSpecApprovalPrerequisites(
   const req = await reqRepo.findById(cwd, spec.requirementId);
   if (!req) {
     errors.push(`Related requirement ${spec.requirementId} not found`);
-  } else if (req.status !== "approved") {
+  } else if (req.status !== "approved" && req.status !== "implemented") {
     errors.push(`Related requirement ${spec.requirementId} is not approved (current: ${req.status})`);
   }
 

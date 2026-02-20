@@ -354,6 +354,18 @@ describe("checkSpecApprovalPrerequisites", () => {
     expect(result.ok).toBe(true);
   });
 
+  it("関連Requirementがimplementedの場合は成功", async () => {
+    const spec = makeSpecification({ status: "draft" });
+    const req = makeRequirement({ status: "implemented" });
+    mockSpecRepo.findByIdOrThrow.mockResolvedValue(spec);
+    mockReqRepo.findById.mockResolvedValue(req);
+    mockSpecRepo.loadFile.mockResolvedValue("# Design");
+
+    const result = await checkSpecApprovalPrerequisites("/cwd", "spec-000001");
+
+    expect(result.ok).toBe(true);
+  });
+
   it("関連Requirementがdraftの場合はエラー", async () => {
     const spec = makeSpecification({ status: "draft" });
     const req = makeRequirement({ status: "draft" });
