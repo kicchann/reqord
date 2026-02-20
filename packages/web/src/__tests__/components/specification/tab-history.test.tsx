@@ -89,7 +89,7 @@ describe("TabHistory", () => {
       {
         version: "1.0.0",
         status: "draft",
-          changedAt: "2026-02-10T10:00:00Z",
+        changedAt: "2026-02-10T10:00:00Z",
         summary: "Initial version",
       },
     ];
