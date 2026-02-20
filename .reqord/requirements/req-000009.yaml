@@ -1,10 +1,10 @@
 id: req-000009
 version: '2.0'
 title: CLIメッセージ統一
-status: draft
+status: approved
 priority: medium
 createdAt: 2026-02-06T16:34:48.127Z
-updatedAt: 2026-02-20T00:00:00Z
+updatedAt: 2026-02-20T12:22:32.414Z
 versionHistory:
   - version: 1.0.0
     status: implemented
@@ -32,3 +32,10 @@ dependencies:
   relatedTo: []
 estimatedComplexity: small
 estimatedHours: 4
+currentApproval:
+  version: '2.0'
+  phase: requirement
+  prNumber: 408
+  prUrl: https://github.com/kicchann/reqord/pull/408
+  approvedBy: []
+flags: []
