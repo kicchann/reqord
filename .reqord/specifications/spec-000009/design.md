@@ -1,8 +1,8 @@
-# CLIエラーハンドリング統一 - 技術設計書
+# CLIメッセージ統一 - 技術設計書
 
 ## 1. 設計概要
 
-reqord CLI全体のエラーハンドリングを統一し、一貫したエラーメッセージ、終了コード、出力先を提供する。`.reqord/` ディレクトリの初期化チェックを共有ミドルウェアとして導入し、各コマンドで繰り返される定型エラー処理を共通化する。エラーメッセージは日本語で提供し、AIエージェント向けには `--json` オプションでの構造化エラー出力もサポートする。本機能は未実装。
+reqord CLI全体のエラーハンドリングを統一し、一貫したエラーメッセージ、終了コード、出力先を提供する。`.reqord/` ディレクトリの初期化チェックを共有ミドルウェアとして導入し、各コマンドで繰り返される定型エラー処理を共通化する。全メッセージ（エラー・情報・警告）は英語で統一し、AIエージェント向けには `--json` オプションでの構造化エラー出力もサポートする。
 
 ## 2. アーキテクチャ
 
@@ -79,12 +79,12 @@ export function handleError(error: unknown, options?: { json?: boolean }): void 
         message: error.message,
       }));
     } else {
-      console.error(chalk.red(`エラー: ${error.message}`));
+      console.error(chalk.red(`Error: ${error.message}`));
     }
     process.exitCode = error.exitCode;
   } else {
-    // 予期しないエラー
-    console.error(chalk.red(`予期しないエラーが発生しました: ${(error as Error).message}`));
+    // Unexpected error
+    console.error(chalk.red(`Unexpected error: ${(error as Error).message}`));
     process.exitCode = 1;
   }
 }
@@ -99,7 +99,7 @@ export async function ensureReqordInitialized(cwd: string): Promise<void> {
   const reqordDir = path.join(cwd, REQORD_DIR);
   if (!(await exists(reqordDir))) {
     throw new AppError(
-      ".reqord/ ディレクトリが見つかりません。先に 'reqord init' を実行してください。",
+      ".reqord/ directory not found. Run 'reqord init' first.",
       ErrorCode.UNINITIALIZED,
     );
   }
@@ -112,14 +112,14 @@ export async function ensureReqordInitialized(cwd: string): Promise<void> {
 
 | ErrorCode | 状況 | メッセージ例 |
 |-----------|------|-------------|
-| `UNINITIALIZED` | `.reqord/` が存在しない | `.reqord/ ディレクトリが見つかりません。先に 'reqord init' を実行してください。` |
-| `NOT_FOUND` | 指定IDの要件が見つからない | `要件 req-000001 が見つかりません。` |
-| `VALIDATION_ERROR` | Zodバリデーション失敗 | `バリデーションエラー: title は1文字以上必要です。` |
-| `FILE_READ_ERROR` | ファイル読み込み失敗 | `ファイルの読み込みに失敗しました: {path}` |
-| `FILE_WRITE_ERROR` | ファイル書き込み失敗 | `ファイルの書き込みに失敗しました: {path}` |
-| `INVALID_ARGUMENT` | 不正な引数 | `不正な引数です: status は draft, approved, approved, deprecated のいずれかを指定してください。` |
-| `ALREADY_EXISTS` | 既に存在する | `context.yaml は既に存在します。` |
-| `DEPENDENCY_ERROR` | 依存関係エラー | `存在しない要件 req-999999 を参照しています。` |
+| `UNINITIALIZED` | `.reqord/` が存在しない | `.reqord/ directory not found. Run 'reqord init' first.` |
+| `NOT_FOUND` | 指定IDの要件が見つからない | `Requirement req-000001 not found.` |
+| `VALIDATION_ERROR` | Zodバリデーション失敗 | `Validation error: title must be at least 1 character.` |
+| `FILE_READ_ERROR` | ファイル読み込み失敗 | `Failed to read file: {path}` |
+| `FILE_WRITE_ERROR` | ファイル書き込み失敗 | `Failed to write file: {path}` |
+| `INVALID_ARGUMENT` | 不正な引数 | `Invalid argument: status must be one of draft, approved, deprecated.` |
+| `ALREADY_EXISTS` | 既に存在する | `context.yaml already exists.` |
+| `DEPENDENCY_ERROR` | 依存関係エラー | `Referenced requirement req-999999 does not exist.` |
 
 ### 3.5 終了コード
 
@@ -139,9 +139,9 @@ export async function ensureReqordInitialized(cwd: string): Promise<void> {
       → .reqord/ 存在確認 → OK
     → showRequirement(cwd, "req-999999")
       → reqRepo.findById(cwd, "req-999999") → null
-      → throw new AppError("要件 req-999999 が見つかりません。", ErrorCode.NOT_FOUND)
+      → throw new AppError("Requirement req-999999 not found.", ErrorCode.NOT_FOUND)
   → handleError(error)
-    → stderr: "エラー: 要件 req-999999 が見つかりません。"
+    → stderr: "Error: Requirement req-999999 not found."
     → process.exitCode = 1
 ```
 
@@ -154,7 +154,7 @@ export async function ensureReqordInitialized(cwd: string): Promise<void> {
       → .reqord/ 存在確認 → 不在
       → throw new AppError("...", ErrorCode.UNINITIALIZED)
   → handleError(error)
-    → stderr: "エラー: .reqord/ ディレクトリが見つかりません。先に 'reqord init' を実行してください。"
+    → stderr: "Error: .reqord/ directory not found. Run 'reqord init' first."
     → process.exitCode = 1
 ```
 
@@ -164,7 +164,7 @@ export async function ensureReqordInitialized(cwd: string): Promise<void> {
 ユーザー → reqord req show req-999999 --json
   → throw AppError(NOT_FOUND)
   → handleError(error, { json: true })
-    → stderr: {"error":true,"code":"NOT_FOUND","message":"要件 req-999999 が見つかりません。"}
+    → stderr: {"error":true,"code":"NOT_FOUND","message":"Requirement req-999999 not found."}
     → process.exitCode = 1
 ```
 
@@ -200,10 +200,10 @@ export async function ensureReqordInitialized(cwd: string): Promise<void> {
 **決定:** すべてのエラーメッセージはstderrに出力
 **理由:** stdoutは正常時のデータ出力（特に--jsonモード）に使用する。AIエージェントがstdoutをパースする際にエラーメッセージが混入すると、JSONパースが失敗する。
 
-### 日本語エラーメッセージ
+### 英語メッセージ統一
 
-**決定:** エラーメッセージは日本語で提供
-**理由:** reqordの主要ターゲットは日本語プロジェクト（ProjectContextのデフォルト言語がja）。AIエージェント向けにはErrorCodeにより言語非依存の判別が可能。
+**決定:** 全CLIメッセージ（エラー・情報・警告）を英語で統一
+**理由:** npm publishによるグローバル展開に向けて、言語の壁を取り除く。AIエージェントにとっても英語が最も自然。ErrorCodeにより言語非依存のプログラム的判別も引き続き可能。
 
 ### Commander.js preAction フックの活用
 

@@ -1,12 +1,17 @@
 id: spec-000009
 requirementId: req-000009
-title: 'CLIエラーハンドリング統一'
-requirementVersion: '1.0'
-version: '1.0'
-status: implemented
+title: 'CLIメッセージ統一'
+requirementVersion: '2.0'
+version: '2.0'
+status: draft
 createdAt: 2026-02-08T14:08:07.300Z
-updatedAt: 2026-02-08T14:08:07.300Z
-versionHistory: []
+updatedAt: 2026-02-20T00:00:00Z
+versionHistory:
+  - version: 1.0.0
+    status: implemented
+    gitCommit: legacy
+    changedAt: 2026-02-08T14:08:07.300Z
+    summary: 初版実装完了（日本語エラーハンドリング統一）
 files:
   design: specifications/spec-000009/design.md
   supplementary: []
