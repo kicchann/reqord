@@ -399,7 +399,7 @@ feedbacks:
         requirements:
           - req-000015
         specifications: []
-    syncedAt: 2026-02-18T02:38:42.790Z
+    syncedAt: 2026-02-20T14:30:39.096Z
     status: open
   - githubIssue: 273
     linkedTo:
@@ -407,7 +407,7 @@ feedbacks:
       createdRequirements: []
       specifications: []
       createdSpecifications: []
-    syncedAt: 2026-02-18T02:38:42.790Z
+    syncedAt: 2026-02-20T14:30:39.096Z
     status: open
   - githubIssue: 335
     linkedTo:
@@ -415,7 +415,7 @@ feedbacks:
       createdRequirements: []
       specifications: []
       createdSpecifications: []
-    syncedAt: 2026-02-18T02:38:42.790Z
+    syncedAt: 2026-02-20T14:30:39.096Z
     status: open
   - githubIssue: 328
     linkedTo:
@@ -423,7 +423,7 @@ feedbacks:
       createdRequirements: []
       specifications: []
       createdSpecifications: []
-    syncedAt: 2026-02-18T02:38:42.790Z
+    syncedAt: 2026-02-20T14:30:39.096Z
     status: open
   - githubIssue: 327
     linkedTo:
@@ -431,7 +431,7 @@ feedbacks:
       createdRequirements: []
       specifications: []
       createdSpecifications: []
-    syncedAt: 2026-02-18T02:38:42.790Z
+    syncedAt: 2026-02-20T14:30:39.096Z
     status: open
   - githubIssue: 398
     type: improvement
@@ -441,7 +441,7 @@ feedbacks:
       createdRequirements: []
       specifications: []
       createdSpecifications: []
-    syncedAt: 2026-02-18T14:40:54.671Z
+    syncedAt: 2026-02-20T14:30:39.096Z
     status: open
   - githubIssue: 399
     type: improvement
@@ -451,7 +451,7 @@ feedbacks:
       createdRequirements: []
       specifications: []
       createdSpecifications: []
-    syncedAt: 2026-02-18T14:41:04.220Z
+    syncedAt: 2026-02-20T14:30:39.096Z
     status: open
   - githubIssue: 400
     type: improvement
@@ -461,7 +461,7 @@ feedbacks:
       createdRequirements: []
       specifications: []
       createdSpecifications: []
-    syncedAt: 2026-02-18T14:41:13.656Z
+    syncedAt: 2026-02-20T14:30:39.096Z
     status: open
   - githubIssue: 401
     type: improvement
@@ -471,7 +471,7 @@ feedbacks:
       createdRequirements: []
       specifications: []
       createdSpecifications: []
-    syncedAt: 2026-02-18T14:41:24.029Z
+    syncedAt: 2026-02-20T14:30:39.096Z
     status: open
   - githubIssue: 402
     type: improvement
@@ -481,7 +481,7 @@ feedbacks:
       createdRequirements: []
       specifications: []
       createdSpecifications: []
-    syncedAt: 2026-02-18T14:46:49.595Z
+    syncedAt: 2026-02-20T14:30:39.096Z
     status: open
   - githubIssue: 403
     type: requirement-gap
@@ -491,7 +491,7 @@ feedbacks:
       createdRequirements: []
       specifications: []
       createdSpecifications: []
-    syncedAt: 2026-02-18T14:46:53.590Z
+    syncedAt: 2026-02-20T14:30:39.095Z
     status: open
   - githubIssue: 410
     type: spec-mismatch
@@ -499,17 +499,29 @@ feedbacks:
     linkedTo:
       requirements: []
       createdRequirements: []
-      specifications: []
+      specifications:
+        - spec-000015
+        - spec-000011
       createdSpecifications: []
-    syncedAt: 2026-02-20T12:29:37.690Z
-    status: open
+      resolved:
+        requirements: []
+        specifications:
+          - spec-000011
+          - spec-000015
+    syncedAt: 2026-02-20T13:40:59.325Z
+    status: closed
   - githubIssue: 411
     type: improvement
     severity: low
     linkedTo:
-      requirements: []
+      requirements:
+        - req-000005
       createdRequirements: []
       specifications: []
       createdSpecifications: []
-    syncedAt: 2026-02-20T12:58:04.132Z
-    status: open
+      resolved:
+        requirements:
+          - req-000005
+        specifications: []
+    syncedAt: 2026-02-20T13:40:59.325Z
+    status: closed

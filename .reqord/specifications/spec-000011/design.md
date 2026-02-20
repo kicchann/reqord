@@ -157,7 +157,7 @@ currentApproval: z.object({
 ### 変更内容
 status: draft → approved
 
-> このPRをマージすると、要件のステータスが `approved` に更新されます。
+> このPRをマージすると、要件のステータスが `approved` に確定します。
 ```
 
 ## 4. データフロー
@@ -186,12 +186,9 @@ status: draft → approved
 
 ### PRマージ後のステータス更新
 
-PRマージ後のステータス更新は、以下のいずれかの方法で実行する:
+PRマージ後の手動ステータス更新は不要。`reqord req approve` コマンドがブランチ上でstatusを `approved` に変更済みのため、PRマージによりmainブランチに反映されるだけで完了する。
 
-1. **手動更新（Phase 1）:** `reqord req update <id> --status approved`
-2. **GitHub Actions連携（Phase 2）:** PRマージイベントをトリガーにワークフローで自動更新
-
-Phase 1では手動更新を前提とし、Phase 2でGitHub Actionsによる自動化を追加する。
+> PR本文に手動更新の指示（`reqord req update` 等）を含めないこと。
 
 ## 5. テスト方針
 
@@ -220,10 +217,10 @@ Phase 1では手動更新を前提とし、Phase 2でGitHub Actionsによる自�
 **決定:** git/gh CLIの操作をリポジトリ層に隔離し、child_process.execFileで実行
 **理由:** テスト時のモック化が容易。また、将来的にOctokit.jsへの移行が必要になった場合も、リポジトリ層の差し替えのみで対応可能。
 
-### PRマージ後の手動更新（Phase 1）
+### PRマージ後の手動更新が不要な理由
 
-**決定:** Phase 1ではPRマージ後のステータス更新を手動で行い、GitHub Actions連携はPhase 2で対応
-**理由:** GitHub Actionsワークフローの設計・テストには追加の複雑さがある。まずCLI単体で完結するフローを確立し、自動化は段階的に導入する。
+**決定:** PRマージ後の手動ステータス更新は不要
+**理由:** `reqord req approve` コマンドがブランチ上でstatus を `approved` に変更しコミットする。PRマージでこの変更がmainに反映されるため、追加のステータス更新アクションは不要。旧設計の `pending_approval` ステータスは廃止済み。
 
 ### gh CLI依存
 
