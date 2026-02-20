@@ -9,7 +9,7 @@ export function handleError(
   const code = isAppError ? error.code : "UNKNOWN";
   const message = error instanceof Error ? error.message : String(error);
   const exitCode = isAppError ? error.exitCode : 1;
-  const prefix = isAppError ? "エラー" : "予期しないエラーが発生しました";
+  const prefix = isAppError ? "Error" : "Unexpected error";
 
   if (options?.json) {
     console.error(JSON.stringify({ error: true, code, message }));

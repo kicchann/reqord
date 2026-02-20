@@ -157,10 +157,10 @@ describe("specApproveCommand", () => {
 
     // Success message
     expect(consoleLogSpy).toHaveBeenCalledWith(
-      expect.stringContaining("承認依頼PRを作成しました: spec-000001")
+      expect.stringContaining("Approval PR created: spec-000001")
     );
     expect(consoleLogSpy).toHaveBeenCalledWith(
-      expect.stringContaining("PRがマージされると承認が確定します")
+      expect.stringContaining("Approval will be confirmed when the PR is merged")
     );
     expect(consoleLogSpy).toHaveBeenCalledWith(
       expect.stringContaining("Branch: reqord/spec-000001-approve-v1.0")
@@ -176,8 +176,8 @@ describe("specApproveCommand", () => {
     vi.mocked(checkSpecApprovalPrerequisites).mockResolvedValue({
       ok: false,
       errors: [
-        "Specificationのステータスが draft ではありません（現在: approved）",
-        "design.mdがテンプレートのままです。設計内容を記述してください。",
+        `Specification status is not "draft" (current: approved)`,
+        "design.md still contains template placeholders. Please edit and write the design content.",
       ],
     });
 
@@ -187,13 +187,13 @@ describe("specApproveCommand", () => {
 
     // Error messages shown
     expect(consoleErrorSpy).toHaveBeenCalledWith(
-      expect.stringContaining("Specificationのステータスが draft ではありません")
+      expect.stringContaining(`Specification status is not "draft"`)
     );
     expect(consoleErrorSpy).toHaveBeenCalledWith(
-      expect.stringContaining("design.mdがテンプレートのままです")
+      expect.stringContaining("design.md still contains template placeholders")
     );
     expect(consoleErrorSpy).toHaveBeenCalledWith(
-      expect.stringContaining("先に問題を解決してください")
+      expect.stringContaining("Please resolve the issues first")
     );
 
     // Exit code set
@@ -261,7 +261,7 @@ describe("specApproveCommand", () => {
 
     // Success message NOT shown in dry-run
     expect(consoleLogSpy).not.toHaveBeenCalledWith(
-      expect.stringContaining("承認依頼PRを作成しました")
+      expect.stringContaining("Approval PR created")
     );
 
     consoleLogSpy.mockRestore();
@@ -367,7 +367,7 @@ describe("specApproveCommand", () => {
     // Approval still proceeds
     expect(startApproval).toHaveBeenCalled();
     expect(consoleLogSpy).toHaveBeenCalledWith(
-      expect.stringContaining("承認依頼PRを作成しました: spec-000001")
+      expect.stringContaining("Approval PR created: spec-000001")
     );
 
     consoleLogSpy.mockRestore();
@@ -436,7 +436,7 @@ describe("specApproveCommand", () => {
 
     // Existing PR message shown
     expect(consoleLogSpy).toHaveBeenCalledWith(
-      expect.stringContaining("承認依頼PRは既に作成されています: spec-000001")
+      expect.stringContaining("Approval PR already exists: spec-000001")
     );
     expect(consoleLogSpy).toHaveBeenCalledWith(
       expect.stringContaining("PR: https://github.com/owner/repo/pull/80")

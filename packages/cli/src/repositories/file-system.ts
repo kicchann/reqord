@@ -171,7 +171,7 @@ export async function readYAML<T>(filePath: string): Promise<T> {
     return yamlLoad(fixed, { schema: JSON_SCHEMA }) as T;
   } catch (error) {
     throw new Error(
-      `YAML構文エラー (${filePath}): ${error instanceof Error ? error.message : String(error)}`,
+      `YAML syntax error (${filePath}): ${error instanceof Error ? error.message : String(error)}`,
     );
   }
 }

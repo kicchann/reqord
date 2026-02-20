@@ -89,7 +89,7 @@ describe("req draft command", () => {
 
       expect(mockRevertToDraft).toHaveBeenCalled();
       expect(consoleLogSpy).toHaveBeenCalledWith(
-        expect.stringContaining("差し戻しPRを作成しました"),
+        expect.stringContaining("Reversion PR created"),
       );
     });
 
@@ -105,7 +105,7 @@ describe("req draft command", () => {
 
       await draftCommand.parseAsync(["node", "test", "req-000001"]);
 
-      expect(consoleLogSpy).toHaveBeenCalledWith("影響範囲:");
+      expect(consoleLogSpy).toHaveBeenCalledWith("Impact scope:");
       expect(consoleLogSpy).toHaveBeenCalledWith("  - req-000002");
       expect(consoleLogSpy).toHaveBeenCalledWith("  - req-000003");
     });

@@ -201,7 +201,7 @@ export async function updateRequirement(
   // 9. Validate merged result through Zod
   const parseResult = RequirementSchema.safeParse(merged);
   if (!parseResult.success) {
-    throw new Error(`バリデーションエラー:\n${formatZodError(parseResult.error)}`);
+    throw new Error(`Validation error:\n${formatZodError(parseResult.error)}`);
   }
 
   let after = parseResult.data;

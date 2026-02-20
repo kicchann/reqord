@@ -133,7 +133,7 @@ export function detectWarnings(
 
     if (req.status === "deprecated") continue;
 
-    // Specificationが存在しない非draft要件
+    // Non-draft requirement with no Specification
     const hasSpec = specifications.some(
       (s) => s.requirementId === req.id && s.status !== "deprecated",
     );
@@ -141,19 +141,19 @@ export function detectWarnings(
       warnings.push({
         id: req.id,
         type: "no-specification",
-        message: `Specificationが作成されていません`,
+        message: `No specification created`,
         severity: "warning",
       });
     }
 
-    // 依存先が未承認（approved/implementedでない）
+    // Dependency not yet approved (not approved/implemented)
     for (const depId of req.dependencies?.blockedBy ?? []) {
       const dep = requirements.find((r) => r.id === depId);
       if (dep && dep.status !== "approved" && dep.status !== "implemented") {
         warnings.push({
           id: req.id,
           type: "blocked-dependency",
-          message: `依存先 ${depId} が未承認です（現在: ${dep.status}）`,
+          message: `Dependency ${depId} is not approved (current: ${dep.status})`,
           severity: "warning",
         });
       }
@@ -166,7 +166,7 @@ export function detectWarnings(
       warnings.push({
         id: req.id,
         type: "feedback-review",
-        message: `フィードバックレビュー待ち: ${flag.reason}（関連Issue: ${flag.relatedIssues.map((n) => `#${n}`).join(", ")}）`,
+        message: `Pending feedback review: ${flag.reason} (related issues: ${flag.relatedIssues.map((n) => `#${n}`).join(", ")})`,
         severity: "info",
       });
     }
@@ -177,7 +177,7 @@ export function detectWarnings(
     if (spec.status === "deprecated") continue;
     const req = requirements.find((r) => r.id === spec.requirementId);
 
-    // Specがapproved以上なのにReqがdraft
+    // Spec is approved or above but Req is still draft
     if (
       req &&
       (spec.status === "approved" || spec.status === "implemented") &&
@@ -186,29 +186,29 @@ export function detectWarnings(
       warnings.push({
         id: spec.id,
         type: "status-inconsistency",
-        message: `Specificationが${spec.status}ですが、要件 ${req.id} がまだdraftです`,
+        message: `Specification is ${spec.status} but requirement ${req.id} is still draft`,
         severity: "warning",
       });
     }
 
-    // 設計検証エラー
+    // Design validation error
     if (spec.designValidation && spec.designValidation.errors > 0) {
       warnings.push({
         id: spec.id,
         type: "validation-failed",
-        message: `設計検証が失敗しています（${spec.designValidation.errors} error）`,
+        message: `Design validation failed (${spec.designValidation.errors} error(s))`,
         severity: "warning",
       });
     }
 
-    // Specificationのfeedback-reviewフラグ
+    // Specification feedback-review flags
     const specFeedbackFlags =
       spec.flags?.filter((f) => f.type === "feedback-review") ?? [];
     for (const flag of specFeedbackFlags) {
       warnings.push({
         id: spec.id,
         type: "feedback-review",
-        message: `フィードバックレビュー待ち: ${flag.reason}（関連Issue: ${flag.relatedIssues.map((n) => `#${n}`).join(", ")}）`,
+        message: `Pending feedback review: ${flag.reason} (related issues: ${flag.relatedIssues.map((n) => `#${n}`).join(", ")})`,
         severity: "info",
       });
     }

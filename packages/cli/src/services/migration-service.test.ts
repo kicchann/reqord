@@ -292,7 +292,7 @@ describe("migration-service", () => {
     it("throws AppError when .reqord/ does not exist", async () => {
       await expect(migrateToYaml(tmpDir, { dryRun: false })).rejects.toThrow(AppError);
       await expect(migrateToYaml(tmpDir, { dryRun: false })).rejects.toThrow(
-        ".reqord/ ディレクトリが見つかりません",
+        ".reqord/ directory not found",
       );
     });
 
@@ -307,7 +307,7 @@ describe("migration-service", () => {
 
       await expect(migrateToYaml(tmpDir, { dryRun: false })).rejects.toThrow(AppError);
       await expect(migrateToYaml(tmpDir, { dryRun: false })).rejects.toThrow(
-        "エラー率10%を超えたため中断しました",
+        "error rate exceeded 10%",
       );
     });
 

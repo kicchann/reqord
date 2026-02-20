@@ -51,7 +51,7 @@ describe("status command", () => {
 
       expect(mockGetProjectStatus).toHaveBeenCalled();
       expect(consoleLogSpy).toHaveBeenCalledWith(
-        expect.stringContaining("プロジェクトステータス"),
+        expect.stringContaining("Project Status"),
       );
     });
 
@@ -116,7 +116,7 @@ describe("status command", () => {
       await statusCommand.parseAsync(["node", "test", "invalid-id"]);
 
       expect(consoleErrorSpy).toHaveBeenCalledWith(
-        expect.stringContaining("不正なID形式"),
+        expect.stringContaining("Invalid ID format"),
       );
     });
   });
@@ -178,7 +178,7 @@ describe("status command", () => {
       await statusCommand.parseAsync(["node", "test", "req-000001"]);
 
       expect(consoleLogSpy).toHaveBeenCalledWith(
-        expect.stringContaining("要件ステータス"),
+        expect.stringContaining("Requirement Status"),
       );
     });
 
@@ -225,10 +225,10 @@ describe("status command", () => {
       await statusCommand.parseAsync(["node", "test", "spec-000001"]);
 
       expect(consoleLogSpy).toHaveBeenCalledWith(
-        expect.stringContaining("仕様ステータス"),
+        expect.stringContaining("Specification Status"),
       );
       expect(consoleLogSpy).toHaveBeenCalledWith(
-        expect.stringContaining("設計検証"),
+        expect.stringContaining("Design Validation"),
       );
     });
 

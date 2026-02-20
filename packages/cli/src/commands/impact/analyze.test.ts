@@ -116,7 +116,7 @@ describe("analyzeCommand", () => {
           relation: "blocks",
           depth: 1,
           path: ["req-000011", "req-000012"],
-          title: "影響範囲分析",
+          title: "Impact analysis",
         },
       ],
     });
@@ -125,8 +125,8 @@ describe("analyzeCommand", () => {
     await analyzeCommand.parseAsync(["node", "test", "req-000011"]);
 
     const output = consoleLogSpy.mock.calls.map((c) => c[0]).join("\n");
-    expect(output).toContain("影響範囲分析: req-000011");
-    expect(output).toContain("直接影響");
+    expect(output).toContain("Impact analysis: req-000011");
+    expect(output).toContain("Direct impacts");
     expect(output).toContain("req-000012");
     expect(output).toContain("blocks");
   });
@@ -139,7 +139,7 @@ describe("analyzeCommand", () => {
           relation: "blocks",
           depth: 2,
           path: ["req-000011", "req-000015", "req-000016"],
-          title: "GitHub Issue生成",
+          title: "GitHub Issue generation",
         },
       ],
     });
@@ -148,7 +148,7 @@ describe("analyzeCommand", () => {
     await analyzeCommand.parseAsync(["node", "test", "req-000011"]);
 
     const output = consoleLogSpy.mock.calls.map((c) => c[0]).join("\n");
-    expect(output).toContain("間接影響");
+    expect(output).toContain("Indirect impacts");
     expect(output).toContain("req-000016");
     expect(output).toContain("req-000015");
   });
@@ -168,7 +168,7 @@ describe("analyzeCommand", () => {
     await analyzeCommand.parseAsync(["node", "test", "req-000011"]);
 
     const output = consoleLogSpy.mock.calls.map((c) => c[0]).join("\n");
-    expect(output).toContain("関連Specification");
+    expect(output).toContain("Related Specifications");
     expect(output).toContain("spec-000011");
     expect(output).toContain("draft");
   });
@@ -178,7 +178,7 @@ describe("analyzeCommand", () => {
       relatedIssues: [
         {
           number: 123,
-          title: "ログイン画面の実装",
+          title: "Login screen implementation",
           url: "https://github.com/owner/repo/issues/123",
           status: "open",
           specificationId: "spec-000011",
@@ -190,10 +190,10 @@ describe("analyzeCommand", () => {
     await analyzeCommand.parseAsync(["node", "test", "req-000011"]);
 
     const output = consoleLogSpy.mock.calls.map((c) => c[0]).join("\n");
-    expect(output).toContain("関連Issue");
+    expect(output).toContain("Related Issues");
     expect(output).toContain("#123");
     expect(output).toContain("open");
-    expect(output).toContain("ログイン画面の実装");
+    expect(output).toContain("Login screen implementation");
   });
 
   it("displays circular dependencies warning", async () => {
@@ -205,7 +205,7 @@ describe("analyzeCommand", () => {
     await analyzeCommand.parseAsync(["node", "test", "req-000011"]);
 
     const output = consoleLogSpy.mock.calls.map((c) => c[0]).join("\n");
-    expect(output).toContain("循環依存");
+    expect(output).toContain("Circular dependencies");
     expect(output).toContain("req-000001");
     expect(output).toContain("req-000002");
   });
@@ -227,18 +227,18 @@ describe("analyzeCommand", () => {
     await analyzeCommand.parseAsync(["node", "test", "spec-000011"]);
 
     const output = consoleLogSpy.mock.calls.map((c) => c[0]).join("\n");
-    expect(output).toContain("影響範囲分析: spec-000011");
-    expect(output).toContain("関連Specification");
+    expect(output).toContain("Impact analysis: spec-000011");
+    expect(output).toContain("Related Specifications");
     expect(output).toContain("spec-000012");
   });
 
-  it("shows 'なし' for empty sections", async () => {
+  it("shows 'None' for empty sections", async () => {
     vi.mocked(analyzeImpact).mockResolvedValue(makeAnalysis());
 
     await analyzeCommand.parseAsync(["node", "test", "req-000011"]);
 
     const output = consoleLogSpy.mock.calls.map((c) => c[0]).join("\n");
-    expect(output).toContain("なし");
+    expect(output).toContain("None");
   });
 
   it("handles errors with error handler", async () => {

@@ -28,7 +28,7 @@ export const implementCommand = new Command("implement")
         // Precondition: status must be "approved"
         if (specification.status !== "approved") {
           throw new AppError(
-            `Specificationのステータスが approved ではありません（現在: ${specification.status}）`,
+            `Specification status is not "approved" (current: ${specification.status})`,
             ErrorCode.VALIDATION_ERROR,
           );
         }

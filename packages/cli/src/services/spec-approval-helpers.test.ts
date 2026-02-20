@@ -5,7 +5,7 @@ describe("extractDesignSummary", () => {
   it("'## 1. 設計概要' セクションの内容を抽出する", () => {
     const designContent = `# spec-000015 - Design
 
-## 1. 設計概要
+## 1. Design Overview
 
 Specificationの承認プロセスをGitHub PRベースで管理する。
 
@@ -20,7 +20,7 @@ Specificationの承認プロセスをGitHub PRベースで管理する。
   it("'## 設計概要' セクションからも抽出できる", () => {
     const designContent = `# Design
 
-## 設計概要
+## Design Overview
 
 シンプルな設計内容。
 
@@ -40,13 +40,13 @@ Specificationの承認プロセスをGitHub PRベースで管理する。
 内容...`;
 
     const result = extractDesignSummary(designContent);
-    expect(result).toBe("(設計概要なし)");
+    expect(result).toBe("(No design summary)");
   });
 
   it("設計概要が複数行の場合はすべて含む", () => {
     const designContent = `# Design
 
-## 1. 設計概要
+## 1. Design Overview
 
 1行目の説明。
 2行目の詳細。
@@ -61,7 +61,7 @@ Specificationの承認プロセスをGitHub PRベースで管理する。
   it("設計概要が最後のセクションの場合も正しく抽出する", () => {
     const designContent = `# Design
 
-## 1. 設計概要
+## 1. Design Overview
 
 最後のセクションの内容。`;
 
@@ -69,8 +69,23 @@ Specificationの承認プロセスをGitHub PRベースで管理する。
     expect(result).toBe("最後のセクションの内容。");
   });
 
+  it("日本語の '## 設計概要' セクションからもフォールバックで抽出できる", () => {
+    const designContent = `# Design
+
+## 設計概要
+
+日本語の設計概要内容。
+
+## アーキテクチャ
+
+詳細...`;
+
+    const result = extractDesignSummary(designContent);
+    expect(result).toBe("日本語の設計概要内容。");
+  });
+
   it("空文字列の場合はデフォルトメッセージを返す", () => {
-    expect(extractDesignSummary("")).toBe("(設計概要なし)");
+    expect(extractDesignSummary("")).toBe("(No design summary)");
   });
 });
 
@@ -86,9 +101,9 @@ describe("buildSpecApprovalPrBody", () => {
 
     expect(result).toContain("| Specification ID | spec-000015 |");
     expect(result).toContain("| Requirement ID | req-000015 |");
-    expect(result).toContain("| 要件タイトル | 承認フロー実装 |");
-    expect(result).toContain("| バージョン | 1.0.0 |");
-    expect(result).toContain("### 設計概要\n設計の概要説明。");
+    expect(result).toContain("| Requirement Title | 承認フロー実装 |");
+    expect(result).toContain("| Version | 1.0.0 |");
+    expect(result).toContain("### Design Overview\n設計の概要説明。");
     expect(result).toContain("status: draft → approved");
     expect(result).toContain("`specifications/spec-000015/design.md`");
   });
@@ -102,7 +117,7 @@ describe("buildSpecApprovalPrBody", () => {
       designSummary: "概要",
     });
 
-    expect(result).toMatch(/^## 仕様承認依頼/);
+    expect(result).toMatch(/^## Specification Approval Request/);
   });
 
   it("マージ後の案内メッセージが含まれる", () => {
@@ -114,6 +129,6 @@ describe("buildSpecApprovalPrBody", () => {
       designSummary: "概要",
     });
 
-    expect(result).toContain("reqord spec update spec-000001 --status approved");
+    expect(result).toContain("specifications/spec-000001/design.md");
   });
 });

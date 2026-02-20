@@ -25,10 +25,10 @@ export const coverageCommand = new Command("coverage")
         return;
       }
 
-      console.log(chalk.bold.cyan("\n要件カバレッジ:\n"));
+      console.log(chalk.bold.cyan("\nRequirement Coverage:\n"));
 
       const table = new Table({
-        head: ["ID", "タイトル", "カバレッジ", "Spec数"],
+        head: ["ID", "Title", "Coverage", "Specs"],
         style: { head: ["cyan"] },
       });
 
@@ -54,7 +54,7 @@ export const coverageCommand = new Command("coverage")
       const { summary } = report;
       console.log(
         chalk.gray(
-          `\nサマリー: ${summary.covered} covered, ${summary.partial} partial, ${summary.notCovered} not-covered (合計: ${summary.total})\n`,
+          `\nSummary: ${summary.covered} covered, ${summary.partial} partial, ${summary.notCovered} not-covered (total: ${summary.total})\n`,
         ),
       );
 

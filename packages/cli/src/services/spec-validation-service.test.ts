@@ -19,24 +19,24 @@ import * as specRepo from "../repositories/specification.js";
 import * as reqRepo from "../repositories/requirement.js";
 import * as contextRepo from "../repositories/project-context.js";
 
-const GOOD_DESIGN = `# テスト設計書
+const GOOD_DESIGN = `# Test Design Document
 
-## 1. 設計概要
-テスト用の設計概要です。
+## 1. Design Overview
+This is the design overview for testing.
 
-## 2. アーキテクチャ
+## 2. Architecture
 Command Layer → Service Layer → Repository
 
-## 3. コンポーネント設計
+## 3. Component Design
 ### SampleService (services/sample-service.ts)
-サンプルのサービス
+Sample service
 
-## 5. テスト方針
-### ユニットテスト
-- SampleServiceのテスト
+## 5. Test Plan
+### Unit test
+- Tests for SampleService
 
-### 統合テスト
-- エンドツーエンドのフロー
+### Integration test
+- End-to-end flow
 `;
 
 describe("validateSpecDesign", () => {
@@ -108,13 +108,13 @@ describe("validateSpecDesign", () => {
   });
 
   it("テスト方針がなければtest-strategy info fail", async () => {
-    const design = `# 設計
-## 1. 設計概要
-概要
-## 2. アーキテクチャ
+    const design = `# Design
+## 1. Design Overview
+Overview
+## 2. Architecture
 Command → Service → Repository
-## 3. コンポーネント設計
-コンポーネント
+## 3. Component Design
+Component
 `;
     vi.mocked(specRepo.loadFile).mockResolvedValue(design);
 
@@ -157,7 +157,7 @@ Command → Service → Repository
     expect(validation.specId).toBe("spec-000001");
     expect(validation.rules.length).toBeGreaterThan(0);
     expect(warnSpy).toHaveBeenCalledWith(
-      expect.stringContaining("technical.yaml のパースに失敗しました"),
+      expect.stringContaining("Failed to parse technical.yaml"),
     );
     expect(warnSpy).toHaveBeenCalledWith(
       expect.stringContaining("unexpected token"),
@@ -184,7 +184,7 @@ Command → Service → Repository
     expect(validation.specId).toBe("spec-000001");
     expect(validation.rules.length).toBeGreaterThan(0);
     expect(warnSpy).toHaveBeenCalledWith(
-      expect.stringContaining("structure.yaml のパースに失敗しました"),
+      expect.stringContaining("Failed to parse structure.yaml"),
     );
     expect(warnSpy).toHaveBeenCalledWith(
       expect.stringContaining("invalid yaml"),

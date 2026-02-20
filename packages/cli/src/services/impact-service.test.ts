@@ -463,7 +463,7 @@ describe("notifyImpact", () => {
     expect(body).toContain("req-000001");
     expect(body).toContain("ユーザー認証機能");
     expect(body).toContain("blocks");
-    expect(body).toContain("要件");
+    expect(body).toContain("requirement");
   });
 
   it("dryRun=true で GitHub API が呼ばれないこと", async () => {
@@ -478,7 +478,7 @@ describe("notifyImpact", () => {
     expect(result.notified[0].number).toBe(42);
     expect(result.notified[0].title).toBe("Implement feature");
     expect(result.notified[0].comment).toBeDefined();
-    expect(result.notified[0].comment).toContain("reqord影響範囲通知");
+    expect(result.notified[0].comment).toContain("reqord Impact Notification");
   });
 
   it("open Issue のみ通知対象になること（closed はスキップ）", async () => {
@@ -562,7 +562,7 @@ describe("notifyImpact", () => {
     expect(result.notified[0].number).toBe(50);
     expect(github.createIssueComment).toHaveBeenCalledOnce();
     const body = vi.mocked(github.createIssueComment).mock.calls[0][1];
-    expect(body).toContain("仕様");
+    expect(body).toContain("specification");
     expect(body).toContain("spec-000001");
   });
 

@@ -26,10 +26,10 @@ export const uiCommand = new Command("ui")
         // Find the web package directory (relative to CLI dist/commands/)
         const webDir = path.resolve(__dirname, "../../../web");
 
-        console.log(chalk.cyan(`\nreqord Web UI を起動しています...\n`));
+        console.log(chalk.cyan(`\nStarting reqord Web UI...\n`));
         console.log(`  URL:  ${chalk.bold(`http://localhost:${port}`)}`);
         console.log(`  Root: ${cwd}`);
-        console.log(chalk.gray(`\n  Ctrl+C で停止\n`));
+        console.log(chalk.gray(`\n  Press Ctrl+C to stop\n`));
 
         const child = spawn("npx", ["next", "dev", "--port", String(port)], {
           cwd: webDir,
@@ -67,7 +67,7 @@ export const uiCommand = new Command("ui")
         // Handle child process errors
         child.on("error", (err) => {
           if ((err as NodeJS.ErrnoException).code === "ENOENT") {
-            handleError(new Error("npx が見つかりません。Node.jsがインストールされていることを確認してください。"));
+            handleError(new Error("npx not found. Please ensure Node.js is installed."));
           } else {
             handleError(err);
           }

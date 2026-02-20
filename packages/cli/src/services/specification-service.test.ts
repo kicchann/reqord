@@ -339,7 +339,7 @@ describe("checkSpecApprovalPrerequisites", () => {
     const result = await checkSpecApprovalPrerequisites("/cwd", "spec-000001");
 
     expect(result.ok).toBe(false);
-    expect(result.errors).toContain("Specificationのステータスが draft ではありません（現在: approved）");
+    expect(result.errors).toContain(`Specification status is not "draft" (current: approved)`);
   });
 
   it("関連Requirementがapprovedの場合は成功", async () => {
@@ -364,7 +364,7 @@ describe("checkSpecApprovalPrerequisites", () => {
     const result = await checkSpecApprovalPrerequisites("/cwd", "spec-000001");
 
     expect(result.ok).toBe(false);
-    expect(result.errors).toContain("関連要件 req-000001 が未承認です（現在: draft）");
+    expect(result.errors).toContain("Related requirement req-000001 is not approved (current: draft)");
   });
 
   it("design.mdがテンプレートのままの場合はエラー", async () => {
@@ -377,7 +377,7 @@ describe("checkSpecApprovalPrerequisites", () => {
     const result = await checkSpecApprovalPrerequisites("/cwd", "spec-000001");
 
     expect(result.ok).toBe(false);
-    expect(result.errors).toContain("design.mdがテンプレートのままです。プレースホルダを編集して設計内容を記述してください。");
+    expect(result.errors).toContain("design.md still contains template placeholders. Please edit and write the design content.");
   });
 
   it("design.mdがnullの場合はエラー", async () => {
@@ -390,7 +390,7 @@ describe("checkSpecApprovalPrerequisites", () => {
     const result = await checkSpecApprovalPrerequisites("/cwd", "spec-000001");
 
     expect(result.ok).toBe(false);
-    expect(result.errors).toContain("design.mdが存在しないか読み込めません。design.mdを作成し、設計内容を記述してください。");
+    expect(result.errors).toContain("design.md does not exist or could not be read. Create design.md and write the design content.");
   });
 
   it("design.mdが空白のみの場合はエラー", async () => {
@@ -403,7 +403,7 @@ describe("checkSpecApprovalPrerequisites", () => {
     const result = await checkSpecApprovalPrerequisites("/cwd", "spec-000001");
 
     expect(result.ok).toBe(false);
-    expect(result.errors).toContain("design.mdが空です。設計内容を記述してください。");
+    expect(result.errors).toContain("design.md is empty. Please write the design content.");
   });
 
   it("関連Requirementが見つからない場合はエラー", async () => {
@@ -415,7 +415,7 @@ describe("checkSpecApprovalPrerequisites", () => {
     const result = await checkSpecApprovalPrerequisites("/cwd", "spec-000001");
 
     expect(result.ok).toBe(false);
-    expect(result.errors).toContain("関連要件 req-000001 が見つかりません");
+    expect(result.errors).toContain("Related requirement req-000001 not found");
   });
 
   it("Specificationが存在しない場合はエラーをthrow", async () => {

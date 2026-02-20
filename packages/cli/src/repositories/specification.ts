@@ -60,7 +60,7 @@ export async function findById(cwd: string, id: string): Promise<Specification |
   const raw = await fs.readYAML<unknown>(yamlPath);
   const result = SpecificationSchema.safeParse(raw);
   if (!result.success) {
-    throw new Error(`仕様 ${id} のバリデーションエラー:\n${formatZodError(result.error)}`);
+    throw new Error(`Validation error for specification ${id}:\n${formatZodError(result.error)}`);
   }
   return result.data;
 }

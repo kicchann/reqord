@@ -228,7 +228,7 @@ describe("spec implement command", () => {
     await implementCommand.parseAsync(["node", "test", "spec-000001"]);
 
     expect(consoleErrorSpy).toHaveBeenCalledWith(
-      expect.stringContaining("Specificationのステータスが approved ではありません（現在: draft）"),
+      expect.stringContaining(`Specification status is not "approved" (current: draft)`),
     );
     expect(process.exitCode).toBe(1);
     expect(mockUpdateSpecification).not.toHaveBeenCalled();
@@ -242,7 +242,7 @@ describe("spec implement command", () => {
     await implementCommand.parseAsync(["node", "test", "spec-000001"]);
 
     expect(consoleErrorSpy).toHaveBeenCalledWith(
-      expect.stringContaining("Specificationのステータスが approved ではありません（現在: implemented）"),
+      expect.stringContaining(`Specification status is not "approved" (current: implemented)`),
     );
     expect(process.exitCode).toBe(1);
     expect(mockUpdateSpecification).not.toHaveBeenCalled();

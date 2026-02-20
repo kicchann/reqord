@@ -63,7 +63,7 @@ export const specificationHandler: ApprovalHandler = {
       reqId: "",
       reqTitle: target.title,
       version: target.version,
-      designSummary: "(設計概要なし)",
+      designSummary: "(No design summary)",
     });
   },
 };

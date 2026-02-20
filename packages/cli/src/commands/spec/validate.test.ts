@@ -37,7 +37,7 @@ function makeValidateResult(overrides = {}) {
     validation: {
       specId: "spec-000001",
       rules: [
-        { ruleId: "arch-layer", ruleName: "レイヤー整合性", severity: "warning" as const, status: "pass" as const },
+        { ruleId: "arch-layer", ruleName: "Layer consistency", severity: "warning" as const, status: "pass" as const },
       ],
       passed: 1,
       warnings: 0,
@@ -87,8 +87,8 @@ describe("spec validate command", () => {
   it("criteria-4: 保存されるdesignValidationはrulesを含む", async () => {
     const result = makeValidateResult({
       rules: [
-        { ruleId: "arch-layer", ruleName: "レイヤー整合性", severity: "warning" as const, status: "pass" as const },
-        { ruleId: "design-sections", ruleName: "セクション構成", severity: "warning" as const, status: "fail" as const, message: "欠落あり" },
+        { ruleId: "arch-layer", ruleName: "Layer consistency", severity: "warning" as const, status: "pass" as const },
+        { ruleId: "design-sections", ruleName: "Section structure", severity: "warning" as const, status: "fail" as const, message: "missing sections" },
       ],
       passed: 1,
       warnings: 1,
@@ -127,7 +127,7 @@ describe("spec validate command", () => {
     await specValidateCommand.parseAsync(["node", "test", "spec-000001"]);
 
     expect(consoleLogSpy).toHaveBeenCalledWith(
-      expect.stringContaining("設計検証: spec-000001"),
+      expect.stringContaining("Design validation: spec-000001"),
     );
     expect(consoleLogSpy).toHaveBeenCalledWith(
       expect.stringContaining("0 error"),
@@ -137,7 +137,7 @@ describe("spec validate command", () => {
   it("criteria-4: design.md不在時のエラー結果も永続化される", async () => {
     const result = makeValidateResult({
       rules: [
-        { ruleId: "design-exists", ruleName: "設計文書存在", severity: "error" as const, status: "fail" as const, message: "design.mdが存在しません" },
+        { ruleId: "design-exists", ruleName: "Design document exists", severity: "error" as const, status: "fail" as const, message: "design.md not found" },
       ],
       passed: 0,
       warnings: 0,
@@ -158,7 +158,7 @@ describe("spec validate command", () => {
   it("errorsが1以上の場合、exitCodeが1になる", async () => {
     const result = makeValidateResult({
       rules: [
-        { ruleId: "dep-conflict", ruleName: "依存関係矛盾", severity: "error" as const, status: "fail" as const, message: "依存先なし" },
+        { ruleId: "dep-conflict", ruleName: "Dependency conflict", severity: "error" as const, status: "fail" as const, message: "missing dependency" },
       ],
       passed: 0,
       warnings: 0,

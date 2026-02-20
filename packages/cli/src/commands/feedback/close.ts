@@ -12,7 +12,7 @@ export const feedbackCloseCommand = new Command("close")
       const cwd = process.cwd();
       const issueNumber = parseIssueNumber(issueNumberStr);
 
-      // v3.0.0: 残存flag警告
+      // v3.0.0: Remaining flag warning
       const { feedback } = await showFeedback(cwd, issueNumber);
       const remainingFlags = await checkRemainingFlags(cwd, feedback);
       if (remainingFlags.length > 0) {

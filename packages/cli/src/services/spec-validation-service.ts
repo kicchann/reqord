@@ -27,10 +27,10 @@ export interface ValidateSpecDesignResult {
 }
 
 const REQUIRED_SECTIONS = [
-  "設計概要",
-  "アーキテクチャ",
-  "コンポーネント設計",
-  "テスト方針",
+  "Design Overview|設計概要",
+  "Architecture|アーキテクチャ",
+  "Component Design|コンポーネント設計",
+  "Test Plan|テスト方針",
 ];
 
 function checkDesignSections(design: string): ValidationRuleResult {
@@ -42,13 +42,16 @@ function checkDesignSections(design: string): ValidationRuleResult {
   }
 
   const missing = REQUIRED_SECTIONS.filter(
-    (s) => !foundSections.some((f) => f.includes(s)),
+    (s) => {
+      const variants = s.split("|");
+      return !foundSections.some((f) => variants.some((v) => f.includes(v)));
+    },
   );
 
   if (missing.length === 0) {
     return {
       ruleId: "design-sections",
-      ruleName: "セクション構成",
+      ruleName: "Section structure",
       severity: "warning",
       status: "pass",
     };
@@ -56,22 +59,22 @@ function checkDesignSections(design: string): ValidationRuleResult {
 
   return {
     ruleId: "design-sections",
-    ruleName: "セクション構成",
+    ruleName: "Section structure",
     severity: "warning",
     status: "fail",
-    message: `必須セクションが不足: ${missing.join(", ")}`,
+    message: `Required sections missing: ${missing.map((s) => s.split("|")[0]).join(", ")}`,
   };
 }
 
 function checkTestStrategy(design: string): ValidationRuleResult {
-  const hasTestSection = /##\s+(?:\d+\.\s+)?テスト方針/.test(design);
+  const hasTestSection = /##\s+(?:\d+\.\s+)?(?:テスト方針|Test Plan)/i.test(design);
   const hasUnitTest = /ユニットテスト|unit\s*test/i.test(design);
   const hasIntegrationTest = /統合テスト|integration\s*test/i.test(design);
 
   if (hasTestSection && (hasUnitTest || hasIntegrationTest)) {
     return {
       ruleId: "test-strategy",
-      ruleName: "テスト方針記載",
+      ruleName: "Test strategy description",
       severity: "warning",
       status: "pass",
     };
@@ -79,12 +82,12 @@ function checkTestStrategy(design: string): ValidationRuleResult {
 
   return {
     ruleId: "test-strategy",
-    ruleName: "テスト方針記載",
+    ruleName: "Test strategy description",
     severity: "warning",
     status: "fail",
     message: hasTestSection
-      ? "テスト方針セクションにユニットテスト/統合テストの記載がありません"
-      : "テスト方針セクションがありません",
+      ? "Test Plan section does not mention unit test/integration test"
+      : "Test Plan section is missing",
   };
 }
 
@@ -99,7 +102,7 @@ function checkArchLayer(design: string, _technical: unknown): ValidationRuleResu
   if (hasLayerStructure) {
     return {
       ruleId: "arch-layer",
-      ruleName: "レイヤー整合性",
+      ruleName: "Layer consistency",
       severity: "warning",
       status: "pass",
     };
@@ -107,10 +110,10 @@ function checkArchLayer(design: string, _technical: unknown): ValidationRuleResu
 
   return {
     ruleId: "arch-layer",
-    ruleName: "レイヤー整合性",
+    ruleName: "Layer consistency",
     severity: "warning",
     status: "fail",
-    message: "設計にレイヤー構成の記載がありません",
+    message: "Design does not describe layer structure",
   };
 }
 
@@ -130,10 +133,10 @@ function checkArchDependency(design: string): ValidationRuleResult {
       ) {
         return {
           ruleId: "arch-dependency",
-          ruleName: "依存方向",
+          ruleName: "Dependency direction",
           severity: "warning",
           status: "fail",
-          message: "Service層からCommand層への参照が検出されました",
+          message: "Reference from Service layer to Command layer detected",
           location: { line: i + 1, content: line.trim() },
         };
       }
@@ -142,7 +145,7 @@ function checkArchDependency(design: string): ValidationRuleResult {
 
   return {
     ruleId: "arch-dependency",
-    ruleName: "依存方向",
+    ruleName: "Dependency direction",
     severity: "warning",
     status: "pass",
   };
@@ -165,16 +168,16 @@ function checkNamingConvention(
   if (badFileNames.length > 0) {
     return {
       ruleId: "naming-convention",
-      ruleName: "命名規則",
+      ruleName: "Naming convention",
       severity: "info",
       status: "fail",
-      message: `ファイル名がkebab-caseでない: ${badFileNames.join(", ")}`,
+      message: `File names not in kebab-case: ${badFileNames.join(", ")}`,
     };
   }
 
   return {
     ruleId: "naming-convention",
-    ruleName: "命名規則",
+    ruleName: "Naming convention",
     severity: "info",
     status: "pass",
   };
@@ -189,7 +192,7 @@ function checkDepConflict(
   if (!req || !req.dependencies) {
     return {
       ruleId: "dep-conflict",
-      ruleName: "依存関係矛盾",
+      ruleName: "Dependency conflict",
       severity: "error",
       status: "pass",
     };
@@ -211,16 +214,16 @@ function checkDepConflict(
   if (missingSpecDeps.length > 0) {
     return {
       ruleId: "dep-conflict",
-      ruleName: "依存関係矛盾",
+      ruleName: "Dependency conflict",
       severity: "error",
       status: "fail",
-      message: `依存先要件にSpecificationが未作成: ${missingSpecDeps.join(", ")}`,
+      message: `Missing specification for dependent requirements: ${missingSpecDeps.join(", ")}`,
     };
   }
 
   return {
     ruleId: "dep-conflict",
-    ruleName: "依存関係矛盾",
+    ruleName: "Dependency conflict",
     severity: "error",
     status: "pass",
   };
@@ -240,10 +243,10 @@ export async function validateSpecDesign(
         rules: [
           {
             ruleId: "design-exists",
-            ruleName: "設計文書存在",
+            ruleName: "Design document exists",
             severity: "error",
             status: "fail",
-            message: "design.mdが存在しません",
+            message: "design.md not found",
           },
         ],
         passed: 0,
@@ -261,7 +264,7 @@ export async function validateSpecDesign(
     technical = await contextRepo.loadContextFile(cwd, "technical");
   } catch (err) {
     console.warn(
-      `警告: technical.yaml のパースに失敗しました: ${err instanceof Error ? err.message : String(err)}`,
+      `Warning: Failed to parse technical.yaml: ${err instanceof Error ? err.message : String(err)}`,
     );
   }
 
@@ -270,7 +273,7 @@ export async function validateSpecDesign(
     structure = await contextRepo.loadContextFile(cwd, "structure");
   } catch (err) {
     console.warn(
-      `警告: structure.yaml のパースに失敗しました: ${err instanceof Error ? err.message : String(err)}`,
+      `Warning: Failed to parse structure.yaml: ${err instanceof Error ? err.message : String(err)}`,
     );
   }
 

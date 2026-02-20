@@ -26,22 +26,22 @@ export async function validateRequirement(
   const language = options.language ?? "ja";
   const issues: ValidationIssue[] = [];
 
-  // 1. 曖昧表現検出
+  // 1. Ambiguous phrase detection
   checkAmbiguousPhrases(requirement, description, language, issues);
 
-  // 2. 成功基準の数チェック
+  // 2. Success criteria count check
   checkSuccessCriteria(requirement, issues);
 
-  // 3. 依存関係の整合性
+  // 3. Dependency integrity
   const hasDependencyIssues = checkDependencies(requirement, allRequirements, issues);
 
-  // 4. 循環依存検出
+  // 4. Circular dependency detection
   checkCircularDependencies(requirement, allRequirements, issues);
 
-  // 5. 複雑度と見積もり時間の整合性
+  // 5. Complexity and estimated hours consistency
   checkComplexityHoursConsistency(requirement, issues);
 
-  // SMARTスコア算出
+  // SMART score calculation
   const smartScore = calculateSmartScore({ requirement, description, language });
 
   const hasErrors = issues.some((i) => i.severity === "error");
@@ -86,8 +86,8 @@ function checkAmbiguousPhrases(
           type: "ambiguous",
           severity: "warning",
           field,
-          message: `曖昧な表現「${phrase}」が含まれています`,
-          suggestion: "具体的な数値や条件に置き換えてください",
+          message: `Ambiguous phrase "${phrase}" detected`,
+          suggestion: "Replace with specific numbers or conditions",
         });
       }
     }
@@ -105,24 +105,24 @@ function checkSuccessCriteria(
       type: "missing_criteria",
       severity: "error",
       field: "successCriteria",
-      message: "成功基準が定義されていません",
-      suggestion: "測定可能な成功基準を最低3つ追加してください",
+      message: "Success criteria are not defined",
+      suggestion: "Add at least 3 measurable success criteria",
     });
   } else if (count < 3) {
     issues.push({
       type: "insufficient_criteria",
       severity: "warning",
       field: "successCriteria",
-      message: `成功基準が${count}件です（推奨: 3件以上）`,
-      suggestion: "測定可能な成功基準を追加してください",
+      message: `Success criteria count is ${count} (recommended: 3 or more)`,
+      suggestion: "Add more measurable success criteria",
     });
   } else if (count > 7) {
     issues.push({
       type: "excessive_criteria",
       severity: "warning",
       field: "successCriteria",
-      message: `成功基準が${count}件です（推奨: 7件以下）`,
-      suggestion: "成功基準を整理・統合してください",
+      message: `Success criteria count is ${count} (recommended: 7 or fewer)`,
+      suggestion: "Consolidate and reduce success criteria",
     });
   }
 }
@@ -149,8 +149,8 @@ function checkDependencies(
           type: "invalid_dependency",
           severity: "error",
           field,
-          message: `存在しない要件 ${depId} を参照しています`,
-          suggestion: "依存先の要件IDを確認してください",
+          message: `References non-existent requirement ${depId}`,
+          suggestion: "Verify the dependency requirement ID",
         });
       }
     }
@@ -201,8 +201,8 @@ function checkCircularDependencies(
       type: "circular_dependency",
       severity: "error",
       field: "dependencies.blockedBy",
-      message: `循環依存が検出されました: ${cycle.join(" → ")}`,
-      suggestion: "依存関係を見直し、循環を解消してください",
+      message: `Circular dependency detected: ${cycle.join(" → ")}`,
+      suggestion: "Review dependencies and resolve the circular reference",
     });
   }
 }
@@ -217,8 +217,8 @@ function checkComplexityHoursConsistency(
         type: "inconsistent_estimate",
         severity: "warning",
         field: "estimatedHours",
-        message: `複雑度「${requirement.estimatedComplexity}」と見積もり時間「${requirement.estimatedHours}h」が整合していません`,
-        suggestion: "複雑度または見積もり時間を見直してください",
+        message: `Complexity "${requirement.estimatedComplexity}" and estimated hours "${requirement.estimatedHours}h" are inconsistent`,
+        suggestion: "Review and align complexity or estimated hours",
       });
     }
   }

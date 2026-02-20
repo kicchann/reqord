@@ -16,39 +16,39 @@ export const migrateToYamlCommand = new Command("migrate-to-yaml")
 
       if (options.dryRun) {
         if (result.plan.length === 0) {
-          console.log(chalk.gray("移行対象のJSONファイルが見つかりませんでした。"));
+          console.log(chalk.gray("No JSON files found for migration."));
           return;
         }
-        console.log(chalk.yellow("プレビューモード（実際の変換は行いません）"));
+        console.log(chalk.yellow("Preview mode (no actual conversion will be performed)"));
         console.log("");
-        console.log(chalk.bold("変換対象ファイル:"));
+        console.log(chalk.bold("Files to convert:"));
         result.plan.forEach((item) => {
           console.log(`  ${item.source} → ${item.destination}`);
         });
         console.log("");
-        console.log(chalk.gray(`合計: ${result.plan.length}ファイル`));
+        console.log(chalk.gray(`Total: ${result.plan.length} file(s)`));
         return;
       }
 
       if (result.plan.length === 0) {
-        console.log(chalk.gray("移行対象のJSONファイルが見つかりませんでした。"));
+        console.log(chalk.gray("No JSON files found for migration."));
         return;
       }
 
       if (result.errors.length > 0) {
-        console.log(chalk.yellow("YAML移行が完了しました（一部エラーあり）"));
+        console.log(chalk.yellow("YAML migration completed (with some errors)"));
       } else {
-        console.log(chalk.green("YAML移行が完了しました"));
+        console.log(chalk.green("YAML migration completed"));
       }
-      console.log(`  変換成功: ${result.success.length}ファイル`);
+      console.log(`  Converted successfully: ${result.success.length} file(s)`);
       if (result.errors.length > 0) {
-        console.log(chalk.red(`  変換失敗: ${result.errors.length}ファイル`));
+        console.log(chalk.red(`  Conversion failed: ${result.errors.length} file(s)`));
         result.errors.forEach((err) => {
           console.log(chalk.red(`    - ${err.file}: ${err.reason}`));
         });
       }
       console.log("");
-      console.log(chalk.gray("バックアップ: .reqord/.backup/ に移動済み"));
+      console.log(chalk.gray("Backup: moved to .reqord/.backup/"));
     } catch (error) {
       handleError(error);
     }

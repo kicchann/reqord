@@ -278,7 +278,7 @@ export async function notifyImpact(
   }> = [];
 
   if (analysis.sourceType === "specification") {
-    // Spec起点: relatedIssues から通知対象を収集
+    // Spec-origin: collect notification targets from relatedIssues
     for (const issue of analysis.relatedIssues) {
       issuesWithContext.push({
         number: issue.number,
@@ -289,7 +289,7 @@ export async function notifyImpact(
       });
     }
   } else {
-    // Requirement起点: direct/indirect impacts の関連Issueを収集
+    // Requirement-origin: collect related issues from direct/indirect impacts
     const impactedIds = new Set([
       ...analysis.directImpacts.map((e) => e.id),
       ...analysis.indirectImpacts.map((e) => e.id),
@@ -331,7 +331,7 @@ export async function notifyImpact(
   }
 
   // Get source title
-  const sourceLabel = analysis.sourceType === "specification" ? "仕様" : "要件";
+  const sourceLabel = analysis.sourceType === "specification" ? "specification" : "requirement";
   let sourceTitle = id;
   if (analysis.sourceType === "specification" && analysis.parentRequirement) {
     sourceTitle = analysis.parentRequirement.title;
@@ -382,13 +382,13 @@ function buildNotificationComment(params: {
   customMessage: string;
 }): string {
   const lines = [
-    "**reqord影響範囲通知**",
+    "**reqord Impact Notification**",
     "",
-    `${params.sourceLabel} \`${params.sourceId}\` (${params.title}) が変更されました。`,
-    "このissueは影響を受ける可能性があります。",
+    `${params.sourceLabel} \`${params.sourceId}\` (${params.title}) has been changed.`,
+    "This issue may be affected.",
     "",
-    `**関係:** ${params.relation}`,
-    `**経路:** ${params.path}`,
+    `**Relation:** ${params.relation}`,
+    `**Path:** ${params.path}`,
   ];
 
   if (params.customMessage) {
