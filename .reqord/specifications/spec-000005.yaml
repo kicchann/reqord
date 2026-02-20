@@ -3,9 +3,9 @@ requirementId: req-000005
 title: Requirement/Specificationバージョン管理
 requirementVersion: '4.0'
 version: '4.0'
-status: draft
+status: approved
 createdAt: 2026-02-08T14:08:06.961Z
-updatedAt: 2026-02-20T15:15:39.066Z
+updatedAt: 2026-02-20T15:31:38.360Z
 versionHistory:
   - version: 1.0.0
     status: implemented
@@ -52,3 +52,9 @@ implementation:
       status: closed
   totalEstimatedHours: 6
   createdAt: 2026-02-16T02:26:10.308Z
+currentApproval:
+  version: '4.0'
+  phase: specification
+  prNumber: 0
+  prUrl: ''
+  approvedBy: []
