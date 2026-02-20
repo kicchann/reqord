@@ -1,11 +1,11 @@
 id: spec-000009
 requirementId: req-000009
-title: 'CLIメッセージ統一'
+title: CLIメッセージ統一
 requirementVersion: '2.0'
 version: '2.0'
-status: draft
+status: approved
 createdAt: 2026-02-08T14:08:07.300Z
-updatedAt: 2026-02-20T00:00:00Z
+updatedAt: 2026-02-20T13:05:22.114Z
 versionHistory:
   - version: 1.0.0
     status: implemented
@@ -15,3 +15,10 @@ versionHistory:
 files:
   design: specifications/spec-000009/design.md
   supplementary: []
+flags: []
+currentApproval:
+  version: '2.0'
+  phase: specification
+  prNumber: 0
+  prUrl: ''
+  approvedBy: []
