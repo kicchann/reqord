@@ -107,6 +107,8 @@ reqord feedback sync
 
 ### 4.1 中核ルール: リンク先の判断基準
 
+**feedback linkの本質は「このreq/specにfeedback-review flagを立てて、修正が必要であることを可視化する」こと。** リンク先のreq/specの内容を変更するわけではなく、対応要否を明らかにするためのフラグ付与である。したがって、影響を受けるreq/specには漏れなくリンクすること。
+
 全 type は最終的に **spec か req のどちらかに帰結する**。
 リンク先は type ではなく **「原因がどこにあるか」** で決める。
 
@@ -179,6 +181,8 @@ reqord feedback link <issue-number> --type <type> --severity <severity> --create
 ```
 
 既にリンク済みのフィードバック（linkedTo に値がある）はスキップし、報告のみ行う。
+
+**注意**: 1つのフィードバックが複数のreq/specに影響する場合は、影響を受けるすべてに対してリンクを実行する（`--req` は1つずつしか指定できないため、複数回実行する）。影響範囲の漏れを防ぐため、req/specの description やコードベースを `grep` して関連箇所を網羅的に確認すること。
 
 ---
 
