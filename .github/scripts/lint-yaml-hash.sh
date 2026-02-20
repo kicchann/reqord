@@ -9,7 +9,7 @@
 #
 # Safe patterns (not flagged):
 #   - Quoted strings: '...（Feedback #169）' or "...(Issue #263)"
-#   - Block scalars (lines after >- or |): continuation lines are safe
+#   - Block scalars (lines after >- or |, in key-value or list items): continuation lines are safe
 #   - Comment lines starting with #
 #   - Key-value lines where # appears in the key part
 
@@ -46,8 +46,10 @@ while IFS= read -r file; do
     # Skip comment-only lines
     [[ "$line" =~ ^[[:space:]]*# ]] && continue
 
-    # Detect block scalar indicators (>- or | or >)
-    if [[ "$line" =~ :[[:space:]]+([\>|]) ]] || [[ "$line" =~ :[[:space:]]+[\>|]- ]]; then
+    # Detect block scalar indicators (>- or | or > or |- etc.)
+    # Matches after ': ' (key-value) or '- ' (list item)
+    if [[ "$line" =~ :[[:space:]]+([\>|]) ]] || [[ "$line" =~ :[[:space:]]+[\>|]- ]] \
+    || [[ "$line" =~ ^[[:space:]]*-[[:space:]]+([\>|]) ]] || [[ "$line" =~ ^[[:space:]]*-[[:space:]]+[\>|]- ]]; then
       in_block_scalar=true
       block_indent=-1
       continue
