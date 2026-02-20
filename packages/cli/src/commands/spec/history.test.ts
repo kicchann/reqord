@@ -48,14 +48,12 @@ describe("spec history command", () => {
         {
           version: "1.0",
           status: "draft",
-          gitCommit: "abc123",
           changedAt: "2026-01-01T00:00:00Z",
           summary: "Initial version",
         },
         {
           version: "2.0",
           status: "approved",
-          gitCommit: "def456",
           changedAt: "2026-01-02T00:00:00Z",
           summary: "Status changed from draft to approved",
         },
@@ -91,14 +89,12 @@ describe("spec history command", () => {
       {
         version: "1.0",
         status: "draft" as const,
-        gitCommit: "abc123",
         changedAt: "2026-01-01T00:00:00Z",
         summary: "Initial version",
       },
       {
         version: "2.0.0",
         status: "approved" as const,
-        gitCommit: "def456",
         changedAt: "2026-01-02T00:00:00Z",
         summary: "Status changed",
       },
@@ -135,7 +131,6 @@ describe("spec history command", () => {
         {
           version: "1.0",
           status: "draft",
-          gitCommit: "abc123",
           changedAt: "2026-01-01T00:00:00Z",
           summary: "This is a very long summary that should be truncated when displayed in the table format",
         },
@@ -157,21 +152,18 @@ describe("spec history command", () => {
         {
           version: "1.0",
           status: "draft" as const,
-          gitCommit: "abc123",
           changedAt: "2026-01-01T00:00:00Z",
           summary: "Initial version",
         },
         {
           version: "2.0",
           status: "approved" as const,
-          gitCommit: "def456",
           changedAt: "2026-01-02T00:00:00Z",
           summary: "Approved",
         },
         {
           version: "2.0",
           status: "implemented" as const,
-          gitCommit: "ghi789",
           changedAt: "2026-01-03T00:00:00Z",
           summary: "Implemented",
         },

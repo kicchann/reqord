@@ -5,7 +5,7 @@ requirementVersion: '4.0'
 version: '4.0'
 status: approved
 createdAt: 2026-02-08T14:08:06.961Z
-updatedAt: 2026-02-20T15:31:38.360Z
+updatedAt: 2026-02-20T15:33:03.700Z
 versionHistory:
   - version: 1.0.0
     status: implemented
@@ -46,15 +46,10 @@ currentApproval:
   approvedBy: []
 implementation:
   issues:
-    - number: 307
-      title: '[spec-000005 v3.0] reqord version コマンド新規作成'
-      url: https://github.com/kicchann/reqord/issues/307
-      priority: P1
-      status: closed
-    - number: 308
-      title: '[spec-000005 v3.0] draft コマンドの --major/--patch オプションに deprecation 警告追加'
-      url: https://github.com/kicchann/reqord/issues/308
+    - number: 430
+      title: '[spec-000005] versionHistoryからgitCommitフィールドを削除'
+      url: https://github.com/kicchann/reqord/issues/430
       priority: P2
-      status: closed
-  totalEstimatedHours: 6
-  createdAt: 2026-02-16T02:26:10.308Z
+      status: open
+  totalEstimatedHours: 3
+  createdAt: 2026-02-20T15:33:03.698Z

@@ -108,7 +108,6 @@ describe("updateRequirement - 自動リバートロジック", () => {
     vi.mocked(versionService.createHistoryEntry).mockReturnValue({
       version: "3.0",
       status: "draft",
-      gitCommit: "abc123",
       changedAt: "2026-01-02T00:00:00Z",
       summary: "Title updated",
     });
@@ -207,7 +206,6 @@ describe("updateRequirement - バージョンインクリメント", () => {
     vi.mocked(versionService.createHistoryEntry).mockReturnValue({
       version: "1.1",
       status: "draft",
-      gitCommit: "abc123",
       changedAt: "2026-01-02T00:00:00Z",
       summary: "Status changed",
     });
@@ -244,7 +242,6 @@ describe("updateRequirement - バージョンインクリメント", () => {
     vi.mocked(versionService.createHistoryEntry).mockReturnValue({
       version: "2.0",
       status: "draft",
-      gitCommit: "abc123",
       changedAt: "2026-01-02T00:00:00Z",
       summary: "Version bumped",
     });
@@ -275,7 +272,6 @@ describe("updateRequirement - バージョン履歴", () => {
     vi.mocked(versionService.createHistoryEntry).mockReturnValue({
       version: "2.0",
       status: "draft",
-      gitCommit: "abc123",
       changedAt: "2026-01-02T00:00:00Z",
       summary: "Version bumped",
     });
@@ -309,8 +305,7 @@ describe("updateRequirement - バージョン履歴", () => {
       {
         version: "1.0",
         status: "draft" as const,
-        gitCommit: "old123",
-        changedAt: "2026-01-01T00:00:00Z",
+          changedAt: "2026-01-01T00:00:00Z",
         summary: "Initial version",
       },
     ];
@@ -325,7 +320,6 @@ describe("updateRequirement - バージョン履歴", () => {
     vi.mocked(versionService.createHistoryEntry).mockReturnValue({
       version: "2.0",
       status: "draft",
-      gitCommit: "new456",
       changedAt: "2026-01-02T00:00:00Z",
       summary: "Version bumped",
     });
@@ -425,7 +419,6 @@ describe("updateRequirement - description変更", () => {
     vi.mocked(versionService.createHistoryEntry).mockReturnValue({
       version: "2.0",
       status: "draft",
-      gitCommit: "abc123",
       changedAt: "2026-01-02T00:00:00Z",
       summary: "Status changed",
     });

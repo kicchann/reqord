@@ -52,10 +52,6 @@ export function TabHistory({ versionHistory }: TabHistoryProps) {
               </p>
 
               <p className="text-sm text-gray-700">{entry.summary}</p>
-
-              <p className="text-xs text-gray-400 font-mono">
-                {entry.gitCommit}
-              </p>
             </div>
           </div>
         );

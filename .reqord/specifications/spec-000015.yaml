@@ -54,7 +54,12 @@ implementation:
       url: https://github.com/kicchann/reqord/issues/301
       priority: P2
       status: closed
-  totalEstimatedHours: 9
+    - number: 426
+      title: '[spec-000015] 承認PR本文テンプレートから手動更新指示を削除・前提条件チェック修正確認'
+      url: https://github.com/kicchann/reqord/issues/426
+      priority: P2
+      status: open
+  totalEstimatedHours: 10
   createdAt: 2026-02-15T23:35:22.309Z
   progress:
     total: 3

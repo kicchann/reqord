@@ -588,7 +588,6 @@ describe("hasSpecMetadataChanges", () => {
         {
           version: "1.0",
           status: "draft",
-          gitCommit: "abc123",
           changedAt: "2025-01-01T00:00:00.000Z",
           summary: "test",
         },
@@ -764,7 +763,6 @@ describe("updateSpecification", () => {
       {
         version: "1.0",
         status: "draft" as const,
-        gitCommit: "abc123",
         changedAt: "2025-01-01T00:00:00.000Z",
         summary: "initial",
       },
