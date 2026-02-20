@@ -3,9 +3,9 @@ requirementId: req-000015
 title: Specification承認フロー
 requirementVersion: '5.0'
 version: '2.0'
-status: draft
+status: approved
 createdAt: 2026-02-08T14:08:07.812Z
-updatedAt: 2026-02-20T14:13:24.845Z
+updatedAt: 2026-02-20T14:57:20.969Z
 versionHistory:
   - version: '1.0'
     status: draft
@@ -37,12 +37,6 @@ flags:
     relatedIssues:
       - 410
     severity: low
-currentApproval:
-  version: '1.0'
-  phase: specification
-  prNumber: 298
-  prUrl: https://github.com/kicchann/reqord/pull/298
-  approvedBy: []
 implementation:
   issues:
     - number: 299
@@ -67,3 +61,9 @@ implementation:
     completed: 3
     percentage: 100
     lastSyncedAt: 2026-02-16T00:47:21.433Z
+currentApproval:
+  version: '2.0'
+  phase: specification
+  prNumber: 0
+  prUrl: ''
+  approvedBy: []
