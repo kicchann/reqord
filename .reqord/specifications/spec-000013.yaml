@@ -11,14 +11,14 @@ versionHistory:
     status: draft
     changedAt: 2026-02-21T00:00:00Z
     summary: 'Reverted to draft for issue #432 restructuring'
-  - version: '1.0'
-    status: draft
-    changedAt: 2026-02-16T01:30:31.353Z
-    summary: 'status: implemented → draft'
   - version: '1.1'
     status: draft
     changedAt: 2026-02-16T01:53:40.006Z
     summary: Design updated for title and requirementVersion fields (#157,
+  - version: '1.0'
+    status: draft
+    changedAt: 2026-02-16T01:30:31.353Z
+    summary: 'status: implemented → draft'
 files:
   design: specifications/spec-000013/design.md
   supplementary: []

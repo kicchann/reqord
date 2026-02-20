@@ -11,14 +11,14 @@ versionHistory:
     status: draft
     changedAt: 2026-02-21T00:00:00Z
     summary: 'Reverted to draft for issue #432 restructuring'
-  - version: '1.0'
-    status: implemented
-    changedAt: 2026-02-09T11:57:48Z
-    summary: 初版実装完了
   - version: '1.1'
     status: draft
     changedAt: 2026-02-17T00:00:00Z
     summary: req-000004 v1.1対応 - ステータス遷移ルール・整合性ルール・Flag型拡張の設計追加
+  - version: '1.0'
+    status: implemented
+    changedAt: 2026-02-09T11:57:48Z
+    summary: 初版実装完了
 files:
   design: specifications/spec-000004/design.md
   supplementary: []

@@ -1,5 +1,6 @@
 tasks:
   - number: 112
+    title: '[Feature] SpecificationSchema拡張: implementationフィールド追加'
     linkedTo:
       specifications:
         - spec-000016
@@ -7,6 +8,7 @@ tasks:
     status: closed
     syncedAt: 2026-02-12T15:13:05.883Z
   - number: 113
+    title: '[Feature] タスク定義ファイル(--tasks-file)スキーマ定義・バリデーション'
     linkedTo:
       specifications:
         - spec-000016
@@ -14,6 +16,7 @@ tasks:
     status: closed
     syncedAt: 2026-02-12T15:13:05.883Z
   - number: 114
+    title: '[Feature] GitHub Issue Template (reqord-implementation) 生成・配置'
     linkedTo:
       specifications:
         - spec-000016
@@ -21,6 +24,7 @@ tasks:
     status: closed
     syncedAt: 2026-02-12T15:13:05.883Z
   - number: 115
+    title: '[Feature] IssueService実装: タスク定義からGitHub Issue作成'
     linkedTo:
       specifications:
         - spec-000016
@@ -28,6 +32,7 @@ tasks:
     status: closed
     syncedAt: 2026-02-12T15:13:05.883Z
   - number: 116
+    title: '[Feature] reqord issue create コマンド実装'
     linkedTo:
       specifications:
         - spec-000016
@@ -35,6 +40,7 @@ tasks:
     status: closed
     syncedAt: 2026-02-12T15:13:05.883Z
   - number: 117
+    title: '[Feature] スキーマ定義: TaskDefinition + SpecificationSchema implementation拡張'
     linkedTo:
       specifications:
         - spec-000016
@@ -42,6 +48,7 @@ tasks:
     status: closed
     syncedAt: 2026-02-12T15:13:05.883Z
   - number: 118
+    title: '[Feature] GitHub Issue Template (reqord-implementation.yml) 作成'
     linkedTo:
       specifications:
         - spec-000016
@@ -49,6 +56,7 @@ tasks:
     status: closed
     syncedAt: 2026-02-12T15:13:05.883Z
   - number: 119
+    title: '[Feature] GitHubClient拡張: createIssue() 追加'
     linkedTo:
       specifications:
         - spec-000016
@@ -56,6 +64,7 @@ tasks:
     status: closed
     syncedAt: 2026-02-12T15:13:05.883Z
   - number: 120
+    title: '[Feature] IssueService実装: タスク定義ファイルからGitHub Issue作成'
     linkedTo:
       specifications:
         - spec-000016
@@ -63,6 +72,7 @@ tasks:
     status: closed
     syncedAt: 2026-02-12T15:13:05.883Z
   - number: 121
+    title: '[Feature] reqord issue create コマンド実装'
     linkedTo:
       specifications:
         - spec-000016
@@ -70,6 +80,7 @@ tasks:
     status: closed
     syncedAt: 2026-02-12T15:13:05.883Z
   - number: 122
+    title: '[Feature] SpecificationSchema拡張: progressフィールド + ProgressCalculator実装'
     linkedTo:
       specifications:
         - spec-000024
@@ -77,6 +88,7 @@ tasks:
     status: closed
     syncedAt: 2026-02-12T15:13:12.425Z
   - number: 123
+    title: '[Feature] GitHubClient拡張: Issue詳細取得・一覧取得'
     linkedTo:
       specifications:
         - spec-000024
@@ -84,6 +96,7 @@ tasks:
     status: closed
     syncedAt: 2026-02-12T15:13:12.425Z
   - number: 124
+    title: '[Feature] IssueSyncService実装: 同期・検証ロジック'
     linkedTo:
       specifications:
         - spec-000024
@@ -91,6 +104,7 @@ tasks:
     status: closed
     syncedAt: 2026-02-12T15:13:12.425Z
   - number: 125
+    title: '[Feature] reqord issue sync / sync-all コマンド実装'
     linkedTo:
       specifications:
         - spec-000024
@@ -98,6 +112,7 @@ tasks:
     status: closed
     syncedAt: 2026-02-12T15:13:12.425Z
   - number: 126
+    title: '[Feature] reqord issue validate コマンド実装'
     linkedTo:
       specifications:
         - spec-000024
@@ -105,6 +120,7 @@ tasks:
     status: closed
     syncedAt: 2026-02-12T15:13:12.425Z
   - number: 132
+    title: '[Feature] Zodバリデーションエラー詳細表示（req-000010 / spec-000010）'
     linkedTo:
       specifications:
         - spec-000010
@@ -112,6 +128,7 @@ tasks:
     status: closed
     syncedAt: 2026-02-12T15:12:54.749Z
   - number: 138
+    title: '[Task] spec-000022: Web UI ダッシュボード実装'
     linkedTo:
       specifications:
         - spec-000022
@@ -119,6 +136,7 @@ tasks:
     status: closed
     syncedAt: 2026-02-12T15:13:08.865Z
   - number: 139
+    title: '[Task] spec-000025: Ganttチャート実装'
     linkedTo:
       specifications:
         - spec-000025
@@ -126,6 +144,7 @@ tasks:
     status: closed
     syncedAt: 2026-02-12T15:13:14.467Z
   - number: 140
+    title: '[Task] spec-000026: 依存グラフ拡張・Spec詳細実装'
     linkedTo:
       specifications:
         - spec-000026
@@ -133,6 +152,7 @@ tasks:
     status: closed
     syncedAt: 2026-02-12T15:13:17.785Z
   - number: 141
+    title: '[Task] spec-000022-1: Specification data layer for Web'
     linkedTo:
       specifications:
         - spec-000022
@@ -140,6 +160,7 @@ tasks:
     status: closed
     syncedAt: 2026-02-12T15:13:08.865Z
   - number: 142
+    title: '[Task] spec-000022-2: Dashboard data aggregation'
     linkedTo:
       specifications:
         - spec-000022
@@ -147,6 +168,7 @@ tasks:
     status: closed
     syncedAt: 2026-02-12T15:13:08.865Z
   - number: 143
+    title: '[Task] spec-000022-3: Dashboard page & UI components'
     linkedTo:
       specifications:
         - spec-000022
@@ -154,6 +176,7 @@ tasks:
     status: closed
     syncedAt: 2026-02-12T15:13:08.865Z
   - number: 144
+    title: '[Task] spec-000025-1: Gantt data transformation'
     linkedTo:
       specifications:
         - spec-000025
@@ -161,6 +184,7 @@ tasks:
     status: closed
     syncedAt: 2026-02-12T15:13:14.467Z
   - number: 145
+    title: '[Task] spec-000025-2: Gantt SVG components & interactions'
     linkedTo:
       specifications:
         - spec-000025
@@ -168,6 +192,7 @@ tasks:
     status: closed
     syncedAt: 2026-02-12T15:13:14.467Z
   - number: 146
+    title: '[Task] spec-000026-1: Spec detail - tabs + Design/Research'
     linkedTo:
       specifications:
         - spec-000026
@@ -175,6 +200,7 @@ tasks:
     status: closed
     syncedAt: 2026-02-12T15:13:17.785Z
   - number: 147
+    title: '[Task] spec-000026-2: Spec detail - Coverage/Issues/History tabs'
     linkedTo:
       specifications:
         - spec-000026
@@ -182,6 +208,7 @@ tasks:
     status: closed
     syncedAt: 2026-02-12T15:13:17.785Z
   - number: 148
+    title: '[Task] spec-000026-3: Multi-level graph data layer'
     linkedTo:
       specifications:
         - spec-000026
@@ -189,6 +216,7 @@ tasks:
     status: closed
     syncedAt: 2026-02-12T15:13:17.785Z
   - number: 149
+    title: '[Task] spec-000026-4: Multi-level graph UI & mode selector'
     linkedTo:
       specifications:
         - spec-000026
@@ -196,6 +224,7 @@ tasks:
     status: closed
     syncedAt: 2026-02-12T15:13:17.785Z
   - number: 153
+    title: '[Task] spec-000029: 2レベルドリルダウングラフ'
     linkedTo:
       specifications:
         - spec-000029
@@ -203,6 +232,7 @@ tasks:
     status: closed
     syncedAt: 2026-02-12T15:13:20.606Z
   - number: 154
+    title: '[Task] spec-000029-1: Data layer - EDGE_STYLES + buildDrillDownGraphData'
     linkedTo:
       specifications:
         - spec-000029
@@ -210,6 +240,7 @@ tasks:
     status: closed
     syncedAt: 2026-02-12T15:13:20.606Z
   - number: 155
+    title: '[Task] spec-000029-2: UI Components - DrillDownBreadcrumb + DrillDownGraph + RequirementNode'
     linkedTo:
       specifications:
         - spec-000029
@@ -217,6 +248,7 @@ tasks:
     status: closed
     syncedAt: 2026-02-12T15:13:20.606Z
   - number: 156
+    title: '[Task] spec-000029-3: Integration - GraphPageClient URL state + DependencyGraph extension'
     linkedTo:
       specifications:
         - spec-000029
@@ -224,6 +256,7 @@ tasks:
     status: closed
     syncedAt: 2026-02-12T15:13:20.606Z
   - number: 173
+    title: '[Task] spec-000030: YAML変換レイヤー実装'
     linkedTo:
       specifications:
         - spec-000030
@@ -231,6 +264,7 @@ tasks:
     status: closed
     syncedAt: 2026-02-12T15:13:23.397Z
   - number: 174
+    title: '[Task] spec-000031: migrate-to-yamlコマンド実装'
     linkedTo:
       specifications:
         - spec-000031
@@ -238,6 +272,7 @@ tasks:
     status: closed
     syncedAt: 2026-02-12T15:13:25.599Z
   - number: 175
+    title: '[Task] spec-000030-1: FileSystem層 - readYAML/writeYAML + js-yaml依存追加'
     linkedTo:
       specifications:
         - spec-000030
@@ -245,6 +280,7 @@ tasks:
     status: closed
     syncedAt: 2026-02-12T15:13:23.397Z
   - number: 176
+    title: '[Task] spec-000030-2: CLI Repository層 YAML対応'
     linkedTo:
       specifications:
         - spec-000030
@@ -252,6 +288,7 @@ tasks:
     status: closed
     syncedAt: 2026-02-12T15:13:23.397Z
   - number: 177
+    title: '[Task] spec-000030-3: Web UI Repository層 YAML対応 + 統合テスト'
     linkedTo:
       specifications:
         - spec-000030
@@ -259,6 +296,7 @@ tasks:
     status: closed
     syncedAt: 2026-02-12T15:13:23.397Z
   - number: 178
+    title: '[Task] spec-000031-1: MigrationService - createMigrationPlan + convertToYaml + バックアップ'
     linkedTo:
       specifications:
         - spec-000031
@@ -266,6 +304,7 @@ tasks:
     status: closed
     syncedAt: 2026-02-12T15:13:25.599Z
   - number: 179
+    title: '[Task] spec-000031-2: CLIコマンド migrate-to-yaml + dry-run + 統合テスト'
     linkedTo:
       specifications:
         - spec-000031
@@ -273,6 +312,7 @@ tasks:
     status: closed
     syncedAt: 2026-02-12T15:13:25.599Z
   - number: 211
+    title: '[spec-000027] Zodスキーマ定義 + FeedbackRepository'
     linkedTo:
       specifications:
         - spec-000027
@@ -280,6 +320,7 @@ tasks:
     status: closed
     syncedAt: 2026-02-21T00:00:00Z
   - number: 212
+    title: '[spec-000027] GitHubClient + HTMLコメントパーサー'
     linkedTo:
       specifications:
         - spec-000027
@@ -287,6 +328,7 @@ tasks:
     status: closed
     syncedAt: 2026-02-21T00:00:00Z
   - number: 213
+    title: '[spec-000027] FeedbackSyncService + sync CLIコマンド'
     linkedTo:
       specifications:
         - spec-000027
@@ -294,6 +336,7 @@ tasks:
     status: closed
     syncedAt: 2026-02-21T00:00:00Z
   - number: 214
+    title: '[spec-000028] FeedbackService基盤 + list/show CLI'
     linkedTo:
       specifications:
         - spec-000028
@@ -301,6 +344,7 @@ tasks:
     status: closed
     syncedAt: 2026-02-21T00:00:00Z
   - number: 215
+    title: '[spec-000028] link CLI + flag管理'
     linkedTo:
       specifications:
         - spec-000028
@@ -308,6 +352,7 @@ tasks:
     status: closed
     syncedAt: 2026-02-21T00:00:00Z
   - number: 216
+    title: '[spec-000028] close CLI'
     linkedTo:
       specifications:
         - spec-000028
@@ -315,6 +360,7 @@ tasks:
     status: closed
     syncedAt: 2026-02-21T00:00:00Z
   - number: 217
+    title: '[spec-000028] resolve CLI + 承認時flag警告 (v2.0.0)'
     linkedTo:
       specifications:
         - spec-000028
@@ -322,6 +368,7 @@ tasks:
     status: closed
     syncedAt: 2026-02-21T00:00:00Z
   - number: 251
+    title: '[spec-000033] VersionService拡張（Specification対応）'
     linkedTo:
       specifications:
         - spec-000033
@@ -329,6 +376,7 @@ tasks:
     status: open
     syncedAt: 2026-02-14T00:21:07.020Z
   - number: 252
+    title: '[spec-000033] SpecificationService拡張（バージョニングロジック統合）'
     linkedTo:
       specifications:
         - spec-000033
@@ -336,6 +384,7 @@ tasks:
     status: open
     syncedAt: 2026-02-14T00:21:07.020Z
   - number: 253
+    title: '[spec-000033] spec history + updateコマンド実装'
     linkedTo:
       specifications:
         - spec-000033
@@ -343,6 +392,7 @@ tasks:
     status: open
     syncedAt: 2026-02-14T00:21:07.020Z
   - number: 254
+    title: '[spec-000033] spec draft + implementedコマンド実装'
     linkedTo:
       specifications:
         - spec-000033
@@ -350,6 +400,7 @@ tasks:
     status: open
     syncedAt: 2026-02-14T00:21:07.020Z
   - number: 255
+    title: '[spec-000005 v2.0] VersionService の X.Y 形式対応'
     linkedTo:
       specifications:
         - spec-000005
@@ -357,6 +408,7 @@ tasks:
     status: closed
     syncedAt: 2026-02-21T00:00:00Z
   - number: 256
+    title: '[spec-000005 v2.0] RequirementService の X.Y 形式対応とバージョニングロジック改訂'
     linkedTo:
       specifications:
         - spec-000005
@@ -364,6 +416,7 @@ tasks:
     status: closed
     syncedAt: 2026-02-21T00:00:00Z
   - number: 257
+    title: '[spec-000005 v2.0] コマンド層の X.Y 形式対応（update/draft/history）'
     linkedTo:
       specifications:
         - spec-000005
@@ -371,6 +424,7 @@ tasks:
     status: closed
     syncedAt: 2026-02-21T00:00:00Z
   - number: 258
+    title: '[spec-000005 v2.0] 既存データの X.Y 形式移行'
     linkedTo:
       specifications:
         - spec-000005
@@ -378,6 +432,7 @@ tasks:
     status: closed
     syncedAt: 2026-02-21T00:00:00Z
   - number: 266
+    title: '[spec-000012] ImpactService analyzeImpact 実装（依存グラフ走査・影響範囲計算）'
     linkedTo:
       specifications:
         - spec-000012
@@ -385,6 +440,7 @@ tasks:
     status: closed
     syncedAt: 2026-02-21T00:00:00Z
   - number: 267
+    title: '[spec-000012] impact analyze コマンド実装（テーブル表示・JSON出力）'
     linkedTo:
       specifications:
         - spec-000012
@@ -392,6 +448,7 @@ tasks:
     status: closed
     syncedAt: 2026-02-21T00:00:00Z
   - number: 268
+    title: '[spec-000012] github.ts コメント投稿メソッド追加（createIssueComment / createPrComment）'
     linkedTo:
       specifications:
         - spec-000012
@@ -399,6 +456,7 @@ tasks:
     status: closed
     syncedAt: 2026-02-21T00:00:00Z
   - number: 269
+    title: '[spec-000012] ImpactService notifyImpact 実装（通知メッセージ生成・バッチ処理）'
     linkedTo:
       specifications:
         - spec-000012
@@ -406,6 +464,7 @@ tasks:
     status: closed
     syncedAt: 2026-02-21T00:00:00Z
   - number: 270
+    title: '[spec-000012] impact notify コマンド実装 + 統合テスト'
     linkedTo:
       specifications:
         - spec-000012
@@ -413,6 +472,7 @@ tasks:
     status: closed
     syncedAt: 2026-02-21T00:00:00Z
   - number: 283
+    title: '[spec-000011] draftコマンドから--major/--patchオプション削除（バージョニング分離）'
     linkedTo:
       specifications:
         - spec-000011
@@ -420,6 +480,7 @@ tasks:
     status: closed
     syncedAt: 2026-02-15T13:00:03.483Z
   - number: 284
+    title: '[spec-000011] DraftReversionService実装（PR作成+影響範囲分析）'
     linkedTo:
       specifications:
         - spec-000011
@@ -427,6 +488,7 @@ tasks:
     status: closed
     syncedAt: 2026-02-15T13:00:03.483Z
   - number: 285
+    title: '[spec-000011] draftコマンドをDraftReversionServiceに接続'
     linkedTo:
       specifications:
         - spec-000011
@@ -434,6 +496,7 @@ tasks:
     status: closed
     syncedAt: 2026-02-15T13:00:03.483Z
   - number: 299
+    title: '[spec-000015] approveコマンドUX改善（req/spec両方）'
     linkedTo:
       specifications:
         - spec-000015
@@ -441,6 +504,7 @@ tasks:
     status: closed
     syncedAt: 2026-02-16T00:47:21.433Z
   - number: 300
+    title: '[spec-000015] implementコマンド修正（req/spec両方: コマンド名変更 + 前提条件チェック強化）'
     linkedTo:
       specifications:
         - spec-000015
@@ -448,6 +512,7 @@ tasks:
     status: closed
     syncedAt: 2026-02-16T00:47:21.433Z
   - number: 301
+    title: '[spec-000015] Specification承認フロー統合テスト'
     linkedTo:
       specifications:
         - spec-000015
@@ -455,6 +520,7 @@ tasks:
     status: closed
     syncedAt: 2026-02-16T00:47:21.433Z
   - number: 307
+    title: '[spec-000005 v3.0] reqord version コマンド新規作成'
     linkedTo:
       specifications:
         - spec-000005
@@ -462,6 +528,7 @@ tasks:
     status: closed
     syncedAt: 2026-02-21T00:00:00Z
   - number: 308
+    title: '[spec-000005 v3.0] draft コマンドの --major/--patch オプションに deprecation 警告追加'
     linkedTo:
       specifications:
         - spec-000005
@@ -469,6 +536,7 @@ tasks:
     status: closed
     syncedAt: 2026-02-21T00:00:00Z
   - number: 314
+    title: '[spec-000013 v1.1] Specificationスキーマにtitleフィールド追加'
     linkedTo:
       specifications:
         - spec-000013
@@ -476,6 +544,7 @@ tasks:
     status: closed
     syncedAt: 2026-02-16T05:55:46.683Z
   - number: 315
+    title: '[spec-000013 v1.1] SpecificationスキーマにrequirementVersionフィールド追加'
     linkedTo:
       specifications:
         - spec-000013
@@ -483,6 +552,7 @@ tasks:
     status: closed
     syncedAt: 2026-02-16T05:55:46.683Z
   - number: 316
+    title: '[spec-000013 v1.1] 既存Specificationデータのマイグレーション'
     linkedTo:
       specifications:
         - spec-000013
@@ -490,6 +560,7 @@ tasks:
     status: closed
     syncedAt: 2026-02-16T05:55:46.683Z
   - number: 332
+    title: '[spec-000028 v3.0] unlink CLI'
     linkedTo:
       specifications:
         - spec-000028
@@ -497,6 +568,7 @@ tasks:
     status: closed
     syncedAt: 2026-02-16T11:01:02.987Z
   - number: 333
+    title: '[spec-000028 v3.0] create CLI'
     linkedTo:
       specifications:
         - spec-000028
@@ -504,6 +576,7 @@ tasks:
     status: closed
     syncedAt: 2026-02-16T11:01:02.987Z
   - number: 334
+    title: '[spec-000028 v3.0] close改善 - 残存flag警告'
     linkedTo:
       specifications:
         - spec-000028
@@ -511,6 +584,7 @@ tasks:
     status: closed
     syncedAt: 2026-02-16T11:01:02.987Z
   - number: 340
+    title: '[spec-000004] ステータス遷移ルール定数・関数の追加'
     linkedTo:
       specifications:
         - spec-000004
@@ -518,6 +592,7 @@ tasks:
     status: closed
     syncedAt: 2026-02-16T20:47:30.983Z
   - number: 341
+    title: '[spec-000004] Req/Spec整合性チェック関数の追加'
     linkedTo:
       specifications:
         - spec-000004
@@ -525,6 +600,7 @@ tasks:
     status: closed
     syncedAt: 2026-02-16T20:47:30.983Z
   - number: 342
+    title: '[spec-000004] FlagSchemaのdiscriminatedUnion拡張'
     linkedTo:
       specifications:
         - spec-000004
@@ -532,6 +608,7 @@ tasks:
     status: closed
     syncedAt: 2026-02-16T20:47:30.983Z
   - number: 425
+    title: '[spec-000011] 承認PR本文テンプレートから手動更新指示を削除'
     linkedTo:
       specifications:
         - spec-000011
@@ -539,6 +616,7 @@ tasks:
     status: open
     syncedAt: 2026-02-15T13:00:03.483Z
   - number: 426
+    title: '[spec-000015] 承認PR本文テンプレートから手動更新指示を削除・前提条件チェック修正確認'
     linkedTo:
       specifications:
         - spec-000015
@@ -546,6 +624,7 @@ tasks:
     status: open
     syncedAt: 2026-02-16T00:47:21.433Z
   - number: 430
+    title: '[spec-000005] versionHistoryからgitCommitフィールドを削除'
     linkedTo:
       specifications:
         - spec-000005
