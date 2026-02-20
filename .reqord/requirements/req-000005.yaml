@@ -62,16 +62,10 @@ dependencies:
     - req-000011
 estimatedComplexity: medium
 estimatedHours: 12
-flags:
-  - type: feedback-review
-    reason: 'Feedback from issue #411'
-    createdAt: 2026-02-20T13:52:30.190Z
-    relatedIssues:
-      - 411
-    severity: low
 currentApproval:
   version: '5.0'
   phase: requirement
-  prNumber: 0
-  prUrl: ''
+  prNumber: 419
+  prUrl: https://github.com/kicchann/reqord/pull/419
   approvedBy: []
+flags: []
