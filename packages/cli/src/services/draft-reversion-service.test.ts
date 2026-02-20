@@ -376,8 +376,8 @@ describe("DraftReversionService", () => {
       await revertToDraft(process.cwd(), "spec-000001");
 
       const callArgs = vi.mocked(githubRepo.createPullRequest).mock.calls[0][0];
-      expect(callArgs.body).toContain("仕様差し戻し");
-      expect(callArgs.body).toContain("仕様のステータス");
+      expect(callArgs.body).toContain("Specification Reversion to Draft");
+      expect(callArgs.body).toContain("Specification");
     });
 
     it("ブランチ名が reqord/spec-<id>-revert-to-draft であること", async () => {

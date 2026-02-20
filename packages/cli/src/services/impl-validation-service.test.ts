@@ -93,10 +93,10 @@ Also see \`packages/cli/src/services/foo.ts\` for details.
   });
 
   it("extracts paths from architecture diagrams", () => {
-    const content = `## アーキテクチャ
+    const content = `## Architecture
 \`\`\`
-    services/foo-service.ts    (新規)
-    repositories/bar-repo.ts   (既存)
+    services/foo-service.ts    (new)
+    repositories/bar-repo.ts   (existing)
 \`\`\``;
     const result = parseDesignPaths(content);
     expect(result.components.some((c) => c.path === "services/foo-service.ts")).toBe(true);
@@ -110,27 +110,27 @@ Also see \`packages/cli/src/services/foo.ts\` for details.
   });
 
   it("returns empty for template design.md content", () => {
-    const content = `# タイトル - 技術設計書
+    const content = `# Title - Technical Design Document
 
-## 1. 設計概要
+## 1. Design Overview
 
-（ここに設計概要を記述）
+(Describe design overview here)
 
-## 2. アーキテクチャ
+## 2. Architecture
 
-（ここにアーキテクチャ図を記述）
+(Describe architecture diagram here)
 
-## 3. コンポーネント設計
+## 3. Component Design
 
-（ここにコンポーネント設計を記述）
+(Describe component design here)
 
-## 4. データフロー
+## 4. Data Flow
 
-（ここにデータフローを記述）
+(Describe data flow here)
 
-## 5. テスト方針
+## 5. Test Plan
 
-（ここにテスト方針を記述）
+(Describe test plan here)
 `;
     const result = parseDesignPaths(content);
     expect(result.components).toEqual([]);

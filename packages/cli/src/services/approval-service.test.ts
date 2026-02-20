@@ -37,18 +37,16 @@ function makeMockHandler(): ApprovalHandler {
     saveCurrentApproval: vi.fn(),
     updatePrInfo: vi.fn(),
     buildPrTitle: vi.fn((target) => `[Reqord] Approve ${target.id}: ${target.title} v${target.version}`),
-    buildPrBody: vi.fn((target) => `## 要件承認依頼
+    buildPrBody: vi.fn((target) => `## Requirement Approval Request
 
-| フィールド | 値 |
+| Field | Value |
 |-----------|------|
 | ID | ${target.id} |
-| タイトル | ${target.title} |
-| バージョン | ${target.version} |
+| Title | ${target.title} |
+| Version | ${target.version} |
 
-### 変更内容
-status: draft → approved
-
-> マージ後、\`reqord req update ${target.id} --status approved\` でステータスを更新してください。`),
+### Changes
+status: draft → approved`),
   };
 }
 
@@ -184,7 +182,6 @@ describe("startApproval", () => {
     expect(prBody).toContain("req-000022");
     expect(prBody).toContain("Feature X");
     expect(prBody).toContain("2.0.0");
-    expect(prBody).toContain("reqord req update req-000022 --status approved");
   });
 
   it("dry-runモード", async () => {

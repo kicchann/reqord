@@ -999,16 +999,16 @@ describe("createFeedbackIssue", () => {
     });
 
     const body = mockGithubClient.createIssue.mock.calls[0][0].body;
-    expect(body).toContain("### 何が起きた？ / 何に気づいた？");
+    expect(body).toContain("### What happened? / What did you notice?");
     expect(body).toContain("Something happened");
-    expect(body).toContain("### フィードバックの種類");
-    expect(body).toContain("implementation-bug (実装のバグ)");
-    expect(body).toContain("### 関連する要件 (Requirement)");
+    expect(body).toContain("### Feedback type");
+    expect(body).toContain("implementation-bug (implementation bug)");
+    expect(body).toContain("### Related requirement (Requirement)");
     expect(body).toContain("req-000001");
-    expect(body).toContain("### 関連する仕様 (Specification)");
+    expect(body).toContain("### Related specification (Specification)");
     expect(body).toContain("spec-000001");
-    expect(body).toContain("### 深刻度");
-    expect(body).toContain("high (多数のユーザーに影響)");
+    expect(body).toContain("### Severity");
+    expect(body).toContain("high (affects many users)");
   });
 });
 

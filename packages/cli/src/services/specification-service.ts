@@ -155,25 +155,25 @@ export async function checkSpecApprovalPrerequisites(
 
   // 1. Status check
   if (spec.status !== "draft") {
-    errors.push(`Specificationのステータスが draft ではありません（現在: ${spec.status}）`);
+    errors.push(`Specification status is not "draft" (current: ${spec.status})`);
   }
 
   // 2. Related requirement status check
   const req = await reqRepo.findById(cwd, spec.requirementId);
   if (!req) {
-    errors.push(`関連要件 ${spec.requirementId} が見つかりません`);
+    errors.push(`Related requirement ${spec.requirementId} not found`);
   } else if (req.status !== "approved") {
-    errors.push(`関連要件 ${spec.requirementId} が未承認です（現在: ${req.status}）`);
+    errors.push(`Related requirement ${spec.requirementId} is not approved (current: ${req.status})`);
   }
 
   // 3. design.md content check
   const design = await specRepo.loadFile(cwd, specId, "design.md");
   if (design == null) {
-    errors.push("design.mdが存在しないか読み込めません。design.mdを作成し、設計内容を記述してください。");
+    errors.push("design.md does not exist or could not be read. Create design.md and write the design content.");
   } else if (design.trim().length === 0) {
-    errors.push("design.mdが空です。設計内容を記述してください。");
+    errors.push("design.md is empty. Please write the design content.");
   } else if (design.includes("{{")) {
-    errors.push("design.mdがテンプレートのままです。プレースホルダを編集して設計内容を記述してください。");
+    errors.push("design.md still contains template placeholders. Please edit and write the design content.");
   }
 
   return { ok: errors.length === 0, errors };

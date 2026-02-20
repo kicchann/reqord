@@ -23,8 +23,8 @@ export const notifyCommand = new Command("notify")
 
 function displayNotifyResult(id: string, result: NotifyResult): void {
   if (result.notified.length === 0 && result.skipped.length === 0) {
-    console.log(chalk.bold(`\n影響範囲通知: ${id}\n`));
-    console.log("通知対象のissueはありません。");
+    console.log(chalk.bold(`\nImpact notification: ${id}\n`));
+    console.log("No issues to notify.");
     return;
   }
 
@@ -36,10 +36,10 @@ function displayNotifyResult(id: string, result: NotifyResult): void {
 }
 
 function displayDryRunResult(id: string, result: NotifyResult): void {
-  console.log(chalk.bold(`\n影響範囲通知プレビュー: ${id}\n`));
+  console.log(chalk.bold(`\nImpact notification preview: ${id}\n`));
 
   if (result.notified.length > 0) {
-    console.log("通知対象:");
+    console.log("Notify targets:");
     for (const entry of result.notified) {
       console.log(`  #${entry.number}  ${entry.title}`);
     }
@@ -47,7 +47,7 @@ function displayDryRunResult(id: string, result: NotifyResult): void {
   }
 
   if (result.skipped.length > 0) {
-    console.log("スキップ:");
+    console.log("Skipped:");
     for (const entry of result.skipped) {
       console.log(`  #${entry.number}  (${entry.reason})`);
     }
@@ -57,19 +57,19 @@ function displayDryRunResult(id: string, result: NotifyResult): void {
   // Show notification message preview
   const firstWithComment = result.notified.find((e) => e.comment);
   if (firstWithComment?.comment) {
-    console.log(chalk.bold("通知メッセージ:"));
+    console.log(chalk.bold("Notification message:"));
     console.log(firstWithComment.comment);
     console.log("");
   }
 
-  console.log("実際に通知するには --dry-run を外して再実行してください。");
+  console.log("To actually send notifications, remove --dry-run and run again.");
 }
 
 function displayActualResult(id: string, result: NotifyResult): void {
-  console.log(chalk.bold(`\n影響範囲通知: ${id}\n`));
+  console.log(chalk.bold(`\nImpact notification: ${id}\n`));
 
   if (result.notified.length > 0) {
-    console.log("通知完了:");
+    console.log("Notified:");
     for (const entry of result.notified) {
       console.log(`  ✓ #${entry.number}  ${entry.title}`);
     }
@@ -77,12 +77,12 @@ function displayActualResult(id: string, result: NotifyResult): void {
   }
 
   if (result.skipped.length > 0) {
-    console.log("スキップ:");
+    console.log("Skipped:");
     for (const entry of result.skipped) {
       console.log(`  - #${entry.number}  (${entry.reason})`);
     }
     console.log("");
   }
 
-  console.log(`${result.notified.length}件の通知を送信しました。`);
+  console.log(`Sent ${result.notified.length} notification(s).`);
 }

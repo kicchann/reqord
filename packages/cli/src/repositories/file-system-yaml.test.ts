@@ -82,11 +82,11 @@ parent:
     expect(result.updatedAt).toBe("2026-02-01");
   });
 
-  it('throws with "YAML構文エラー" on syntax error', async () => {
+  it('throws with "YAML syntax error" on syntax error', async () => {
     const filePath = join(tmpDir, "invalid.yaml");
     await writeFile(filePath, "key: [\ninvalid yaml syntax", "utf-8");
 
-    await expect(readYAML(filePath)).rejects.toThrow("YAML構文エラー");
+    await expect(readYAML(filePath)).rejects.toThrow("YAML syntax error");
     await expect(readYAML(filePath)).rejects.toThrow(filePath);
   });
 });

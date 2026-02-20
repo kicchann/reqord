@@ -30,7 +30,7 @@ export const implementCommand = new Command("implement")
         // Precondition: status must be "approved"
         if (requirement.status !== "approved") {
           throw new AppError(
-            `Requirementのステータスが approved ではありません（現在: ${requirement.status}）`,
+            `Requirement status is not "approved" (current: ${requirement.status})`,
             ErrorCode.VALIDATION_ERROR,
           );
         }
@@ -48,7 +48,7 @@ export const implementCommand = new Command("implement")
         // Consistency check: warn if specs are not implemented or issues are open
         const consistencyResult = await checkImplementConsistency(cwd, id);
         if (consistencyResult.warnings.length > 0 && !options.json) {
-          console.warn(chalk.yellow("\n⚠ 整合性チェック警告:"));
+          console.warn(chalk.yellow("\n⚠ Consistency check warnings:"));
           for (const w of consistencyResult.warnings) {
             console.warn(chalk.yellow(`  - ${w.message}`));
           }

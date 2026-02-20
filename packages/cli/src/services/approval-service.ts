@@ -57,9 +57,9 @@ export async function startApproval(
   // 2. Dry-run mode
   if (options?.dryRun) {
     const prTitle = handler.buildPrTitle(target);
-    console.log(`[dry-run] ブランチ作成: ${branchName}`);
-    console.log(`[dry-run] ステータス変更: draft → approved`);
-    console.log(`[dry-run] PR作成: ${prTitle}`);
+    console.log(`[dry-run] Create branch: ${branchName}`);
+    console.log(`[dry-run] Status change: draft → approved`);
+    console.log(`[dry-run] Create PR: ${prTitle}`);
     return { branchName, prNumber: 0, prUrl: "" };
   }
 

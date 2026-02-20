@@ -1,25 +1,25 @@
 export function extractDesignSummary(designContent: string): string {
   if (!designContent) {
-    return "(設計概要なし)";
+    return "(No design summary)";
   }
 
   // Split content into sections by ## headings
   const sections = designContent.split(/\n(?=##\s)/);
 
-  // Find the section that starts with "## 設計概要" or "## 1. 設計概要"
+  // Find the section that starts with "## Design Overview" or "## 設計概要" (with optional numbering)
   const summarySection = sections.find(section =>
-    /^##\s+(?:\d+\.\s+)?設計概要/.test(section)
+    /^##\s+(?:\d+\.\s+)?(?:Design Overview|設計概要)/.test(section)
   );
 
   if (!summarySection) {
-    return "(設計概要なし)";
+    return "(No design summary)";
   }
 
   // Extract content after the heading
-  const contentAfterHeading = summarySection.replace(/^##\s+(?:\d+\.\s+)?設計概要\s*\n+/, "");
+  const contentAfterHeading = summarySection.replace(/^##\s+(?:\d+\.\s+)?(?:Design Overview|設計概要)\s*\n+/, "");
   const summary = contentAfterHeading.trim();
 
-  return summary || "(設計概要なし)";
+  return summary || "(No design summary)";
 }
 
 function escapeRegExp(s: string): string {
@@ -48,7 +48,9 @@ export function extractDesignSection(designContent: string, sectionName: string)
 export function extractComponentList(designContent: string): string[] {
   if (!designContent) return [];
 
-  const section = extractDesignSection(designContent, "コンポーネント設計");
+  // Try English first, then Japanese fallback
+  const section = extractDesignSection(designContent, "Component Design")
+    ?? extractDesignSection(designContent, "コンポーネント設計");
   if (!section) return [];
 
   // Extract ### headings as component names
@@ -74,53 +76,51 @@ export interface SpecApprovalPrBodyParams {
 
 export function buildSpecApprovalPrBody(params: SpecApprovalPrBodyParams): string {
   const lines: string[] = [
-    `## 仕様承認依頼`,
+    `## Specification Approval Request`,
     ``,
-    `| フィールド | 値 |`,
+    `| Field | Value |`,
     `|-----------|------|`,
     `| Specification ID | ${params.specId} |`,
     `| Requirement ID | ${params.reqId} |`,
-    `| 要件タイトル | ${params.reqTitle} |`,
-    `| バージョン | ${params.version} |`,
+    `| Requirement Title | ${params.reqTitle} |`,
+    `| Version | ${params.version} |`,
     ``,
-    `### 設計概要`,
+    `### Design Overview`,
     params.designSummary,
     ``,
-    `### 変更内容`,
+    `### Changes`,
     `status: draft → approved`,
   ];
 
   if (params.successCriteria && params.successCriteria.length > 0) {
-    lines.push(``, `### 対象要件の成功基準`);
+    lines.push(``, `### Success Criteria`);
     for (const criterion of params.successCriteria) {
       lines.push(`- ${criterion}`);
     }
   }
 
   if (params.components && params.components.length > 0) {
-    lines.push(``, `### コンポーネント一覧`);
+    lines.push(``, `### Components`);
     for (const component of params.components) {
       lines.push(`- ${component}`);
     }
   }
 
   if (params.testPlan) {
-    lines.push(``, `### テスト方針`, params.testPlan);
+    lines.push(``, `### Test Plan`, params.testPlan);
   }
 
   lines.push(
     ``,
-    `### 設計ファイル`,
+    `### Design Files`,
     `- \`specifications/${params.specId}/design.md\``,
     ``,
     `### Checklist`,
-    `- [ ] 設計が要件の成功基準をカバーしている`,
-    `- [ ] コンポーネント設計が妥当`,
-    `- [ ] テスト方針が明確`,
-    `- [ ] Breaking changesの確認`,
-    `- [ ] セルフレビュー完了`,
-    ``,
-    `> マージ後、\`reqord spec update ${params.specId} --status approved\` でステータスを更新してください。`,
+    `- [ ] Design covers success criteria`,
+    `- [ ] Component design is appropriate`,
+    `- [ ] Test plan is clear`,
+    `- [ ] Breaking changes reviewed`,
+    `- [ ] Self-review completed`,
   );
 
   return lines.join("\n");

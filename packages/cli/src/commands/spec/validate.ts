@@ -38,7 +38,7 @@ export const specValidateCommand = new Command("validate")
         return;
       }
 
-      console.log(chalk.bold.cyan(`\n設計検証: ${id}\n`));
+      console.log(chalk.bold.cyan(`\nDesign validation: ${id}\n`));
 
       for (const rule of result.rules) {
         const icon =
@@ -64,7 +64,7 @@ export const specValidateCommand = new Command("validate")
       }
 
       console.log(
-        `\n検証結果: ${result.errors} error, ${result.warnings} warning, ${result.passed} passed\n`,
+        `\nValidation result: ${result.errors} error, ${result.warnings} warning, ${result.passed} passed\n`,
       );
 
       if (result.errors > 0) {

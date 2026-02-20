@@ -214,7 +214,7 @@ describe("req implement command", () => {
     await implementCommand.parseAsync(["node", "test", "req-000001"]);
 
     expect(consoleErrorSpy).toHaveBeenCalledWith(
-      expect.stringContaining("Requirementのステータスが approved ではありません（現在: draft）"),
+      expect.stringContaining(`Requirement status is not "approved" (current: draft)`),
     );
     expect(process.exitCode).toBe(1);
     expect(mockUpdateRequirement).not.toHaveBeenCalled();
@@ -228,7 +228,7 @@ describe("req implement command", () => {
     await implementCommand.parseAsync(["node", "test", "req-000001"]);
 
     expect(consoleErrorSpy).toHaveBeenCalledWith(
-      expect.stringContaining("Requirementのステータスが approved ではありません（現在: implemented）"),
+      expect.stringContaining(`Requirement status is not "approved" (current: implemented)`),
     );
     expect(process.exitCode).toBe(1);
     expect(mockUpdateRequirement).not.toHaveBeenCalled();
@@ -278,12 +278,12 @@ describe("req implement command", () => {
       warnings: [
         {
           type: "spec-not-implemented",
-          message: "spec-000001 のステータスが approved です（implementedではありません）",
+          message: "spec-000001 status is approved (not implemented)",
           details: { id: "spec-000001", currentStatus: "approved" },
         },
         {
           type: "issue-not-closed",
-          message: "#44 (Service実装) が open です",
+          message: "#44 (Service implementation) is open",
           details: { id: "44", currentStatus: "open" },
         },
       ],
@@ -292,13 +292,13 @@ describe("req implement command", () => {
     await implementCommand.parseAsync(["node", "test", "req-000001"]);
 
     expect(consoleWarnSpy).toHaveBeenCalledWith(
-      expect.stringContaining("整合性チェック警告"),
+      expect.stringContaining("Consistency check warnings"),
     );
     expect(consoleWarnSpy).toHaveBeenCalledWith(
-      expect.stringContaining("spec-000001 のステータスが approved"),
+      expect.stringContaining("spec-000001 status is approved"),
     );
     expect(consoleWarnSpy).toHaveBeenCalledWith(
-      expect.stringContaining("#44 (Service実装) が open"),
+      expect.stringContaining("#44 (Service implementation) is open"),
     );
     // Still proceeds to implement
     expect(mockUpdateRequirement).toHaveBeenCalled();
@@ -315,7 +315,7 @@ describe("req implement command", () => {
       warnings: [
         {
           type: "spec-not-implemented",
-          message: "spec-000001 のステータスが draft です",
+          message: "spec-000001 status is draft (not implemented)",
           details: { id: "spec-000001", currentStatus: "draft" },
         },
       ],

@@ -52,16 +52,16 @@ describe("validate impl command", () => {
     await implValidateCommand.parseAsync(["node", "test", "spec-000001"]);
 
     expect(consoleLogSpy).toHaveBeenCalledWith(
-      expect.stringContaining("実装検証: spec-000001"),
+      expect.stringContaining("Implementation validation: spec-000001"),
     );
     expect(consoleLogSpy).toHaveBeenCalledWith(
       expect.stringContaining("GitHub Issues:"),
     );
     expect(consoleLogSpy).toHaveBeenCalledWith(
-      expect.stringContaining("コンポーネント:"),
+      expect.stringContaining("Components:"),
     );
     expect(consoleLogSpy).toHaveBeenCalledWith(
-      expect.stringContaining("サマリー: Issues 1/2, Components 1/2, Tests 1/1"),
+      expect.stringContaining("Summary: Issues 1/2, Components 1/2, Tests 1/1"),
     );
   });
 
@@ -89,7 +89,7 @@ describe("validate impl command", () => {
 
     expect(process.exitCode).toBe(1);
     expect(consoleErrorSpy).toHaveBeenCalledWith(
-      expect.stringContaining("実装検証失敗"),
+      expect.stringContaining("Implementation validation failed"),
     );
   });
 

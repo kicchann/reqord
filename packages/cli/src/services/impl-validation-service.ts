@@ -82,7 +82,7 @@ export function parseDesignPaths(designContent: string): DesignPaths {
     addComponent(match[1], "");
   }
 
-  // Extract from architecture diagrams: services/foo-service.ts    (新規)
+  // Extract from architecture diagrams: services/foo-service.ts    (new)
   const archPattern = /^\s+([\w\-./]+\.tsx?)\s/gm;
   while ((match = archPattern.exec(designContent)) !== null) {
     const path = match[1];
@@ -238,7 +238,7 @@ export async function checkImplementConsistency(
     if (spec.status !== "implemented") {
       warnings.push({
         type: "spec-not-implemented",
-        message: `${spec.id} のステータスが ${spec.status} です（implementedではありません）`,
+        message: `${spec.id} status is ${spec.status} (not implemented)`,
         details: { id: spec.id, currentStatus: spec.status },
       });
     }
@@ -248,7 +248,7 @@ export async function checkImplementConsistency(
         if (issue.status !== "closed") {
           warnings.push({
             type: "issue-not-closed",
-            message: `#${issue.number} (${issue.title}) が ${issue.status} です`,
+            message: `#${issue.number} (${issue.title}) is ${issue.status}`,
             details: { id: String(issue.number), currentStatus: issue.status },
           });
         }

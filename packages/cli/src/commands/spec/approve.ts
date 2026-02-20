@@ -31,7 +31,7 @@ export const specApproveCommand = new Command("approve")
       const { specification, design } = await showSpecification(cwd, id);
 
       if (specification.currentApproval?.prUrl) {
-        console.log(chalk.yellow(`承認依頼PRは既に作成されています: ${id}`));
+        console.log(chalk.yellow(`Approval PR already exists: ${id}`));
         console.log(`  PR: ${specification.currentApproval.prUrl}`);
         process.exitCode = 0;
         return;
@@ -41,9 +41,9 @@ export const specApproveCommand = new Command("approve")
       const prereqs = await checkSpecApprovalPrerequisites(cwd, id);
       if (!prereqs.ok) {
         for (const error of prereqs.errors) {
-          console.error(chalk.red(`エラー: ${error}`));
+          console.error(chalk.red(`Error: ${error}`));
         }
-        console.error(chalk.yellow(`先に問題を解決してください。`));
+        console.error(chalk.yellow(`Please resolve the issues first.`));
         process.exitCode = 1;
         return;
       }
@@ -71,7 +71,8 @@ export const specApproveCommand = new Command("approve")
       // 3. Build custom handler with actual design content
       const designContent = design ?? "";
       const designSummary = extractDesignSummary(designContent);
-      const testPlan = extractDesignSection(designContent, "テスト方針");
+      const testPlan = extractDesignSection(designContent, "Test Plan")
+        ?? extractDesignSection(designContent, "テスト方針");
       const components = extractComponentList(designContent);
       const customHandler = {
         ...specificationHandler,
@@ -110,8 +111,8 @@ export const specApproveCommand = new Command("approve")
         return;
       }
 
-      console.log(chalk.green(`承認依頼PRを作成しました: ${id}`));
-      console.log(`PRがマージされると承認が確定します`);
+      console.log(chalk.green(`Approval PR created: ${id}`));
+      console.log(`Approval will be confirmed when the PR is merged`);
       console.log(`  Branch: ${result.branchName}`);
       console.log(`  PR: ${result.prUrl}`);
     } catch (error) {

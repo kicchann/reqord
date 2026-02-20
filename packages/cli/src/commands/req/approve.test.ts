@@ -99,10 +99,10 @@ describe("approveCommand", () => {
 
     // Verify success message
     expect(consoleLogSpy).toHaveBeenCalledWith(
-      expect.stringContaining("承認依頼PRを作成しました: req-000001")
+      expect.stringContaining("Approval PR created: req-000001")
     );
     expect(consoleLogSpy).toHaveBeenCalledWith(
-      expect.stringContaining("PRがマージされると承認が確定します")
+      expect.stringContaining("Approval will be confirmed when the PR is merged")
     );
     expect(consoleLogSpy).toHaveBeenCalledWith(
       expect.stringContaining("Branch: reqord/req-000001-approve-v1.0")
@@ -208,7 +208,7 @@ describe("approveCommand", () => {
 
     // Verify success message NOT shown in dry-run mode
     expect(consoleLogSpy).not.toHaveBeenCalledWith(
-      expect.stringContaining("承認依頼PRを作成しました")
+      expect.stringContaining("Approval PR created")
     );
 
     consoleLogSpy.mockRestore();
@@ -256,7 +256,7 @@ describe("approveCommand", () => {
     // Approval still proceeds
     expect(startApproval).toHaveBeenCalled();
     expect(consoleLogSpy).toHaveBeenCalledWith(
-      expect.stringContaining("承認依頼PRを作成しました: req-000001")
+      expect.stringContaining("Approval PR created: req-000001")
     );
 
     consoleLogSpy.mockRestore();
@@ -308,7 +308,7 @@ describe("approveCommand", () => {
 
     // Existing PR message shown
     expect(consoleLogSpy).toHaveBeenCalledWith(
-      expect.stringContaining("承認依頼PRは既に作成されています: req-000001")
+      expect.stringContaining("Approval PR already exists: req-000001")
     );
     expect(consoleLogSpy).toHaveBeenCalledWith(
       expect.stringContaining("PR: https://github.com/owner/repo/pull/50")

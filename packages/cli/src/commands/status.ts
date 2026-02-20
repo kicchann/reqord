@@ -30,7 +30,7 @@ export const statusCommand = new Command("status")
         } else if (/^spec-\d{6}$/.test(id)) {
           await showSpecificationStatus(cwd, id, options);
         } else {
-          throw new Error(`不正なID形式: ${id} (req-NNNNNN or spec-NNNNNN)`);
+          throw new Error(`Invalid ID format: ${id} (req-NNNNNN or spec-NNNNNN)`);
         }
       } catch (error) {
         handleError(error, { json: options.json });
@@ -54,7 +54,7 @@ async function showProjectStatus(
     return;
   }
 
-  console.log(chalk.bold.cyan("\nreqord プロジェクトステータス\n"));
+  console.log(chalk.bold.cyan("\nreqord Project Status\n"));
 
   // Requirements
   console.log(chalk.bold("Requirements:"));
@@ -84,7 +84,7 @@ async function showProjectStatus(
     (w) => w.severity === "warning",
   );
   if (warningItems.length > 0) {
-    console.log(chalk.bold.yellow("\n⚠ 警告:"));
+    console.log(chalk.bold.yellow("\n⚠ Warnings:"));
     for (const w of warningItems) {
       console.log(chalk.yellow(`  - ${w.id}: ${w.message}`));
     }
@@ -95,7 +95,7 @@ async function showProjectStatus(
     (w) => w.severity === "info",
   );
   if (infoItems.length > 0) {
-    console.log(chalk.bold.blue("\nℹ 情報:"));
+    console.log(chalk.bold.blue("\nℹ Info:"));
     for (const w of infoItems) {
       console.log(chalk.blue(`  - ${w.id}: ${w.message}`));
     }
@@ -154,18 +154,18 @@ async function showRequirementStatus(
   const priorityColor = PRIORITY_COLORS[req.priority] ?? identityColor;
 
   console.log(
-    chalk.bold.cyan(`\n要件ステータス: ${req.id} (${req.title})\n`),
+    chalk.bold.cyan(`\nRequirement Status: ${req.id} (${req.title})\n`),
   );
 
-  console.log(`  ステータス:   ${statusColor(req.status)}`);
-  console.log(`  優先度:       ${priorityColor(req.priority)}`);
+  console.log(`  Status:       ${statusColor(req.status)}`);
+  console.log(`  Priority:     ${priorityColor(req.priority)}`);
   if (req.estimatedComplexity) {
-    console.log(`  複雑度:       ${req.estimatedComplexity}`);
+    console.log(`  Complexity:   ${req.estimatedComplexity}`);
   }
 
   // Related Specifications
   if (status.specifications.length > 0) {
-    console.log(chalk.bold("\n関連Specification:"));
+    console.log(chalk.bold("\nRelated Specifications:"));
     const table = new Table({
       head: ["ID", "Title", "Status"],
       style: { head: ["cyan"] },
@@ -185,7 +185,7 @@ async function showRequirementStatus(
 
   // Dependencies
   if (status.dependencyStatus.length > 0) {
-    console.log(chalk.bold("\n依存関係:"));
+    console.log(chalk.bold("\nDependencies:"));
     for (const dep of status.dependencyStatus) {
       const depColor = STATUS_COLORS[dep.status] ?? identityColor;
       const check =
@@ -204,7 +204,7 @@ async function showRequirementStatus(
       (status.issueProgress.completed / status.issueProgress.total) * 100,
     );
     console.log(
-      chalk.bold("\nIssue進捗:  ") +
+      chalk.bold("\nIssue Progress:  ") +
         `${renderProgressBar(pct)}  ${pct}% (${status.issueProgress.completed}/${status.issueProgress.total})`,
     );
   }
@@ -241,22 +241,22 @@ async function showSpecificationStatus(
 
   console.log(
     chalk.bold.cyan(
-      `\n仕様ステータス: ${spec.id} (${spec.title ?? spec.id})\n`,
+      `\nSpecification Status: ${spec.id} (${spec.title ?? spec.id})\n`,
     ),
   );
 
-  console.log(`  ステータス:   ${statusColor(spec.status)}`);
+  console.log(`  Status:       ${statusColor(spec.status)}`);
 
   if (status.requirement) {
     const reqColor = STATUS_COLORS[status.requirement.status] ?? identityColor;
     console.log(
-      `  要件:         ${status.requirement.id} (${reqColor(status.requirement.status)}) ${status.requirement.title}`,
+      `  Requirement:  ${status.requirement.id} (${reqColor(status.requirement.status)}) ${status.requirement.title}`,
     );
   }
 
   // Design Validation
   if (status.designValidation) {
-    console.log(chalk.bold("\n設計検証:"));
+    console.log(chalk.bold("\nDesign Validation:"));
     console.log(
       `  passed: ${status.designValidation.passed}, warnings: ${status.designValidation.warnings}, errors: ${status.designValidation.errors}`,
     );
@@ -268,14 +268,14 @@ async function showSpecificationStatus(
       (status.issueProgress.completed / status.issueProgress.total) * 100,
     );
     console.log(
-      chalk.bold("\nIssue進捗:  ") +
+      chalk.bold("\nIssue Progress:  ") +
         `${renderProgressBar(pct)}  ${pct}% (${status.issueProgress.completed}/${status.issueProgress.total})`,
     );
   }
 
   // Coverage Status
   console.log(
-    `  カバレッジ:   ${status.coverageStatus}`,
+    `  Coverage:     ${status.coverageStatus}`,
   );
 
   console.log();

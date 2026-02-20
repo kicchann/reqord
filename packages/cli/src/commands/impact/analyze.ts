@@ -36,7 +36,7 @@ export const analyzeCommand = new Command("analyze")
   });
 
 function displayResult(result: ImpactAnalysis): void {
-  console.log(chalk.bold(`\n影響範囲分析: ${result.sourceId}\n`));
+  console.log(chalk.bold(`\nImpact analysis: ${result.sourceId}\n`));
 
   if (result.sourceType === "requirement") {
     displayRequirementResult(result);
@@ -47,12 +47,12 @@ function displayResult(result: ImpactAnalysis): void {
 
 function displayRequirementResult(result: ImpactAnalysis): void {
   // Direct impacts
-  console.log(chalk.bold("直接影響:"));
+  console.log(chalk.bold("Direct impacts:"));
   if (result.directImpacts.length === 0) {
-    console.log("  なし\n");
+    console.log("  None\n");
   } else {
     const directTable = new Table({
-      head: ["ID", "関係", "タイトル"],
+      head: ["ID", "Relation", "Title"],
       style: { head: [], border: [] },
     });
     for (const impact of result.directImpacts) {
@@ -63,12 +63,12 @@ function displayRequirementResult(result: ImpactAnalysis): void {
   }
 
   // Indirect impacts
-  console.log(chalk.bold("間接影響:"));
+  console.log(chalk.bold("Indirect impacts:"));
   if (result.indirectImpacts.length === 0) {
-    console.log("  なし\n");
+    console.log("  None\n");
   } else {
     const indirectTable = new Table({
-      head: ["ID", "経由", "タイトル"],
+      head: ["ID", "Via", "Title"],
       style: { head: [], border: [] },
     });
     for (const impact of result.indirectImpacts) {
@@ -86,7 +86,7 @@ function displayRequirementResult(result: ImpactAnalysis): void {
 
 function displaySpecificationResult(result: ImpactAnalysis): void {
   if (result.parentRequirement) {
-    console.log(chalk.bold("親Requirement:"));
+    console.log(chalk.bold("Parent Requirement:"));
     console.log(`  ${result.parentRequirement.id} (${result.parentRequirement.title})\n`);
   }
   displaySpecifications(result);
@@ -94,12 +94,12 @@ function displaySpecificationResult(result: ImpactAnalysis): void {
 }
 
 function displaySpecifications(result: ImpactAnalysis): void {
-  console.log(chalk.bold("関連Specification:"));
+  console.log(chalk.bold("Related Specifications:"));
   if (result.relatedSpecifications.length === 0) {
-    console.log("  なし\n");
+    console.log("  None\n");
   } else {
     const specTable = new Table({
-      head: ["ID", "要件ID", "ステータス"],
+      head: ["ID", "Req ID", "Status"],
       style: { head: [], border: [] },
     });
     for (const spec of result.relatedSpecifications) {
@@ -111,12 +111,12 @@ function displaySpecifications(result: ImpactAnalysis): void {
 }
 
 function displayIssues(result: ImpactAnalysis): void {
-  console.log(chalk.bold("関連Issue:"));
+  console.log(chalk.bold("Related Issues:"));
   if (result.relatedIssues.length === 0) {
-    console.log("  なし\n");
+    console.log("  None\n");
   } else {
     const issueTable = new Table({
-      head: ["#", "ステータス", "タイトル"],
+      head: ["#", "Status", "Title"],
       style: { head: [], border: [] },
     });
     for (const issue of result.relatedIssues) {
@@ -130,7 +130,7 @@ function displayIssues(result: ImpactAnalysis): void {
 function displayCircularDependencies(result: ImpactAnalysis): void {
   if (result.circularDependencies.length === 0) return;
 
-  console.log(chalk.bold.yellow("循環依存:"));
+  console.log(chalk.bold.yellow("Circular dependencies:"));
   for (const cycle of result.circularDependencies) {
     console.log(`  ⚠ ${cycle.join(" → ")}`);
   }

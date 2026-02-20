@@ -41,7 +41,7 @@ export async function findById(cwd: string, id: string): Promise<Requirement | n
   const raw = await fs.readYAML<unknown>(yamlPath);
   const result = RequirementSchema.safeParse(raw);
   if (!result.success) {
-    throw new Error(`要件 ${id} のバリデーションエラー:\n${formatZodError(result.error)}`);
+    throw new Error(`Validation error for requirement ${id}:\n${formatZodError(result.error)}`);
   }
   return result.data;
 }

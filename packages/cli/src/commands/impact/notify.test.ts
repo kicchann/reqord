@@ -91,12 +91,12 @@ describe("notifyCommand", () => {
       "test",
       "req-000011",
       "--message",
-      "緊急の変更です",
+      "Urgent change",
     ]);
 
     expect(notifyImpact).toHaveBeenCalledWith(process.cwd(), "req-000011", {
       dryRun: undefined,
-      message: "緊急の変更です",
+      message: "Urgent change",
     });
   });
 
@@ -105,8 +105,8 @@ describe("notifyCommand", () => {
       makeNotifyResult({
         dryRun: true,
         notified: [
-          { type: "issue", number: 123, title: "ログイン画面の実装" },
-          { type: "issue", number: 124, title: "認証API統合テスト" },
+          { type: "issue", number: 123, title: "Login screen implementation" },
+          { type: "issue", number: 124, title: "Auth API integration test" },
         ],
         skipped: [{ type: "issue", number: 125, reason: "closed" }],
       }),
@@ -115,16 +115,16 @@ describe("notifyCommand", () => {
     await notifyCommand.parseAsync(["node", "test", "req-000011", "--dry-run"]);
 
     const output = consoleLogSpy.mock.calls.map((c) => c[0]).join("\n");
-    expect(output).toContain("影響範囲通知プレビュー: req-000011");
-    expect(output).toContain("通知対象:");
+    expect(output).toContain("Impact notification preview: req-000011");
+    expect(output).toContain("Notify targets:");
     expect(output).toContain("#123");
-    expect(output).toContain("ログイン画面の実装");
+    expect(output).toContain("Login screen implementation");
     expect(output).toContain("#124");
-    expect(output).toContain("認証API統合テスト");
-    expect(output).toContain("スキップ:");
+    expect(output).toContain("Auth API integration test");
+    expect(output).toContain("Skipped:");
     expect(output).toContain("#125");
     expect(output).toContain("closed");
-    expect(output).toContain("--dry-run を外して再実行");
+    expect(output).toContain("remove --dry-run and run again");
   });
 
   it("displays actual notification result format", async () => {
@@ -132,8 +132,8 @@ describe("notifyCommand", () => {
       makeNotifyResult({
         dryRun: false,
         notified: [
-          { type: "issue", number: 123, title: "ログイン画面の実装" },
-          { type: "issue", number: 124, title: "認証API統合テスト" },
+          { type: "issue", number: 123, title: "Login screen implementation" },
+          { type: "issue", number: 124, title: "Auth API integration test" },
         ],
         skipped: [{ type: "issue", number: 125, reason: "closed" }],
       }),
@@ -142,16 +142,16 @@ describe("notifyCommand", () => {
     await notifyCommand.parseAsync(["node", "test", "req-000011"]);
 
     const output = consoleLogSpy.mock.calls.map((c) => c[0]).join("\n");
-    expect(output).toContain("影響範囲通知: req-000011");
-    expect(output).toContain("通知完了:");
+    expect(output).toContain("Impact notification: req-000011");
+    expect(output).toContain("Notified:");
     expect(output).toContain("✓");
     expect(output).toContain("#123");
-    expect(output).toContain("ログイン画面の実装");
+    expect(output).toContain("Login screen implementation");
     expect(output).toContain("#124");
-    expect(output).toContain("スキップ:");
+    expect(output).toContain("Skipped:");
     expect(output).toContain("#125");
     expect(output).toContain("closed");
-    expect(output).toContain("2件の通知を送信しました。");
+    expect(output).toContain("Sent 2 notification(s).");
   });
 
   it("displays empty notification message", async () => {
@@ -160,8 +160,8 @@ describe("notifyCommand", () => {
     await notifyCommand.parseAsync(["node", "test", "req-000011"]);
 
     const output = consoleLogSpy.mock.calls.map((c) => c[0]).join("\n");
-    expect(output).toContain("影響範囲通知: req-000011");
-    expect(output).toContain("通知対象のissueはありません。");
+    expect(output).toContain("Impact notification: req-000011");
+    expect(output).toContain("No issues to notify.");
   });
 
   it("handles errors with error handler", async () => {

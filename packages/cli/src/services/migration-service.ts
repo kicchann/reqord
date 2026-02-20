@@ -102,7 +102,7 @@ export async function migrateToYaml(
 
   if (!(await fs.exists(reqordPath))) {
     throw new AppError(
-      ".reqord/ ディレクトリが見つかりません。先に 'reqord init' を実行してください。",
+      ".reqord/ directory not found. Run 'reqord init' first.",
       ErrorCode.NOT_FOUND,
     );
   }
@@ -149,7 +149,7 @@ export async function migrateToYaml(
   // Abort if too many errors
   if (plan.length > 0 && errors.length > 0 && errors.length / plan.length > 0.1) {
     throw new AppError(
-      `移行がエラー率10%を超えたため中断しました (${errors.length}/${plan.length}件失敗)。--dry-run で確認してください。`,
+      `Migration aborted: error rate exceeded 10% (${errors.length}/${plan.length} failed). Use --dry-run to check.`,
       ErrorCode.MIGRATION_FAILED,
     );
   }

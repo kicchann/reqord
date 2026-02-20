@@ -67,26 +67,26 @@ export const draftCommand = new Command("draft")
           }
 
           if (options.dryRun) {
-            console.log(`[dry-run] ステータス変更: ${result.previousStatus} → draft`);
+            console.log(`[dry-run] Status change: ${result.previousStatus} → draft`);
             if (result.impactedRequirements.length > 0) {
-              console.log(`[dry-run] 影響範囲:`);
+              console.log(`[dry-run] Impact scope:`);
               for (const rid of result.impactedRequirements) {
                 console.log(`  - ${rid}`);
               }
             }
           } else {
-            console.log(chalk.green(`差し戻しPRを作成しました: ${id}`));
-            console.log(`  status: ${result.previousStatus} → draft (PRマージ後に確定)`);
+            console.log(chalk.green(`Reversion PR created: ${id}`));
+            console.log(`  status: ${result.previousStatus} → draft (confirmed when PR is merged)`);
             if (result.impactedRequirements.length > 0) {
               console.log();
-              console.log("影響範囲:");
+              console.log("Impact scope:");
               for (const rid of result.impactedRequirements) {
                 console.log(`  - ${rid}`);
               }
             }
             console.log();
-            console.log(`PRを作成しました: ${result.prUrl}`);
-            console.log("PRマージで差し戻しが確定します。");
+            console.log(`PR created: ${result.prUrl}`);
+            console.log("Reversion will be confirmed when the PR is merged.");
           }
           return;
         }

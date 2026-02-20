@@ -39,14 +39,12 @@ function buildPrBody(
   entityType: "requirement" | "specification",
 ): string {
   const isSpec = entityType === "specification";
-  const entityLabel = isSpec ? "仕様" : "要件";
-  const heading = isSpec ? "仕様差し戻し" : "要件差し戻し";
+  const entityLabel = isSpec ? "Specification" : "Requirement";
+  const heading = isSpec ? "Specification Reversion to Draft" : "Requirement Reversion to Draft";
   const impactLabel = isSpec
-    ? "以下の要件がこの仕様の親要件に依存しています:"
-    : "以下の要件がこの要件に依存しています:";
-  const noImpactLabel = isSpec
-    ? "なし（他の要件に影響はありません）"
-    : "なし（他の要件に影響はありません）";
+    ? "The following requirements depend on this specification's parent requirement:"
+    : "The following requirements depend on this requirement:";
+  const noImpactLabel = "None (no impact on other requirements)";
 
   const impactSection =
     impactedRequirements.length > 0
@@ -55,21 +53,21 @@ function buildPrBody(
 
   return `## ${heading}
 
-| フィールド | 値 |
+| Field | Value |
 |-----------|------|
 | ID | ${id} |
-| タイトル | ${title} |
-| バージョン | ${version} |
-| 変更前ステータス | ${previousStatus} |
+| Title | ${title} |
+| Version | ${version} |
+| Previous Status | ${previousStatus} |
 
-### 影響範囲
+### Impact Analysis
 ${impactLabel}
 ${impactSection}
 
-### 変更内容
+### Changes
 status: ${previousStatus} → draft
 
-> このPRをマージすると、${entityLabel}のステータスが \`draft\` に差し戻されます。`;
+> Merging this PR will revert the ${entityLabel} status to \`draft\`.`;
 }
 
 function getEntityInfo(id: string): { type: "requirement" | "specification"; dir: string } {

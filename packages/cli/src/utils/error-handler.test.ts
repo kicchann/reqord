@@ -23,7 +23,7 @@ describe("handleError", () => {
 
     expect(consoleErrorSpy).toHaveBeenCalledOnce();
     const output = consoleErrorSpy.mock.calls[0][0] as string;
-    expect(output).toContain("エラー: Test error message");
+    expect(output).toContain("Error: Test error message");
   });
 
   it("sets process.exitCode to error.exitCode when handling AppError", () => {
@@ -39,7 +39,7 @@ describe("handleError", () => {
 
     expect(consoleErrorSpy).toHaveBeenCalledOnce();
     const output = consoleErrorSpy.mock.calls[0][0] as string;
-    expect(output).toContain("予期しないエラーが発生しました: Standard error");
+    expect(output).toContain("Unexpected error: Standard error");
   });
 
   it("sets process.exitCode to 1 for non-AppError", () => {

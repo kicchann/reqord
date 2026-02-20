@@ -27,7 +27,7 @@ export const implValidateCommand = new Command("impl")
         }
 
         console.log(
-          chalk.bold.cyan(`\n実装検証: ${specId}\n`),
+          chalk.bold.cyan(`\nImplementation validation: ${specId}\n`),
         );
 
         // Issues
@@ -50,7 +50,7 @@ export const implValidateCommand = new Command("impl")
 
         // Components
         if (result.componentCheck.total > 0) {
-          console.log(chalk.bold("コンポーネント:"));
+          console.log(chalk.bold("Components:"));
           for (const comp of result.componentCheck.components) {
             const icon = comp.exists
               ? chalk.green("[EXISTS] ")
@@ -62,7 +62,7 @@ export const implValidateCommand = new Command("impl")
 
         // Tests
         if (result.testCheck.total > 0) {
-          console.log(chalk.bold("テストファイル:"));
+          console.log(chalk.bold("Test files:"));
           for (const test of result.testCheck.tests) {
             const icon = test.exists
               ? chalk.green("[EXISTS] ")
@@ -75,15 +75,15 @@ export const implValidateCommand = new Command("impl")
         // Summary
         const { issueCheck, componentCheck, testCheck } = result;
         console.log(
-          `サマリー: Issues ${issueCheck.completed}/${issueCheck.total}, Components ${componentCheck.exists}/${componentCheck.total}, Tests ${testCheck.exists}/${testCheck.total}`,
+          `Summary: Issues ${issueCheck.completed}/${issueCheck.total}, Components ${componentCheck.exists}/${componentCheck.total}, Tests ${testCheck.exists}/${testCheck.total}`,
         );
         console.log(
-          `ステータス: ${result.overallStatus === "complete" ? chalk.green("complete") : result.overallStatus === "partial" ? chalk.yellow("partial") : chalk.red("not-started")}\n`,
+          `Status: ${result.overallStatus === "complete" ? chalk.green("complete") : result.overallStatus === "partial" ? chalk.yellow("partial") : chalk.red("not-started")}\n`,
         );
 
         if (options.strict && result.overallStatus !== "complete") {
           console.error(
-            chalk.red("実装検証失敗: 未完了項目があります"),
+            chalk.red("Implementation validation failed: incomplete items exist"),
           );
           process.exitCode = 1;
         }

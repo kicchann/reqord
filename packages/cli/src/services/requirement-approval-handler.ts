@@ -78,20 +78,20 @@ export interface ReqApprovalPrBodyParams {
 
 export function buildReqApprovalPrBody(params: ReqApprovalPrBodyParams): string {
   const lines: string[] = [
-    `## 要件承認依頼`,
+    `## Requirement Approval Request`,
     ``,
-    `| フィールド | 値 |`,
+    `| Field | Value |`,
     `|-----------|------|`,
     `| ID | ${params.id} |`,
-    `| タイトル | ${params.title} |`,
-    `| バージョン | ${params.version} |`,
+    `| Title | ${params.title} |`,
+    `| Version | ${params.version} |`,
     ``,
-    `### 変更内容`,
+    `### Changes`,
     `status: draft → approved`,
   ];
 
   if (params.successCriteria && params.successCriteria.length > 0) {
-    lines.push(``, `### 成功基準`);
+    lines.push(``, `### Success Criteria`);
     for (const criterion of params.successCriteria) {
       lines.push(`- ${criterion}`);
     }
@@ -104,7 +104,7 @@ export function buildReqApprovalPrBody(params: ReqApprovalPrBodyParams): string 
       deps.blocks.length > 0 ||
       deps.relatedTo.length > 0;
     if (hasAny) {
-      lines.push(``, `### 依存関係`);
+      lines.push(``, `### Dependencies`);
       if (deps.blockedBy.length > 0) {
         lines.push(`- **blockedBy:** ${deps.blockedBy.join(", ")}`);
       }
@@ -120,13 +120,11 @@ export function buildReqApprovalPrBody(params: ReqApprovalPrBodyParams): string 
   lines.push(
     ``,
     `### Checklist`,
-    `- [ ] 成功基準が明確で検証可能`,
-    `- [ ] 依存関係に問題がない`,
-    `- [ ] セルフレビュー完了`,
-    `- [ ] Breaking changesの確認`,
-    `- [ ] 関連するSpecificationへの影響確認`,
-    ``,
-    `> マージ後、\`reqord req update ${params.id} --status approved\` でステータスを更新してください。`,
+    `- [ ] Success criteria are clear and verifiable`,
+    `- [ ] No dependency issues`,
+    `- [ ] Self-review completed`,
+    `- [ ] Breaking changes reviewed`,
+    `- [ ] Impact on related specifications reviewed`,
   );
 
   return lines.join("\n");

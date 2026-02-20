@@ -161,10 +161,10 @@ describe("Specification承認フロー統合テスト", () => {
 
       // Assert: Success message with new format
       expect(consoleLogSpy).toHaveBeenCalledWith(
-        expect.stringContaining("承認依頼PRを作成しました: spec-000001"),
+        expect.stringContaining("Approval PR created: spec-000001"),
       );
       expect(consoleLogSpy).toHaveBeenCalledWith(
-        "PRがマージされると承認が確定します",
+        "Approval will be confirmed when the PR is merged",
       );
       expect(consoleLogSpy).toHaveBeenCalledWith(
         expect.stringContaining("PR: https://github.com/owner/repo/pull/42"),
@@ -211,7 +211,7 @@ describe("Specification承認フロー統合テスト", () => {
 
       // No success message shown
       expect(consoleLogSpy).not.toHaveBeenCalledWith(
-        expect.stringContaining("承認依頼PRを作成しました"),
+        expect.stringContaining("Approval PR created"),
       );
     });
   });
@@ -221,8 +221,8 @@ describe("Specification承認フロー統合テスト", () => {
       vi.mocked(checkSpecApprovalPrerequisites).mockResolvedValue({
         ok: false,
         errors: [
-          "Requirementが承認されていません",
-          "design.mdがテンプレートのままです。設計内容を記述してください。",
+          "Related requirement req-000001 is not approved (current: draft)",
+          "design.md still contains template placeholders. Please edit and write the design content.",
         ],
       });
 
@@ -230,10 +230,10 @@ describe("Specification承認フロー統合テスト", () => {
 
       // Error messages displayed
       expect(consoleErrorSpy).toHaveBeenCalledWith(
-        expect.stringContaining("Requirementが承認されていません"),
+        expect.stringContaining("Related requirement req-000001 is not approved"),
       );
       expect(consoleErrorSpy).toHaveBeenCalledWith(
-        expect.stringContaining("design.mdがテンプレートのままです"),
+        expect.stringContaining("design.md still contains template placeholders"),
       );
 
       // Exit code set
@@ -270,7 +270,7 @@ describe("Specification承認フロー統合テスト", () => {
 
       // Success message
       expect(consoleLogSpy).toHaveBeenCalledWith(
-        expect.stringContaining("差し戻しPRを作成しました: spec-000001"),
+        expect.stringContaining("Reversion PR created: spec-000001"),
       );
       expect(consoleLogSpy).toHaveBeenCalledWith(
         expect.stringContaining("status: approved → draft"),
@@ -321,7 +321,7 @@ describe("Specification承認フロー統合テスト", () => {
 
       // Error message
       expect(consoleErrorSpy).toHaveBeenCalledWith(
-        expect.stringContaining("Specificationのステータスが approved ではありません（現在: draft）"),
+        expect.stringContaining(`Specification status is not "approved" (current: draft)`),
       );
 
       // Exit code set
@@ -343,7 +343,7 @@ describe("Specification承認フロー統合テスト", () => {
 
       // Error message
       expect(consoleErrorSpy).toHaveBeenCalledWith(
-        expect.stringContaining("Specificationのステータスが approved ではありません（現在: implemented）"),
+        expect.stringContaining(`Specification status is not "approved" (current: implemented)`),
       );
 
       // Exit code set

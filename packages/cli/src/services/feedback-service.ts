@@ -272,7 +272,7 @@ function buildImpactSummary(feedback: FeedbackEntry): string {
   return lines.join("\n");
 }
 
-// v3.0.0: ISSUE_TEMPLATE/05-feedback.yml に準拠したbody生成 (SC-17)
+// v3.0.0: Body generation conforming to ISSUE_TEMPLATE/05-feedback.yml (SC-17)
 export interface CreateFeedbackOptions {
   title: string;
   description: string;
@@ -284,21 +284,21 @@ export interface CreateFeedbackOptions {
 
 function feedbackTypeToLabel(type: FeedbackType): string {
   const map: Record<FeedbackType, string> = {
-    "requirement-gap": "requirement-gap (要件の不足)",
-    "spec-mismatch": "spec-mismatch (仕様と実装の不一致)",
-    "bug": "implementation-bug (実装のバグ)",
-    "improvement": "improvement (改善提案)",
-    "security": "security (セキュリティ)",
+    "requirement-gap": "requirement-gap (missing requirement)",
+    "spec-mismatch": "spec-mismatch (spec vs implementation mismatch)",
+    "bug": "implementation-bug (implementation bug)",
+    "improvement": "improvement (improvement proposal)",
+    "security": "security (security issue)",
   };
   return map[type] ?? type;
 }
 
 function severityToLabel(severity: FeedbackSeverity): string {
   const map: Record<FeedbackSeverity, string> = {
-    critical: "critical (全ユーザーに影響)",
-    high: "high (多数のユーザーに影響)",
-    medium: "medium (一部のユーザーに影響)",
-    low: "low (軽微な問題)",
+    critical: "critical (affects all users)",
+    high: "high (affects many users)",
+    medium: "medium (affects some users)",
+    low: "low (minor issue)",
   };
   return map[severity] ?? severity;
 }
@@ -306,35 +306,35 @@ function severityToLabel(severity: FeedbackSeverity): string {
 function buildFeedbackIssueBody(options: CreateFeedbackOptions): string {
   const lines: string[] = [];
 
-  lines.push("### 何が起きた？ / 何に気づいた？");
+  lines.push("### What happened? / What did you notice?");
   lines.push("");
   lines.push(options.description);
   lines.push("");
 
-  lines.push("### フィードバックの種類");
+  lines.push("### Feedback type");
   lines.push("");
   const typeLabel = options.type
     ? feedbackTypeToLabel(options.type)
-    : "不明/未分類";
+    : "unknown/unclassified";
   lines.push(typeLabel);
   lines.push("");
 
   if (options.relatedReq) {
-    lines.push("### 関連する要件 (Requirement)");
+    lines.push("### Related requirement (Requirement)");
     lines.push("");
     lines.push(options.relatedReq);
     lines.push("");
   }
 
   if (options.relatedSpec) {
-    lines.push("### 関連する仕様 (Specification)");
+    lines.push("### Related specification (Specification)");
     lines.push("");
     lines.push(options.relatedSpec);
     lines.push("");
   }
 
   if (options.severity) {
-    lines.push("### 深刻度");
+    lines.push("### Severity");
     lines.push("");
     lines.push(severityToLabel(options.severity));
     lines.push("");
@@ -460,7 +460,7 @@ export async function resolveFeedback(
   await feedbackRepo.saveIndex(cwd, index);
 }
 
-// v3.0.0: close時の残存flag警告 (SC-16)
+// v3.0.0: Remaining flag warning on close (SC-16)
 export interface RemainingFlag {
   artifactId: string;
   issueNumber: number;
@@ -520,7 +520,7 @@ export async function checkRemainingFlags(
   return remaining;
 }
 
-// v3.0.0: Feedbackのリンク解除 (SC-14, SC-15)
+// v3.0.0: Feedback link removal (SC-14, SC-15)
 export interface UnlinkFromRequirementOptions {
   issueNumber: number;
   requirementId: string;
@@ -542,7 +542,7 @@ export async function unlinkFromRequirement(
     throw new Error(`Feedback for issue #${options.issueNumber} not found in index.yaml`);
   }
 
-  // linkedTo.requirementsから削除
+  // Remove from linkedTo.requirements
   const reqIndex = feedback.linkedTo.requirements.indexOf(options.requirementId);
   if (reqIndex === -1) {
     throw new Error(
@@ -551,7 +551,7 @@ export async function unlinkFromRequirement(
   }
   feedback.linkedTo.requirements.splice(reqIndex, 1);
 
-  // Requirementからfeedback-reviewフラグを削除
+  // Remove feedback-review flag from Requirement
   const requirement = await reqRepo.findByIdOrThrow(cwd, options.requirementId);
   requirement.flags = requirement.flags.filter(
     (f) =>
@@ -564,7 +564,7 @@ export async function unlinkFromRequirement(
 
   await feedbackRepo.saveIndex(cwd, index);
 
-  // GitHub Issue bodyのHTMLコメントを更新
+  // Update HTML comment in GitHub Issue body
   const issue = await githubClient.getIssue(options.issueNumber);
   const newBody = upsertReqordComment(issue.body ?? "", {
     type: feedback.type,
@@ -585,7 +585,7 @@ export async function unlinkFromSpecification(
     throw new Error(`Feedback for issue #${options.issueNumber} not found in index.yaml`);
   }
 
-  // linkedTo.specificationsから削除
+  // Remove from linkedTo.specifications
   const specIndex = feedback.linkedTo.specifications.indexOf(options.specificationId);
   if (specIndex === -1) {
     throw new Error(
@@ -594,7 +594,7 @@ export async function unlinkFromSpecification(
   }
   feedback.linkedTo.specifications.splice(specIndex, 1);
 
-  // Specificationからfeedback-reviewフラグを削除
+  // Remove feedback-review flag from Specification
   const specification = await specRepo.findByIdOrThrow(cwd, options.specificationId);
   specification.flags = specification.flags.filter(
     (f) =>
@@ -607,7 +607,7 @@ export async function unlinkFromSpecification(
 
   await feedbackRepo.saveIndex(cwd, index);
 
-  // GitHub Issue bodyのHTMLコメントを更新
+  // Update HTML comment in GitHub Issue body
   const issue = await githubClient.getIssue(options.issueNumber);
   const newBody = upsertReqordComment(issue.body ?? "", {
     type: feedback.type,
