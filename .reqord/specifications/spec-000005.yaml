@@ -39,12 +39,3 @@ currentApproval:
   prNumber: 429
   prUrl: https://github.com/kicchann/reqord/pull/429
   approvedBy: []
-implementation:
-  issues:
-    - number: 430
-      title: '[spec-000005] versionHistoryからgitCommitフィールドを削除'
-      url: https://github.com/kicchann/reqord/issues/430
-      priority: P2
-      status: open
-  totalEstimatedHours: 3
-  createdAt: 2026-02-20T15:33:03.698Z

@@ -33,27 +33,3 @@ currentApproval:
   prNumber: 421
   prUrl: https://github.com/kicchann/reqord/pull/421
   approvedBy: []
-implementation:
-  issues:
-    - number: 283
-      title: '[spec-000011] draftコマンドから--major/--patchオプション削除（バージョニング分離）'
-      url: https://github.com/kicchann/reqord/issues/283
-      priority: P1
-      status: closed
-    - number: 284
-      title: '[spec-000011] DraftReversionService実装（PR作成+影響範囲分析）'
-      url: https://github.com/kicchann/reqord/issues/284
-      priority: P1
-      status: closed
-    - number: 285
-      title: '[spec-000011] draftコマンドをDraftReversionServiceに接続'
-      url: https://github.com/kicchann/reqord/issues/285
-      priority: P1
-      status: closed
-    - number: 425
-      title: '[spec-000011] 承認PR本文テンプレートから手動更新指示を削除'
-      url: https://github.com/kicchann/reqord/issues/425
-      priority: P2
-      status: open
-  totalEstimatedHours: 8
-  createdAt: 2026-02-15T13:00:03.483Z

@@ -33,32 +33,3 @@ currentApproval:
   prNumber: 422
   prUrl: https://github.com/kicchann/reqord/pull/422
   approvedBy: []
-implementation:
-  issues:
-    - number: 299
-      title: '[spec-000015] approveコマンドUX改善（req/spec両方）'
-      url: https://github.com/kicchann/reqord/issues/299
-      priority: P2
-      status: closed
-    - number: 300
-      title: '[spec-000015] implementコマンド修正（req/spec両方: コマンド名変更 + 前提条件チェック強化）'
-      url: https://github.com/kicchann/reqord/issues/300
-      priority: P2
-      status: closed
-    - number: 301
-      title: '[spec-000015] Specification承認フロー統合テスト'
-      url: https://github.com/kicchann/reqord/issues/301
-      priority: P2
-      status: closed
-    - number: 426
-      title: '[spec-000015] 承認PR本文テンプレートから手動更新指示を削除・前提条件チェック修正確認'
-      url: https://github.com/kicchann/reqord/issues/426
-      priority: P2
-      status: open
-  totalEstimatedHours: 10
-  createdAt: 2026-02-15T23:35:22.309Z
-  progress:
-    total: 3
-    completed: 3
-    percentage: 100
-    lastSyncedAt: 2026-02-16T00:47:21.433Z

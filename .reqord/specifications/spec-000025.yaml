@@ -3,35 +3,15 @@ requirementId: req-000022
 title: 'Web UI - Ganttチャート'
 requirementVersion: '2.0'
 version: '1.0'
-status: implemented
+status: draft
 createdAt: 2026-02-08T14:08:15.243Z
-updatedAt: 2026-02-12T15:13:14.467Z
-versionHistory: []
+updatedAt: 2026-02-21T00:00:00Z
+versionHistory:
+  - version: '1.0'
+    status: draft
+    changedAt: 2026-02-21T00:00:00Z
+    summary: 'Reverted to draft for issue #432 restructuring'
 files:
   design: specifications/spec-000025/design.md
   supplementary: []
 flags: []
-implementation:
-  issues:
-    - number: 145
-      title: '[Task] spec-000025-2: Gantt SVG components & interactions'
-      url: https://github.com/kicchann/reqord/issues/145
-      priority: P1
-      status: closed
-    - number: 144
-      title: '[Task] spec-000025-1: Gantt data transformation'
-      url: https://github.com/kicchann/reqord/issues/144
-      priority: P1
-      status: closed
-    - number: 139
-      title: '[Task] spec-000025: Ganttチャート実装'
-      url: https://github.com/kicchann/reqord/issues/139
-      priority: P2
-      status: closed
-  totalEstimatedHours: 18
-  createdAt: 2026-02-10T22:45:11.142Z
-  progress:
-    total: 3
-    completed: 3
-    percentage: 100
-    lastSyncedAt: 2026-02-12T15:13:14.467Z

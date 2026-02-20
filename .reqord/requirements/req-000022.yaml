@@ -1,11 +1,15 @@
 id: req-000022
 version: '2.0'
 title: Web UI拡張 (Dashboard・依存グラフ・Gantt Chart)
-status: implemented
+status: draft
 priority: medium
 createdAt: 2026-02-07T12:00:00Z
-updatedAt: 2026-02-18T15:08:19.878Z
+updatedAt: 2026-02-21T00:00:00Z
 versionHistory:
+  - version: '2.0'
+    status: draft
+    changedAt: 2026-02-21T00:00:00Z
+    summary: 'Reverted to draft for issue #432 restructuring'
   - version: 1.0.0
     status: implemented
     changedAt: 2026-02-09T12:00:00Z
@@ -45,4 +49,10 @@ currentApproval:
   prNumber: 366
   prUrl: https://github.com/kicchann/reqord/pull/366
   approvedBy: []
-flags: []
+flags:
+  - type: feedback-review
+    reason: 'Feedback from issue #432'
+    createdAt: 2026-02-20T16:17:57.232Z
+    relatedIssues:
+      - 432
+    severity: high

@@ -3,10 +3,14 @@ requirementId: req-000023
 title: 'Feedbackスキーマ・Repository・GitHub同期基盤'
 requirementVersion: '4.0'
 version: '3.0'
-status: implemented
+status: draft
 createdAt: 2026-02-09T05:48:38.643Z
-updatedAt: 2026-02-16T12:07:42.527Z
-versionHistory: []
+updatedAt: 2026-02-21T00:00:00Z
+versionHistory:
+  - version: '3.0'
+    status: draft
+    changedAt: 2026-02-21T00:00:00Z
+    summary: 'Reverted to draft for issue #432 restructuring'
 files:
   design: specifications/spec-000027/design.md
   supplementary: []

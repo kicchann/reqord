@@ -1,11 +1,15 @@
 id: req-000012
 version: '3.1'
 title: 影響範囲分析
-status: implemented
+status: draft
 priority: medium
 createdAt: 2026-02-07T12:00:00Z
-updatedAt: 2026-02-17T14:36:08.697Z
+updatedAt: 2026-02-21T00:00:00Z
 versionHistory:
+  - version: '3.1'
+    status: draft
+    changedAt: 2026-02-21T00:00:00Z
+    summary: 'Reverted to draft for issue #432 restructuring'
   - version: 2.0.0
     status: approved
     changedAt: 2026-02-11T08:05:03.835Z
@@ -49,4 +53,10 @@ currentApproval:
   prNumber: 264
   prUrl: https://github.com/kicchann/reqord/pull/264
   approvedBy: []
-flags: []
+flags:
+  - type: feedback-review
+    reason: 'Feedback from issue #432'
+    createdAt: 2026-02-20T16:22:07.334Z
+    relatedIssues:
+      - 432
+    severity: high

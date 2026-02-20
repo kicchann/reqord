@@ -1,11 +1,15 @@
 id: req-000018
 version: '4.0'
 title: 実装検証
-status: implemented
+status: draft
 priority: low
 createdAt: 2026-02-07T12:00:00Z
-updatedAt: 2026-02-18T15:18:42.714Z
+updatedAt: 2026-02-21T00:00:00Z
 versionHistory:
+  - version: '4.0'
+    status: draft
+    changedAt: 2026-02-21T00:00:00Z
+    summary: 'Reverted to draft for issue #432 restructuring'
   - version: 2.0.0
     status: approved
     changedAt: 2026-02-11T08:05:04.580Z
@@ -55,4 +59,10 @@ currentApproval:
   prNumber: 367
   prUrl: https://github.com/kicchann/reqord/pull/367
   approvedBy: []
-flags: []
+flags:
+  - type: feedback-review
+    reason: 'Feedback from issue #432'
+    createdAt: 2026-02-20T16:20:28.750Z
+    relatedIssues:
+      - 432
+    severity: high
