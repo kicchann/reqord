@@ -23,7 +23,7 @@ export async function validateRequirement(
   const description = await reqRepo.loadDescription(cwd, id);
   const allRequirements = await reqRepo.findAll(cwd);
 
-  const language = options.language ?? "ja";
+  const language = options.language ?? "en";
   const issues: ValidationIssue[] = [];
 
   // 1. Ambiguous phrase detection

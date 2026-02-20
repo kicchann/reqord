@@ -120,7 +120,7 @@ describe("buildSpecApprovalPrBody", () => {
     expect(result).toMatch(/^## Specification Approval Request/);
   });
 
-  it("マージ後の案内メッセージが含まれる", () => {
+  it("Design files section is present", () => {
     const result = buildSpecApprovalPrBody({
       specId: "spec-000001",
       reqId: "req-000001",

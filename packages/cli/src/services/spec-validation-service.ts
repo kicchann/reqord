@@ -26,6 +26,7 @@ export interface ValidateSpecDesignResult {
   spec: Specification;
 }
 
+// Each entry: "English|日本語" - supports both heading variants in design.md
 const REQUIRED_SECTIONS = [
   "Design Overview|設計概要",
   "Architecture|アーキテクチャ",
