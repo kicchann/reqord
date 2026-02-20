@@ -1,10 +1,10 @@
 id: req-000005
 version: '5.0'
 title: Requirement/Specificationバージョン管理
-status: draft
+status: approved
 priority: medium
 createdAt: 2026-02-07T10:00:00Z
-updatedAt: 2026-02-20T14:13:19.911Z
+updatedAt: 2026-02-20T14:44:24.109Z
 versionHistory:
   - version: 1.0.0
     status: implemented
@@ -62,12 +62,6 @@ dependencies:
     - req-000011
 estimatedComplexity: medium
 estimatedHours: 12
-currentApproval:
-  version: '4.0'
-  phase: requirement
-  prNumber: 271
-  prUrl: https://github.com/kicchann/reqord/pull/271
-  approvedBy: []
 flags:
   - type: feedback-review
     reason: 'Feedback from issue #411'
@@ -75,3 +69,9 @@ flags:
     relatedIssues:
       - 411
     severity: low
+currentApproval:
+  version: '5.0'
+  phase: requirement
+  prNumber: 0
+  prUrl: ''
+  approvedBy: []
