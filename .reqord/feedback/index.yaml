@@ -493,3 +493,23 @@ feedbacks:
       createdSpecifications: []
     syncedAt: 2026-02-18T14:46:53.590Z
     status: open
+  - githubIssue: 410
+    type: spec-mismatch
+    severity: low
+    linkedTo:
+      requirements: []
+      createdRequirements: []
+      specifications: []
+      createdSpecifications: []
+    syncedAt: 2026-02-20T12:29:37.690Z
+    status: open
+  - githubIssue: 411
+    type: improvement
+    severity: low
+    linkedTo:
+      requirements: []
+      createdRequirements: []
+      specifications: []
+      createdSpecifications: []
+    syncedAt: 2026-02-20T12:58:04.132Z
+    status: open
