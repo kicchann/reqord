@@ -1,16 +1,21 @@
 id: spec-000019
 requirementId: req-000019
-title: 'ステータス表示コマンド'
+title: ステータス表示コマンド
 requirementVersion: '2.0'
-version: '1.0'
+version: '1.1'
 status: draft
 createdAt: 2026-02-08T14:08:08.151Z
-updatedAt: 2026-02-21T00:00:00Z
+updatedAt: 2026-02-20T23:19:02.305Z
 versionHistory:
   - version: '1.0'
     status: draft
     changedAt: 2026-02-21T00:00:00Z
     summary: 'Reverted to draft for issue #432 restructuring'
+  - version: '1.1'
+    status: draft
+    changedAt: 2026-02-20T23:19:02.305Z
+    summary: '#432 .reqord/issues/ 再構造化に伴うドキュメント更新'
 files:
   design: specifications/spec-000019/design.md
   supplementary: []
+flags: []

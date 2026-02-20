@@ -2,7 +2,7 @@
 
 ## 1. 設計概要
 
-GitHub Issueの状態をローカルのSpecification JSONに同期し、実装進捗を追跡する機能を提供する。spec-000016で作成されたIssueの最新状態をGitHub APIから取得し、`implementation.issues[].state` および `implementation.progress` フィールドを更新する。`gh` CLIを通じたGitHub API呼び出しにより、追加の認証設定なしでIssue情報を取得する。メタデータの整合性検証（Issue存在確認、HTMLコメントタグ一致、循環依存チェック）も提供する。
+GitHub Issueの状態をローカルの `.reqord/issues/tasks.yaml` に同期し、実装進捗を追跡する機能を提供する。spec-000016で作成されたIssueの最新状態をGitHub APIから取得し、tasks.yamlの各タスクエントリの `status` および `syncedAt` フィールドを更新する。進捗（progress）はtasks.yamlのclosed/totalから動的に計算される。`gh` CLIを通じたGitHub API呼び出しにより、追加の認証設定なしでIssue情報を取得する。メタデータの整合性検証（Issue存在確認、HTMLコメントタグ一致、循環依存チェック）も提供する。
 
 ## 2. アーキテクチャ
 
@@ -37,7 +37,7 @@ Repository:     repositories/specification.ts (既存)
                     ↓
 External:       gh CLI → GitHub API
                     ↓
-Storage:        .reqord/specifications/spec-NNNNNN.yaml
+Storage:        .reqord/issues/tasks.yaml
 ```
 
 ## 3. コンポーネント設計
@@ -144,30 +144,31 @@ export async function syncAll(
 
 ```typescript
 async function syncSpecification(cwd: string, specId: string): Promise<SyncResult> {
-  // 1. Specification JSONを読み込み
-  const spec = await specRepo.findById(cwd, specId);
-  if (!spec?.implementation?.issues) {
-    throw new Error(`No issues found for ${specId}`);
+  // 1. tasks.yamlからタスクエントリを読み込み
+  const tasksYaml = await loadTasksYaml(cwd);
+  const specTasks = tasksYaml.tasks.filter(t => t.specId === specId);
+  if (specTasks.length === 0) {
+    throw new Error(`No tasks found for ${specId}`);
   }
 
   // 2. 各IssueのGitHub状態を取得
   const synced: SyncedIssue[] = [];
-  for (const issue of spec.implementation.issues) {
-    const ghIssue = await githubRepo.getIssue(cwd, issue.number);
+  for (const task of specTasks) {
+    const ghIssue = await githubRepo.getIssue(cwd, task.issueNumber);
     synced.push({
-      number: issue.number,
-      title: issue.title,
-      previousState: issue.status,
+      number: task.issueNumber,
+      title: task.title,
+      previousState: task.status,
       currentState: mapGitHubState(ghIssue.state),
-      changed: issue.status !== mapGitHubState(ghIssue.state),
+      changed: task.status !== mapGitHubState(ghIssue.state),
     });
   }
 
-  // 3. 進捗率を計算
+  // 3. 進捗率を動的に計算
   const progress = calculateProgress(synced);
 
-  // 4. Specification JSONを更新
-  await updateSpecificationProgress(cwd, specId, synced, progress);
+  // 4. tasks.yamlのstatus・syncedAtを更新
+  await updateTasksYaml(cwd, specId, synced);
 
   return { specId, synced, progress, errors: [] };
 }
@@ -231,51 +232,34 @@ async function listIssues(cwd: string, options: ListOptions): Promise<GitHubIssu
 
 ### 3.5 ProgressCalculator (`utils/progress-calculator.ts` - 新規)
 
-**責務:** Issue状態からの進捗率計算。
+**責務:** tasks.yamlから進捗率を動的に計算する。進捗はtasks.yamlのclosed/totalから都度算出し、保存しない。
 
 ```typescript
 export function calculateProgress(issues: SyncedIssue[]): ProgressInfo {
   const total = issues.length;
   const completed = issues.filter(i => i.currentState === "closed").length;
   const inProgress = issues.filter(i =>
-    i.currentState === "open" &&
-    // assigneesが設定されている場合をin_progressとみなす
-    // （GitHub APIから取得した追加情報で判定）
-    false  // 基本実装ではopen/closedのみで判定
+    i.currentState === "open"
   ).length;
   const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
   return { total, completed, inProgress, percentage };
 }
+
+// specId指定でtasks.yamlから動的に進捗を計算
+export async function calculateProgressFromTasksYaml(
+  cwd: string,
+  specId: string,
+): Promise<ProgressInfo> {
+  const tasksYaml = await loadTasksYaml(cwd);
+  const specTasks = tasksYaml.tasks.filter(t => t.specId === specId);
+  const total = specTasks.length;
+  const completed = specTasks.filter(t => t.status === "closed").length;
+  const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
+  return { total, completed, inProgress: total - completed, percentage };
+}
 ```
 
-### 3.6 SpecificationSchema拡張
-
-spec-000016で追加される `implementation` フィールドに対し、本specで以下のフィールドを利用・更新する:
-
-```typescript
-// spec-000016で定義済みのフィールド（本specが更新対象とする）
-implementation: z.object({
-  issues: z.array(z.object({
-    number: z.number(),
-    title: z.string(),
-    url: z.string(),
-    priority: z.string(),
-    status: z.enum(["open", "in_progress", "closed"]).default("open"),
-  })),
-  strategy: z.string(),
-  totalEstimatedHours: z.number(),
-  createdAt: z.string(),
-  // 本specで追加するフィールド
-  progress: z.object({
-    total: z.number(),
-    completed: z.number(),
-    percentage: z.number(),
-    lastSyncedAt: z.string(),
-  }).optional(),
-}).optional(),
-```
-
-### 3.7 GitHub状態のマッピング
+### 3.6 GitHub状態のマッピング
 
 ```typescript
 function mapGitHubState(ghState: "open" | "closed"): "open" | "in_progress" | "closed" {
@@ -297,17 +281,16 @@ function mapGitHubState(ghState: "open" | "closed"): "open" | "in_progress" | "c
 ユーザー → reqord issue sync spec-000016
   → syncCommand.action("spec-000016")
     → issueSyncService.syncSpecification(cwd, "spec-000016")
-      → specRepo.findById(cwd, "spec-000016") → Specification取得
-        → implementation.issues = [#42, #43, #44]
+      → loadTasksYaml(cwd) → tasks.yaml読み込み
+        → specId === "spec-000016" のタスクをフィルタ → [#42, #43, #44]
       → 各Issueについて:
         → githubRepo.getIssue(cwd, 42)
           → gh issue view 42 --json ... → GitHubIssue
         → previousState vs currentState 比較
       → calculateProgress(synced)
         → { total: 3, completed: 1, percentage: 33 }
-      → specRepo.save(cwd, updatedSpec)
-        → implementation.issues[0].status = "closed"
-        → implementation.progress = { total: 3, completed: 1, percentage: 33, lastSyncedAt: "..." }
+      → updateTasksYaml(cwd, specId, synced)
+        → tasks.yaml の該当タスクの status = "closed", syncedAt = "..." を更新
     → SyncResult返却
   → テーブル表示
 ```
@@ -318,7 +301,7 @@ function mapGitHubState(ghState: "open" | "closed"): "open" | "in_progress" | "c
 ユーザー → reqord issue sync-all
   → syncAllCommand.action()
     → specRepo.findAll(cwd) → 全Specification取得
-    → implementationフィールドを持つspecをフィルタ
+    → tasks.yamlからspecIdの一覧を取得
     → 各specに対して syncSpecification() を順次実行
     → 全SyncResult[] を集約
   → サマリーテーブル表示:
@@ -382,9 +365,8 @@ function mapGitHubState(ghState: "open" | "closed"): "open" | "in_progress" | "c
   - JSON応答のパース検証
   - エラーハンドリング（Issue不存在、権限エラー）
 - **sync → save フロー**:
-  - 同期結果がSpecification JSONに正しく書き込まれること
-  - progressフィールドの更新値検証
-  - lastSyncedAtのタイムスタンプ更新
+  - 同期結果がtasks.yamlに正しく書き込まれること
+  - status・syncedAtフィールドの更新値検証
 
 ### E2Eテスト（手動）
 
@@ -408,7 +390,7 @@ function mapGitHubState(ghState: "open" | "closed"): "open" | "in_progress" | "c
 **決定:** 初期実装では `open` / `closed` の2状態のみを使用し、`in_progress` はGitHub Projectsとの統合として将来対応
 **理由:** GitHub REST APIではIssueの状態は `open` / `closed` のみ。`in_progress` の判定にはGitHub Projectsの `Status` カスタムフィールドへのアクセスが必要で、GraphQL APIの使用が前提となる。初期実装ではシンプルにopen/closedの同期に集中し、Projects統合は将来のspecで扱う。
 
-### progressフィールドの追加
+### 進捗の動的計算
 
-**決定:** `implementation.progress` オブジェクトを追加し、集計済みの進捗情報をJSON内に保持
-**理由:** ダッシュボード（spec-000022）やガントチャート（spec-000025）など複数のコンシューマーが進捗情報を参照する。毎回全Issueのstateをカウントするのではなく、同期時に計算済みの進捗を保持することで、読み取り側の実装がシンプルになる。`lastSyncedAt` によりデータの鮮度も確認可能。
+**決定:** 進捗（progress）はtasks.yamlから動的に計算し、保存しない
+**理由:** tasks.yamlにタスクのstatus（open/closed）が記録されているため、closed/totalで進捗率を都度計算できる。保存済みの進捗値は同期タイミングによって古くなるリスクがあるが、動的計算であれば常に最新の状態を反映する。ダッシュボード（spec-000022）やガントチャート（spec-000025）など複数のコンシューマーは `calculateProgressFromTasksYaml()` を呼び出して進捗を取得する。

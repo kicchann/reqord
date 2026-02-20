@@ -19,6 +19,7 @@
   - `specifications/` - 仕様書
   - `settings/` - テンプレート・ルール
   - `assets/` - 添付ファイル
+  - `issues/` - タスク・フィードバック管理
 - `settings/templates/` に初期テンプレートを配置
 - `settings/rules/` に初期ルールを配置
 

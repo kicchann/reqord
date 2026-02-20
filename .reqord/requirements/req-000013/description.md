@@ -47,6 +47,8 @@ Requirementに基づくSpecification（仕様）の作成・管理機能。設�
 - `files`: 外部ファイル参照（design + supplementary）
 - `versionHistory`: 承認トラッキング（version, status, gitCommit, approvedAt, approvedBy）
 
+> **注記（#432）**: issue管理情報（旧implementationフィールド）は `.reqord/issues/tasks.yaml` に分離された。Specificationはメタデータと設計文書の管理に専念する。
+
 ## 責務分離
 
 | 責務                              | 担当                         |

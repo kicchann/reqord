@@ -104,7 +104,6 @@ export const SpecificationSchema = z.object({
   }),
   flags: z.array(FeedbackFlagSchema).default([]),
   currentApproval: SpecCurrentApprovalSchema.optional(),
-  implementation: ImplementationSchema.optional(),
 });
 ```
 

@@ -280,10 +280,9 @@ export async function getDashboardData(): Promise<DashboardData> {
   const specApproved = specByStatus.approved ?? 0;
   const specTotal = specifications.length;
 
-  // Issues集計（各Specificationのimplementationフィールドから）
-  const allIssues = specifications
-    .filter(s => s.implementation)
-    .flatMap(s => s.implementation!.issues);
+  // Issues集計（tasks.yamlから）
+  const tasks = await loadTasksYaml(); // .reqord/issues/tasks.yaml
+  const allIssues = tasks;
   const issuesClosed = allIssues.filter(i => i.status === "closed").length;
   const issuesTotal = allIssues.length;
 
@@ -346,7 +345,7 @@ const navItems = [
           → .reqord/specifications/spec-*.yaml 読み込み
       → Requirements集計: byStatus, approvedPercentage
       → Specifications集計: byStatus, approvedPercentage
-      → Issues集計: 各spec.implementation.issues から
+      → Issues集計: tasks.yaml から
       → 健全性スコア算出
       → 警告検出
       → クリティカルパス抽出
@@ -375,7 +374,7 @@ const navItems = [
 - **getDashboardData**:
   - 正常系: Requirements/Specifications/Issuesの集計が正確であること
   - 要件0件: total=0, percentage=0
-  - implementationフィールドなし: Issues集計がスキップされること
+  - tasks.yamlにエントリなし: Issues集計がスキップされること
   - 健全性スコア計算: 加重平均の正確性
 - **detectWarnings**:
   - Gap Analysis未実行の承認済み要件
@@ -383,7 +382,7 @@ const navItems = [
   - Specificationなしの非draft要件
   - 設計検証エラーのSpecification
 - **groupByStatus**: 各ステータスのカウントが正確であること
-- **extractCriticalPath**: implementationフィールドからのタスク抽出
+- **extractCriticalPath**: tasks.yamlからのタスク抽出
 
 ### コンポーネントテスト
 

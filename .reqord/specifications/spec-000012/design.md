@@ -218,12 +218,12 @@ function traverseDependencyGraph(
 GitHub Issueの発見は2段階で行う:
 
 **1. ローカル（高速・APIコール不要）:**
-Specificationの `implementation.issues` フィールドから取得。`reqord issue create` 時に保存されたIssue情報（number, title, url, status）を利用する。
+`.reqord/issues/tasks.yaml` から該当Specificationに紐づくIssue情報（number, title, url, status）を取得する。`reqord issue create` 時にtasks.yamlに保存されたデータを利用する。
 
 ```typescript
-// specification.implementation.issues からIssue一覧を取得
-const spec = await specRepo.findById(cwd, specId);
-const issues = spec.implementation?.issues ?? [];
+// tasks.yaml からSpecificationに紐づくIssue一覧を取得
+const tasks = await tasksRepo.findBySpecificationId(cwd, specId);
+const issues = tasks.map(t => ({ number: t.issueNumber, title: t.title, url: t.url, status: t.status }));
 ```
 
 **2. GitHub検索（notifyコマンドでのステータス確認用）:**
@@ -284,7 +284,7 @@ export async function createPrComment(
         → req-000015 の blocks → [req-000016]
         → relatedTo は depth=1 で打ち切り
       → 関連Specification検索（requirementIdでフィルタ）
-      → 関連Issue取得（specification.implementation.issuesから）
+      → 関連Issue取得（tasks.yamlから）
       → 循環依存チェック（既存validation-serviceのDFSロジック再利用）
       → ImpactAnalysis構築
   → テーブル表示 or JSON出力
@@ -299,7 +299,7 @@ export async function createPrComment(
       → specRepo.findById(cwd, "spec-000011") → 対象Specification取得
       → 親Requirement取得（spec.requirementId）
       → 同一Requirementに紐づく他のSpecification検索
-      → 関連Issue取得（specification.implementation.issuesから）
+      → 関連Issue取得（tasks.yamlから）
       → ImpactAnalysis構築（依存グラフ走査はスキップ）
   → テーブル表示 or JSON出力
 ```
@@ -327,7 +327,7 @@ export async function createPrComment(
 - **循環依存検出**: A→B→C→A のケースで循環が検出されること
 - **maxDepth制限**: depth=1で間接影響が含まれないこと
 - **Specification関連付け**: requirementIdによる正確なフィルタリング
-- **Issue発見**: specification.implementation.issuesからの正確な取得
+- **Issue発見**: tasks.yamlからの正確な取得
 - **Specification起点分析**: spec-IDで親Requirement・関連Spec・Issueが取得されること
 - **通知メッセージ生成**: テンプレート変数が正しく置換されること
 - **影響先が0件**: 空のImpactAnalysisが返ること
@@ -363,5 +363,5 @@ export async function createPrComment(
 
 ### Issue発見のデータソース
 
-**決定:** analyzeではローカルデータ（specification.implementation.issues）、notifyではGitHub API
+**決定:** analyzeではローカルデータ（tasks.yaml）、notifyではGitHub API
 **理由:** analyzeはオフライン・高速動作を優先。notifyは実際のIssueステータス（open/closed）を確認する必要があるためGitHub APIを使用。Issue body の `<!-- reqord:specification -->` タグは紐づけ確認のフォールバックとして利用可能。

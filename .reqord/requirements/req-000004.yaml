@@ -1,10 +1,10 @@
 id: req-000004
-version: '1.1'
+version: '1.2'
 title: 共有型定義 (@reqord/shared)
 status: draft
 priority: high
 createdAt: 2026-02-07T10:00:00Z
-updatedAt: 2026-02-21T00:00:00Z
+updatedAt: 2026-02-20T23:18:54.171Z
 versionHistory:
   - version: '1.1'
     status: draft
@@ -18,6 +18,10 @@ versionHistory:
     status: approved
     changedAt: 2026-02-17T00:00:00Z
     summary: ドキュメント修正 - in-progress削除、遷移ルール未実装注記追加、StatusSchema統一
+  - version: '1.2'
+    status: draft
+    changedAt: 2026-02-20T23:18:54.171Z
+    summary: '#432 .reqord/issues/ 再構造化に伴うドキュメント更新'
 files:
   description: requirements/req-000004/description.md
   supplementary: []
@@ -44,10 +48,4 @@ dependencies:
     - req-000003
 estimatedComplexity: medium
 estimatedHours: 12
-flags:
-  - type: feedback-review
-    reason: 'Feedback from issue #432'
-    createdAt: 2026-02-20T16:17:43.503Z
-    relatedIssues:
-      - 432
-    severity: high
+flags: []

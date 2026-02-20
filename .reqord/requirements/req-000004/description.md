@@ -25,6 +25,7 @@ packages/shared/
 │   │   ├── requirement.ts      # Zodスキーマ
 │   │   ├── project-context.ts
 │   │   ├── specification.ts
+│   │   ├── task.ts
 │   │   └── index.ts
 │   └── index.ts
 ├── package.json
@@ -41,6 +42,9 @@ packages/shared/
 - `ProjectContext` - プロジェクトコンテキスト全体
 - `Specification` - 仕様書
 - `Flag` - feedback-review | security-review | breaking-change 等のフラグ型
+- `TasksIndex` - issues/tasks.yaml のタスク一覧インデックス型（issue管理情報の分離先）
+
+> **注記**: Specification型からimplementationフィールドが削除され、issue管理情報は `.reqord/issues/tasks.yaml` に分離された。
 
 ## ステータス遷移ルール（計画中, Feedback #16）
 

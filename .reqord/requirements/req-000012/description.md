@@ -17,9 +17,9 @@
 - Requirementの場合:
   - 依存関係（blockedBy, blocks, relatedTo）を走査し、関連Requirementを検出
   - `requirementId` で紐づく関連Specificationを検索
-  - Specificationの `implementation.issues` から関連GitHub Issueを取得
+  - `.reqord/issues/tasks.yaml` から該当Specificationに紐づくGitHub Issueを取得
 - Specificationの場合:
-  - `implementation.issues` から関連GitHub Issueを取得
+  - `.reqord/issues/tasks.yaml` から該当Specificationに紐づくGitHub Issueを取得
   - 同一Requirementに紐づく他のSpecificationを検索
 - 出力:
   - 直接影響: blocks先のRequirement

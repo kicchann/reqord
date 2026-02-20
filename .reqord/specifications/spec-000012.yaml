@@ -2,10 +2,10 @@ id: spec-000012
 requirementId: req-000012
 title: 影響範囲分析
 requirementVersion: '3.1'
-version: '1.0'
+version: '1.1'
 status: draft
 createdAt: 2026-02-08T14:08:07.554Z
-updatedAt: 2026-02-21T00:00:00Z
+updatedAt: 2026-02-20T23:19:00.086Z
 versionHistory:
   - version: '1.0'
     status: draft
@@ -15,6 +15,10 @@ versionHistory:
     status: approved
     changedAt: 2026-02-14T12:18:12.080Z
     summary: 'status: draft → approved'
+  - version: '1.1'
+    status: draft
+    changedAt: 2026-02-20T23:19:00.086Z
+    summary: '#432 .reqord/issues/ 再構造化に伴うドキュメント更新'
 files:
   design: specifications/spec-000012/design.md
   supplementary: []

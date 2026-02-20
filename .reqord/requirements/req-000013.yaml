@@ -1,10 +1,10 @@
 id: req-000013
-version: '1.1'
+version: '1.2'
 title: Specification CRUD
 status: draft
 priority: high
 createdAt: 2026-02-07T12:00:00Z
-updatedAt: 2026-02-21T00:00:00Z
+updatedAt: 2026-02-20T23:18:55.338Z
 versionHistory:
   - version: '1.1'
     status: draft
@@ -18,6 +18,10 @@ versionHistory:
     status: draft
     changedAt: 2026-02-16T01:38:58.639Z
     summary: Success criteria updated
+  - version: '1.2'
+    status: draft
+    changedAt: 2026-02-20T23:18:55.338Z
+    summary: '#432 .reqord/issues/ 再構造化に伴うドキュメント更新'
 files:
   description: requirements/req-000013/description.md
   supplementary: []
@@ -56,10 +60,4 @@ currentApproval:
   prNumber: 312
   prUrl: https://github.com/kicchann/reqord/pull/312
   approvedBy: []
-flags:
-  - type: feedback-review
-    reason: 'Feedback from issue #432'
-    createdAt: 2026-02-20T16:17:49.994Z
-    relatedIssues:
-      - 432
-    severity: high
+flags: []
