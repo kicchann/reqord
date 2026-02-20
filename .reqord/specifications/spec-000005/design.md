@@ -7,6 +7,7 @@
 > **v2.0.0改訂:** フィードバック(#109, #208, #209)に基づき、バージョニングルールと状態遷移を改訂。
 > **v3.0.0改訂 (Issue #247):** セマンティックバージョニングから整数+小数点形式（X.Y）に簡素化。
 > **v3.0.0改訂 (Issue #263):** バージョン管理とステータス遷移を完全分離。`reqord version`コマンド追加。Requirement/Specification共通設計に統合。
+> **v4.0改訂 (feedback #411):** versionHistoryからgitCommitフィールドを削除。git log -Sで導出する方針に変更。
 
 ## 2. アーキテクチャ
 
@@ -42,7 +43,8 @@ Shared:         @reqord/shared
 reqord req history <id> [--json]
 ```
 
-- テーブル形式: version, status, gitCommit(短縮), changedAt, summary
+- テーブル形式: version, status, changedAt, summary
+- gitCommitは表示しない（必要時は `git log -S` で導出）
 - `--json`: ValidationResult同様のJSON出力
 
 ### 3.2 VersionService (`services/version-service.ts` - 新規)
@@ -53,7 +55,7 @@ reqord req history <id> [--json]
   - **X.0インクリメント** (1.5→2.0): デフォルト（`--patch`なし）
   - **.Yインクリメント** (1.5→1.6): `--patch`指定時
   - **注**: approved/implemented → draft 遷移時にのみバージョン変更
-- `createHistoryEntry(requirement, gitCommit)`: VersionHistoryEntryの生成
+- `createHistoryEntry(requirement)`: VersionHistoryEntryの生成
 - `getStateTransitions()`: 許可される状態遷移マップの提供
 - `--major`, `--patch` オプションで明示的にバージョン種別を指定可能（`--minor` は廃止）
 - **デフォルトは`--major`**: オプション指定なしの場合、自動的に`--major`適用
@@ -151,13 +153,14 @@ draft ──approve──→ approved ──implement──→ implemented
 
 ```typescript
 {
-  version: string,      // "1.2.3"
+  version: string,      // "1.0", "2.0" etc.
   status: Status,       // 記録時点の状態
-  gitCommit: string,    // Gitコミットハッシュ（必須。PR経由のため常に取得可能）
   changedAt: string,    // ISO 8601タイムスタンプ
   summary: string,      // 変更概要
 }
 ```
+
+> **v4.0変更:** `gitCommit` フィールドを削除。`git log -S` で高速に導出可能（単一ファイル指定で0.02〜0.15秒）なため、YAMLに重複して保持しない。CLI実行時点ではコミット前のHEADが記録されるため不正確になる問題も解消。
 
 ## 4. データフロー
 
@@ -223,10 +226,11 @@ draft ──approve──→ approved ──implement──→ implemented
 **決定:** `approved` ステータスを廃止し、`draft → approved → implemented` の3状態とする
 **理由:** PRマージ自体が承認行為であり、別途「承認待ち」状態を設ける意味がない。ワークフローの簡素化。（#208 フィードバック反映）
 
-### Gitコミットハッシュの必須化
+### Gitコミットハッシュの導出方式（v4.0改訂）
 
-**決定:** すべての状態遷移・バージョン変更時にGitコミットハッシュを記録する（必須）
-**理由:** すべての状態遷移はPR経由で行われるため、コミットハッシュは常に取得可能。変更の追跡性を担保するために必須とする。
+**決定:** versionHistoryにgitCommitフィールドを持たず、必要時に `git log -S` で導出する
+**理由:** `git log -S` で高速に導出可能（単一ファイル指定で0.02〜0.15秒）。YAMLに重複保持する必要がなく、CLI実行時点ではコミット前のHEADが記録されるため不正確になる問題も解消。
+**旧決定（v3.0以前）:** ~~すべての状態遷移時にGitコミットハッシュを記録する（必須）~~ → v4.0で廃止
 
 ## 7. 改訂履歴
 
@@ -234,3 +238,4 @@ draft ──approve──→ approved ──implement──→ implemented
 |-----------|------|---------|
 | v1.0.0 | 2026-02-08 | 初版（Requirementバージョン管理） |
 | v2.0.0 | 2026-02-13 | #109: ステータス変更でバージョンを上げない方針に変更。#208: approved廃止。#209: --major/--minor/--patchオプション明記 |
+| v4.0 | 2026-02-21 | #411: versionHistoryからgitCommitフィールドを削除。git log -Sで導出する方針に変更 |

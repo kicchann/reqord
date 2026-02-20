@@ -1,11 +1,11 @@
 id: spec-000005
 requirementId: req-000005
-title: 'Requirement/Specificationバージョン管理'
+title: Requirement/Specificationバージョン管理
 requirementVersion: '4.0'
-version: '3.0'
-status: implemented
+version: '4.0'
+status: draft
 createdAt: 2026-02-08T14:08:06.961Z
-updatedAt: 2026-02-16T03:23:27.866Z
+updatedAt: 2026-02-20T15:15:39.066Z
 versionHistory:
   - version: 1.0.0
     status: implemented
@@ -29,16 +29,15 @@ versionHistory:
     gitCommit: bfc2d7a
     changedAt: 2026-02-14T21:22:47.041Z
     summary: 'status: implemented → approved (実装未完了のため差し戻し)'
+  - version: '4.0'
+    status: implemented
+    gitCommit: 0e17ee9
+    changedAt: 2026-02-20T15:15:39.066Z
+    summary: 'Remove gitCommit field from VersionHistoryEntrySchema (feedback #411, req-000005 v5.0)'
 files:
   design: specifications/spec-000005/design.md
   supplementary: []
 flags: []
-currentApproval:
-  version: '3.0'
-  phase: specification
-  prNumber: 274
-  prUrl: https://github.com/kicchann/reqord/pull/274
-  approvedBy: []
 implementation:
   issues:
     - number: 307
