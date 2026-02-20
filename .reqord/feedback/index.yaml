@@ -525,3 +525,13 @@ feedbacks:
         specifications: []
     syncedAt: 2026-02-20T13:40:59.325Z
     status: closed
+  - githubIssue: 420
+    type: improvement
+    severity: medium
+    linkedTo:
+      requirements: []
+      createdRequirements: []
+      specifications: []
+      createdSpecifications: []
+    syncedAt: 2026-02-20T14:47:40.896Z
+    status: open

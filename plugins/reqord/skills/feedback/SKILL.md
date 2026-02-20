@@ -1,7 +1,7 @@
 ---
 name: feedback
-description: Feedback運用（同期・分類・リンク・クローズ・フラグ解消）。GitHub Issueとして報告されたフィードバックの取り込みワークフローを実行する。Manage feedback lifecycle - sync GitHub issues, classify, link to requirements/specifications, close, and resolve flags. Use when processing issues, triaging bugs, or linking feedback.
-argument-hint: "[issue-number...] (省略時は未処理一覧から選択)"
+description: Feedback運用（作成・同期・分類・リンク・クローズ・フラグ解消）。GitHub Issueとしてフィードバックを作成、または既存フィードバックの取り込みワークフローを実行する。Manage feedback lifecycle - create, sync GitHub issues, classify, link to requirements/specifications, close, and resolve flags. Use when creating feedback, processing issues, triaging bugs, or linking feedback.
+argument-hint: "[create | issue-number...] (省略時は未処理一覧から選択)"
 ---
 
 > **ユーザー確認必須**: このスキルはGitHub Issue操作（クローズ・コメント）を伴います。自律実行時は操作内容をユーザーに提示し、承認を得てから実行してください。
@@ -10,8 +10,52 @@ argument-hint: "[issue-number...] (省略時は未処理一覧から選択)"
 
 対象: $ARGUMENTS
 
-GitHub Issueとして報告されたフィードバックを、同期・分類・リンク・クローズする運用ワークフロー。
+GitHub Issueとしてフィードバックを新規作成、または既存フィードバックの同期・分類・リンク・クローズを行う運用ワークフロー。
 正しいリンク先（req vs spec）の判断ルールを組み込み、誤リンクを防止する。
+
+---
+
+## $ARGUMENTS が "create" の場合 → Step C へ
+
+## $ARGUMENTS が "create" 以外の場合 → Step 1 へ
+
+---
+
+## Step C: フィードバック新規作成
+
+会話の文脈からフィードバック内容を整理し、`reqord feedback create` で GitHub Issue を作成する。
+
+### C.1 内容の整理
+
+会話の文脈から以下を特定する:
+
+- **タイトル**: フィードバックの要約（簡潔に）
+- **説明**: 何が起きたか / 何に気づいたか
+- **Type**: bug / improvement / requirement-gap / spec-mismatch / security
+- **Severity**: critical / high / medium / low
+- **関連 req/spec**: 分かっていれば（任意）
+
+不明な項目がある場合は AskUserQuestion で確認する。
+
+### C.2 作成実行
+
+```bash
+reqord feedback create \
+  --title "<タイトル>" \
+  --description "<説明>" \
+  --type <type> \
+  --severity <severity> \
+  [--related-req <req-id>] \
+  [--related-spec <spec-id>]
+```
+
+### C.3 結果報告
+
+- 作成された Issue 番号と URL
+- 適用された Type / Severity
+- 次のアクション: 「`/reqord:feedback <issue-number>` でリンク・クローズ処理を続行できます」
+
+**ここで終了。** 以降の Step 1〜8 は既存フィードバックの取り込みワークフロー。
 
 ---
 
