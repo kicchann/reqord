@@ -1,11 +1,11 @@
 id: spec-000011
 requirementId: req-000011
-title: Requirement承認フロー (GitHub PR連携)
+title: 'Requirement承認フロー (GitHub PR連携)'
 requirementVersion: '5.0'
-version: '2.0'
+version: '1.0'
 status: implemented
 createdAt: 2026-02-08T14:08:07.471Z
-updatedAt: 2026-02-20T14:13:22.338Z
+updatedAt: 2026-02-15T14:50:00.000Z
 versionHistory:
   - version: '1.0'
     status: draft
@@ -22,11 +22,6 @@ versionHistory:
     gitCommit: 32427ff
     changedAt: 2026-02-15T14:50:00.000Z
     summary: 'status: approved → implemented (PR #286)'
-  - version: '2.0'
-    status: implemented
-    gitCommit: 273b8b8
-    changedAt: 2026-02-20T14:13:22.338Z
-    summary: 'Fix unnecessary CLI command instruction in approval PR body (feedback #410)'
 files:
   design: specifications/spec-000011/design.md
   supplementary: []
