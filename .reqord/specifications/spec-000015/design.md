@@ -145,7 +145,7 @@ status: draft → approved
 ### 設計ファイル
 - `specifications/{specId}/design.md`
 
-> このPRをマージすると、仕様のステータスが `approved` に更新されます。
+> このPRをマージすると、仕様のステータスが `approved` に確定します。
 ```
 
 **designSummary抽出:** design.mdの「設計概要」セクション（## 1. 設計概要 の直下テキスト）を自動抽出してPR本文に含める。
