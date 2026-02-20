@@ -9,29 +9,24 @@ updatedAt: 2026-02-20T15:33:03.700Z
 versionHistory:
   - version: 1.0.0
     status: implemented
-    gitCommit: aa7e3b6
     changedAt: 2026-02-12T15:12:54.066Z
     summary: Initial implementation (Requirement versioning only)
   - version: '2.0'
     status: draft
-    gitCommit: pending
     changedAt: 2026-02-14T00:00:00.000Z
     summary: 'Simplified versioning: semantic versioning → integer-based (X.Y) format (Issue #247)'
   - version: '3.0'
     status: approved
-    gitCommit: d990b37
     changedAt: 2026-02-14T13:01:02.544Z
     summary: >-
       Unified Requirement/Specification versioning design. Added reqord version command architecture, separated
       versioning from status transitions. Status: draft → approved (Issue #263)
   - version: '3.0'
     status: approved
-    gitCommit: bfc2d7a
     changedAt: 2026-02-14T21:22:47.041Z
     summary: 'status: implemented → approved (実装未完了のため差し戻し)'
   - version: '4.0'
     status: implemented
-    gitCommit: 0e17ee9
     changedAt: 2026-02-20T15:15:39.066Z
     summary: 'Remove gitCommit field from VersionHistoryEntrySchema (feedback #411, req-000005 v5.0)'
 files:

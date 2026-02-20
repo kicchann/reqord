@@ -8,24 +8,20 @@ updatedAt: 2026-02-16T00:22:56.121Z
 versionHistory:
   - version: 2.0.0
     status: approved
-    gitCommit: f97b4fc
     changedAt: 2026-02-10T01:17:59.304Z
     summary: Status changed from draft to pending_approval
   - version: 3.0.0
     status: approved
-    gitCommit: fd38137
     changedAt: 2026-02-10T01:19:45.947Z
     summary: Status changed from pending_approval to approved
     approvedAt: 2026-02-10T01:19:45.947Z
     approvedBy: []
   - version: 4.0.0
     status: implemented
-    gitCommit: fd38137
     changedAt: 2026-02-10T01:19:51.783Z
     summary: Status changed from approved to implemented
   - version: 5.0.0
     status: draft
-    gitCommit: a3583e7
     changedAt: 2026-02-13T00:00:00.000Z
     summary: Reverted to draft for revision based on feedback (#208,
 files:

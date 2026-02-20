@@ -8,29 +8,24 @@ updatedAt: 2026-02-20T14:44:24.109Z
 versionHistory:
   - version: 1.0.0
     status: implemented
-    gitCommit: ff72679
     changedAt: 2026-02-09T12:00:00Z
     summary: Initial implementation (Requirement only)
   - version: 2.0.0
     status: draft
-    gitCommit: a3583e7
     changedAt: 2026-02-13T00:00:00.000Z
     summary: Reverted to draft for revision based on feedback (#109,
   - version: '3.0'
     status: draft
-    gitCommit: pending
     changedAt: 2026-02-14T00:00:00.000Z
     summary: 'Simplified versioning: semantic versioning → integer-based (X.Y) format (Issue #247)'
   - version: '4.0'
     status: draft
-    gitCommit: pending
     changedAt: 2026-02-14T12:00:00.000Z
     summary: >-
       Major design change: Add reqord version command, fully separate versioning from status transitions. Removes
       --major/--patch from draft command. Backward incompatible with v3.0 (Issue #263)
   - version: '5.0'
     status: implemented
-    gitCommit: 273b8b8
     changedAt: 2026-02-20T14:13:19.911Z
     summary: 'Remove gitCommit field from versionHistory (feedback #411)'
 files:

@@ -8,7 +8,6 @@ updatedAt: 2026-02-20T12:22:32.414Z
 versionHistory:
   - version: 1.0.0
     status: implemented
-    gitCommit: legacy
     changedAt: 2026-02-10T12:00:00Z
     summary: 初版実装完了（日本語エラーハンドリング統一）
 files:

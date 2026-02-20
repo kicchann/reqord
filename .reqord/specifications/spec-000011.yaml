@@ -9,22 +9,18 @@ updatedAt: 2026-02-20T14:57:08.563Z
 versionHistory:
   - version: '1.0'
     status: draft
-    gitCommit: f1bd45c
     changedAt: 2026-02-14T22:32:10.477Z
     summary: 'status: implemented → draft'
   - version: '1.0'
     status: approved
-    gitCommit: 2067d8c
     changedAt: 2026-02-15T09:39:03.405Z
     summary: 'status: draft → approved'
   - version: '1.0'
     status: implemented
-    gitCommit: 32427ff
     changedAt: 2026-02-15T14:50:00.000Z
     summary: 'status: approved → implemented (PR #286)'
   - version: '2.0'
     status: implemented
-    gitCommit: 273b8b8
     changedAt: 2026-02-20T14:13:22.338Z
     summary: 'Fix unnecessary CLI command instruction in approval PR body (feedback #410)'
 files:

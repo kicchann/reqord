@@ -10,7 +10,6 @@ versionHistory:
     changedAt: 2026-02-06T16:34:43.541Z
     summary: 初版作成
     status: deprecated
-    gitCommit: legacy
 files:
   description: requirements/req-000008/description.md
   supplementary: []

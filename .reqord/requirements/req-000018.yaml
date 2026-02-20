@@ -8,24 +8,20 @@ updatedAt: 2026-02-18T15:18:42.714Z
 versionHistory:
   - version: 2.0.0
     status: approved
-    gitCommit: 4a1fcac
     changedAt: 2026-02-11T08:05:04.580Z
     summary: Status changed from draft to pending_approval
   - version: 3.0.0
     status: approved
-    gitCommit: 4a1fcac
     changedAt: 2026-02-11T08:05:04.762Z
     summary: Status changed from pending_approval to approved
     approvedAt: 2026-02-11T08:05:04.762Z
     approvedBy: []
   - version: 3.0.1
     status: implemented
-    gitCommit: legacy
     changedAt: 2026-02-12T00:00:00Z
     summary: 実装完了
   - version: 4.0.0
     status: draft
-    gitCommit: 44c081f
     changedAt: 2026-02-18T00:00:00Z
     summary: 'Feedback #221（req implement時のステータス整合性チェック）を成功基準に追加'
 files:
