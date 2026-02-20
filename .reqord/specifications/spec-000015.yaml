@@ -3,7 +3,7 @@ requirementId: req-000015
 title: Specification承認フロー
 requirementVersion: '5.0'
 version: '2.0'
-status: implemented
+status: draft
 createdAt: 2026-02-08T14:08:07.812Z
 updatedAt: 2026-02-20T14:13:24.845Z
 versionHistory:
@@ -30,7 +30,13 @@ versionHistory:
 files:
   design: specifications/spec-000015/design.md
   supplementary: []
-flags: []
+flags:
+  - type: feedback-review
+    reason: 'Feedback from issue #410'
+    createdAt: 2026-02-20T13:52:25.475Z
+    relatedIssues:
+      - 410
+    severity: low
 currentApproval:
   version: '1.0'
   phase: specification
