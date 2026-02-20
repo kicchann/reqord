@@ -5,7 +5,7 @@ requirementVersion: '5.0'
 version: '2.0'
 status: approved
 createdAt: 2026-02-08T14:08:07.812Z
-updatedAt: 2026-02-20T14:57:20.969Z
+updatedAt: 2026-02-20T15:20:15.862Z
 versionHistory:
   - version: '1.0'
     status: draft
@@ -54,10 +54,15 @@ implementation:
       url: https://github.com/kicchann/reqord/issues/301
       priority: P2
       status: closed
-  totalEstimatedHours: 9
+    - number: 426
+      title: '[spec-000015] 承認PR本文テンプレートから手動更新指示を削除・前提条件チェック修正確認'
+      url: https://github.com/kicchann/reqord/issues/426
+      priority: P2
+      status: open
+  totalEstimatedHours: 10
   createdAt: 2026-02-15T23:35:22.309Z
   progress:
     total: 3
     completed: 3
     percentage: 100
-    lastSyncedAt: 2026-02-16T00:47:21.433Z
+    lastSyncedAt: 2026-02-20T15:20:15.861Z
