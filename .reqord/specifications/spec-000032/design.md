@@ -2,11 +2,11 @@
 
 ## 1. 設計概要
 
-`reqord spec/req approve` コマンドで作成された承認PRがマージされた際に、対象エンティティ（`req-NNNNNN` / `spec-NNNNNN`）のステータスを `approved` から `approved` に自動更新するGitHub Actionsワークフローを実装する。
+`reqord spec/req approve` コマンドで作成された承認PRがマージされた際に、対象エンティティ（`req-NNNNNN` / `spec-NNNNNN`）のステータスを `draft` から `approved` に自動更新するGitHub Actionsワークフローを実装する。
 
 ### 背景
 
-- 現在、承認PRマージ後の `approved` → `approved` 更新は手作業
+- 現在、承認PRマージ後の `draft` → `approved` 更新は手作業
 - ブランチ保護があるリポジトリではオーナー以外がmainに直pushできない
 - GitHub Actionsの `contents: write` 権限を使用して自動化する
 
@@ -87,7 +87,7 @@ jq --arg now "$NOW" \
      status: "approved",
      gitCommit: $commit,
      changedAt: $now,
-     summary: "Status changed from approved to approved"
+     summary: "Status changed from draft to approved"
    }]
    ' "$FILE_PATH" > tmp && mv tmp "$FILE_PATH"
 ```
@@ -103,7 +103,7 @@ yq -i "
     \"status\": \"approved\",
     \"gitCommit\": \"$COMMIT_SHA\",
     \"changedAt\": \"$NOW\",
-    \"summary\": \"Status changed from approved to approved\"
+    \"summary\": \"Status changed from draft to approved\"
   }]
 " "$FILE_PATH"
 ```
