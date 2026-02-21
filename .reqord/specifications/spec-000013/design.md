@@ -90,9 +90,9 @@ Requirement CRUDと同様の3層構成。Command層はCommander.jsによるCLI�
 ```typescript
 export const SpecificationSchema = z.object({
   id: z.string().regex(/^spec-\d{6}$/),
-  title: z.string(),                                    // ← #157で追加
+  title: z.string().min(1).optional(),                   // ← #157で追加（create時に自動設定）
   requirementId: z.string().regex(/^req-\d{6}$/),
-  requirementVersion: z.string(),                       // ← #220で追加
+  requirementVersion: z.string().min(1).optional(),     // ← #220で追加（create時に自動設定）
   version: z.string().default("1.0.0"),
   status: StatusSchema.default("draft"),
   createdAt: z.string(),
@@ -102,7 +102,7 @@ export const SpecificationSchema = z.object({
     design: z.string(),
     supplementary: z.array(z.string()).default([]),
   }),
-  flags: z.array(FeedbackFlagSchema).default([]),
+  flags: z.array(FlagSchema).default([]),              // FlagSchema from requirement.ts
 });
 ```
 
@@ -111,9 +111,9 @@ export const SpecificationSchema = z.object({
 - `title`: 仕様のタイトル。create時に`--title`で指定可能。未指定時はRequirementのtitleをデフォルト値として使用。グラフ表示やlist出力での識別に利用。
 - `requirementVersion`: 仕様が準拠するRequirementのバージョン（例: `"1.1"`）。create時にRequirementの現行versionを自動取得して設定。Requirementが更新された際に、Specificationが最新バージョンに準拠しているか判別できる。
 
-### 3.5 ID自動採番 (`utils/spec-id-generator.ts` - 実装済み)
+### 3.5 ID自動採番 (`utils/id-generator.ts` - 実装済み)
 
-**責務:** 既存spec-NNNNNN.yamlファイル名をスキャンし、最大番号+1で次IDを生成。
+**責務:** 既存spec-NNNNNN.yamlファイル名をスキャンし、最大番号+1で次IDを生成。req/specで共有。
 
 - パターン: `spec-NNNNNN`（6桁ゼロパディング）
 - 既存ファイルがない場合は `spec-000001` から開始
