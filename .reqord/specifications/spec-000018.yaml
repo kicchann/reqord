@@ -3,9 +3,9 @@ requirementId: req-000018
 title: 実装検証
 requirementVersion: '4.0'
 version: '1.1'
-status: draft
+status: approved
 createdAt: 2026-02-08T14:08:08.067Z
-updatedAt: 2026-02-20T23:19:01.749Z
+updatedAt: 2026-02-21T13:28:45.007Z
 versionHistory:
   - version: '1.0'
     status: draft
