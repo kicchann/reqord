@@ -1,10 +1,8 @@
+import type { Implementation, ImplementationIssue } from "@reqord/shared";
 import * as specRepo from "../repositories/specification.js";
 import * as githubClient from "./github-client.js";
-import * as fs from "../repositories/file-system.js";
 import { parseSpecTag, type SpecTagMetadata } from "../utils/spec-tag-parser.js";
-import { TasksIndexSchema, REQORD_DIR, ISSUES_DIR } from "@reqord/shared";
-import type { TaskEntry } from "@reqord/shared";
-import path from "node:path";
+import { calculateProgress } from "../utils/progress-calculator.js";
 
 export interface FetchOptions {
   specId?: string;
@@ -37,25 +35,6 @@ interface ParsedIssue {
   title: string;
   state: "open" | "closed";
   metadata: SpecTagMetadata;
-}
-
-async function loadTasksYaml(
-  cwd: string,
-): Promise<{ title: string; tasks: TaskEntry[] }> {
-  const tasksPath = path.join(cwd, REQORD_DIR, ISSUES_DIR, "tasks.yaml");
-  const raw = await fs.readYAML(tasksPath).catch(() => null);
-  if (!raw) return { title: "Tasks", tasks: [] };
-  const parsed = TasksIndexSchema.safeParse(raw);
-  if (!parsed.success) return { title: "Tasks", tasks: [] };
-  return parsed.data;
-}
-
-async function saveTasksYaml(
-  cwd: string,
-  data: { title: string; tasks: TaskEntry[] },
-): Promise<void> {
-  const tasksPath = path.join(cwd, REQORD_DIR, ISSUES_DIR, "tasks.yaml");
-  await fs.writeYAML(tasksPath, data);
 }
 
 export async function fetchIssues(
@@ -107,9 +86,6 @@ export async function fetchIssues(
   const specsUpdated: SpecFetchResult[] = [];
   const issuesWithoutSpec: OrphanIssue[] = [];
 
-  // Load existing tasks.yaml
-  const tasksIndex = await loadTasksYaml(cwd);
-
   for (const [specId, issues] of groupedBySpec) {
     const spec = await specRepo.findById(cwd, specId);
 
@@ -125,36 +101,38 @@ export async function fetchIssues(
       continue;
     }
 
-    const previousIssueCount = tasksIndex.tasks.filter((t) =>
-      t.linkedTo.specifications.includes(specId),
-    ).length;
+    const previousIssueCount = spec.implementation?.issues.length ?? 0;
+
+    // Build Implementation object
+    const implIssues: ImplementationIssue[] = issues.map((issue) => ({
+      number: issue.number,
+      title: issue.title,
+      url: `${repoUrl}/issues/${issue.number}`,
+      priority: issue.metadata.priority ?? "P2",
+      status: issue.state as "open" | "closed",
+    }));
 
     const totalEstimatedHours = issues.reduce(
       (sum, issue) => sum + (issue.metadata.estimatedHours ?? 0),
       0,
     );
 
-    // Upsert each issue into tasks.yaml
-    for (const issue of issues) {
-      const existingIdx = tasksIndex.tasks.findIndex(
-        (t) => t.number === issue.number,
-      );
-      const taskEntry: TaskEntry = {
-        number: issue.number,
-        title: issue.title,
-        url: `${repoUrl}/issues/${issue.number}`,
-        linkedTo: { specifications: [specId] },
-        priority: issue.metadata.priority ?? "P2",
-        status: issue.state as "open" | "closed",
-        estimatedHours: issue.metadata.estimatedHours,
-        syncedAt: new Date().toISOString(),
-      };
+    const progress = calculateProgress(implIssues);
 
-      if (existingIdx >= 0) {
-        tasksIndex.tasks[existingIdx] = taskEntry;
-      } else {
-        tasksIndex.tasks.push(taskEntry);
-      }
+    const implementation: Implementation = {
+      issues: implIssues,
+      totalEstimatedHours,
+      createdAt: spec.implementation?.createdAt ?? new Date().toISOString(),
+      progress: {
+        ...progress,
+        lastSyncedAt: new Date().toISOString(),
+      },
+    };
+
+    if (!options?.dryRun) {
+      spec.implementation = implementation;
+      spec.updatedAt = new Date().toISOString();
+      await specRepo.save(cwd, spec);
     }
 
     specsUpdated.push({
@@ -164,10 +142,6 @@ export async function fetchIssues(
       previousIssueCount,
       updated: !options?.dryRun,
     });
-  }
-
-  if (!options?.dryRun && specsUpdated.length > 0) {
-    await saveTasksYaml(cwd, tasksIndex);
   }
 
   return {
