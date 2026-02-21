@@ -99,7 +99,7 @@ export function registerCreateCommand(program: Command) {
 ```typescript
 import * as specRepo from "../repositories/specification.js";
 import * as githubClient from "./github-client.js";
-import { TaskDefinitionFile, TaskDefinition } from "@reqord/shared";
+import { TaskDefinitionFileSchema, type TaskDefinitionFile, type TaskDefinition } from "@reqord/shared";
 import * as fs from "../utils/file-system.js";
 
 export interface CreateIssuesOptions {
@@ -141,19 +141,16 @@ export async function createIssuesFromSpec(
 
   // 2. タスク定義ファイル読み込み・検証
   const tasksFile = await loadTasksFile(cwd, options.tasksFile);
-  if (tasksFile.tasks.length > options.maxIssues) {
+  if (options.maxIssues != null && tasksFile.tasks.length > options.maxIssues) {
     throw new Error(
       `Task count (${tasksFile.tasks.length}) exceeds max (${options.maxIssues})`
     );
   }
 
-  // 3. Issue Template読み込み
-  const template = await loadIssueTemplate(cwd);
-
-  // 4. 各タスクをIssueとして作成
+  // 3. 各タスクをIssueとして作成
   const issues: CreatedIssue[] = [];
   for (const task of tasksFile.tasks) {
-    const issueBody = buildIssueBody(options.specId, task, template);
+    const issueBody = buildIssueBody(options.specId, task);
     const labels = buildLabels(task);
 
     if (!options.dryRun) {
@@ -182,10 +179,6 @@ export async function createIssuesFromSpec(
 
   // 5. tasks.yamlに記録（dry-run時はスキップ）
   if (!options.dryRun) {
-    const totalEstimatedHours = tasksFile.tasks.reduce(
-      (sum, t) => sum + t.estimatedHours,
-      0
-    );
     await writeTasksToYaml(cwd, options.specId, {
       issues: issues.map((i) => ({
         number: i.number!,
@@ -198,38 +191,37 @@ export async function createIssuesFromSpec(
     });
   }
 
+  const totalEstimatedHours = tasksFile.tasks.reduce(
+    (sum, t) => sum + t.estimatedHours,
+    0
+  );
+
   return {
     specId: options.specId,
     issues,
-    totalEstimatedHours: tasksFile.tasks.reduce(
-      (sum, t) => sum + t.estimatedHours,
-      0
-    ),
+    totalEstimatedHours,
   };
 }
 
 function buildIssueBody(
   specId: string,
   task: TaskDefinition,
-  template: string | null,
 ): string {
   // HTMLコメントタグ埋め込み
   const metadata = `<!-- reqord:specification {"specificationId":"${specId}"} -->\n\n`;
 
-  // テンプレート適用またはシンプルなMarkdown
-  if (template) {
-    // テンプレート変数を置換
-    return metadata + applyTemplate(template, task);
-  } else {
-    return (
-      metadata +
-      `## 説明\n\n${task.description}\n\n` +
-      `## 見積もり\n\n${task.estimatedHours}時間\n\n` +
-      (task.dependencies.length > 0
-        ? `## 依存タスク\n\n${task.dependencies.map((d) => `- ${d}`).join("\n")}\n\n`
-        : "")
-    );
-  }
+  // Markdown形式でIssue bodyを構築
+  // NOTE: ISSUE_TEMPLATEはGitHub UI用のYAML form定義であり、
+  // gh issue create --body-file - でbodyを直接渡す場合には使用しない。
+  return (
+    metadata +
+    `## 説明\n\n${task.description}\n\n` +
+    `## 見積もり\n\n${task.estimatedHours}時間\n\n` +
+    `## 優先度\n\n${task.priority}\n\n` +
+    (task.dependencies.length > 0
+      ? `## 依存タスク\n\n${task.dependencies.map((d) => `- ${d}`).join("\n")}\n\n`
+      : "")
+  );
 }
 
 function buildLabels(task: TaskDefinition): string[] {
@@ -250,21 +242,6 @@ async function loadTasksFile(
   return TaskDefinitionFileSchema.parse(raw);
 }
 
-async function loadIssueTemplate(
-  cwd: string,
-): Promise<string | null> {
-  const templatePath = fs.joinPath(
-    cwd,
-    ".github",
-    "ISSUE_TEMPLATE",
-    "reqord-implementation.yml"
-  );
-  if (await fs.exists(templatePath)) {
-    return fs.readText(templatePath);
-  }
-  return null;
-}
-
 async function writeTasksToYaml(
   cwd: string,
   specId: string,
@@ -279,7 +256,6 @@ async function writeTasksToYaml(
     linkedTo: { specifications: [specId] },
     url: i.url,
     estimatedHours: i.estimatedHours,
-    priority: i.priority,
     status: i.status,
     syncedAt: new Date().toISOString(),
   }));
@@ -316,6 +292,8 @@ export async function createIssue(
     options.title,
     "--label",
     options.labels.join(","),
+    "--body-file",
+    "-",
   ];
 
   // bodyは大きくなる可能性があるためstdin経由で渡す（エスケープ問題回避）
@@ -325,10 +303,12 @@ export async function createIssue(
 
   const stdout = await new Promise<string>((resolve, reject) => {
     let data = "";
+    let stderr = "";
     proc.stdout.on("data", (chunk) => (data += chunk));
+    proc.stderr.on("data", (chunk) => (stderr += chunk));
     proc.on("close", (code) => {
       if (code === 0) resolve(data);
-      else reject(new Error(`gh issue create failed: ${code}`));
+      else reject(new Error(`gh issue create failed (code ${code}): ${stderr}`));
     });
   });
 
@@ -368,7 +348,7 @@ export type TaskDefinition = z.infer<typeof TaskDefinitionSchema>;
 export type TaskDefinitionFile = z.infer<typeof TaskDefinitionFileSchema>;
 ```
 
-### 3.5 GitHub Issue Template (`。github/ISSUE_TEMPLATE/reqord-implementation.yml` - 新規)
+### 3.5 GitHub Issue Template (`.github/ISSUE_TEMPLATE/reqord-implementation.yml` - 新規)
 
 **目的:** reqordから自動生成されるIssueのフォーマット統一。
 
@@ -439,12 +419,10 @@ body:
       → loadTasksFile(cwd, "./tasks.json")
         → fs.readText() → JSON.parse() → TaskDefinitionFileSchema.parse()
         → { tasks: [{ title, description, priority, estimatedHours, dependencies }, ...] }
-      → loadIssueTemplate(cwd)
-        → .github/ISSUE_TEMPLATE/reqord-implementation.yml 読み込み
       → 各タスクに対して:
-        → buildIssueBody(specId, task, template)
+        → buildIssueBody(specId, task)
           → HTMLコメントタグ挿入: <!-- reqord:specification {"specificationId":"spec-000016"} -->
-          → テンプレート適用またはMarkdown生成
+          → Markdown形式でbody構築（説明・見積もり・優先度・依存タスク）
         → buildLabels(task)
           → ["reqord-generated", "P0"] 等
         → githubClient.createIssue({ title, body, labels })
@@ -486,7 +464,7 @@ body:
   - issue生成後のtasks.yaml記録検証
 - **issue-service.buildIssueBody**:
   - HTMLコメントタグ埋め込み検証
-  - テンプレートあり/なしでの本文生成
+  - Markdown形式の本文生成（説明・見積もり・優先度・依存タスク）
 - **issue-service.buildLabels**:
   - `reqord-generated` + 優先度ラベルの生成
 - **github-client.createIssue**:
