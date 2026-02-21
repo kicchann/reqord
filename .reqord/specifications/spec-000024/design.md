@@ -146,7 +146,7 @@ export async function syncAll(
 async function syncSpecification(cwd: string, specId: string): Promise<SyncResult> {
   // 1. tasks.yamlからタスクエントリを読み込み
   const tasksYaml = await loadTasksYaml(cwd);
-  const specTasks = tasksYaml.tasks.filter(t => t.specId === specId);
+  const specTasks = tasksYaml.tasks.filter(t => t.linkedTo.specifications.includes(specId));
   if (specTasks.length === 0) {
     throw new Error(`No tasks found for ${specId}`);
   }
@@ -154,9 +154,9 @@ async function syncSpecification(cwd: string, specId: string): Promise<SyncResul
   // 2. 各IssueのGitHub状態を取得
   const synced: SyncedIssue[] = [];
   for (const task of specTasks) {
-    const ghIssue = await githubRepo.getIssue(cwd, task.issueNumber);
+    const ghIssue = await githubRepo.getIssue(cwd, task.number);
     synced.push({
-      number: task.issueNumber,
+      number: task.number,
       title: task.title,
       previousState: task.status,
       currentState: mapGitHubState(ghIssue.state),
@@ -251,7 +251,7 @@ export async function calculateProgressFromTasksYaml(
   specId: string,
 ): Promise<ProgressInfo> {
   const tasksYaml = await loadTasksYaml(cwd);
-  const specTasks = tasksYaml.tasks.filter(t => t.specId === specId);
+  const specTasks = tasksYaml.tasks.filter(t => t.linkedTo.specifications.includes(specId));
   const total = specTasks.length;
   const completed = specTasks.filter(t => t.status === "closed").length;
   const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
@@ -342,7 +342,7 @@ function mapGitHubState(ghState: "open" | "closed"): "open" | "in_progress" | "c
   - 正常系: 3件のIssueのうち1件がclosed → progress 33%
   - 全件closed: progress 100%
   - 全件open: progress 0%
-  - implementationフィールドなし: エラーメッセージ
+  - tasks.yamlに該当タスクなし: エラーメッセージ
   - GitHub API応答エラー: SyncErrorとして記録
 - **issueSyncService.validateSpecification**:
   - 全チェック正常: ValidationResult.errors = []

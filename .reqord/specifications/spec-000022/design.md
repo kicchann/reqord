@@ -281,8 +281,8 @@ export async function getDashboardData(): Promise<DashboardData> {
   const specTotal = specifications.length;
 
   // Issues集計（tasks.yamlから）
-  const tasks = await loadTasksYaml(); // .reqord/issues/tasks.yaml
-  const allIssues = tasks;
+  const tasksIndex = await loadTasksYaml(); // .reqord/issues/tasks.yaml
+  const allIssues = tasksIndex.tasks;
   const issuesClosed = allIssues.filter(i => i.status === "closed").length;
   const issuesTotal = allIssues.length;
 
@@ -295,8 +295,8 @@ export async function getDashboardData(): Promise<DashboardData> {
   // 警告検出
   const warnings = detectWarnings(requirements, specifications);
 
-  // クリティカルパス（implementationフィールドから）
-  const criticalPath = extractCriticalPath(specifications);
+  // クリティカルパス（tasks.yamlのestimatedHoursから算出）
+  const criticalPath = extractCriticalPath(allIssues);
 
   return { health, progress, statusBreakdown, warnings, criticalPath };
 }

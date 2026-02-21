@@ -120,8 +120,8 @@ function transformToGanttData(specId: string, tasks: TaskEntry[]): GanttData {
       { priority: "P1", label: "P1: Parallel", tasks: p1Gantt },
       { priority: "P2", label: "P2: Parallel", tasks: p2Gantt },
     ].filter(g => g.tasks.length > 0),
-    criticalPath: implementation.criticalPath ?? [],
-    totalEstimatedHours: implementation.totalEstimatedHours,
+    criticalPath: computeCriticalPath(allGanttTasks),
+    totalEstimatedHours: allGanttTasks.reduce((sum, t) => sum + t.estimatedHours, 0),
     timelineStart: 0,
     timelineEnd,
   };
@@ -276,7 +276,7 @@ interface GanttTooltipProps {
     → getSpecificationById(id)
       → .reqord/specifications/spec-NNNNNN.yaml 読み込み
       → tasks.yaml からタスク取得
-    → transformToGanttData(specId, implementation)
+    → transformToGanttData(specId, tasks)
       → Priority別グループ分け
       → P0: 直列配置 → startOffset累積計算
       → P1: 並列配置 → P0終了時点から開始

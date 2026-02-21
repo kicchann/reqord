@@ -113,11 +113,15 @@ FlagSchemaはdiscriminatedUnion（`type` フィールドで判別）に拡張す
 **責務:** `.reqord/issues/tasks.yaml` のタスク一覧インデックスのスキーマ定義。Specificationから分離されたissue管理情報を構造化する。
 
 ```typescript
+export const TaskLinkedToSchema = z.object({
+  specifications: z.array(z.string()).default([]),
+});
+
 export const TaskEntrySchema = z.object({
   number: z.number(),
   title: z.string(),
   url: z.string(),
-  linkedTo: z.array(z.string()).default([]),
+  linkedTo: TaskLinkedToSchema,
   priority: z.string().optional(),
   status: z.string(),
   estimatedHours: z.number().optional(),
@@ -125,6 +129,7 @@ export const TaskEntrySchema = z.object({
 });
 
 export const TasksIndexSchema = z.object({
+  title: z.string(),
   tasks: z.array(TaskEntrySchema),
 });
 ```

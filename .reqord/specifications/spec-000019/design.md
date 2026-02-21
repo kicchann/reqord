@@ -19,7 +19,7 @@ Repository:     repositories/requirement.ts       (既存)
                     ↓
 Shared:         @reqord/shared
                   schemas/requirement.ts          (既存: gapAnalysisフィールド参照)
-                  schemas/specification.ts        (既存: implementationフィールド参照)
+                  schemas/specification.ts        (既存: statusフィールド等参照)
                   rules/consistency.ts            (既存: checkConsistency)
                     ↓
 Storage:        .reqord/requirements/req-NNNNNN.yaml

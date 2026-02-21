@@ -482,8 +482,8 @@ export function buildDrillDownGraphData(
       animated: false,
     });
 
-    // 3. Issueノード（右列） - tasks.yamlからspec-idで検索
-    const specTasks = tasks.filter(t => t.specId === spec.id);
+    // 3. Issueノード（右列） - tasks.yamlからlinkedTo.specificationsで検索
+    const specTasks = tasks.filter(t => t.linkedTo.specifications.includes(spec.id));
     specTasks.forEach((task, j) => {
       const issueNodeId = `issue-${task.number}`;
       nodes.push({
@@ -628,7 +628,7 @@ Next.js App Router navigation
 - Refactor: ノード生成ロジックを関数に分割
 
 **Cycle 4: buildDrillDownGraphData - Issue追加**
-- Red: Specification.implementation.issuesからIssueノードが生成されるテスト（実装不足で失敗）
+- Red: tasks.yaml（linkedTo.specifications）からIssueノードが生成されるテスト（実装不足で失敗）
 - Green: Issueノード（右列x=720）と tracks エッジを追加
 - Refactor: エッジ生成ロジックをヘルパー関数に抽出
 

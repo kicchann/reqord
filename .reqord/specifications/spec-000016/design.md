@@ -274,13 +274,14 @@ async function writeTasksToYaml(
   const tasksYamlPath = fs.joinPath(cwd, ".reqord", "issues", "tasks.yaml");
   const existing = await loadTasksYaml(tasksYamlPath);
   const newEntries = data.issues.map((i) => ({
-    issueNumber: i.number,
-    specId,
+    number: i.number,
     title: i.title,
+    linkedTo: { specifications: [specId] },
     url: i.url,
     estimatedHours: i.estimatedHours,
+    priority: i.priority,
     status: i.status,
-    createdAt: data.createdAt,
+    syncedAt: new Date().toISOString(),
   }));
   existing.tasks.push(...newEntries);
   await saveTasksYaml(tasksYamlPath, existing);

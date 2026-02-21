@@ -469,9 +469,8 @@ function buildMultiLevelGraphData(
       type: "implements",
     });
 
-    // 3. Issueノードを配置（右列）
-    // 3. Issueノードを配置（右列） - tasks.yamlからspec-idで検索
-    const specTasks = tasks.filter(t => t.specId === spec.id);
+    // 3. Issueノードを配置（右列） - tasks.yamlからlinkedTo.specificationsで検索
+    const specTasks = tasks.filter(t => t.linkedTo.specifications.includes(spec.id));
     specTasks.forEach((task, j) => {
       const issueId = `issue-${task.number}`;
       nodes.push({
@@ -596,7 +595,7 @@ IssueNode クリック → window.open(issueUrl, "_blank") → GitHub Issue
 - **SpecTabs**: タブ切替でアクティブタブが変わること
 - **TabDesign**: Markdownコンテンツの描画
 - **TabCoverage**: 成功基準テーブルの行数
-- **TabIssues**: Issueリストテーブルの行数、implementationなし時の空状態
+- **TabIssues**: Issueリストテーブルの行数、tasks.yamlにタスクなし時の空状態
 - **TabHistory**: バージョン履歴エントリの表示
 - **SpecificationNode**: ステータス別の色クラスが適用されること
 - **IssueNode**: 状態別の色クラスが適用されること
