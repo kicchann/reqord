@@ -445,7 +445,7 @@ body:
   → createIssuesFromSpec(..., { dryRun: true })
     → Specification検証 + タスクファイル読み込みは同じ
     → githubClient.createIssue() はスキップ
-    → updateSpecificationImplementation() はスキップ
+    → writeTasksToYaml() はスキップ
   → プレビューテーブル表示:
     | # | タイトル | 優先度 | 見積 | 依存 |
     | 1 | スキーマ定義 | P0 | 2h | - |

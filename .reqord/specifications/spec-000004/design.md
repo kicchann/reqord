@@ -118,14 +118,14 @@ export const TaskLinkedToSchema = z.object({
 });
 
 export const TaskEntrySchema = z.object({
-  number: z.number(),
-  title: z.string(),
-  url: z.string(),
+  number: z.number().int().positive(),
+  title: z.string().min(1),
+  url: z.string().url(),
   linkedTo: TaskLinkedToSchema,
-  priority: z.string().optional(),
-  status: z.string(),
-  estimatedHours: z.number().optional(),
-  syncedAt: z.string(),
+  priority: z.enum(['P0', 'P1', 'P2', 'P3']).optional(),
+  status: z.enum(['open', 'closed']),
+  estimatedHours: z.number().positive().optional(),
+  syncedAt: z.string().datetime(),
 });
 
 export const TasksIndexSchema = z.object({
