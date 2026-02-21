@@ -339,6 +339,7 @@ import type { Requirement, Specification } from "@reqord/shared";
 interface DrillDownGraphProps {
   requirement: Requirement;
   specifications: Specification[];
+  tasks: TaskEntry[];
 }
 
 const nodeTypes = {
@@ -347,10 +348,10 @@ const nodeTypes = {
   issue: IssueNode,
 };
 
-export function DrillDownGraph({ requirement, specifications }: DrillDownGraphProps) {
+export function DrillDownGraph({ requirement, specifications, tasks }: DrillDownGraphProps) {
   const { nodes, edges } = useMemo(
-    () => buildDrillDownGraphData(requirement, specifications),
-    [requirement, specifications]
+    () => buildDrillDownGraphData(requirement, specifications, tasks),
+    [requirement, specifications, tasks]
   );
 
   return (
@@ -439,7 +440,8 @@ const LAYOUT = {
 
 export function buildDrillDownGraphData(
   requirement: Requirement,
-  specifications: Specification[]
+  specifications: Specification[],
+  tasks: TaskEntry[],
 ): DrillDownGraphData {
   const nodes: Node[] = [];
   const edges: Edge[] = [];
@@ -564,7 +566,7 @@ GraphPageClient rerenders
   ↓
 <DrillDownGraph> + <DrillDownBreadcrumb> 表示
   ↓
-buildDrillDownGraphData(requirement, specifications)
+buildDrillDownGraphData(requirement, specifications, tasks)
   ↓ 3列レイアウト計算（Req中央、Spec左、Issue右）
   ↓
 ReactFlow描画: 選択されたRequirement + 関連Spec + 関連Issue
