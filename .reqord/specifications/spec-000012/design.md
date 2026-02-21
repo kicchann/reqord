@@ -176,7 +176,7 @@ function traverseDependencyGraph(
 
   while (queue.length > 0) {
     const { id, depth, path, relation } = queue.shift()!;
-    if (visited.has(id)) continue;
+    if (visited.has(id)) continue;  // ダイヤモンド依存: 同一ノードへの複数経路のうち最初到達のみ記録
     if (maxDepth && depth > maxDepth) continue;
     visited.add(id);
 
@@ -311,7 +311,7 @@ export async function createPrComment(
   → notifyCommand.action("req-000011", { message: "優先度変更" })
     → impactService.analyzeImpact(cwd, "req-000011") → 影響先取得
     → 関連IssueのステータスをGitHub APIで確認（openのみ通知対象）
-    → 各影響先に対して（バッチ処理: 100件/時以下）:
+    → 各影響先に対して（バッチ処理: 100件/時以下、1件毎に36秒のスリープ間隔）:
       → 通知コメント生成
       → githubRepo.createIssueComment(issueNumber, comment) or
         githubRepo.createPrComment(prNumber, comment)
