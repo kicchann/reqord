@@ -2,7 +2,7 @@
 
 ## 1. 設計概要
 
-`reqord status` コマンドにより、プロジェクト全体の進捗ダッシュボードを提供する。Requirements・Specifications・GitHub Issuesの各カテゴリのステータス集計とASCIIプログレスバーで視覚的に進捗を表示する。`reqord status <req-id>` で要件単位の詳細ステータス（関連Specification・Gap Analysis結果）、`reqord status <spec-id>` で仕様単位の詳細（カバレッジ・Issue進捗）を表示する。`--json` と `--quiet`（CI用の数値のみ出力）オプションをサポートする。
+`reqord status` コマンドにより、プロジェクト全体の進捗ダッシュボードを提供する。Requirements・Specifications・GitHub Issuesの各カテゴリのステータス集計とASCIIプログレスバーで視覚的に進捗を表示する。`reqord status <req-id>` で要件単位の詳細ステータス（関連Specification・Gap Analysis結果）、`reqord status <spec-id>` で仕様単位の詳細（カバレッジ・Issue進捗）を表示する。`--json`、`--quiet`（警告のみ表示、CI向け）、`--check`（整合性チェックのみ実行）オプションをサポートする。
 
 Requirement/Specification間のステータス整合性チェックは `@reqord/shared` の `checkConsistency()` ルールを使用し、不整合を警告表示する（Feedback #16）。また、`feedback-review` フラグを持つRequirement/Specificationについて情報表示を行う。
 
@@ -42,7 +42,8 @@ reqord status [<id>] [options]
 |-----------|------|
 | `[<id>]` | 省略: プロジェクト全体、req-NNNNNN: 要件詳細、spec-NNNNNN: 仕様詳細 |
 | `--json` | 構造化JSON出力 |
-| `--quiet` | 数値のみ出力（CI用: `完了率%`） |
+| `--quiet` | 警告のみ表示（CI向け） |
+| `--check` | 整合性チェックのみ実行（終了コード: 0=問題なし, 1=警告あり） |
 
 **ID形式の判定:**
 ```typescript
@@ -62,12 +63,12 @@ reqord プロジェクトステータス
 
 Requirements:
   approved  ████████████░░░░░░░░  60% (6/10)
-  pending   ██░░░░░░░░░░░░░░░░░░  10% (1/10)
+  implemented ██░░░░░░░░░░░░░░░░  10% (1/10)
   draft     ██████░░░░░░░░░░░░░░  30% (3/10)
 
 Specifications:
   approved  ██████████░░░░░░░░░░  50% (4/8)
-  pending   ████░░░░░░░░░░░░░░░░  25% (2/8)
+  implemented ████░░░░░░░░░░░░░░  25% (2/8)
   draft     ████░░░░░░░░░░░░░░░░  25% (2/8)
 
 Issues:
@@ -212,6 +213,9 @@ function detectWarnings(
 
   for (const req of requirements) {
     // Gap Analysisが未実行
+    // NOTE: req-000017 (Gap Analysis) は deprecated のため、gapAnalysisフィールドは
+    // RequirementSchemaに存在しない。この警告は現状では発火しない。
+    // Gap Analysis機能が将来実装される場合にスキーマ追加と合わせて有効化する。
     if (!req.gapAnalysis && req.status === "approved") {
       warnings.push({
         id: req.id,
@@ -322,10 +326,10 @@ function renderProgressBar(percentage: number, width: number = 20): string {
       → reqRepo.findAll(cwd) → 全要件取得
       → specRepo.findAll(cwd) → 全仕様取得
       → Requirements集計:
-        → byStatus: { draft: 3, approved: 6, approved: 1 }
+        → byStatus: { draft: 3, approved: 6, implemented: 1 }
         → approvedPercentage: 60%
       → Specifications集計:
-        → byStatus: { draft: 2, approved: 4, approved: 2 }
+        → byStatus: { draft: 2, approved: 4, implemented: 2 }
         → approvedPercentage: 50%
       → Issues集計（tasks.yamlから各specに紐づくIssueを取得）:
         → total: 20, closed: 16, closedPercentage: 80%
@@ -355,7 +359,18 @@ function renderProgressBar(percentage: number, width: number = 20): string {
 ```
 ユーザー → reqord status --quiet
   → statusService.getProjectStatus(cwd)
-  → stdout: "60"  (Requirementsの承認率%のみ出力)
+  → detectWarnings(requirements, specifications)
+  → 警告のみ出力（プログレスバー等の通常表示を抑制）
+```
+
+### checkモード
+
+```
+ユーザー → reqord status --check
+  → statusService.getProjectStatus(cwd)
+  → detectWarnings(requirements, specifications)
+  → 整合性チェックのみ実行
+  → 終了コード: 0=問題なし, 1=警告あり
 ```
 
 ## 5. テスト方針
@@ -388,7 +403,8 @@ function renderProgressBar(percentage: number, width: number = 20): string {
 
 - テスト用のRequirement・Specification群を用意し、集計結果が正確であることを確認
 - `--json` 出力のスキーマ検証
-- `--quiet` 出力が数値のみであること
+- `--quiet` 出力が警告のみであること
+- `--check` が整合性チェックのみ実行し、適切な終了コードを返すこと
 
 ## 6. 技術的決定事項
 
