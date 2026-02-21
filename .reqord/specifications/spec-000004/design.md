@@ -151,9 +151,9 @@ export const TasksIndexSchema = z.object({
 - 「適切に」「なるべく」「できるだけ」等の42表現
 - `getAmbiguousPhrases(language)`: 言語コードに応じたリスト返却（現時点はjaのみ）
 
-### 3.11 ステータス遷移ルール（計画中）
+### 3.11 ステータス遷移ルール
 
-> **実装状況**: 未実装。遷移チェックはCLI `version-service.ts` 等にハードコードで散在しており、@reqord/shared への集約が未完了。
+> **実装状況**: `src/rules/status-transitions.ts` として実装済み。
 
 **責務:** Requirement・Specificationのステータス遷移を定数・関数として一元管理する。
 
@@ -169,7 +169,7 @@ deprecated         deprecated
 
 #### 設計
 
-- **配置先:** `schemas/common.ts` または新規 `rules/status-transitions.ts`
+- **配置先:** `rules/status-transitions.ts`
 - **`STATUS_TRANSITIONS`**: 許可遷移のマップ定数
 
   ```typescript
@@ -184,9 +184,9 @@ deprecated         deprecated
 - **`isValidTransition(from: Status, to: Status): boolean`**: 遷移の妥当性チェック
 - **`getAvailableTransitions(current: Status): Status[]`**: 現在のステータスから遷移可能な状態一覧を返却
 
-### 3.12 Req/Spec 整合性ルール（計画中）
+### 3.12 Req/Spec 整合性ルール
 
-> **実装状況**: 未実装。`reqord status` コマンド（req-000019）から使用される想定。
+> **実装状況**: `src/rules/consistency.ts` として実装済み。`reqord status` コマンド（req-000019）から使用される。
 
 **責務:** RequirementとSpecificationの状態整合性を検査し、警告リストを返却する。自動ステータス変更は行わず、警告のみ（human-in-the-loop）。
 
