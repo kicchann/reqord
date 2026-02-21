@@ -157,8 +157,11 @@ export async function loadIndex(cwd: string): Promise<FeedbackIndex> {
     const data = await readYAML(indexPath);
     return FeedbackIndexSchema.parse(data);
   } catch (error) {
-    // ファイルが存在しない場合は空のindexを返す
-    return { feedbacks: [] };
+    // ファイルが存在しない場合のみ空のindexを返す
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+      return { feedbacks: [] };
+    }
+    throw error;
   }
 }
 
@@ -238,20 +241,36 @@ export async function updateIssueBody(
   newBody: string
 ): Promise<void> {
   // spawn で --body-file - に stdin 経由で渡す（argv サイズ制限回避）
-  const proc = spawn("gh", ["issue", "edit", String(issueNumber), "--body-file", "-"]);
-  proc.stdin.write(newBody);
-  proc.stdin.end();
+  return new Promise<void>((resolve, reject) => {
+    const proc = spawn("gh", ["issue", "edit", String(issueNumber), "--body-file", "-"], {
+      stdio: ["pipe", "pipe", "pipe"],
+    });
+    let stderr = "";
+    proc.stderr.on("data", (data) => { stderr += data; });
+    proc.stdin.write(newBody);
+    proc.stdin.end();
+    proc.on("close", (code) => {
+      if (code === 0) resolve();
+      else reject(new Error(`gh issue edit failed: ${stderr}`));
+    });
+  });
 }
 
 export async function closeIssue(
   issueNumber: number,
   comment?: string
 ): Promise<void> {
-  let cmd = `gh issue close ${issueNumber}`;
+  const args = ["issue", "close", String(issueNumber)];
   if (comment) {
-    cmd += ` --comment "${comment.replace(/"/g, '\\"')}"`;
+    args.push("--comment", comment);
   }
-  await execAsync(cmd);
+  await new Promise<void>((resolve, reject) => {
+    const proc = spawn("gh", args, { stdio: ["ignore", "pipe", "pipe"] });
+    proc.on("close", (code) => {
+      if (code === 0) resolve();
+      else reject(new Error(`gh issue close failed with exit code ${code}`));
+    });
+  });
 }
 
 // v3.0.0追加: GitHub Issue作成
@@ -264,18 +283,34 @@ export interface CreateIssueOptions {
 export async function createIssue(
   options: CreateIssueOptions
 ): Promise<number> {
-  const args = ["gh", "issue", "create", "--title", options.title];
-  if (options.body) {
-    args.push("--body", options.body);
-  }
+  const args = ["issue", "create", "--title", options.title];
   if (options.labels && options.labels.length > 0) {
     args.push("--label", options.labels.join(","));
   }
+  if (options.body) {
+    args.push("--body-file", "-");
+  }
   args.push("--json", "number");
 
-  const { stdout } = await execAsync(args.join(" "));
-  const result = JSON.parse(stdout);
-  return result.number;
+  return new Promise<number>((resolve, reject) => {
+    const proc = spawn("gh", args, { stdio: ["pipe", "pipe", "pipe"] });
+    let stdout = "";
+    let stderr = "";
+    proc.stdout.on("data", (data) => { stdout += data; });
+    proc.stderr.on("data", (data) => { stderr += data; });
+    if (options.body) {
+      proc.stdin.write(options.body);
+      proc.stdin.end();
+    }
+    proc.on("close", (code) => {
+      if (code === 0) {
+        const result = JSON.parse(stdout);
+        resolve(result.number);
+      } else {
+        reject(new Error(`gh issue create failed: ${stderr}`));
+      }
+    });
+  });
 }
 ```
 
