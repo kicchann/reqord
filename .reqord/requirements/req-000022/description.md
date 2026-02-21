@@ -18,6 +18,7 @@
 - **サマリーカード**: Requirements, Specs, Issues それぞれの状態別集計
 - **警告表示**: Gap未実行、Validation失敗、ブロック中Issue
 - **依存関係グラフ**: インタラクティブなグラフ表示
+- **Issues進捗データソース**: `.reqord/issues/tasks.yaml`
 
 ### Specification詳細画面
 
@@ -52,7 +53,7 @@ Requirement/Specificationの詳細画面にflagsセクションを追加:
 ### Feedback一覧表示（Feedback #170）
 
 GitHub Issueに登録されたfeedbackをUI上で確認できるようにする:
-- Feedback一覧ページ（`.reqord/feedback/index.yaml`のデータを表示）
+- Feedback一覧ページ（`.reqord/issues/feedbacks.yaml`のデータを表示）
 - フィードバック種別（bug, requirement-gap, improvement等）でフィルタリング
 - 関連Requirement/Specificationへのリンク表示
 - ステータス（open/closed/resolved）の表示

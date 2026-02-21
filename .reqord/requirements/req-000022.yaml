@@ -1,10 +1,10 @@
 id: req-000022
-version: '2.0'
+version: '2.1'
 title: Web UI拡張 (Dashboard・依存グラフ・Gantt Chart)
 status: draft
 priority: medium
 createdAt: 2026-02-07T12:00:00Z
-updatedAt: 2026-02-21T00:00:00Z
+updatedAt: 2026-02-20T23:18:57.628Z
 versionHistory:
   - version: '2.0'
     status: draft
@@ -18,6 +18,10 @@ versionHistory:
     status: draft
     changedAt: 2026-02-18T00:00:00Z
     summary: 'Feedback #169（Flags UI表示）・#170（Feedback一覧表示）を成功基準に追加'
+  - version: '2.1'
+    status: draft
+    changedAt: 2026-02-20T23:18:57.628Z
+    summary: '#432 .reqord/issues/ 再構造化に伴うドキュメント更新'
 files:
   description: requirements/req-000022/description.md
   supplementary: []
@@ -49,10 +53,4 @@ currentApproval:
   prNumber: 366
   prUrl: https://github.com/kicchann/reqord/pull/366
   approvedBy: []
-flags:
-  - type: feedback-review
-    reason: 'Feedback from issue #432'
-    createdAt: 2026-02-20T16:17:57.232Z
-    relatedIssues:
-      - 432
-    severity: high
+flags: []

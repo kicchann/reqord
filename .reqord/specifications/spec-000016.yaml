@@ -1,16 +1,20 @@
 id: spec-000016
 requirementId: req-000016
-title: 'GitHub Issue一括生成'
+title: GitHub Issue一括生成
 requirementVersion: '1.0'
-version: '1.0'
+version: '1.1'
 status: draft
 createdAt: 2026-02-08T14:08:07.899Z
-updatedAt: 2026-02-21T00:00:00Z
+updatedAt: 2026-02-20T23:19:01.182Z
 versionHistory:
   - version: '1.0'
     status: draft
     changedAt: 2026-02-21T00:00:00Z
     summary: 'Reverted to draft for issue #432 restructuring'
+  - version: '1.1'
+    status: draft
+    changedAt: 2026-02-20T23:19:01.182Z
+    summary: '#432 .reqord/issues/ 再構造化に伴うドキュメント更新'
 files:
   design: specifications/spec-000016/design.md
   supplementary: []

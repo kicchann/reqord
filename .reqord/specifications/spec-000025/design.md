@@ -2,7 +2,7 @@
 
 ## 1. 設計概要
 
-Next.js 15 App Router上で、SpecificationごとのGitHub Issue進捗をGanttチャートとして可視化する機能を提供する。並列グループ（P0/P1/P2）ごとのレイアウト、Issue状態に応じた色分け、見積もり時間ベースのバー幅、クリティカルパスのハイライトを実装する。Specification詳細ページのIssuesタブ内に配置し、spec-000024の同期データ（`implementation` フィールド）をデータソースとする。SVGベースのカスタム実装により、外部Ganttライブラリへの依存を回避する。
+Next.js 15 App Router上で、SpecificationごとのGitHub Issue進捗をGanttチャートとして可視化する機能を提供する。並列グループ（P0/P1/P2）ごとのレイアウト、Issue状態に応じた色分け、見積もり時間ベースのバー幅、クリティカルパスのハイライトを実装する。Specification詳細ページのIssuesタブ内に配置し、`.reqord/issues/tasks.yaml` をデータソースとする。SVGベースのカスタム実装により、外部Ganttライブラリへの依存を回避する。
 
 ## 2. アーキテクチャ
 
@@ -32,8 +32,8 @@ packages/web/src/
 ```
 ブラウザ → /specifications/[id] (GET)
   → SpecificationDetailPage (Server Component)
-    → getSpecificationById(id) → Specification JSON取得
-      → implementation.issues, implementation.progress 読み取り
+    → getSpecificationById(id) → Specification YAML取得
+      → tasks.yaml からタスク配列取得
     → transformToGanttData() → GanttData変換
   → GanttChart (Client Component)
     → SVG描画
@@ -45,7 +45,7 @@ packages/web/src/
 
 #### gantt-data.ts (`lib/gantt-data.ts` - 新規)
 
-**責務:** Specification JSONの `implementation` フィールドからGanttチャート表示用のデータに変換する。
+**責務:** `tasks.yaml` のタスクデータからGanttチャート表示用のデータに変換する。
 
 ```typescript
 export interface GanttData {
@@ -78,15 +78,14 @@ export interface GanttTask {
 
 export function transformToGanttData(
   specId: string,
-  implementation: Implementation,
+  tasks: TaskEntry[],
 ): GanttData;
 ```
 
 **変換ロジック:**
 
 ```typescript
-function transformToGanttData(specId: string, implementation: Implementation): GanttData {
-  const tasks = implementation.issues;
+function transformToGanttData(specId: string, tasks: TaskEntry[]): GanttData {
 
   // 1. 優先度別にグループ分け
   const p0Tasks = tasks.filter(t => t.priority === "P0");
@@ -121,8 +120,8 @@ function transformToGanttData(specId: string, implementation: Implementation): G
       { priority: "P1", label: "P1: Parallel", tasks: p1Gantt },
       { priority: "P2", label: "P2: Parallel", tasks: p2Gantt },
     ].filter(g => g.tasks.length > 0),
-    criticalPath: implementation.criticalPath ?? [],
-    totalEstimatedHours: implementation.totalEstimatedHours,
+    criticalPath: computeCriticalPath(allGanttTasks),
+    totalEstimatedHours: allGanttTasks.reduce((sum, t) => sum + t.estimatedHours, 0),
     timelineStart: 0,
     timelineEnd,
   };
@@ -276,8 +275,8 @@ interface GanttTooltipProps {
   → SpecificationDetailPage (Server Component)
     → getSpecificationById(id)
       → .reqord/specifications/spec-NNNNNN.yaml 読み込み
-      → implementation フィールド取得
-    → transformToGanttData(specId, implementation)
+      → tasks.yaml からタスク取得
+    → transformToGanttData(specId, tasks)
       → Priority別グループ分け
       → P0: 直列配置 → startOffset累積計算
       → P1: 並列配置 → P0終了時点から開始
@@ -356,7 +355,7 @@ interface GanttTooltipProps {
 ### 統合テスト
 
 - Specification詳細ページ内でのGanttチャート表示
-- implementationフィールドが未設定の場合の空状態表示
+- tasks.yamlにエントリがない場合の空状態表示
 - 複数グループを持つデータでのレイアウト検証
 
 ## 6. 技術的決定事項

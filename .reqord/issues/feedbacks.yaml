@@ -552,5 +552,17 @@ feedbacks:
       createdRequirements: []
       specifications: []
       createdSpecifications: []
+      resolved:
+        requirements:
+          - req-000001
+          - req-000004
+          - req-000012
+          - req-000013
+          - req-000016
+          - req-000018
+          - req-000019
+          - req-000022
+          - req-000023
+        specifications: []
     syncedAt: 2026-02-20T16:08:21.668Z
     status: closed

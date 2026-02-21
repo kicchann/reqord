@@ -14,7 +14,7 @@ Specificationで定義された設計に対して、実装の完了度を検証�
 ### reqord validate impl \<spec-id\>
 
 1. **Issue完了チェック**
-   - Specification内の全GitHub Issueの状態を確認
+   - `.reqord/issues/tasks.yaml` から該当Specificationに紐づく全GitHub Issueの状態を確認
    - 未完了Issueをリスト表示
 
 2. **コンポーネント実装チェック**
@@ -53,7 +53,7 @@ Implementation Validation: spec-001
 
 - 対応する全Specificationが `implemented` であるかを確認
   - `implemented` でないSpecがある場合は警告表示（ブロックはしない）
-- 紐付きGitHub Issueが全て `closed` であるかを確認
+- `tasks.yaml` から紐付きGitHub Issueが全て `closed` であるかを確認
   - `open` のIssueがある場合は警告表示
 
 **自動ステータス変更は行わない。** 警告表示のみでユーザーの判断に委ねる（human-in-the-loop）。

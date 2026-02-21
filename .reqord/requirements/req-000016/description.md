@@ -23,7 +23,7 @@
    - 構造化Markdownで本文を生成
    - HTMLコメントタグでspec-idをメタデータとして埋め込み（`<!-- reqord:specification {"specificationId":"..."} -->`）
    - ラベル: `reqord-generated`, `<priority>`（P0/P1/P2/P3）
-4. Specification JSONの `implementation` フィールドを更新
+4. `.reqord/issues/tasks.yaml` にタスクエントリとして記録（url, estimatedHours）
 
 タスク定義ファイル形式:
 ```json
@@ -52,8 +52,7 @@
 ### reqord issue sync \<spec-id\>
 
 - GitHub APIで各Issueの最新状態を取得
-- Specification JSONの `implementation.issues[].state` を更新
-- `implementation.progress` を再計算
+- `.reqord/issues/tasks.yaml` の各タスクエントリのstatusを更新
 
 ### reqord issue sync-all
 

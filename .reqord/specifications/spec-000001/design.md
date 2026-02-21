@@ -35,6 +35,7 @@ File System:    .reqord/ ディレクトリ構造
    - `specifications/`
    - `settings/templates/` + `settings/rules/`
    - `assets/`
+   - `issues/`
 3. デフォルトテンプレートの配置:
    - `settings/templates/requirement-description.md`
    - `settings/templates/specification-design.md`
@@ -51,7 +52,7 @@ File System:    .reqord/ ディレクトリ構造
 ユーザー → reqord init
   → initService.initProject(cwd)
     → fs.exists(.reqord/) → 既存ならエラー
-    → fs.mkdirp() × 6ディレクトリ
+    → fs.mkdirp() × 7ディレクトリ
     → fs.writeText() × テンプレートファイル
     → fs.writeText() × ルールファイル
   → 完了サマリー表示

@@ -2,11 +2,11 @@
 
 ## 1. 設計概要
 
-GitHub Issueと`.reqord/feedback/index.yaml`の双方向同期機構を提供する。本specは以下の責務を担う:
+GitHub Issueと`.reqord/issues/feedbacks.yaml`の双方向同期機構を提供する。本specは以下の責務を担う:
 
 - **Zod スキーマ定義**: `@reqord/shared`パッケージにFeedbackIndex型を定義
-- **同期ロジック**: GitHub Issue (gh CLI) ↔ index.yaml の双方向同期
-- **Repository層**: index.yamlのCRUD操作
+- **同期ロジック**: GitHub Issue (gh CLI) ↔ feedbacks.yaml の双方向同期
+- **Repository層**: feedbacks.yamlのCRUD操作
 
 ### v2.0.0 追加スコープ
 
@@ -29,8 +29,8 @@ GitHub Issueと`.reqord/feedback/index.yaml`の双方向同期機構を提供す
            │
            ▼
 ┌─────────────────────┐
-│ FeedbackSyncService │ GitHub → index.yaml (default)
-│ (packages/cli)      │ index.yaml → GitHub (--from-local)
+│ FeedbackSyncService │ GitHub → feedbacks.yaml (default)
+│ (packages/cli)      │ feedbacks.yaml → GitHub (--from-local)
 └──────────┬──────────┘
            │
            ├─────────────────────┐
@@ -38,7 +38,7 @@ GitHub Issueと`.reqord/feedback/index.yaml`の双方向同期機構を提供す
 ┌─────────────────────┐   ┌─────────────────────┐
 │ GitHubClient        │   │ FeedbackRepository  │
 │ (packages/cli)      │   │ (packages/cli)      │
-│ - gh CLI実行        │   │ - index.yaml読み書き│
+│ - gh CLI実行        │   │ - feedbacks.yaml読み書き│
 │ - Issue取得/更新    │   │ - Zod検証           │
 └─────────────────────┘   └──────────┬──────────┘
                                      │
@@ -136,7 +136,7 @@ export * from "./feedback";
 
 **ファイルパス**: `packages/cli/src/repositories/feedback.ts`
 
-**責務**: index.yamlの読み書き、Zod検証
+**責務**: feedbacks.yamlの読み書き、Zod検証
 
 **インターフェース**:
 
@@ -149,7 +149,7 @@ import { FeedbackIndexSchema } from "@reqord/shared";
 import { readYAML, writeYAML } from "./file-system";
 import path from "node:path";
 
-const FEEDBACK_INDEX_PATH = ".reqord/feedback/index.yaml";
+const FEEDBACK_INDEX_PATH = ".reqord/issues/feedbacks.yaml";
 
 export async function loadIndex(cwd: string): Promise<FeedbackIndex> {
   const indexPath = path.join(cwd, FEEDBACK_INDEX_PATH);
@@ -295,7 +295,7 @@ import { listFeedbackIssues, getIssue, updateIssueBody, type GitHubIssue } from 
 import { loadIndex, saveIndex } from "../repositories/feedback";
 import { parseReqordComment, buildReqordComment, upsertReqordComment } from "./reqord-comment";
 
-// GitHub → index.yaml 同期（v2.0.0: マージ更新 + 一括I/O）
+// GitHub → feedbacks.yaml 同期（v2.0.0: マージ更新 + 一括I/O）
 export async function syncFromGitHub(cwd: string): Promise<number> {
   const issues = await listFeedbackIssues();
   const index = await loadIndex(cwd);  // 1回のload
@@ -339,7 +339,7 @@ export function mergeFeedback(
   };
 }
 
-// index.yaml → GitHub 同期（HTMLコメントをIssue bodyに挿入/更新）
+// feedbacks.yaml → GitHub 同期（HTMLコメントをIssue bodyに挿入/更新）
 export async function syncToGitHub(cwd: string): Promise<number> {
   const index = await loadIndex(cwd);
   let updatedCount = 0;
@@ -395,8 +395,8 @@ import chalk from "chalk";
 import { syncFromGitHub, syncToGitHub } from "../../services/feedback-sync-service";
 
 export const syncCommand = new Command("sync")
-  .description("Sync GitHub Issues with feedback label to index.yaml")
-  .option("--from-local", "Sync from index.yaml to GitHub")
+  .description("Sync GitHub Issues with feedback label to feedbacks.yaml")
+  .option("--from-local", "Sync from feedbacks.yaml to GitHub")
   .option("--json", "Output as JSON")
   .action(async (options) => {
     try {
@@ -410,8 +410,8 @@ export const syncCommand = new Command("sync")
         console.log(JSON.stringify({ synced: count }));
       } else {
         const direction = options.fromLocal
-          ? "index.yaml → GitHub"
-          : "GitHub → index.yaml";
+          ? "feedbacks.yaml → GitHub"
+          : "GitHub → feedbacks.yaml";
         console.log(chalk.green(`✓ Synced ${count} feedbacks (${direction})`));
       }
     } catch (error) {
@@ -423,14 +423,14 @@ export const syncCommand = new Command("sync")
 
 ## 4. データフロー
 
-### 4.1 GitHub → index.yaml 同期 (デフォルト)
+### 4.1 GitHub → feedbacks.yaml 同期 (デフォルト)
 
 ```
 1. ユーザー実行
    $ reqord feedback sync
 
 2. syncFromGitHub()（v2.0.0: マージ更新 + 一括I/O）
-   ├─ loadIndex() で既存index.yamlを一括読み込み
+   ├─ loadIndex() で既存feedbacks.yamlを一括読み込み
    ├─ gh issue list --label feedback でGitHub Issueを取得（bodyフィールド含む）
    ├─ 各Issueについて:
    │  ├─ Issue bodyのHTMLコメントからFeedbackEntryを構築
@@ -442,20 +442,20 @@ export const syncCommand = new Command("sync")
    │  │  ├─ linkedTo（resolved含む） → 常にexisting保持
    │  │  └─ status, syncedAt → GitHubから更新
    │  └─ 既存エントリがない場合: 新規追加
-   └─ saveIndex() でindex.yamlに一括保存
+   └─ saveIndex() でfeedbacks.yamlに一括保存
 
 3. 結果表示
-   ✓ Synced 3 feedbacks (GitHub → index.yaml)
+   ✓ Synced 3 feedbacks (GitHub → feedbacks.yaml)
 ```
 
-### 4.2 index.yaml → GitHub 同期 (--from-local)
+### 4.2 feedbacks.yaml → GitHub 同期 (--from-local)
 
 ```
 1. ユーザー実行
    $ reqord feedback sync --from-local
 
 2. syncToGitHub()
-   ├─ loadIndex() でindex.yamlを読み込み
+   ├─ loadIndex() でfeedbacks.yamlを読み込み
    ├─ 各feedbackのGitHub Issue bodyを取得
    ├─ FeedbackEntryからHTMLコメントを構築
    │  └─ <!-- reqord:feedback {"type":"...","linkedTo":{...}} -->
@@ -463,7 +463,7 @@ export const syncCommand = new Command("sync")
    └─ gh issue edit --body-file でIssue body更新
 
 3. 結果表示
-   ✓ Synced 3 feedbacks (index.yaml → GitHub)
+   ✓ Synced 3 feedbacks (feedbacks.yaml → GitHub)
 ```
 
 ## 5. テスト方針
@@ -503,8 +503,8 @@ export const syncCommand = new Command("sync")
 
 **E2Eシナリオ**:
 1. 空のプロジェクトで`reqord feedback sync`実行
-2. index.yamlが生成され、feedbackラベル付きIssueが同期されることを確認
-3. index.yaml手動編集後、`reqord feedback sync --from-local`実行
+2. feedbacks.yamlが生成され、feedbackラベル付きIssueが同期されることを確認
+3. feedbacks.yaml手動編集後、`reqord feedback sync --from-local`実行
 4. GitHub Issue上のラベルが更新されることを確認
 
 ## 6. 技術的決定事項
@@ -522,9 +522,9 @@ export const syncCommand = new Command("sync")
 - Octokit: 認証設定の複雑さ、依存関係増加
 - @actions/github: GitHub Actions専用、ローカル実行に不向き
 
-### 6.2 index.yamlの最小限設計
+### 6.2 feedbacks.yamlの最小限設計
 
-**決定**: index.yamlにはGitHub Issue参照情報のみを保持
+**決定**: feedbacks.yamlにはGitHub Issue参照情報のみを保持
 
 **理由**:
 - GitHub IssueがSSoT（Single Source of Truth）
@@ -539,7 +539,7 @@ export const syncCommand = new Command("sync")
 
 ### 6.3 双方向同期の競合解決
 
-**決定**: 同期方向を明示的に指定（デフォルトはGitHub → index.yaml）
+**決定**: 同期方向を明示的に指定（デフォルトはGitHub → feedbacks.yaml）
 
 **理由**:
 - 自動マージによるデータ破損リスク回避
@@ -547,7 +547,7 @@ export const syncCommand = new Command("sync")
 
 **運用**:
 - GitHub Issueでラベル変更 → `reqord feedback sync` で取り込み
-- index.yaml手動編集 → `reqord feedback sync --from-local` で反映
+- feedbacks.yaml手動編集 → `reqord feedback sync --from-local` で反映
 
 ### 6.4 APIレート制限への配慮
 

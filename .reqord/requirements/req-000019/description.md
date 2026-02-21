@@ -66,5 +66,5 @@ Specification個別の詳細ステータス:
 ## 技術的制約
 
 - Specification/Issue データが存在しない場合はRequirement情報のみ表示
-- GitHub Issue状態は最後のsync結果を使用（リアルタイム取得しない）
+- GitHub Issue状態は `.reqord/issues/tasks.yaml` の最終sync結果を使用（リアルタイム取得しない）
 - 整合性ルールは@reqord/shared `checkConsistency` から参照（冒頭注記参照）

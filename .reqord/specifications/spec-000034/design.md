@@ -2,7 +2,7 @@
 
 ## 1. 設計概要
 
-Requirement/Specificationの詳細画面にflagsセクションを追加し、`feedback-review`・`security-review`・`breaking-change`フラグの存在をユーザーに可視化する（Feedback #169）。また、`.reqord/feedback/index.yaml`に格納されたFeedbackデータをWeb UIで一覧・詳細表示し、関連Requirement/Specificationとのリンクを確認できるFeedback一覧ページを新設する（Feedback #170）。
+Requirement/Specificationの詳細画面にflagsセクションを追加し、`feedback-review`・`security-review`・`breaking-change`フラグの存在をユーザーに可視化する（Feedback #169）。また、`.reqord/issues/feedbacks.yaml`に格納されたFeedbackデータをWeb UIで一覧・詳細表示し、関連Requirement/Specificationとのリンクを確認できるFeedback一覧ページを新設する（Feedback #170）。
 
 本specは既存のダッシュボード（spec-000022）・Gantt（spec-000025）・依存グラフ（spec-000026）・ドリルダウン（spec-000029）とは独立した機能であり、UI表示に必要なデータ層（FeedbackRepository）を新規追加し、既存の詳細ページコンポーネントを拡張する。
 
@@ -39,7 +39,7 @@ packages/web/src/
       ├── feedback-data.ts                     (新規: Feedbackデータ取得)
       ├── feedback-repository.ts               (新規: FeedbackRepositoryインターフェース)
       ├── local-feedback-repository.ts         (新規: ファイルシステム実装)
-      └── reqord-root.ts                       (既存: getFeedbackDir追加)
+      └── reqord-root.ts                       (既存: getIssuesDir追加)
 ```
 
 ### データアクセスの流れ
@@ -312,11 +312,11 @@ export interface FeedbackRepository {
 ```typescript
 import { FeedbackIndexSchema, type FeedbackEntry } from "@reqord/shared";
 import { readYAML } from "./file-system";
-import { getFeedbackDir } from "./reqord-root";
+import { getIssuesDir } from "./reqord-root";
 
 export class LocalFeedbackRepository implements FeedbackRepository {
   async findAll(): Promise<FeedbackEntry[]> {
-    const indexPath = path.join(getFeedbackDir(), "index.yaml");
+    const indexPath = path.join(getIssuesDir(), "feedbacks.yaml");
     const raw = await readYAML<unknown>(indexPath);
     const parsed = FeedbackIndexSchema.safeParse(raw);
     if (!parsed.success) return [];
@@ -325,7 +325,7 @@ export class LocalFeedbackRepository implements FeedbackRepository {
 }
 ```
 
-- `readYAML` を使用してindex.yamlを読み取り
+- `readYAML` を使用してfeedbacks.yamlを読み取り
 - Zodスキーマ（`FeedbackIndexSchema`）でバリデーション
 - パース失敗時は空配列を返す（堅牢性重視）
 
@@ -341,8 +341,8 @@ export async function getAllFeedbacks(): Promise<FeedbackEntry[]>;
 #### reqord-root.ts 拡張 (`lib/reqord-root.ts` - 既存拡張)
 
 ```typescript
-export function getFeedbackDir(): string {
-  return path.join(getReqordRoot(), "feedback");
+export function getIssuesDir(): string {
+  return path.join(getReqordRoot(), "issues");
 }
 ```
 
@@ -423,8 +423,8 @@ const navItems = [
 ### ユニットテスト
 
 - **LocalFeedbackRepository.findAll**:
-  - index.yamlが存在する場合: FeedbackEntry配列が返されること
-  - index.yamlが存在しない場合: 空配列が返されること
+  - feedbacks.yamlが存在する場合: FeedbackEntry配列が返されること
+  - feedbacks.yamlが存在しない場合: 空配列が返されること
   - 不正なYAML: 空配列が返されること（エラーにならない）
 - **FeedbackFilters ロジック**:
   - type指定: 該当typeのみフィルタされること
@@ -458,7 +458,7 @@ const navItems = [
 
 - RequirementDetailページ: flagsがある場合にFlagListが表示されること
 - SpecDetailページ: flagsがある場合にFlagListが表示されること
-- Feedbackページ: index.yamlからデータが読み込まれテーブル表示されること
+- Feedbackページ: feedbacks.yamlからデータが読み込まれテーブル表示されること
 - フィルタ操作: タイプ・ステータスフィルタが正しく動作すること
 - ナビゲーション: Feedbackリンクが表示されること
 

@@ -482,36 +482,35 @@ export function buildDrillDownGraphData(
       animated: false,
     });
 
-    // 3. Issueノード（右列）
-    if (spec.implementation?.issues) {
-      spec.implementation.issues.forEach((issue, j) => {
-        const issueNodeId = `issue-${issue.number}`;
-        nodes.push({
-          id: issueNodeId,
-          type: "issue",
-          position: {
-            x: LAYOUT.ISSUE_X,
-            y: i * LAYOUT.VERTICAL_GAP + j * LAYOUT.ISSUE_VERTICAL_GAP,
-          },
-          data: {
-            number: issue.number,
-            title: issue.title,
-            status: issue.status,
-            priority: issue.priority,
-            url: issue.url,
-          },
-        });
-
-        // Issue → Specification の tracks エッジ
-        edges.push({
-          id: `track-${issueNodeId}-${specNodeId}`,
-          source: issueNodeId,
-          target: specNodeId,
-          style: EDGE_STYLES.tracks,
-          animated: false,
-        });
+    // 3. Issueノード（右列） - tasks.yamlからlinkedTo.specificationsで検索
+    const specTasks = tasks.filter(t => t.linkedTo.specifications.includes(spec.id));
+    specTasks.forEach((task, j) => {
+      const issueNodeId = `issue-${task.number}`;
+      nodes.push({
+        id: issueNodeId,
+        type: "issue",
+        position: {
+          x: LAYOUT.ISSUE_X,
+          y: i * LAYOUT.VERTICAL_GAP + j * LAYOUT.ISSUE_VERTICAL_GAP,
+        },
+        data: {
+          number: task.number,
+          title: task.title,
+          status: task.status,
+          priority: task.priority,
+          url: task.url,
+        },
       });
-    }
+
+      // Issue → Specification の tracks エッジ
+      edges.push({
+        id: `track-${issueNodeId}-${specNodeId}`,
+        source: issueNodeId,
+        target: specNodeId,
+        style: EDGE_STYLES.tracks,
+        animated: false,
+      });
+    });
   });
 
   return { nodes, edges };
@@ -629,7 +628,7 @@ Next.js App Router navigation
 - Refactor: ノード生成ロジックを関数に分割
 
 **Cycle 4: buildDrillDownGraphData - Issue追加**
-- Red: Specification.implementation.issuesからIssueノードが生成されるテスト（実装不足で失敗）
+- Red: tasks.yaml（linkedTo.specifications）からIssueノードが生成されるテスト（実装不足で失敗）
 - Green: Issueノード（右列x=720）と tracks エッジを追加
 - Refactor: エッジ生成ロジックをヘルパー関数に抽出
 
@@ -665,8 +664,8 @@ Next.js App Router navigation
 ### 5.2 ユニットテスト
 
 **buildDrillDownGraphData:**
-- 入力: Requirement + Specifications（implementation.issuesなし）→ ノード: Req + Specs、エッジ: implements のみ
-- 入力: Requirement + Specifications（implementation.issuesあり）→ ノード: Req + Specs + Issues、エッジ: implements + tracks
+- 入力: Requirement + Specifications（tasks.yamlにエントリなし）→ ノード: Req + Specs、エッジ: implements のみ
+- 入力: Requirement + Specifications（tasks.yamlにエントリあり）→ ノード: Req + Specs + Issues、エッジ: implements + tracks
 - 入力: Specifications = [] → ノード: Reqのみ、エッジ: なし
 - レイアウト座標: Req x=420, Spec x=0, Issue x=720, y座標が正しくオフセットされること
 

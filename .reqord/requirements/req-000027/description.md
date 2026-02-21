@@ -23,7 +23,7 @@ Issue #159 より:
    - `.reqord/context/product.json` → `.reqord/context/product.yaml`
    - `.reqord/context/technical.json` → `.reqord/context/technical.yaml`
    - `.reqord/context/structure.json` → `.reqord/context/structure.yaml`
-4. **Feedback**: `.reqord/feedback/index.json` → `.reqord/feedback/index.yaml`
+4. **Feedback**: `.reqord/feedback/index.json` → `.reqord/feedback/index.yaml` → `.reqord/issues/feedbacks.yaml`
 
 ## 技術的アプローチ
 

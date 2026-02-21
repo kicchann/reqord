@@ -1,3 +1,4 @@
+title: GitHub Issueタスク管理
 tasks:
   - number: 112
     title: '[Feature] SpecificationSchema拡張: implementationフィールド追加'
@@ -6,6 +7,8 @@ tasks:
         - spec-000016
     priority: P2
     status: closed
+    url: https://github.com/kicchann/reqord/issues/112
+    estimatedHours: 1
     syncedAt: 2026-02-12T15:13:05.883Z
   - number: 113
     title: '[Feature] タスク定義ファイル(--tasks-file)スキーマ定義・バリデーション'
@@ -14,6 +17,8 @@ tasks:
         - spec-000016
     priority: P2
     status: closed
+    url: https://github.com/kicchann/reqord/issues/113
+    estimatedHours: 1
     syncedAt: 2026-02-12T15:13:05.883Z
   - number: 114
     title: '[Feature] GitHub Issue Template (reqord-implementation) 生成・配置'
@@ -22,6 +27,8 @@ tasks:
         - spec-000016
     priority: P2
     status: closed
+    url: https://github.com/kicchann/reqord/issues/114
+    estimatedHours: 1
     syncedAt: 2026-02-12T15:13:05.883Z
   - number: 115
     title: '[Feature] IssueService実装: タスク定義からGitHub Issue作成'
@@ -30,6 +37,8 @@ tasks:
         - spec-000016
     priority: P2
     status: closed
+    url: https://github.com/kicchann/reqord/issues/115
+    estimatedHours: 1
     syncedAt: 2026-02-12T15:13:05.883Z
   - number: 116
     title: '[Feature] reqord issue create コマンド実装'
@@ -38,6 +47,8 @@ tasks:
         - spec-000016
     priority: P2
     status: closed
+    url: https://github.com/kicchann/reqord/issues/116
+    estimatedHours: 1
     syncedAt: 2026-02-12T15:13:05.883Z
   - number: 117
     title: '[Feature] スキーマ定義: TaskDefinition + SpecificationSchema implementation拡張'
@@ -46,6 +57,8 @@ tasks:
         - spec-000016
     priority: P2
     status: closed
+    url: https://github.com/kicchann/reqord/issues/117
+    estimatedHours: 1
     syncedAt: 2026-02-12T15:13:05.883Z
   - number: 118
     title: '[Feature] GitHub Issue Template (reqord-implementation.yml) 作成'
@@ -54,6 +67,8 @@ tasks:
         - spec-000016
     priority: P2
     status: closed
+    url: https://github.com/kicchann/reqord/issues/118
+    estimatedHours: 1
     syncedAt: 2026-02-12T15:13:05.883Z
   - number: 119
     title: '[Feature] GitHubClient拡張: createIssue() 追加'
@@ -62,6 +77,8 @@ tasks:
         - spec-000016
     priority: P2
     status: closed
+    url: https://github.com/kicchann/reqord/issues/119
+    estimatedHours: 1
     syncedAt: 2026-02-12T15:13:05.883Z
   - number: 120
     title: '[Feature] IssueService実装: タスク定義ファイルからGitHub Issue作成'
@@ -70,6 +87,8 @@ tasks:
         - spec-000016
     priority: P2
     status: closed
+    url: https://github.com/kicchann/reqord/issues/120
+    estimatedHours: 1
     syncedAt: 2026-02-12T15:13:05.883Z
   - number: 121
     title: '[Feature] reqord issue create コマンド実装'
@@ -78,6 +97,8 @@ tasks:
         - spec-000016
     priority: P2
     status: closed
+    url: https://github.com/kicchann/reqord/issues/121
+    estimatedHours: 1
     syncedAt: 2026-02-12T15:13:05.883Z
   - number: 122
     title: '[Feature] SpecificationSchema拡張: progressフィールド + ProgressCalculator実装'
@@ -86,6 +107,8 @@ tasks:
         - spec-000024
     priority: P2
     status: closed
+    url: https://github.com/kicchann/reqord/issues/122
+    estimatedHours: 1
     syncedAt: 2026-02-12T15:13:12.425Z
   - number: 123
     title: '[Feature] GitHubClient拡張: Issue詳細取得・一覧取得'
@@ -94,6 +117,8 @@ tasks:
         - spec-000024
     priority: P2
     status: closed
+    url: https://github.com/kicchann/reqord/issues/123
+    estimatedHours: 1
     syncedAt: 2026-02-12T15:13:12.425Z
   - number: 124
     title: '[Feature] IssueSyncService実装: 同期・検証ロジック'
@@ -102,6 +127,8 @@ tasks:
         - spec-000024
     priority: P2
     status: closed
+    url: https://github.com/kicchann/reqord/issues/124
+    estimatedHours: 1
     syncedAt: 2026-02-12T15:13:12.425Z
   - number: 125
     title: '[Feature] reqord issue sync / sync-all コマンド実装'
@@ -110,6 +137,8 @@ tasks:
         - spec-000024
     priority: P2
     status: closed
+    url: https://github.com/kicchann/reqord/issues/125
+    estimatedHours: 1
     syncedAt: 2026-02-12T15:13:12.425Z
   - number: 126
     title: '[Feature] reqord issue validate コマンド実装'
@@ -118,6 +147,8 @@ tasks:
         - spec-000024
     priority: P2
     status: closed
+    url: https://github.com/kicchann/reqord/issues/126
+    estimatedHours: 1
     syncedAt: 2026-02-12T15:13:12.425Z
   - number: 132
     title: '[Feature] Zodバリデーションエラー詳細表示（req-000010 / spec-000010）'
@@ -126,6 +157,8 @@ tasks:
         - spec-000010
     priority: P2
     status: closed
+    url: https://github.com/kicchann/reqord/issues/132
+    estimatedHours: 1
     syncedAt: 2026-02-12T15:12:54.749Z
   - number: 138
     title: '[Task] spec-000022: Web UI ダッシュボード実装'
@@ -134,6 +167,8 @@ tasks:
         - spec-000022
     priority: P2
     status: closed
+    url: https://github.com/kicchann/reqord/issues/138
+    estimatedHours: 1
     syncedAt: 2026-02-12T15:13:08.865Z
   - number: 139
     title: '[Task] spec-000025: Ganttチャート実装'
@@ -142,6 +177,8 @@ tasks:
         - spec-000025
     priority: P2
     status: closed
+    url: https://github.com/kicchann/reqord/issues/139
+    estimatedHours: 1
     syncedAt: 2026-02-12T15:13:14.467Z
   - number: 140
     title: '[Task] spec-000026: 依存グラフ拡張・Spec詳細実装'
@@ -150,6 +187,8 @@ tasks:
         - spec-000026
     priority: P2
     status: closed
+    url: https://github.com/kicchann/reqord/issues/140
+    estimatedHours: 1
     syncedAt: 2026-02-12T15:13:17.785Z
   - number: 141
     title: '[Task] spec-000022-1: Specification data layer for Web'
@@ -158,6 +197,8 @@ tasks:
         - spec-000022
     priority: P0
     status: closed
+    url: https://github.com/kicchann/reqord/issues/141
+    estimatedHours: 4
     syncedAt: 2026-02-12T15:13:08.865Z
   - number: 142
     title: '[Task] spec-000022-2: Dashboard data aggregation'
@@ -166,6 +207,8 @@ tasks:
         - spec-000022
     priority: P0
     status: closed
+    url: https://github.com/kicchann/reqord/issues/142
+    estimatedHours: 8
     syncedAt: 2026-02-12T15:13:08.865Z
   - number: 143
     title: '[Task] spec-000022-3: Dashboard page & UI components'
@@ -174,6 +217,8 @@ tasks:
         - spec-000022
     priority: P1
     status: closed
+    url: https://github.com/kicchann/reqord/issues/143
+    estimatedHours: 10
     syncedAt: 2026-02-12T15:13:08.865Z
   - number: 144
     title: '[Task] spec-000025-1: Gantt data transformation'
@@ -182,6 +227,8 @@ tasks:
         - spec-000025
     priority: P1
     status: closed
+    url: https://github.com/kicchann/reqord/issues/144
+    estimatedHours: 6
     syncedAt: 2026-02-12T15:13:14.467Z
   - number: 145
     title: '[Task] spec-000025-2: Gantt SVG components & interactions'
@@ -190,6 +237,8 @@ tasks:
         - spec-000025
     priority: P1
     status: closed
+    url: https://github.com/kicchann/reqord/issues/145
+    estimatedHours: 12
     syncedAt: 2026-02-12T15:13:14.467Z
   - number: 146
     title: '[Task] spec-000026-1: Spec detail - tabs + Design/Research'
@@ -198,6 +247,8 @@ tasks:
         - spec-000026
     priority: P1
     status: closed
+    url: https://github.com/kicchann/reqord/issues/146
+    estimatedHours: 8
     syncedAt: 2026-02-12T15:13:17.785Z
   - number: 147
     title: '[Task] spec-000026-2: Spec detail - Coverage/Issues/History tabs'
@@ -206,6 +257,8 @@ tasks:
         - spec-000026
     priority: P1
     status: closed
+    url: https://github.com/kicchann/reqord/issues/147
+    estimatedHours: 6
     syncedAt: 2026-02-12T15:13:17.785Z
   - number: 148
     title: '[Task] spec-000026-3: Multi-level graph data layer'
@@ -214,6 +267,8 @@ tasks:
         - spec-000026
     priority: P1
     status: closed
+    url: https://github.com/kicchann/reqord/issues/148
+    estimatedHours: 4
     syncedAt: 2026-02-12T15:13:17.785Z
   - number: 149
     title: '[Task] spec-000026-4: Multi-level graph UI & mode selector'
@@ -222,6 +277,8 @@ tasks:
         - spec-000026
     priority: P1
     status: closed
+    url: https://github.com/kicchann/reqord/issues/149
+    estimatedHours: 8
     syncedAt: 2026-02-12T15:13:17.785Z
   - number: 153
     title: '[Task] spec-000029: 2レベルドリルダウングラフ'
@@ -230,6 +287,8 @@ tasks:
         - spec-000029
     priority: P1
     status: closed
+    url: https://github.com/kicchann/reqord/issues/153
+    estimatedHours: 14
     syncedAt: 2026-02-12T15:13:20.606Z
   - number: 154
     title: '[Task] spec-000029-1: Data layer - EDGE_STYLES + buildDrillDownGraphData'
@@ -238,6 +297,8 @@ tasks:
         - spec-000029
     priority: P1
     status: closed
+    url: https://github.com/kicchann/reqord/issues/154
+    estimatedHours: 4
     syncedAt: 2026-02-12T15:13:20.606Z
   - number: 155
     title: '[Task] spec-000029-2: UI Components - DrillDownBreadcrumb + DrillDownGraph + RequirementNode'
@@ -246,6 +307,8 @@ tasks:
         - spec-000029
     priority: P1
     status: closed
+    url: https://github.com/kicchann/reqord/issues/155
+    estimatedHours: 6
     syncedAt: 2026-02-12T15:13:20.606Z
   - number: 156
     title: '[Task] spec-000029-3: Integration - GraphPageClient URL state + DependencyGraph extension'
@@ -254,6 +317,8 @@ tasks:
         - spec-000029
     priority: P1
     status: closed
+    url: https://github.com/kicchann/reqord/issues/156
+    estimatedHours: 4
     syncedAt: 2026-02-12T15:13:20.606Z
   - number: 173
     title: '[Task] spec-000030: YAML変換レイヤー実装'
@@ -262,6 +327,8 @@ tasks:
         - spec-000030
     priority: P1
     status: closed
+    url: https://github.com/kicchann/reqord/issues/173
+    estimatedHours: 14
     syncedAt: 2026-02-12T15:13:23.397Z
   - number: 174
     title: '[Task] spec-000031: migrate-to-yamlコマンド実装'
@@ -270,6 +337,8 @@ tasks:
         - spec-000031
     priority: P2
     status: closed
+    url: https://github.com/kicchann/reqord/issues/174
+    estimatedHours: 10
     syncedAt: 2026-02-12T15:13:25.599Z
   - number: 175
     title: '[Task] spec-000030-1: FileSystem層 - readYAML/writeYAML + js-yaml依存追加'
@@ -278,6 +347,8 @@ tasks:
         - spec-000030
     priority: P1
     status: closed
+    url: https://github.com/kicchann/reqord/issues/175
+    estimatedHours: 4
     syncedAt: 2026-02-12T15:13:23.397Z
   - number: 176
     title: '[Task] spec-000030-2: CLI Repository層 YAML対応'
@@ -286,6 +357,8 @@ tasks:
         - spec-000030
     priority: P1
     status: closed
+    url: https://github.com/kicchann/reqord/issues/176
+    estimatedHours: 6
     syncedAt: 2026-02-12T15:13:23.397Z
   - number: 177
     title: '[Task] spec-000030-3: Web UI Repository層 YAML対応 + 統合テスト'
@@ -294,6 +367,8 @@ tasks:
         - spec-000030
     priority: P1
     status: closed
+    url: https://github.com/kicchann/reqord/issues/177
+    estimatedHours: 4
     syncedAt: 2026-02-12T15:13:23.397Z
   - number: 178
     title: '[Task] spec-000031-1: MigrationService - createMigrationPlan + convertToYaml + バックアップ'
@@ -302,6 +377,8 @@ tasks:
         - spec-000031
     priority: P2
     status: closed
+    url: https://github.com/kicchann/reqord/issues/178
+    estimatedHours: 5
     syncedAt: 2026-02-12T15:13:25.599Z
   - number: 179
     title: '[Task] spec-000031-2: CLIコマンド migrate-to-yaml + dry-run + 統合テスト'
@@ -310,6 +387,8 @@ tasks:
         - spec-000031
     priority: P2
     status: closed
+    url: https://github.com/kicchann/reqord/issues/179
+    estimatedHours: 5
     syncedAt: 2026-02-12T15:13:25.599Z
   - number: 211
     title: '[spec-000027] Zodスキーマ定義 + FeedbackRepository'
@@ -318,6 +397,8 @@ tasks:
         - spec-000027
     priority: P2
     status: closed
+    url: https://github.com/kicchann/reqord/issues/211
+    estimatedHours: 4
     syncedAt: 2026-02-21T00:00:00Z
   - number: 212
     title: '[spec-000027] GitHubClient + HTMLコメントパーサー'
@@ -326,6 +407,8 @@ tasks:
         - spec-000027
     priority: P2
     status: closed
+    url: https://github.com/kicchann/reqord/issues/212
+    estimatedHours: 4
     syncedAt: 2026-02-21T00:00:00Z
   - number: 213
     title: '[spec-000027] FeedbackSyncService + sync CLIコマンド'
@@ -334,6 +417,8 @@ tasks:
         - spec-000027
     priority: P2
     status: closed
+    url: https://github.com/kicchann/reqord/issues/213
+    estimatedHours: 5
     syncedAt: 2026-02-21T00:00:00Z
   - number: 214
     title: '[spec-000028] FeedbackService基盤 + list/show CLI'
@@ -342,6 +427,8 @@ tasks:
         - spec-000028
     priority: P2
     status: closed
+    url: https://github.com/kicchann/reqord/issues/214
+    estimatedHours: 3
     syncedAt: 2026-02-21T00:00:00Z
   - number: 215
     title: '[spec-000028] link CLI + flag管理'
@@ -350,6 +437,8 @@ tasks:
         - spec-000028
     priority: P2
     status: closed
+    url: https://github.com/kicchann/reqord/issues/215
+    estimatedHours: 4
     syncedAt: 2026-02-21T00:00:00Z
   - number: 216
     title: '[spec-000028] close CLI'
@@ -358,6 +447,8 @@ tasks:
         - spec-000028
     priority: P2
     status: closed
+    url: https://github.com/kicchann/reqord/issues/216
+    estimatedHours: 2
     syncedAt: 2026-02-21T00:00:00Z
   - number: 217
     title: '[spec-000028] resolve CLI + 承認時flag警告 (v2.0.0)'
@@ -366,6 +457,8 @@ tasks:
         - spec-000028
     priority: P2
     status: closed
+    url: https://github.com/kicchann/reqord/issues/217
+    estimatedHours: 3
     syncedAt: 2026-02-21T00:00:00Z
   - number: 251
     title: '[spec-000033] VersionService拡張（Specification対応）'
@@ -374,6 +467,8 @@ tasks:
         - spec-000033
     priority: P1
     status: open
+    url: https://github.com/kicchann/reqord/issues/251
+    estimatedHours: 1
     syncedAt: 2026-02-14T00:21:07.020Z
   - number: 252
     title: '[spec-000033] SpecificationService拡張（バージョニングロジック統合）'
@@ -382,6 +477,8 @@ tasks:
         - spec-000033
     priority: P1
     status: open
+    url: https://github.com/kicchann/reqord/issues/252
+    estimatedHours: 1
     syncedAt: 2026-02-14T00:21:07.020Z
   - number: 253
     title: '[spec-000033] spec history + updateコマンド実装'
@@ -390,6 +487,8 @@ tasks:
         - spec-000033
     priority: P2
     status: open
+    url: https://github.com/kicchann/reqord/issues/253
+    estimatedHours: 5
     syncedAt: 2026-02-14T00:21:07.020Z
   - number: 254
     title: '[spec-000033] spec draft + implementedコマンド実装'
@@ -398,6 +497,8 @@ tasks:
         - spec-000033
     priority: P2
     status: open
+    url: https://github.com/kicchann/reqord/issues/254
+    estimatedHours: 5
     syncedAt: 2026-02-14T00:21:07.020Z
   - number: 255
     title: '[spec-000005 v2.0] VersionService の X.Y 形式対応'
@@ -406,6 +507,8 @@ tasks:
         - spec-000005
     priority: P2
     status: closed
+    url: https://github.com/kicchann/reqord/issues/255
+    estimatedHours: 6
     syncedAt: 2026-02-21T00:00:00Z
   - number: 256
     title: '[spec-000005 v2.0] RequirementService の X.Y 形式対応とバージョニングロジック改訂'
@@ -414,6 +517,8 @@ tasks:
         - spec-000005
     priority: P2
     status: closed
+    url: https://github.com/kicchann/reqord/issues/256
+    estimatedHours: 5
     syncedAt: 2026-02-21T00:00:00Z
   - number: 257
     title: '[spec-000005 v2.0] コマンド層の X.Y 形式対応（update/draft/history）'
@@ -422,6 +527,8 @@ tasks:
         - spec-000005
     priority: P2
     status: closed
+    url: https://github.com/kicchann/reqord/issues/257
+    estimatedHours: 4
     syncedAt: 2026-02-21T00:00:00Z
   - number: 258
     title: '[spec-000005 v2.0] 既存データの X.Y 形式移行'
@@ -430,6 +537,8 @@ tasks:
         - spec-000005
     priority: P2
     status: closed
+    url: https://github.com/kicchann/reqord/issues/258
+    estimatedHours: 5
     syncedAt: 2026-02-21T00:00:00Z
   - number: 266
     title: '[spec-000012] ImpactService analyzeImpact 実装（依存グラフ走査・影響範囲計算）'
@@ -438,6 +547,8 @@ tasks:
         - spec-000012
     priority: P2
     status: closed
+    url: https://github.com/kicchann/reqord/issues/266
+    estimatedHours: 5
     syncedAt: 2026-02-21T00:00:00Z
   - number: 267
     title: '[spec-000012] impact analyze コマンド実装（テーブル表示・JSON出力）'
@@ -446,6 +557,8 @@ tasks:
         - spec-000012
     priority: P2
     status: closed
+    url: https://github.com/kicchann/reqord/issues/267
+    estimatedHours: 3
     syncedAt: 2026-02-21T00:00:00Z
   - number: 268
     title: '[spec-000012] github.ts コメント投稿メソッド追加（createIssueComment / createPrComment）'
@@ -454,6 +567,8 @@ tasks:
         - spec-000012
     priority: P2
     status: closed
+    url: https://github.com/kicchann/reqord/issues/268
+    estimatedHours: 1
     syncedAt: 2026-02-21T00:00:00Z
   - number: 269
     title: '[spec-000012] ImpactService notifyImpact 実装（通知メッセージ生成・バッチ処理）'
@@ -462,6 +577,8 @@ tasks:
         - spec-000012
     priority: P2
     status: closed
+    url: https://github.com/kicchann/reqord/issues/269
+    estimatedHours: 2
     syncedAt: 2026-02-21T00:00:00Z
   - number: 270
     title: '[spec-000012] impact notify コマンド実装 + 統合テスト'
@@ -470,6 +587,8 @@ tasks:
         - spec-000012
     priority: P2
     status: closed
+    url: https://github.com/kicchann/reqord/issues/270
+    estimatedHours: 2
     syncedAt: 2026-02-21T00:00:00Z
   - number: 283
     title: '[spec-000011] draftコマンドから--major/--patchオプション削除（バージョニング分離）'
@@ -478,6 +597,8 @@ tasks:
         - spec-000011
     priority: P1
     status: closed
+    url: https://github.com/kicchann/reqord/issues/283
+    estimatedHours: 1
     syncedAt: 2026-02-15T13:00:03.483Z
   - number: 284
     title: '[spec-000011] DraftReversionService実装（PR作成+影響範囲分析）'
@@ -486,6 +607,8 @@ tasks:
         - spec-000011
     priority: P1
     status: closed
+    url: https://github.com/kicchann/reqord/issues/284
+    estimatedHours: 4
     syncedAt: 2026-02-15T13:00:03.483Z
   - number: 285
     title: '[spec-000011] draftコマンドをDraftReversionServiceに接続'
@@ -494,6 +617,8 @@ tasks:
         - spec-000011
     priority: P1
     status: closed
+    url: https://github.com/kicchann/reqord/issues/285
+    estimatedHours: 2
     syncedAt: 2026-02-15T13:00:03.483Z
   - number: 299
     title: '[spec-000015] approveコマンドUX改善（req/spec両方）'
@@ -502,6 +627,8 @@ tasks:
         - spec-000015
     priority: P2
     status: closed
+    url: https://github.com/kicchann/reqord/issues/299
+    estimatedHours: 3
     syncedAt: 2026-02-16T00:47:21.433Z
   - number: 300
     title: '[spec-000015] implementコマンド修正（req/spec両方: コマンド名変更 + 前提条件チェック強化）'
@@ -510,6 +637,8 @@ tasks:
         - spec-000015
     priority: P2
     status: closed
+    url: https://github.com/kicchann/reqord/issues/300
+    estimatedHours: 3
     syncedAt: 2026-02-16T00:47:21.433Z
   - number: 301
     title: '[spec-000015] Specification承認フロー統合テスト'
@@ -518,6 +647,8 @@ tasks:
         - spec-000015
     priority: P2
     status: closed
+    url: https://github.com/kicchann/reqord/issues/301
+    estimatedHours: 3
     syncedAt: 2026-02-16T00:47:21.433Z
   - number: 307
     title: '[spec-000005 v3.0] reqord version コマンド新規作成'
@@ -526,6 +657,8 @@ tasks:
         - spec-000005
     priority: P2
     status: closed
+    url: https://github.com/kicchann/reqord/issues/307
+    estimatedHours: 4
     syncedAt: 2026-02-21T00:00:00Z
   - number: 308
     title: '[spec-000005 v3.0] draft コマンドの --major/--patch オプションに deprecation 警告追加'
@@ -534,6 +667,8 @@ tasks:
         - spec-000005
     priority: P2
     status: closed
+    url: https://github.com/kicchann/reqord/issues/308
+    estimatedHours: 2
     syncedAt: 2026-02-21T00:00:00Z
   - number: 314
     title: '[spec-000013 v1.1] Specificationスキーマにtitleフィールド追加'
@@ -542,6 +677,8 @@ tasks:
         - spec-000013
     priority: P1
     status: closed
+    url: https://github.com/kicchann/reqord/issues/314
+    estimatedHours: 3
     syncedAt: 2026-02-16T05:55:46.683Z
   - number: 315
     title: '[spec-000013 v1.1] SpecificationスキーマにrequirementVersionフィールド追加'
@@ -550,6 +687,8 @@ tasks:
         - spec-000013
     priority: P1
     status: closed
+    url: https://github.com/kicchann/reqord/issues/315
+    estimatedHours: 3
     syncedAt: 2026-02-16T05:55:46.683Z
   - number: 316
     title: '[spec-000013 v1.1] 既存Specificationデータのマイグレーション'
@@ -558,6 +697,8 @@ tasks:
         - spec-000013
     priority: P2
     status: closed
+    url: https://github.com/kicchann/reqord/issues/316
+    estimatedHours: 2
     syncedAt: 2026-02-16T05:55:46.683Z
   - number: 332
     title: '[spec-000028 v3.0] unlink CLI'
@@ -566,6 +707,8 @@ tasks:
         - spec-000028
     priority: P2
     status: closed
+    url: https://github.com/kicchann/reqord/issues/332
+    estimatedHours: 3
     syncedAt: 2026-02-16T11:01:02.987Z
   - number: 333
     title: '[spec-000028 v3.0] create CLI'
@@ -574,6 +717,8 @@ tasks:
         - spec-000028
     priority: P2
     status: closed
+    url: https://github.com/kicchann/reqord/issues/333
+    estimatedHours: 3
     syncedAt: 2026-02-16T11:01:02.987Z
   - number: 334
     title: '[spec-000028 v3.0] close改善 - 残存flag警告'
@@ -582,6 +727,8 @@ tasks:
         - spec-000028
     priority: P2
     status: closed
+    url: https://github.com/kicchann/reqord/issues/334
+    estimatedHours: 2
     syncedAt: 2026-02-16T11:01:02.987Z
   - number: 340
     title: '[spec-000004] ステータス遷移ルール定数・関数の追加'
@@ -590,6 +737,8 @@ tasks:
         - spec-000004
     priority: P1
     status: closed
+    url: https://github.com/kicchann/reqord/issues/340
+    estimatedHours: 2
     syncedAt: 2026-02-16T20:47:30.983Z
   - number: 341
     title: '[spec-000004] Req/Spec整合性チェック関数の追加'
@@ -598,6 +747,8 @@ tasks:
         - spec-000004
     priority: P2
     status: closed
+    url: https://github.com/kicchann/reqord/issues/341
+    estimatedHours: 3
     syncedAt: 2026-02-16T20:47:30.983Z
   - number: 342
     title: '[spec-000004] FlagSchemaのdiscriminatedUnion拡張'
@@ -606,6 +757,8 @@ tasks:
         - spec-000004
     priority: P2
     status: closed
+    url: https://github.com/kicchann/reqord/issues/342
+    estimatedHours: 2
     syncedAt: 2026-02-16T20:47:30.983Z
   - number: 425
     title: '[spec-000011] 承認PR本文テンプレートから手動更新指示を削除'
@@ -614,6 +767,8 @@ tasks:
         - spec-000011
     priority: P2
     status: open
+    url: https://github.com/kicchann/reqord/issues/425
+    estimatedHours: 1
     syncedAt: 2026-02-15T13:00:03.483Z
   - number: 426
     title: '[spec-000015] 承認PR本文テンプレートから手動更新指示を削除・前提条件チェック修正確認'
@@ -622,6 +777,8 @@ tasks:
         - spec-000015
     priority: P2
     status: open
+    url: https://github.com/kicchann/reqord/issues/426
+    estimatedHours: 1
     syncedAt: 2026-02-16T00:47:21.433Z
   - number: 430
     title: '[spec-000005] versionHistoryからgitCommitフィールドを削除'
@@ -630,4 +787,6 @@ tasks:
         - spec-000005
     priority: P2
     status: open
+    url: https://github.com/kicchann/reqord/issues/430
+    estimatedHours: 3
     syncedAt: 2026-02-20T15:33:03.698Z

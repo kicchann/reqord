@@ -1,16 +1,20 @@
 id: spec-000026
 requirementId: req-000022
-title: 'Web UI - 依存グラフ拡張・Specification詳細'
+title: Web UI - 依存グラフ拡張・Specification詳細
 requirementVersion: '2.0'
-version: '1.0'
+version: '1.1'
 status: draft
 createdAt: 2026-02-08T14:08:15.325Z
-updatedAt: 2026-02-21T00:00:00Z
+updatedAt: 2026-02-20T23:19:04.542Z
 versionHistory:
   - version: '1.0'
     status: draft
     changedAt: 2026-02-21T00:00:00Z
     summary: 'Reverted to draft for issue #432 restructuring'
+  - version: '1.1'
+    status: draft
+    changedAt: 2026-02-20T23:19:04.542Z
+    summary: '#432 .reqord/issues/ 再構造化に伴うドキュメント更新'
 files:
   design: specifications/spec-000026/design.md
   supplementary: []

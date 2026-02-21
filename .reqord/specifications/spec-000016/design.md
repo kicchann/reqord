@@ -2,7 +2,7 @@
 
 ## 1. 設計概要
 
-構造化されたタスク定義ファイル（JSON）からGitHub Issueを作成し、同期・検証する機能を提供する。`reqord issue create <spec-id> --tasks-file <path>` コマンドにより、事前に定義されたタスクリストをGitHub Issueとして一括作成し、Specification JSONの `implementation` フィールドに記録する。構造化Markdownによる本文生成、HTMLコメントタグによるメタデータ（spec-id）埋め込み、`--dry-run` によるプレビューをサポートする。
+構造化されたタスク定義ファイル（JSON）からGitHub Issueを作成し、同期・検証する機能を提供する。`reqord issue create <spec-id> --tasks-file <path>` コマンドにより、事前に定義されたタスクリストをGitHub Issueとして一括作成し、`.reqord/issues/tasks.yaml` にタスクエントリとして記録する。構造化Markdownによる本文生成、HTMLコメントタグによるメタデータ（spec-id）埋め込み、`--dry-run` によるプレビューをサポートする。
 
 **スコープ:** Issue作成（`create`）、状態同期（`sync` / `sync-all`）、メタデータ検証（`validate`）を含む。
 
@@ -21,7 +21,7 @@ Repository:     repositories/specification.ts  (既存)
                     ↓
 External:       gh CLI (Issue作成)
                     ↓
-Storage:        .reqord/specifications/spec-NNNNNN.yaml (implementationフィールド)
+Storage:        .reqord/issues/tasks.yaml (タスクエントリ)
                 GitHub Issues
 ```
 
@@ -94,7 +94,7 @@ export function registerCreateCommand(program: Command) {
 
 ### 3.2 IssueService (`services/issue-service.ts` - 新規)
 
-**責務:** タスク定義ファイルの読み込み・検証、GitHub Issue作成、Specification JSON更新の調整。
+**責務:** タスク定義ファイルの読み込み・検証、GitHub Issue作成、tasks.yaml記録の調整。
 
 ```typescript
 import * as specRepo from "../repositories/specification.js";
@@ -180,21 +180,20 @@ export async function createIssuesFromSpec(
     }
   }
 
-  // 5. Specification JSONに記録（dry-run時はスキップ）
+  // 5. tasks.yamlに記録（dry-run時はスキップ）
   if (!options.dryRun) {
     const totalEstimatedHours = tasksFile.tasks.reduce(
       (sum, t) => sum + t.estimatedHours,
       0
     );
-    await updateSpecificationImplementation(cwd, options.specId, {
+    await writeTasksToYaml(cwd, options.specId, {
       issues: issues.map((i) => ({
         number: i.number!,
         title: i.title,
         url: i.url!,
-        priority: i.priority,
+        estimatedHours: i.estimatedHours,
         status: "open",
       })),
-      totalEstimatedHours,
       createdAt: new Date().toISOString(),
     });
   }
@@ -266,21 +265,26 @@ async function loadIssueTemplate(
   return null;
 }
 
-async function updateSpecificationImplementation(
+async function writeTasksToYaml(
   cwd: string,
   specId: string,
-  implementation: ImplementationData,
+  data: TasksData,
 ): Promise<void> {
-  const spec = await specRepo.findById(cwd, specId);
-  if (!spec) throw new Error(`Specification not found: ${specId}`);
-
-  const updated = {
-    ...spec,
-    implementation,
-    updatedAt: new Date().toISOString(),
-  };
-
-  await specRepo.save(cwd, updated);
+  // .reqord/issues/tasks.yaml にタスクエントリを追記
+  const tasksYamlPath = fs.joinPath(cwd, ".reqord", "issues", "tasks.yaml");
+  const existing = await loadTasksYaml(tasksYamlPath);
+  const newEntries = data.issues.map((i) => ({
+    number: i.number,
+    title: i.title,
+    linkedTo: { specifications: [specId] },
+    url: i.url,
+    estimatedHours: i.estimatedHours,
+    priority: i.priority,
+    status: i.status,
+    syncedAt: new Date().toISOString(),
+  }));
+  existing.tasks.push(...newEntries);
+  await saveTasksYaml(tasksYamlPath, existing);
 }
 ```
 
@@ -364,38 +368,7 @@ export type TaskDefinition = z.infer<typeof TaskDefinitionSchema>;
 export type TaskDefinitionFile = z.infer<typeof TaskDefinitionFileSchema>;
 ```
 
-### 3.5 SpecificationSchema拡張 (`packages/shared/src/schemas/specification.ts` - 既存ファイルに追加)
-
-**既存定義:** `SpecificationSchema` に `id`, `requirementId`, `status`, `files`, `flags`, `currentApproval` が定義済み。
-
-**追加フィールド:**
-
-```typescript
-const ImplementationIssueSchema = z.object({
-  number: z.number(),
-  title: z.string(),
-  url: z.string(),
-  priority: z.string(),
-  status: z.enum(["open", "in_progress", "closed"]).default("open"),
-});
-
-const ImplementationSchema = z.object({
-  issues: z.array(ImplementationIssueSchema),
-  totalEstimatedHours: z.number(),
-  createdAt: z.string(),
-  // spec-000024で追加予定: progress フィールド
-}).optional();
-
-export const SpecificationSchema = z.object({
-  // 既存フィールド...
-  implementation: ImplementationSchema,
-});
-
-export type ImplementationIssue = z.infer<typeof ImplementationIssueSchema>;
-export type Implementation = z.infer<typeof ImplementationSchema>;
-```
-
-### 3.6 GitHub Issue Template (`。github/ISSUE_TEMPLATE/reqord-implementation.yml` - 新規)
+### 3.5 GitHub Issue Template (`。github/ISSUE_TEMPLATE/reqord-implementation.yml` - 新規)
 
 **目的:** reqordから自動生成されるIssueのフォーマット統一。
 
@@ -477,9 +450,9 @@ body:
         → githubClient.createIssue({ title, body, labels })
           → gh issue create --title "..." --label "..." (stdin経由でbody)
           → stdout から Issue# と URL を抽出
-      → updateSpecificationImplementation(cwd, specId, implementation)
-        → spec.implementation = { issues: [...], totalEstimatedHours, createdAt }
-        → specRepo.save(cwd, updated)
+      → writeTasksToYaml(cwd, specId, data)
+        → tasks.yaml に追記（issueNumber, specId, title, url, estimatedHours, status）
+        → saveTasksYaml(tasksYamlPath, existing)
     → CreateIssuesResult返却
   → テーブル表示（cli-table3）:
     | # | タイトル | 優先度 | 見積 | Issue# | URL |
@@ -510,7 +483,7 @@ body:
   - tasks-file読み込み失敗時のエラー
   - maxIssues超過時のエラー
   - dry-runモードでGitHub API呼び出しなし
-  - issue生成後のSpecification JSON更新検証
+  - issue生成後のtasks.yaml記録検証
 - **issue-service.buildIssueBody**:
   - HTMLコメントタグ埋め込み検証
   - テンプレートあり/なしでの本文生成
@@ -530,7 +503,7 @@ body:
   - プレビュー表示のみ、JSON未変更を確認
 - **create コマンド（実行）**:
   - GitHub API呼び出しモック化
-  - Specification YAML の implementation フィールド更新検証
+  - tasks.yaml のタスクエントリ記録検証
 - **--json 出力フォーマット検証**
 
 ### E2Eテスト（手動）

@@ -19,7 +19,7 @@ Repository:     repositories/requirement.ts       (既存)
                     ↓
 Shared:         @reqord/shared
                   schemas/requirement.ts          (既存: gapAnalysisフィールド参照)
-                  schemas/specification.ts        (既存: implementationフィールド参照)
+                  schemas/specification.ts        (既存: statusフィールド等参照)
                   rules/consistency.ts            (既存: checkConsistency)
                     ↓
 Storage:        .reqord/requirements/req-NNNNNN.yaml
@@ -327,7 +327,7 @@ function renderProgressBar(percentage: number, width: number = 20): string {
       → Specifications集計:
         → byStatus: { draft: 2, approved: 4, approved: 2 }
         → approvedPercentage: 50%
-      → Issues集計（各specのimplementationフィールドから）:
+      → Issues集計（tasks.yamlから各specに紐づくIssueを取得）:
         → total: 20, closed: 16, closedPercentage: 80%
       → 警告検出:
         → detectWarnings(requirements, specifications)
@@ -345,7 +345,7 @@ function renderProgressBar(percentage: number, width: number = 20): string {
       → specRepo.findAll(cwd) → requirementIdでフィルタ → 関連Spec取得
       → gapAnalysisフィールド読み取り
       → 依存関係ステータス: blockedByの各要件のstatus取得
-      → Issue進捗: 関連Specのimplementationフィールドから集計
+      → Issue進捗: tasks.yamlから関連Specに紐づくIssueを集計
     → RequirementDetailStatus返却
   → 詳細表示
 ```
@@ -366,7 +366,7 @@ function renderProgressBar(percentage: number, width: number = 20): string {
   - 全要件draftの場合: approvedPercentage = 0
   - 全要件approvedの場合: approvedPercentage = 100
   - 要件0件の場合: total = 0, approvedPercentage = 0
-  - implementationフィールドがないSpecificationのIssue集計スキップ
+  - tasks.yamlにエントリがないSpecificationのIssue集計スキップ
 - **警告検出**:
   - Gap Analysis未実行の承認済み要件
   - 未承認の依存先がある要件
@@ -399,8 +399,8 @@ function renderProgressBar(percentage: number, width: number = 20): string {
 
 ### Issue集計のデータソース
 
-**決定:** SpecificationのimplementationフィールドからIssue情報を取得し、GitHub APIへのリアルタイム問い合わせは行わない
-**理由:** `reqord status` は高頻度で実行されるコマンドであり、毎回GitHub API呼び出しを行うとレイテンシが大きくなる。Issue同期（spec-000024で実装予定）により、implementationフィールドのstatusは定期的に更新される前提。リアルタイム情報が必要な場合は `reqord validate impl` を使用する。
+**決定:** `tasks.yaml` からIssue情報を取得し、GitHub APIへのリアルタイム問い合わせは行わない
+**理由:** `reqord status` は高頻度で実行されるコマンドであり、毎回GitHub API呼び出しを行うとレイテンシが大きくなる。Issue同期（spec-000024で実装予定）により、tasks.yamlのstatusは定期的に更新される前提。リアルタイム情報が必要な場合は `reqord validate impl` を使用する。
 
 ### 警告の自動検出
 

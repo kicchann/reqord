@@ -158,18 +158,18 @@ const archPathPattern = /^\s+([\w\-./]+\.tsx?)\s/gm;
 
 ### 3.4 GitHub Issue状態チェック
 
-**責務:** Specification JSONのimplementationフィールドに記録されたIssue番号のGitHub状態を取得。
+**責務:** `.reqord/issues/tasks.yaml` に記録されたIssue番号のGitHub状態を取得。
 
 ```typescript
 async function checkIssueStates(
   issues: Array<{ number: number; title: string }>,
 ): Promise<IssueCheckResult> {
   // gh issue view <number> --json state で各Issueの状態を取得
-  // implementationフィールドがない場合は空の結果を返す
+  // tasks.yamlにエントリなし → 空の結果を返す
 }
 ```
 
-spec-000016で定義されるSpecificationのimplementationフィールドを参照する。implementationフィールドが存在しない場合、Issueチェックはスキップされ、コンポーネント・テストチェックのみ実行される。
+tasks.yamlから該当Specificationに紐づくIssue情報を参照する。tasks.yamlにエントリがない場合、Issueチェックはスキップされ、コンポーネント・テストチェックのみ実行される。
 
 ### 3.5 overallStatus判定ロジック
 
@@ -198,7 +198,7 @@ function determineOverallStatus(
 **チェック内容:**
 
 1. **Specification実装状態チェック:** 対象RequirementにリンクされたSpecificationのうち、statusが`implemented`でないものがあれば警告
-2. **Issue完了状態チェック:** 各Specificationの`implementation.issues`から全Issueを収集し、statusが`closed`でないものがあれば警告
+2. **Issue完了状態チェック:** `tasks.yaml`から各Specificationに紐づく全Issueを収集し、statusが`closed`でないものがあれば警告
 
 **整合性チェックの結果型:**
 
@@ -239,17 +239,16 @@ export async function checkImplementConsistency(
     }
   }
 
-  // 2. 全Issueがclosedか
+  // 2. 全Issueがclosedか（tasks.yamlから取得）
   for (const spec of specs) {
-    if (spec.implementation?.issues) {
-      for (const issue of spec.implementation.issues) {
-        if (issue.status !== "closed") {
-          warnings.push({
-            type: "issue-not-closed",
-            message: `#${issue.number} (${issue.title}) が ${issue.status} です`,
-            details: { id: String(issue.number), currentStatus: issue.status },
-          });
-        }
+    const tasks = await tasksRepo.findBySpecificationId(cwd, spec.id);
+    for (const task of tasks) {
+      if (task.status !== "closed") {
+        warnings.push({
+          type: "issue-not-closed",
+          message: `#${task.issueNumber} (${task.title}) が ${task.status} です`,
+          details: { id: String(task.issueNumber), currentStatus: task.status },
+        });
       }
     }
   }
@@ -307,8 +306,8 @@ reqord req implement req-000016
       → parseDesignPaths(designContent)
         → components: [{path: "commands/issue/create.ts", ...}, ...]
         → tests: [{path: "services/issue-service.test.ts", ...}, ...]
-      → Issue状態チェック（implementationフィールドが存在する場合）:
-        → spec.implementation.issues.map(i => githubRepo.getIssueState(i.number))
+      → Issue状態チェック（tasks.yamlにエントリが存在する場合）:
+        → tasksRepo.findBySpecificationId(cwd, specId).map(t => githubRepo.getIssueState(t.issueNumber))
       → コンポーネント存在チェック:
         → components.map(c => fs.exists(joinPath(cwd, c.path)))
       → テスト存在チェック:
@@ -337,7 +336,7 @@ reqord req implement req-000016
     → checkImplementConsistency(cwd, "req-000016")
       → specRepo.findByRequirementId(cwd, "req-000016") → 関連Spec取得
       → 各Specのstatusがimplementedかチェック
-      → 各Specのimplementation.issuesのstatusがclosedかチェック
+      → tasks.yamlから各Specに紐づくIssueのstatusがclosedかチェック
       → ImplementConsistencyResult返却
     → 警告があれば表示（処理はブロックしない）
     → requirementService.updateRequirement(cwd, "req-000016", { status: "implemented" })
@@ -366,7 +365,7 @@ reqord req implement req-000016
   - 一部Specがdraft/approved: spec-not-implemented警告が含まれる
   - 一部IssueがOpen: issue-not-closed警告が含まれる
   - Specが0件: warnings空配列（関連Specなしでも警告なし）
-  - implementationフィールドなしのSpec: Issueチェックをスキップ
+  - tasks.yamlにエントリなしのSpec: Issueチェックをスキップ
 
 ### 統合テスト
 
@@ -383,9 +382,9 @@ reqord req implement req-000016
 **決定:** design.mdのテキストを正規表現でパースしてコンポーネントパスを抽出
 **理由:** design.mdは自然言語とMarkdown混在のドキュメントであり、構造化パーサーの適用が困難。reqordプロジェクトのdesign.mdは一定の記述規約（セクション見出し、バッククォート内パス、アーキテクチャ図内パス）に従っているため、正規表現による抽出が実用的。AI分析はコスト・レイテンシの観点から検証コマンドには不適切。
 
-### implementationフィールド非存在時のフォールバック
+### tasks.yamlにエントリなし時のフォールバック
 
-**決定:** implementationフィールドが存在しない場合、Issueチェックをスキップし、コンポーネント・テストチェックのみ実行
+**決定:** tasks.yamlにエントリがない場合、Issueチェックをスキップし、コンポーネント・テストチェックのみ実行
 **理由:** Issue生成（spec-000016）はオプショナルな機能であり、すべてのSpecificationがIssueを持つとは限らない。Issueなしでも実装検証は有用であるため、部分的な検証を許容する。
 
 ### strictモードのexit code

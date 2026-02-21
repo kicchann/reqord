@@ -2,15 +2,19 @@ id: spec-000028
 requirementId: req-000023
 title: Feedback操作CLI
 requirementVersion: '4.0'
-version: '3.0'
+version: '3.1'
 status: draft
 createdAt: 2026-02-09T05:48:42.351Z
-updatedAt: 2026-02-21T00:00:00Z
+updatedAt: 2026-02-20T23:19:05.657Z
 versionHistory:
   - version: '3.0'
     status: draft
     changedAt: 2026-02-21T00:00:00Z
     summary: 'Reverted to draft for issue #432 restructuring'
+  - version: '3.1'
+    status: draft
+    changedAt: 2026-02-20T23:19:05.657Z
+    summary: '#432 .reqord/issues/ 再構造化に伴うドキュメント更新'
 files:
   design: specifications/spec-000028/design.md
   supplementary: []

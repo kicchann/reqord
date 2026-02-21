@@ -1,16 +1,20 @@
 id: spec-000024
 requirementId: req-000016
-title: 'GitHub Issue同期・進捗追跡'
+title: GitHub Issue同期・進捗追跡
 requirementVersion: '1.0'
-version: '1.0'
+version: '1.1'
 status: draft
 createdAt: 2026-02-08T14:08:15.153Z
-updatedAt: 2026-02-21T00:00:00Z
+updatedAt: 2026-02-20T23:19:03.426Z
 versionHistory:
   - version: '1.0'
     status: draft
     changedAt: 2026-02-21T00:00:00Z
     summary: 'Reverted to draft for issue #432 restructuring'
+  - version: '1.1'
+    status: draft
+    changedAt: 2026-02-20T23:19:03.426Z
+    summary: '#432 .reqord/issues/ 再構造化に伴うドキュメント更新'
 files:
   design: specifications/spec-000024/design.md
   supplementary: []

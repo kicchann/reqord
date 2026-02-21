@@ -238,7 +238,7 @@ interface TabIssuesProps {
 
 - Issueリストテーブル: Issue番号、タイトル、状態、優先度、GitHub URL
 - spec-000025のGanttチャートをインライン表示
-- `implementation` フィールドが未設定の場合は「No issues generated yet」表示
+- tasks.yamlにエントリがない場合は「No issues generated yet」表示
 
 #### TabHistory (`components/specification/tab-history.tsx` - 新規)
 
@@ -469,30 +469,29 @@ function buildMultiLevelGraphData(
       type: "implements",
     });
 
-    // 3. Issueノードを配置（右列）
-    if (spec.implementation?.issues) {
-      spec.implementation.issues.forEach((issue, j) => {
-        const issueId = `issue-${issue.number}`;
-        nodes.push({
-          id: issueId,
-          type: "issue",
-          data: {
-            label: issue.title,
-            status: issue.status,
-            issueNumber: issue.number,
-            issueUrl: issue.url,
-          },
-          position: { x: 800, y: i * 120 + j * 80 },
-        });
-        // Issue → Specification の tracks エッジ
-        edges.push({
-          id: `track-${issueId}-${spec.id}`,
-          source: issueId,
-          target: spec.id,
-          type: "tracks",
-        });
+    // 3. Issueノードを配置（右列） - tasks.yamlからlinkedTo.specificationsで検索
+    const specTasks = tasks.filter(t => t.linkedTo.specifications.includes(spec.id));
+    specTasks.forEach((task, j) => {
+      const issueId = `issue-${task.number}`;
+      nodes.push({
+        id: issueId,
+        type: "issue",
+        data: {
+          label: task.title,
+          status: task.status,
+          issueNumber: task.number,
+          issueUrl: task.url,
+        },
+        position: { x: 800, y: i * 120 + j * 80 },
       });
-    }
+      // Issue → Specification の tracks エッジ
+      edges.push({
+        id: `track-${issueId}-${spec.id}`,
+        source: issueId,
+        target: spec.id,
+        type: "tracks",
+      });
+    });
   });
 
   return { nodes, edges };
@@ -581,7 +580,7 @@ IssueNode クリック → window.open(issueUrl, "_blank") → GitHub Issue
   - Requirement + Specification: implementsエッジが正しいこと
   - Requirement + Specification + Issue: 3階層のノードとエッジ
   - 存在しないrequirementIdへの参照: エッジが無視されること
-  - implementationフィールドなし: Issueノードが生成されないこと
+  - tasks.yamlにエントリなし: Issueノードが生成されないこと
 - **loadSpecFile**:
   - ファイルが存在する場合: コンテンツが返されること
   - ファイルが存在しない場合: nullが返されること
@@ -596,7 +595,7 @@ IssueNode クリック → window.open(issueUrl, "_blank") → GitHub Issue
 - **SpecTabs**: タブ切替でアクティブタブが変わること
 - **TabDesign**: Markdownコンテンツの描画
 - **TabCoverage**: 成功基準テーブルの行数
-- **TabIssues**: Issueリストテーブルの行数、implementationなし時の空状態
+- **TabIssues**: Issueリストテーブルの行数、tasks.yamlにタスクなし時の空状態
 - **TabHistory**: バージョン履歴エントリの表示
 - **SpecificationNode**: ステータス別の色クラスが適用されること
 - **IssueNode**: 状態別の色クラスが適用されること

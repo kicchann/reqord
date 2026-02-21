@@ -157,7 +157,7 @@ reqord spec draft <id> [--patch]
 reqord spec implemented <id>
 ```
 
-- 関連Issue（implementation.issues）の完了状況を事前チェック
+- 関連Issue（tasks.yaml の linkedTo.specifications）の完了状況を事前チェック
 - 全Issueが完了していない場合は警告を表示
 
 **ファイルパス:** `packages/cli/src/commands/spec/implemented.ts`
@@ -428,7 +428,7 @@ spec-000005と共通のスキーマ（`@reqord/shared` の `VersionHistoryEntryS
   - supplementary変更検出
   - ステータスのみ変更時の false 判定
   - flags変更時の false 判定（メタ情報は除外）
-  - currentApproval/implementation変更時の false 判定
+  - currentApproval変更時の false 判定
 
 ### 統合テスト
 

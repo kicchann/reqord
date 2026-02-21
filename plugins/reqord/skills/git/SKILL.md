@@ -185,7 +185,21 @@ Untracked:
 
 ユーザーの選択に応じて `git add` を実行する。
 
-### Step 6: コミット・プッシュ
+### Step 6: バージョンバンプ確認
+
+`.reqord/` 配下のreq/spec YAML・description.md・design.mdに変更がある場合、`reqord version` でバージョンバンプが必要かを確認する:
+
+```bash
+# .reqord/ 配下の変更を確認
+git diff --name-only -- '.reqord/'
+
+# 変更があるreq/specに対してバージョンバンプ
+reqord version <id> --patch --summary "<変更概要>"
+```
+
+**重要**: `.reqord/` 配下のYAMLファイル（version, versionHistory, flags等）を直接編集してはならない。必ず `reqord version`, `reqord feedback resolve` 等のCLIコマンドを使用すること。
+
+### Step 7: コミット・プッシュ
 
 ```bash
 git add <files>
@@ -195,7 +209,7 @@ git push -u origin <current-branch>
 
 プッシュ失敗時は `git push` のエラー内容を表示して対処を案内する。
 
-### Step 7: PR作成
+### Step 8: PR作成
 
 ```bash
 gh pr create --title "<type>(<scope>): <summary>" --body "<PR本文>"
@@ -251,7 +265,7 @@ Error: <spec-id> が見つかりません。
 
 直接ファイル読み取りにフォールバック:
 
-1. `.reqord/specifications/<spec-id>/index.yaml` をReadツールで読み取り
+1. `.reqord/specifications/<spec-id>.yaml` をReadツールで読み取り
 2. `.reqord/requirements/<req-id>.yaml` をReadツールで読み取り
 3. yqまたは手動パースでフィールドを抽出
 

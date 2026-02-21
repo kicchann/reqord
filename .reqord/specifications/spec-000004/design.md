@@ -106,9 +106,35 @@ FlagSchemaはdiscriminatedUnion（`type` フィールドで判別）に拡張す
 
 **責務:** .reqord/配下のディレクトリ名を定数化。
 
-- `REQORD_DIR`, `CONTEXT_DIR`, `REQUIREMENTS_DIR`, `SPECIFICATIONS_DIR`, `SETTINGS_DIR`, `TEMPLATES_DIR`, `RULES_DIR`, `ASSETS_DIR`, `DOMAIN_DIR`, `ISSUE_TEMPLATES_DIR`
+- `REQORD_DIR`, `CONTEXT_DIR`, `REQUIREMENTS_DIR`, `SPECIFICATIONS_DIR`, `SETTINGS_DIR`, `TEMPLATES_DIR`, `RULES_DIR`, `ASSETS_DIR`, `DOMAIN_DIR`, `ISSUE_TEMPLATES_DIR`, `ISSUES_DIR`
 
-### 3.8 SMARTスコアリング (`validation/smart-scoring.ts`)
+### 3.8 TasksIndexSchema (`schemas/task.ts`)
+
+**責務:** `.reqord/issues/tasks.yaml` のタスク一覧インデックスのスキーマ定義。Specificationから分離されたissue管理情報を構造化する。
+
+```typescript
+export const TaskLinkedToSchema = z.object({
+  specifications: z.array(z.string()).default([]),
+});
+
+export const TaskEntrySchema = z.object({
+  number: z.number(),
+  title: z.string(),
+  url: z.string(),
+  linkedTo: TaskLinkedToSchema,
+  priority: z.string().optional(),
+  status: z.string(),
+  estimatedHours: z.number().optional(),
+  syncedAt: z.string(),
+});
+
+export const TasksIndexSchema = z.object({
+  title: z.string(),
+  tasks: z.array(TaskEntrySchema),
+});
+```
+
+### 3.9 SMARTスコアリング (`validation/smart-scoring.ts`)
 
 **責務:** ルールベース（AI不要）でのSMART基準スコア算出。
 
@@ -118,14 +144,14 @@ FlagSchemaはdiscriminatedUnion（`type` フィールドで判別）に拡張す
 - Relevant: formatの充実度 + 依存関係の定義
 - TimeBound: 見積もり時間 + 複雑度 + 時間制約表現
 
-### 3.9 曖昧表現検出 (`validation/ambiguous-phrases.ts`)
+### 3.10 曖昧表現検出 (`validation/ambiguous-phrases.ts`)
 
 **責務:** 日本語の曖昧表現リスト提供。
 
 - 「適切に」「なるべく」「できるだけ」等の42表現
 - `getAmbiguousPhrases(language)`: 言語コードに応じたリスト返却（現時点はjaのみ）
 
-### 3.10 ステータス遷移ルール（計画中）
+### 3.11 ステータス遷移ルール（計画中）
 
 > **実装状況**: 未実装。遷移チェックはCLI `version-service.ts` 等にハードコードで散在しており、@reqord/shared への集約が未完了。
 
@@ -158,7 +184,7 @@ deprecated         deprecated
 - **`isValidTransition(from: Status, to: Status): boolean`**: 遷移の妥当性チェック
 - **`getAvailableTransitions(current: Status): Status[]`**: 現在のステータスから遷移可能な状態一覧を返却
 
-### 3.11 Req/Spec 整合性ルール（計画中）
+### 3.12 Req/Spec 整合性ルール（計画中）
 
 > **実装状況**: 未実装。`reqord status` コマンド（req-000019）から使用される想定。
 

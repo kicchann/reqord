@@ -4,8 +4,8 @@
 
 Feedback一覧表示・詳細表示・紐付け・クローズの4つのCLIコマンドを提供する。本specは以下の責務を担う:
 
-- **list**: index.yamlからFeedback一覧を表示（フィルタリング対応）
-- **show**: GitHub Issue + index.yamlマージデータの詳細表示
+- **list**: feedbacks.yamlからFeedback一覧を表示（フィルタリング対応）
+- **show**: GitHub Issue + feedbacks.yamlマージデータの詳細表示
 - **link**: Requirement/Specificationへの紐付け + フラグ管理 + 新Requirement作成
 - **close**: Feedbackクローズ + GitHub Issueクローズ
 
@@ -19,7 +19,7 @@ Feedback一覧表示・詳細表示・紐付け・クローズの4つのCLIコ�
 ### v3.0.0 追加スコープ
 
 - **unlink**: linkの逆操作。アーティファクトとの紐付け解除 + フラグ削除（SC-14, SC-15対応）
-- **create**: feedbackラベル付きGitHub Issue作成 + index.yaml登録（SC-17対応）
+- **create**: feedbackラベル付きGitHub Issue作成 + feedbacks.yaml登録（SC-17対応）
 - **close改善**: クローズ時に残存feedback-reviewフラグの警告表示（SC-16対応）
 
 ## 2. アーキテクチャ
@@ -49,7 +49,7 @@ Feedback一覧表示・詳細表示・紐付け・クローズの4つのCLIコ�
 ┌────────────────────┐   ┌────────────────────┐
 │ FeedbackRepository │   │ GitHubClient       │
 │ (spec-000027)      │   │ (spec-000027)      │
-│ - index.yaml       │   │ - gh CLI           │
+│ - feedbacks.yaml       │   │ - gh CLI           │
 └────────────────────┘   └────────────────────┘
              │
              ▼
@@ -139,7 +139,7 @@ export async function listFeedbacks(
   return { feedbacks };
 }
 
-// Feedback詳細取得（GitHub Issue + index.yaml マージ）
+// Feedback詳細取得（GitHub Issue + feedbacks.yaml マージ）
 export async function showFeedback(
   cwd: string,
   issueNumber: number
@@ -148,7 +148,7 @@ export async function showFeedback(
   const feedback = index.feedbacks.find((f) => f.githubIssue === issueNumber);
 
   if (!feedback) {
-    throw new Error(`Feedback for issue #${issueNumber} not found in index.yaml. Run 'reqord feedback sync' first.`);
+    throw new Error(`Feedback for issue #${issueNumber} not found in feedbacks.yaml. Run 'reqord feedback sync' first.`);
   }
 
   const issue = await getIssue(issueNumber);
@@ -165,7 +165,7 @@ export async function linkToRequirement(
   let feedback = index.feedbacks.find((f) => f.githubIssue === options.issueNumber);
 
   if (!feedback) {
-    // index.yamlにない場合は新規作成
+    // feedbacks.yamlにない場合は新規作成
     feedback = {
       githubIssue: options.issueNumber,
       linkedTo: {
@@ -188,7 +188,7 @@ export async function linkToRequirement(
     feedback.linkedTo.requirements.push(options.requirementId);
   }
 
-  // index.yaml保存
+  // feedbacks.yaml保存
   await saveIndex(cwd, index);
 
   // Requirementにfeedback-reviewフラグ追加
@@ -241,7 +241,7 @@ export async function linkWithNewRequirement(
   result.requirement.origin = { feedbackIssue: options.issueNumber };
   await saveRequirement(cwd, result.requirement);
 
-  // index.yaml更新
+  // feedbacks.yaml更新
   const index = await loadIndex(cwd);
   let feedback = index.feedbacks.find((f) => f.githubIssue === options.issueNumber);
 
@@ -329,7 +329,7 @@ export async function closeFeedback(
     throw new Error(`Feedback for issue #${issueNumber} not found`);
   }
 
-  // index.yamlステータス更新
+  // feedbacks.yamlステータス更新
   feedback.status = "closed";
   await saveIndex(cwd, index);
 
@@ -357,7 +357,7 @@ export async function resolveFeedback(
 
   if (!feedback) {
     throw new Error(
-      `Feedback for issue #${options.issueNumber} not found in index.yaml`
+      `Feedback for issue #${options.issueNumber} not found in feedbacks.yaml`
     );
   }
 
@@ -411,7 +411,7 @@ export async function resolveFeedback(
     await saveSpecification(cwd, specification);
   }
 
-  // Step 2: index.yamlのlinkedTo.resolvedに追加
+  // Step 2: feedbacks.yamlのlinkedTo.resolvedに追加
   if (!feedback.linkedTo.resolved) {
     feedback.linkedTo.resolved = { requirements: [], specifications: [] };
   }
@@ -444,7 +444,7 @@ export async function unlinkFromRequirement(
   const feedback = index.feedbacks.find((f) => f.githubIssue === options.issueNumber);
 
   if (!feedback) {
-    throw new Error(`Feedback for issue #${options.issueNumber} not found in index.yaml`);
+    throw new Error(`Feedback for issue #${options.issueNumber} not found in feedbacks.yaml`);
   }
 
   // linkedTo.requirementsから削除
@@ -490,7 +490,7 @@ export async function unlinkFromSpecification(
   const feedback = index.feedbacks.find((f) => f.githubIssue === options.issueNumber);
 
   if (!feedback) {
-    throw new Error(`Feedback for issue #${options.issueNumber} not found in index.yaml`);
+    throw new Error(`Feedback for issue #${options.issueNumber} not found in feedbacks.yaml`);
   }
 
   // linkedTo.specificationsから削除
@@ -606,7 +606,7 @@ export async function createFeedbackIssue(
     labels: ["feedback", "reqord-generated", ...(options.type ? [options.type] : [])],
   });
 
-  // index.yamlに新規エントリ追加
+  // feedbacks.yamlに新規エントリ追加
   const index = await loadIndex(cwd);
   const newEntry: FeedbackEntry = {
     githubIssue: issueNumber,
@@ -693,7 +693,7 @@ import Table from "cli-table3";
 import { listFeedbacks } from "../../services/feedback-service";
 
 export const listCommand = new Command("list")
-  .description("List feedback issues from index.yaml")
+  .description("List feedback issues from feedbacks.yaml")
   .option("--state <state>", "Filter by state (open|closed|all)", "all")
   .option("--type <type>", "Filter by type")
   .option("--json", "Output as JSON")
@@ -748,7 +748,7 @@ import chalk from "chalk";
 import { showFeedback } from "../../services/feedback-service";
 
 export const showCommand = new Command("show")
-  .description("Show feedback details (GitHub Issue + index.yaml)")
+  .description("Show feedback details (GitHub Issue + feedbacks.yaml)")
   .argument("<issue-number>", "GitHub issue number")
   .action(async (issueNumberStr: string) => {
     try {
@@ -848,7 +848,7 @@ import chalk from "chalk";
 import { closeFeedback } from "../../services/feedback-service";
 
 export const closeCommand = new Command("close")
-  .description("Close feedback (updates index.yaml and closes GitHub Issue)")
+  .description("Close feedback (updates feedbacks.yaml and closes GitHub Issue)")
   .argument("<issue-number>", "GitHub issue number")
   .action(async (issueNumberStr: string) => {
     try {
@@ -878,7 +878,7 @@ import chalk from "chalk";
 import { closeFeedback, checkRemainingFlags, showFeedback } from "../../services/feedback-service";
 
 export const closeCommand = new Command("close")
-  .description("Close feedback (updates index.yaml and closes GitHub Issue)")
+  .description("Close feedback (updates feedbacks.yaml and closes GitHub Issue)")
   .argument("<issue-number>", "GitHub issue number")
   .action(async (issueNumberStr: string) => {
     try {
@@ -997,7 +997,7 @@ export const createCommand = new Command("create")
 
       console.log(chalk.green(`✓ Created Feedback Issue #${issueNumber}`));
       console.log(chalk.gray(`  Label: feedback, reqord-generated`));
-      console.log(chalk.gray(`  Updated .reqord/feedback/index.yaml`));
+      console.log(chalk.gray(`  Updated .reqord/issues/feedbacks.yaml`));
     } catch (error) {
       console.error(chalk.red(`Error: ${(error as Error).message}`));
       process.exitCode = 1;
@@ -1085,7 +1085,7 @@ program.addCommand(feedbackCommand);
    $ reqord feedback list --state open
 
 2. listFeedbacks()
-   ├─ loadIndex() でindex.yamlを読み込み
+   ├─ loadIndex() でfeedbacks.yamlを読み込み
    ├─ フィルタリング（state, type）
    └─ テーブル表示
 
@@ -1105,7 +1105,7 @@ program.addCommand(feedbackCommand);
    $ reqord feedback show 17
 
 2. showFeedback()
-   ├─ loadIndex() でindex.yamlから取得
+   ├─ loadIndex() でfeedbacks.yamlから取得
    ├─ getIssue() でGitHub Issueから取得
    └─ マージして表示
 
@@ -1128,7 +1128,7 @@ program.addCommand(feedbackCommand);
    $ reqord feedback link 17 --req req-000006 --type improvement --severity high
 
 2. linkToRequirement()
-   ├─ index.yaml更新
+   ├─ feedbacks.yaml更新
    │  ├─ linkedTo.requirements に追加
    │  └─ type, severity設定
    ├─ Requirement JSON読み込み
@@ -1153,7 +1153,7 @@ program.addCommand(feedbackCommand);
    ├─ generateNextId() で連番採番
    ├─ createRequirement() で新Requirement作成
    ├─ origin: { feedbackIssue: 13 } を記録
-   ├─ index.yaml更新（linkedTo.createdRequirements）
+   ├─ feedbacks.yaml更新（linkedTo.createdRequirements）
    └─ Issue bodyにHTMLコメント挿入/更新
 
 3. 出力
@@ -1167,7 +1167,7 @@ program.addCommand(feedbackCommand);
    $ reqord feedback close 17
 
 2. closeFeedback()
-   ├─ index.yamlのstatus更新（closed）
+   ├─ feedbacks.yamlのstatus更新（closed）
    ├─ 影響範囲サマリー生成
    └─ gh issue close --comment でクローズ
 
@@ -1183,13 +1183,13 @@ program.addCommand(feedbackCommand);
    $ reqord feedback resolve req-000006 --issue 17
 
 2. resolveFeedback()
-   ├─ index.yamlからfeedbackエントリを検索
+   ├─ feedbacks.yamlからfeedbackエントリを検索
    ├─ artifact-idがlinkedTo.requirementsに含まれるか検証
    ├─ Step 1: アーティファクトからflag削除（先に実行 = 安全側）
    │  ├─ Requirement/Specification読み込み
    │  ├─ feedback-reviewフラグ（relatedIssues一致）を除去
    │  └─ 保存
-   └─ Step 2: index.yamlのlinkedTo.resolvedに追加
+   └─ Step 2: feedbacks.yamlのlinkedTo.resolvedに追加
       ├─ resolved.requirements にartifact-idを追加
       └─ 保存
 
@@ -1206,10 +1206,10 @@ program.addCommand(feedbackCommand);
    $ reqord feedback unlink 224 --req req-000023
 
 2. unlinkFromRequirement()
-   ├─ index.yamlからfeedbackエントリを検索
+   ├─ feedbacks.yamlからfeedbackエントリを検索
    ├─ linkedTo.requirementsからreq-000023を削除
    ├─ req-000023のfeedback-reviewフラグ（issue #224）を削除
-   ├─ index.yaml保存
+   ├─ feedbacks.yaml保存
    └─ Issue bodyのHTMLコメントを更新
 
 3. 出力
@@ -1234,13 +1234,13 @@ program.addCommand(feedbackCommand);
    │  └─ "### 深刻度" セクション（指定時）
    ├─ タイトルに "[Feedback] " prefix付与
    ├─ gh issue create --label feedback,reqord,improvement でGitHub Issue作成
-   ├─ index.yamlに新規エントリ追加（type, severity設定）
-   └─ index.yaml保存
+   ├─ feedbacks.yamlに新規エントリ追加（type, severity設定）
+   └─ feedbacks.yaml保存
 
 3. 出力
    ✓ Created Feedback Issue #228
      Label: feedback
-     Updated .reqord/feedback/index.yaml
+     Updated .reqord/issues/feedbacks.yaml
 ```
 
 ### 4.9 Close時の残存flag警告（v3.0.0改善）
@@ -1257,7 +1257,7 @@ program.addCommand(feedbackCommand);
    │  ⚠ Warning: Linked artifacts have remaining feedback-review flags:
    │    - req-000006: feedback-review (issue #17, high)
    ├─ closeFeedback()
-   │  ├─ index.yamlのstatus更新（closed）
+   │  ├─ feedbacks.yamlのstatus更新（closed）
    │  └─ gh issue close --comment でクローズ
    └─ 残存flag案内表示
 
@@ -1333,9 +1333,9 @@ if (entity.flags && entity.flags.length > 0) {
   - flag削除後のGitHub Issue body更新
 - v3.0.0: unlinkFromSpecification(): linkedTo削除
   - linkedToに含まれないspecの場合エラー
-- v3.0.0: createFeedbackIssue(): GitHub Issue作成 + index.yaml登録
+- v3.0.0: createFeedbackIssue(): GitHub Issue作成 + feedbacks.yaml登録
   - feedbackラベル付きIssueが作成される
-  - index.yamlに新規エントリが追加される
+  - feedbacks.yamlに新規エントリが追加される
 - v3.0.0: checkRemainingFlags(): 残存flag収集
   - linkedTo.requirementsの各reqからfeedback-reviewフラグを収集
   - 該当issueのフラグのみ抽出
@@ -1366,25 +1366,25 @@ if (entity.flags && entity.flags.length > 0) {
 7. GitHub Issue上でcloseされていることを確認
 8. v2.0.0: `reqord feedback resolve <artifact-id> --issue <number>` でflag解決
 9. v2.0.0: アーティファクトからfeedback-reviewフラグが除去されることを確認
-10. v2.0.0: index.yamlのlinkedTo.resolvedに記録されることを確認
+10. v2.0.0: feedbacks.yamlのlinkedTo.resolvedに記録されることを確認
 11. v2.0.0: flags付きアーティファクトの承認時に警告が表示されることを確認
 12. v3.0.0: `reqord feedback unlink <issue> --req <id>` でリンクとフラグが削除されることを確認
 13. v3.0.0: `reqord feedback unlink <issue> --spec <id>` でリンクが削除されることを確認
-14. v3.0.0: `reqord feedback create --title <title> --type <type>` でGitHub Issueが作成されindex.yamlに登録されることを確認
+14. v3.0.0: `reqord feedback create --title <title> --type <type>` でGitHub Issueが作成されfeedbacks.yamlに登録されることを確認
 15. v3.0.0: `reqord feedback close <issue>` 実行時に残存flagの警告が表示されることを確認
 
 ## 6. 技術的決定事項
 
-### 6.1 index.yaml未存在時の挙動
+### 6.1 feedbacks.yaml未存在時の挙動
 
-**決定**: index.yamlにない場合でもlinkコマンドで新規エントリを作成
+**決定**: feedbacks.yamlにない場合でもlinkコマンドで新規エントリを作成
 
 **理由**:
 - `reqord feedback sync`実行を強制しない柔軟性
 - GitHub Issueが先に作成され、後からreqordで管理開始するケースに対応
 
 **実装**:
-- linkコマンド実行時、index.yamlにissueNumberがなければ新規FeedbackEntryを作成
+- linkコマンド実行時、feedbacks.yamlにissueNumberがなければ新規FeedbackEntryを作成
 - syncコマンド実行で既存エントリとマージ
 
 ### 6.2 新Requirement作成時のタイトル形式
@@ -1442,7 +1442,7 @@ Error: Specify exactly one of --req, --created-req, or --spec
 
 ### 6.6 resolve操作順序（v2.0.0）
 
-**決定**: アーティファクトのflag削除 → index.yamlのresolved追加 の順序
+**決定**: アーティファクトのflag削除 → feedbacks.yamlのresolved追加 の順序
 
 **理由**:
 - 部分的障害対策として、先にflagを消す方が安全

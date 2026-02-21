@@ -2,10 +2,10 @@ id: spec-000004
 requirementId: req-000004
 title: 共有型定義 (@reqord/shared)
 requirementVersion: '1.1'
-version: '1.1'
+version: '1.2'
 status: draft
 createdAt: 2026-02-08T14:08:06.872Z
-updatedAt: 2026-02-21T00:00:00Z
+updatedAt: 2026-02-20T23:18:59.538Z
 versionHistory:
   - version: '1.1'
     status: draft
@@ -19,6 +19,10 @@ versionHistory:
     status: implemented
     changedAt: 2026-02-09T11:57:48Z
     summary: 初版実装完了
+  - version: '1.2'
+    status: draft
+    changedAt: 2026-02-20T23:18:59.538Z
+    summary: '#432 .reqord/issues/ 再構造化に伴うドキュメント更新'
 files:
   design: specifications/spec-000004/design.md
   supplementary: []
