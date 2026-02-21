@@ -169,7 +169,7 @@ deprecated         deprecated
 
 #### 設計
 
-- **配置先:** `schemas/common.ts` または新規 `rules/status-transitions.ts`
+- **配置先:** `rules/status-transitions.ts`
 - **`STATUS_TRANSITIONS`**: 許可遷移のマップ定数
 
   ```typescript
