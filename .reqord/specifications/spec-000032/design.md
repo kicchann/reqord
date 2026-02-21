@@ -52,8 +52,6 @@ PR Merged (reqord/*-approve-v*)
   ├─ 5. データ更新（jq/yq）
   │     - status → "approved"
   │     - updatedAt → ISO 8601タイムスタンプ
-  │     - currentApproval.approvedAt → タイムスタンプ
-  │     - currentApproval.approvedBy → PRマージユーザー名
   │     - versionHistory[] に新エントリ追加
   │
   └─ 6. コミット & プッシュ
@@ -84,8 +82,6 @@ jq --arg now "$NOW" \
    '
    .status = "approved" |
    .updatedAt = $now |
-   .currentApproval.approvedAt = $now |
-   .currentApproval.approvedBy = [$user] |
    .versionHistory += [{
      version: $version,
      status: "approved",
@@ -102,8 +98,6 @@ jq --arg now "$NOW" \
 yq -i "
   .status = \"approved\" |
   .updatedAt = \"$NOW\" |
-  .currentApproval.approvedAt = \"$NOW\" |
-  .currentApproval.approvedBy = [\"$MERGED_BY\"] |
   .versionHistory += [{
     \"version\": \"$VERSION\",
     \"status\": \"approved\",

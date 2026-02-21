@@ -51,10 +51,4 @@ dependencies:
     - req-000005
 estimatedComplexity: medium
 estimatedHours: 12
-currentApproval:
-  version: '3.1'
-  phase: requirement
-  prNumber: 264
-  prUrl: https://github.com/kicchann/reqord/pull/264
-  approvedBy: []
 flags: []

@@ -57,10 +57,4 @@ dependencies:
     - req-000011
 estimatedComplexity: medium
 estimatedHours: 12
-currentApproval:
-  version: '5.0'
-  phase: requirement
-  prNumber: 419
-  prUrl: https://github.com/kicchann/reqord/pull/419
-  approvedBy: []
 flags: []

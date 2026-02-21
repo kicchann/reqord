@@ -34,8 +34,6 @@ function makeMockHandler(): ApprovalHandler {
   return {
     revalidate: vi.fn(),
     updateStatus: vi.fn().mockResolvedValue("2.0.0"),
-    saveCurrentApproval: vi.fn(),
-    updatePrInfo: vi.fn(),
     buildPrTitle: vi.fn((target) => `[Reqord] Approve ${target.id}: ${target.title} v${target.version}`),
     buildPrBody: vi.fn((target) => `## Requirement Approval Request
 
@@ -82,9 +80,6 @@ describe("startApproval", () => {
     // Verify handler.updateStatus called
     expect(mockHandler.updateStatus).toHaveBeenCalledWith("/test/cwd", target);
 
-    // Verify handler.saveCurrentApproval called
-    expect(mockHandler.saveCurrentApproval).toHaveBeenCalledWith("/test/cwd", target, "2.0.0");
-
     // Verify git operations
     expect(gitRepo.add).toHaveBeenCalledWith("/test/cwd", [".reqord/requirements/req-000011.yaml"]);
     expect(gitRepo.commit).toHaveBeenCalledWith("/test/cwd", "chore(reqord): request approval for req-000011");
@@ -98,9 +93,6 @@ describe("startApproval", () => {
         head: "reqord/req-000011-approve-v1.0.0",
       })
     );
-
-    // Verify handler.updatePrInfo called
-    expect(mockHandler.updatePrInfo).toHaveBeenCalledWith("/test/cwd", target, 42, "https://github.com/owner/repo/pull/42");
 
     // Verify result
     expect(result).toEqual({
@@ -224,21 +216,6 @@ describe("startApproval", () => {
     expect(checkoutCalls[0]).toEqual(["/test/cwd", "reqord/req-000011-approve-v1.0.0"]);
     // Last checkout should restore original branch
     expect(checkoutCalls[checkoutCalls.length - 1]).toEqual(["/test/cwd", "feature-123"]);
-  });
-
-  it("handler.updatePrInfoが呼ばれてPR情報が更新される", async () => {
-    const target = makeApprovalTarget();
-    const mockHandler = makeMockHandler();
-
-    await startApproval("/test/cwd", target, mockHandler);
-
-    // Verify updatePrInfo called with PR info
-    expect(mockHandler.updatePrInfo).toHaveBeenCalledWith(
-      "/test/cwd",
-      target,
-      42,
-      "https://github.com/owner/repo/pull/42"
-    );
   });
 
   it("ブランチ作成後にJSON更新される（書き込み順序の安全性）", async () => {

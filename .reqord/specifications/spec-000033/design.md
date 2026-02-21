@@ -428,7 +428,7 @@ spec-000005と共通のスキーマ（`@reqord/shared` の `VersionHistoryEntryS
   - supplementary変更検出
   - ステータスのみ変更時の false 判定
   - flags変更時の false 判定（メタ情報は除外）
-  - currentApproval変更時の false 判定
+  - メタ情報のみ変更時の false 判定
 
 ### 統合テスト
 

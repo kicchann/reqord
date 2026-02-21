@@ -15,8 +15,6 @@ vi.mock("../../services/requirement-approval-handler.js", () => ({
   requirementHandler: {
     revalidate: vi.fn(),
     updateStatus: vi.fn(),
-    saveCurrentApproval: vi.fn(),
-    updatePrInfo: vi.fn(),
     buildPrTitle: vi.fn(),
     buildPrBody: vi.fn(),
   },
@@ -287,39 +285,4 @@ describe("approveCommand", () => {
     consoleLogSpy.mockRestore();
   });
 
-  it("既存PR検出時に早期リターン", async () => {
-    const requirement = makeRequirement({
-      currentApproval: {
-        version: "1.0",
-        phase: "requirement",
-        prNumber: 50,
-        prUrl: "https://github.com/owner/repo/pull/50",
-        approvedBy: [],
-      },
-    });
-    vi.mocked(showRequirement).mockResolvedValue({
-      requirement,
-      description: null,
-    });
-
-    const consoleLogSpy = vi.spyOn(console, "log").mockImplementation(() => {});
-
-    await approveCommand.parseAsync(["node", "test", "req-000001"]);
-
-    // Existing PR message shown
-    expect(consoleLogSpy).toHaveBeenCalledWith(
-      expect.stringContaining("Approval PR already exists: req-000001")
-    );
-    expect(consoleLogSpy).toHaveBeenCalledWith(
-      expect.stringContaining("PR: https://github.com/owner/repo/pull/50")
-    );
-
-    // startApproval NOT called
-    expect(startApproval).not.toHaveBeenCalled();
-
-    // No error
-    expect(process.exitCode).toBe(0);
-
-    consoleLogSpy.mockRestore();
-  });
 });

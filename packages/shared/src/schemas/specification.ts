@@ -2,15 +2,6 @@ import { z } from "zod";
 import { StatusSchema, VersionHistoryEntrySchema } from "./common.js";
 import { FlagSchema } from "./requirement.js";
 
-const SpecCurrentApprovalSchema = z.object({
-  version: z.string(),
-  phase: z.literal("specification"),
-  prNumber: z.number(),
-  prUrl: z.string(),
-  approvedBy: z.array(z.string()),
-  approvedAt: z.string().optional(),
-});
-
 export const ImplementationIssueSchema = z.object({
   number: z.number(),
   title: z.string(),
@@ -63,7 +54,6 @@ export const SpecificationSchema = z.object({
     supplementary: z.array(z.string()).default([]),
   }),
   flags: z.array(FlagSchema).default([]),
-  currentApproval: SpecCurrentApprovalSchema.optional(),
   implementation: ImplementationSchema.optional(),
   designValidation: DesignValidationSchema.optional(),
 });

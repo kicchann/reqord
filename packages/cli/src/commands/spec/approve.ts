@@ -30,13 +30,6 @@ export const specApproveCommand = new Command("approve")
       // 1. Load spec and check for existing approval PR first
       const { specification, design } = await showSpecification(cwd, id);
 
-      if (specification.currentApproval?.prUrl) {
-        console.log(chalk.yellow(`Approval PR already exists: ${id}`));
-        console.log(`  PR: ${specification.currentApproval.prUrl}`);
-        process.exitCode = 0;
-        return;
-      }
-
       // 2. Check prerequisites
       const prereqs = await checkSpecApprovalPrerequisites(cwd, id);
       if (!prereqs.ok) {

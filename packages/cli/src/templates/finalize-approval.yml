@@ -52,7 +52,6 @@ jobs:
           ENTITY_TYPE="${{ steps.extract.outputs.entity_type }}"
           ENTITY_ID="${{ steps.extract.outputs.entity_id }}"
           VERSION="${{ steps.extract.outputs.version }}"
-          MERGED_BY="${{ github.event.pull_request.merged_by.login }}"
           NOW="$(date -u +%Y-%m-%dT%H:%M:%S.000Z)"
 
           # Determine file path (YAML preferred, JSON fallback)
@@ -92,8 +91,6 @@ jobs:
             yq -i "
               .status = \"approved\" |
               .updatedAt = \"$NOW\" |
-              .currentApproval.approvedAt = \"$NOW\" |
-              .currentApproval.approvedBy = [\"$MERGED_BY\"] |
               .versionHistory += [{
                 \"version\": \"$VERSION\",
                 \"status\": \"approved\",
@@ -103,13 +100,10 @@ jobs:
             " "$FILE_PATH"
           else
             jq --arg now "$NOW" \
-               --arg user "$MERGED_BY" \
                --arg version "$VERSION" \
                '
                .status = "approved" |
                .updatedAt = $now |
-               .currentApproval.approvedAt = $now |
-               .currentApproval.approvedBy = [$user] |
                .versionHistory += [{
                  version: $version,
                  status: "approved",

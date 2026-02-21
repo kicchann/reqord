@@ -23,35 +23,6 @@ export const specificationHandler: ApprovalHandler = {
     return after.version;
   },
 
-  async saveCurrentApproval(cwd, target, newVersion) {
-    const spec = await specRepo.findByIdOrThrow(cwd, target.id);
-    await specRepo.save(cwd, {
-      ...spec,
-      currentApproval: {
-        version: newVersion,
-        phase: "specification" as const,
-        prNumber: 0,
-        prUrl: "",
-        approvedBy: [],
-      },
-    });
-  },
-
-  async updatePrInfo(cwd, target, prNumber, prUrl) {
-    const spec = await specRepo.findByIdOrThrow(cwd, target.id);
-    if (!spec.currentApproval) {
-      throw new Error(`Cannot update PR info: current approval not found for "${target.id}".`);
-    }
-    await specRepo.save(cwd, {
-      ...spec,
-      currentApproval: {
-        ...spec.currentApproval,
-        prNumber,
-        prUrl,
-      },
-    });
-  },
-
   buildPrTitle(target) {
     return `[Reqord] Approve ${target.id}: ${target.title} v${target.version}`;
   },

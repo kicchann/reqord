@@ -54,10 +54,4 @@ dependencies:
   relatedTo: []
 estimatedComplexity: large
 estimatedHours: 20
-currentApproval:
-  version: '1.1'
-  phase: requirement
-  prNumber: 312
-  prUrl: https://github.com/kicchann/reqord/pull/312
-  approvedBy: []
 flags: []

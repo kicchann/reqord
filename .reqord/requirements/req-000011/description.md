@@ -60,7 +60,7 @@ approved/implementedからdraftに差し戻す場合、影響範囲を含めたP
    - CODEOWNERSからレビュアーを自動アサイン
    - Reqordメタデータをボディに含める（下記「PRメタデータコメントタグ」参照）
 5. PRマージ時:
-   - `currentApproval` を記録（version, phase, prNumber）
+   - 承認情報をversionHistoryに記録
    - `versionHistory` にエントリを追加
    - `approvedBy`/`approvedAt`はPRの承認者・マージ日時が証跡となるため、YAMLに重複記録しない
 
