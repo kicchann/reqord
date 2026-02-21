@@ -1,5 +1,11 @@
 import { describe, it, expect } from "vitest";
-import { TaskDefinitionSchema, TaskDefinitionFileSchema } from "./task.js";
+import {
+  TaskDefinitionSchema,
+  TaskDefinitionFileSchema,
+  TaskLinkedToSchema,
+  TaskEntrySchema,
+  TasksIndexSchema,
+} from "./task.js";
 
 describe("TaskDefinitionSchema", () => {
   describe("正常系", () => {
@@ -139,5 +145,102 @@ describe("TaskDefinitionFileSchema", () => {
 
       expect(() => TaskDefinitionFileSchema.parse(file)).toThrow();
     });
+  });
+});
+
+describe("TaskLinkedToSchema", () => {
+  it("specifications配列を受け入れる", () => {
+    const result = TaskLinkedToSchema.parse({
+      specifications: ["spec-000001", "spec-000002"],
+    });
+    expect(result.specifications).toEqual(["spec-000001", "spec-000002"]);
+  });
+
+  it("specifications省略時に空配列をデフォルト値として設定する", () => {
+    const result = TaskLinkedToSchema.parse({});
+    expect(result.specifications).toEqual([]);
+  });
+});
+
+describe("TaskEntrySchema", () => {
+  const baseEntry = {
+    number: 101,
+    title: "Implement feature X",
+    url: "https://github.com/owner/repo/issues/101",
+    linkedTo: { specifications: ["spec-000001"] },
+    priority: "P1" as const,
+    status: "open" as const,
+    estimatedHours: 5,
+    syncedAt: "2026-02-10T10:00:00Z",
+  };
+
+  it("全フィールド指定で受け入れる", () => {
+    const result = TaskEntrySchema.parse(baseEntry);
+    expect(result.number).toBe(101);
+    expect(result.title).toBe("Implement feature X");
+    expect(result.linkedTo.specifications).toEqual(["spec-000001"]);
+    expect(result.status).toBe("open");
+  });
+
+  it("priority・estimatedHoursはオプション", () => {
+    const { priority, estimatedHours, ...minimal } = baseEntry;
+    const result = TaskEntrySchema.parse(minimal);
+    expect(result.priority).toBeUndefined();
+    expect(result.estimatedHours).toBeUndefined();
+  });
+
+  it("numberが0以下で拒否する", () => {
+    expect(() => TaskEntrySchema.parse({ ...baseEntry, number: 0 })).toThrow();
+    expect(() =>
+      TaskEntrySchema.parse({ ...baseEntry, number: -1 })
+    ).toThrow();
+  });
+
+  it("不正なURLで拒否する", () => {
+    expect(() =>
+      TaskEntrySchema.parse({ ...baseEntry, url: "not-a-url" })
+    ).toThrow();
+  });
+
+  it("不正なstatusで拒否する", () => {
+    expect(() =>
+      TaskEntrySchema.parse({ ...baseEntry, status: "in_progress" })
+    ).toThrow();
+  });
+});
+
+describe("TasksIndexSchema", () => {
+  it("タスク一覧を受け入れる", () => {
+    const index = {
+      title: "Project Tasks",
+      tasks: [
+        {
+          number: 101,
+          title: "Task 1",
+          url: "https://github.com/owner/repo/issues/101",
+          linkedTo: { specifications: ["spec-000001"] },
+          status: "open" as const,
+          syncedAt: "2026-02-10T10:00:00Z",
+        },
+      ],
+    };
+
+    const result = TasksIndexSchema.parse(index);
+    expect(result.title).toBe("Project Tasks");
+    expect(result.tasks).toHaveLength(1);
+  });
+
+  it("空のタスク配列を受け入れる", () => {
+    const index = {
+      title: "Empty Project",
+      tasks: [],
+    };
+
+    const result = TasksIndexSchema.parse(index);
+    expect(result.tasks).toEqual([]);
+  });
+
+  it("titleが欠けている場合は拒否する", () => {
+    expect(() => TasksIndexSchema.parse({ tasks: [] })).toThrow();
   });
 });
