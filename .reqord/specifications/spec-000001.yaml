@@ -3,9 +3,9 @@ requirementId: req-000001
 title: CLI初期化コマンド
 requirementVersion: '1.0'
 version: '1.1'
-status: draft
+status: approved
 createdAt: 2026-02-08T14:07:39.737Z
-updatedAt: 2026-02-20T23:18:58.977Z
+updatedAt: 2026-02-21T13:28:03.117Z
 versionHistory:
   - version: '1.0'
     status: draft
