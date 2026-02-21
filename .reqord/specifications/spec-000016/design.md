@@ -141,7 +141,7 @@ export async function createIssuesFromSpec(
 
   // 2. タスク定義ファイル読み込み・検証
   const tasksFile = await loadTasksFile(cwd, options.tasksFile);
-  if (tasksFile.tasks.length > options.maxIssues) {
+  if (options.maxIssues != null && tasksFile.tasks.length > options.maxIssues) {
     throw new Error(
       `Task count (${tasksFile.tasks.length}) exceeds max (${options.maxIssues})`
     );
@@ -182,10 +182,6 @@ export async function createIssuesFromSpec(
 
   // 5. tasks.yamlに記録（dry-run時はスキップ）
   if (!options.dryRun) {
-    const totalEstimatedHours = tasksFile.tasks.reduce(
-      (sum, t) => sum + t.estimatedHours,
-      0
-    );
     await writeTasksToYaml(cwd, options.specId, {
       issues: issues.map((i) => ({
         number: i.number!,
@@ -198,13 +194,15 @@ export async function createIssuesFromSpec(
     });
   }
 
+  const totalEstimatedHours = tasksFile.tasks.reduce(
+    (sum, t) => sum + t.estimatedHours,
+    0
+  );
+
   return {
     specId: options.specId,
     issues,
-    totalEstimatedHours: tasksFile.tasks.reduce(
-      (sum, t) => sum + t.estimatedHours,
-      0
-    ),
+    totalEstimatedHours,
   };
 }
 
@@ -218,7 +216,6 @@ function buildIssueBody(
 
   // テンプレート適用またはシンプルなMarkdown
   if (template) {
-    // テンプレート変数を置換
     return metadata + applyTemplate(template, task);
   } else {
     return (
@@ -234,6 +231,22 @@ function buildIssueBody(
 
 function buildLabels(task: TaskDefinition): string[] {
   return ["reqord-generated", task.priority];
+}
+
+function applyTemplate(template: string, task: TaskDefinition): string {
+  // ISSUE_TEMPLATEはYAML form形式だが、bodyセクションのみ抽出して変数置換する
+  // {{title}}, {{description}}, {{estimatedHours}}, {{priority}} を置換
+  return template
+    .replace(/\{\{title\}\}/g, task.title)
+    .replace(/\{\{description\}\}/g, task.description)
+    .replace(/\{\{estimatedHours\}\}/g, String(task.estimatedHours))
+    .replace(/\{\{priority\}\}/g, task.priority)
+    .replace(
+      /\{\{dependencies\}\}/g,
+      task.dependencies.length > 0
+        ? task.dependencies.map((d) => `- ${d}`).join("\n")
+        : "なし"
+    );
 }
 
 async function loadTasksFile(
@@ -279,7 +292,6 @@ async function writeTasksToYaml(
     linkedTo: { specifications: [specId] },
     url: i.url,
     estimatedHours: i.estimatedHours,
-    priority: i.priority,
     status: i.status,
     syncedAt: new Date().toISOString(),
   }));
@@ -316,6 +328,8 @@ export async function createIssue(
     options.title,
     "--label",
     options.labels.join(","),
+    "--body-file",
+    "-",
   ];
 
   // bodyは大きくなる可能性があるためstdin経由で渡す（エスケープ問題回避）
@@ -368,7 +382,7 @@ export type TaskDefinition = z.infer<typeof TaskDefinitionSchema>;
 export type TaskDefinitionFile = z.infer<typeof TaskDefinitionFileSchema>;
 ```
 
-### 3.5 GitHub Issue Template (`。github/ISSUE_TEMPLATE/reqord-implementation.yml` - 新規)
+### 3.5 GitHub Issue Template (`.github/ISSUE_TEMPLATE/reqord-implementation.yml` - 新規)
 
 **目的:** reqordから自動生成されるIssueのフォーマット統一。
 
