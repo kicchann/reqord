@@ -213,7 +213,6 @@ function buildIssueBody(
   // Markdown形式でIssue bodyを構築
   // NOTE: ISSUE_TEMPLATEはGitHub UI用のYAML form定義であり、
   // gh issue create --body-file - でbodyを直接渡す場合には使用しない。
-  // templateパラメータは将来的なMarkdownテンプレート対応用に予約。
   return (
     metadata +
     `## 説明\n\n${task.description}\n\n` +
@@ -420,12 +419,10 @@ body:
       → loadTasksFile(cwd, "./tasks.json")
         → fs.readText() → JSON.parse() → TaskDefinitionFileSchema.parse()
         → { tasks: [{ title, description, priority, estimatedHours, dependencies }, ...] }
-      → loadIssueTemplate(cwd)
-        → .github/ISSUE_TEMPLATE/reqord-implementation.yml 読み込み
       → 各タスクに対して:
-        → buildIssueBody(specId, task, template)
+        → buildIssueBody(specId, task)
           → HTMLコメントタグ挿入: <!-- reqord:specification {"specificationId":"spec-000016"} -->
-          → テンプレート適用またはMarkdown生成
+          → Markdown形式でbody構築（説明・見積もり・優先度・依存タスク）
         → buildLabels(task)
           → ["reqord-generated", "P0"] 等
         → githubClient.createIssue({ title, body, labels })
@@ -467,7 +464,7 @@ body:
   - issue生成後のtasks.yaml記録検証
 - **issue-service.buildIssueBody**:
   - HTMLコメントタグ埋め込み検証
-  - テンプレートあり/なしでの本文生成
+  - Markdown形式の本文生成（説明・見積もり・優先度・依存タスク）
 - **issue-service.buildLabels**:
   - `reqord-generated` + 優先度ラベルの生成
 - **github-client.createIssue**:
