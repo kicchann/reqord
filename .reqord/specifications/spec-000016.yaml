@@ -3,9 +3,9 @@ requirementId: req-000016
 title: GitHub Issue一括生成
 requirementVersion: '1.0'
 version: '1.1'
-status: draft
+status: approved
 createdAt: 2026-02-08T14:08:07.899Z
-updatedAt: 2026-02-20T23:19:01.182Z
+updatedAt: 2026-02-21T13:28:36.519Z
 versionHistory:
   - version: '1.0'
     status: draft
