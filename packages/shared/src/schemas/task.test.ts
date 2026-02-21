@@ -183,7 +183,7 @@ describe("TaskEntrySchema", () => {
   });
 
   it("priority・estimatedHoursはオプション", () => {
-    const { priority, estimatedHours, ...minimal } = baseEntry;
+    const { priority: _priority, estimatedHours: _estimatedHours, ...minimal } = baseEntry;
     const result = TaskEntrySchema.parse(minimal);
     expect(result.priority).toBeUndefined();
     expect(result.estimatedHours).toBeUndefined();
