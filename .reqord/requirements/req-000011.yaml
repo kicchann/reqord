@@ -33,7 +33,7 @@ successCriteria:
   - PR本文にreqordメタデータコメントタグが埋め込まれる
   - CODEOWNERSで指定されたレビュアーがPRに自動アサインされる
   - PRマージ時にRequirementのstatusがapprovedに更新される
-  - currentApproval情報（version, phase, prNumber, approvedBy）が記録される
+  - 承認PR情報がversionHistoryに記録される
   - approve実行時にバージョンをインクリメントしない（バージョン変更はreqord versionコマンドで行う）
   - approve実行時にstatusをapprovedに設定し、PRマージで承認完了
   - reqord req implement <id> でapproved状態のreqをimplementedに遷移できる
@@ -56,10 +56,4 @@ dependencies:
     - req-000005
 estimatedComplexity: medium
 estimatedHours: 12
-currentApproval:
-  version: '5.0'
-  phase: requirement
-  prNumber: 280
-  prUrl: https://github.com/kicchann/reqord/pull/280
-  approvedBy: []
 flags: []

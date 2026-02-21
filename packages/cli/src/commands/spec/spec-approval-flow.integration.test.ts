@@ -114,7 +114,7 @@ describe("Specification承認フロー統合テスト", () => {
   });
 
   describe("承認フロー正常系", () => {
-    it("Requirement approved → spec approve → PR作成 → currentApproval記録", async () => {
+    it("Requirement approved → spec approve → PR作成", async () => {
       // Arrange: Requirement is approved, Specification is draft
       const requirement = makeRequirement({ status: "approved" });
       const specification = makeSpecification({ status: "draft" });

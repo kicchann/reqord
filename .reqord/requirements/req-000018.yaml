@@ -59,10 +59,4 @@ dependencies:
   relatedTo: []
 estimatedComplexity: medium
 estimatedHours: 12
-currentApproval:
-  version: '4.0'
-  phase: requirement
-  prNumber: 367
-  prUrl: https://github.com/kicchann/reqord/pull/367
-  approvedBy: []
 flags: []

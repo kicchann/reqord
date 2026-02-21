@@ -27,9 +27,3 @@ files:
   design: specifications/spec-000013/design.md
   supplementary: []
 flags: []
-currentApproval:
-  version: '1.1'
-  phase: specification
-  prNumber: 313
-  prUrl: https://github.com/kicchann/reqord/pull/313
-  approvedBy: []

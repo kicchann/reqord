@@ -561,20 +561,6 @@ describe("hasSpecMetadataChanges", () => {
     expect(hasSpecMetadataChanges(before, after)).toBe(false);
   });
 
-  it("currentApproval変更は検出しない", () => {
-    const before = makeSpecification({ currentApproval: undefined });
-    const after = makeSpecification({
-      currentApproval: {
-        version: "1.0",
-        phase: "specification",
-        prNumber: 123,
-        prUrl: "https://github.com/user/repo/pull/123",
-        approvedBy: ["user1"],
-      },
-    });
-    expect(hasSpecMetadataChanges(before, after)).toBe(false);
-  });
-
   it("updatedAt変更は検出しない", () => {
     const before = makeSpecification({ updatedAt: "2025-01-01T00:00:00.000Z" });
     const after = makeSpecification({ updatedAt: "2025-01-02T00:00:00.000Z" });

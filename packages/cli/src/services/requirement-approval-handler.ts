@@ -22,35 +22,6 @@ export const requirementHandler: ApprovalHandler = {
     return after.version;
   },
 
-  async saveCurrentApproval(cwd, target, newVersion) {
-    const req = await reqRepo.findByIdOrThrow(cwd, target.id);
-    await reqRepo.save(cwd, {
-      ...req,
-      currentApproval: {
-        version: newVersion,
-        phase: "requirement" as const,
-        prNumber: 0,
-        prUrl: "",
-        approvedBy: [],
-      },
-    });
-  },
-
-  async updatePrInfo(cwd, target, prNumber, prUrl) {
-    const req = await reqRepo.findByIdOrThrow(cwd, target.id);
-    if (!req.currentApproval) {
-      throw new Error(`Cannot update PR info: ${target.id} has no current approval.`);
-    }
-    await reqRepo.save(cwd, {
-      ...req,
-      currentApproval: {
-        ...req.currentApproval,
-        prNumber,
-        prUrl,
-      },
-    });
-  },
-
   buildPrTitle(target) {
     return `[Reqord] Approve ${target.id}: ${target.title} v${target.version}`;
   },

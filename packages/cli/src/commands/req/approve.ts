@@ -19,14 +19,6 @@ export const approveCommand = new Command("approve")
     try {
       const { requirement } = await showRequirement(cwd, id);
 
-      // Check for existing approval PR
-      if (requirement.currentApproval?.prUrl) {
-        console.log(chalk.yellow(`Approval PR already exists: ${id}`));
-        console.log(`  PR: ${requirement.currentApproval.prUrl}`);
-        process.exitCode = 0;
-        return;
-      }
-
       // v2.0.0: Flag warning before approval
       if (requirement.flags.length > 0) {
         console.log(

@@ -15,10 +15,6 @@ export interface ApprovalHandler {
   revalidate(cwd: string, target: ApprovalTarget): Promise<void>;
   /** Update entity status to approved, returns new version */
   updateStatus(cwd: string, target: ApprovalTarget): Promise<string>;
-  /** Save currentApproval field on entity */
-  saveCurrentApproval(cwd: string, target: ApprovalTarget, newVersion: string): Promise<void>;
-  /** Update currentApproval with actual PR info after PR creation */
-  updatePrInfo(cwd: string, target: ApprovalTarget, prNumber: number, prUrl: string): Promise<void>;
   /** Build PR title */
   buildPrTitle(target: ApprovalTarget): string;
   /** Build PR body */
@@ -77,31 +73,22 @@ export async function startApproval(
     // 6. Update status via handler
     const newVersion = await handler.updateStatus(cwd, target);
 
-    // 7. Save currentApproval (placeholder PR info)
-    await handler.saveCurrentApproval(cwd, target, newVersion);
-
-    // 8. Stage and commit
+    // 7. Stage and commit
     await gitRepo.add(cwd, target.files);
     await gitRepo.commit(cwd, `chore(reqord): request approval for ${target.id}`);
     await gitRepo.push(cwd, branchName);
 
-    // 9. Build PR title/body AFTER updateStatus to use newVersion
+    // 8. Build PR title/body AFTER updateStatus to use newVersion
     const updatedTarget = { ...target, version: newVersion };
     const prTitle = handler.buildPrTitle(updatedTarget);
     const prBody = handler.buildPrBody(updatedTarget);
 
-    // 10. Create PR
+    // 9. Create PR
     const prInfo = await githubRepo.createPullRequest({
       title: prTitle,
       body: prBody,
       head: branchName,
     });
-
-    // 11. Update with actual PR info
-    await handler.updatePrInfo(cwd, target, prInfo.number, prInfo.url);
-    await gitRepo.add(cwd, target.files);
-    await gitRepo.commit(cwd, `chore(reqord): update currentApproval with PR #${prInfo.number}`);
-    await gitRepo.push(cwd, branchName);
 
     return {
       branchName,

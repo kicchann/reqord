@@ -78,10 +78,4 @@ dependencies:
     - req-000019
 estimatedComplexity: medium
 estimatedHours: 20
-currentApproval:
-  version: '4.0'
-  phase: requirement
-  prNumber: 329
-  prUrl: https://github.com/kicchann/reqord/pull/329
-  approvedBy: []
 flags: []

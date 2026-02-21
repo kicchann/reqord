@@ -92,8 +92,6 @@ jobs:
             yq -i "
               .status = \"approved\" |
               .updatedAt = \"$NOW\" |
-              .currentApproval.approvedAt = \"$NOW\" |
-              .currentApproval.approvedBy = [\"$MERGED_BY\"] |
               .versionHistory += [{
                 \"version\": \"$VERSION\",
                 \"status\": \"approved\",
@@ -103,13 +101,10 @@ jobs:
             " "$FILE_PATH"
           else
             jq --arg now "$NOW" \
-               --arg user "$MERGED_BY" \
                --arg version "$VERSION" \
                '
                .status = "approved" |
                .updatedAt = $now |
-               .currentApproval.approvedAt = $now |
-               .currentApproval.approvedBy = [$user] |
                .versionHistory += [{
                  version: $version,
                  status: "approved",

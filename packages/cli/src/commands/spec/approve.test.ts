@@ -410,47 +410,4 @@ describe("specApproveCommand", () => {
     consoleLogSpy.mockRestore();
   });
 
-  it("既存PR検出時に早期リターン", async () => {
-    const specification = makeSpecification({
-      currentApproval: {
-        version: "1.0",
-        phase: "specification",
-        prNumber: 80,
-        prUrl: "https://github.com/owner/repo/pull/80",
-        approvedBy: [],
-      },
-    });
-
-    vi.mocked(checkSpecApprovalPrerequisites).mockResolvedValue({
-      ok: true,
-      errors: [],
-    });
-    vi.mocked(showSpecification).mockResolvedValue({
-      specification,
-      design: "# Design",
-    });
-
-    const consoleLogSpy = vi.spyOn(console, "log").mockImplementation(() => {});
-
-    await specApproveCommand.parseAsync(["node", "test", "spec-000001"]);
-
-    // Existing PR message shown
-    expect(consoleLogSpy).toHaveBeenCalledWith(
-      expect.stringContaining("Approval PR already exists: spec-000001")
-    );
-    expect(consoleLogSpy).toHaveBeenCalledWith(
-      expect.stringContaining("PR: https://github.com/owner/repo/pull/80")
-    );
-
-    // showRequirement NOT called (early return before loading requirement)
-    expect(showRequirement).not.toHaveBeenCalled();
-
-    // startApproval NOT called
-    expect(startApproval).not.toHaveBeenCalled();
-
-    // No error
-    expect(process.exitCode).toBe(0);
-
-    consoleLogSpy.mockRestore();
-  });
 });
