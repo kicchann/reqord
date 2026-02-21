@@ -312,7 +312,7 @@ interface MultiLevelEdge {
 const SPEC_STATUS_COLORS: Record<string, string> = {
   draft: "border-blue-300 bg-blue-50",
   approved: "border-purple-300 bg-purple-50",
-  approved: "border-green-300 bg-green-50",
+  implemented: "border-green-300 bg-green-50",
   deprecated: "border-red-300 bg-red-50",
 };
 ```
@@ -421,6 +421,7 @@ export async function loadSpecFile(id: string, filename: string): Promise<string
 export function buildMultiLevelGraphData(
   requirements: Requirement[],
   specifications: Specification[],
+  tasks: TaskEntry[],
 ): MultiLevelGraphData;
 ```
 
@@ -430,6 +431,7 @@ export function buildMultiLevelGraphData(
 function buildMultiLevelGraphData(
   requirements: Requirement[],
   specifications: Specification[],
+  tasks: TaskEntry[],
 ): MultiLevelGraphData {
   const nodes: MultiLevelNode[] = [];
   const edges: MultiLevelEdge[] = [];
@@ -554,7 +556,7 @@ const navItems = [
     → "Requirements Only" 選択時:
       → DependencyGraph (既存)
     → "Full Traceability" 選択時:
-      → buildMultiLevelGraphData(requirements, specifications)
+      → buildMultiLevelGraphData(requirements, specifications, tasks)
       → MultiLevelGraph
         → React Flow描画:
           → RequirementNode (左列)
@@ -606,7 +608,7 @@ IssueNode クリック → window.open(issueUrl, "_blank") → GitHub Issue
 
 - Specification詳細ページ: 全タブの切替と表示
 - 多階層グラフ: RequirementとSpecificationの接続が正しいこと
-- グラフモード切替: RequirentsOnly → Traceabilityの切替
+- グラフモード切替: RequirementsOnly → Traceabilityの切替
 - CLIで作成したSpecificationがWeb UIに表示されること
 
 ## 6. 技術的決定事項
