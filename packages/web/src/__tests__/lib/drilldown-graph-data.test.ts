@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import type { Requirement, Specification } from "@reqord/shared";
+import type { Requirement, Specification, TaskEntry } from "@reqord/shared";
 import { buildDrillDownGraphData } from "../../lib/drilldown-graph-data";
 import { EDGE_STYLES } from "../../components/graph/edge-styles";
 
@@ -47,12 +47,28 @@ function makeSpec(
   } as Specification;
 }
 
+function makeTask(
+  number: number,
+  specIds: string[],
+  overrides: Partial<TaskEntry> = {},
+): TaskEntry {
+  return {
+    number,
+    title: `Task ${number}`,
+    url: `https://github.com/test/repo/issues/${number}`,
+    linkedTo: { specifications: specIds },
+    status: "open",
+    syncedAt: "2026-01-01T00:00:00Z",
+    ...overrides,
+  };
+}
+
 describe("buildDrillDownGraphData", () => {
   describe("requirement only (no specifications)", () => {
     it("returns a single requirement node at x=0, y=0 and no edges", () => {
       const req = makeReq("req-000001");
 
-      const result = buildDrillDownGraphData(req, []);
+      const result = buildDrillDownGraphData(req, [], []);
 
       expect(result.nodes).toHaveLength(1);
       expect(result.nodes[0]).toMatchObject({
@@ -70,7 +86,7 @@ describe("buildDrillDownGraphData", () => {
         priority: "high",
       });
 
-      const result = buildDrillDownGraphData(req, []);
+      const result = buildDrillDownGraphData(req, [], []);
 
       expect(result.nodes[0].data).toMatchObject({
         label: "My Feature",
@@ -87,7 +103,7 @@ describe("buildDrillDownGraphData", () => {
       const spec1 = makeSpec("spec-000001", "req-000001");
       const spec2 = makeSpec("spec-000002", "req-000001");
 
-      const result = buildDrillDownGraphData(req, [spec1, spec2]);
+      const result = buildDrillDownGraphData(req, [spec1, spec2], []);
 
       expect(result.nodes).toHaveLength(3);
       expect(result.edges).toHaveLength(2);
@@ -98,7 +114,7 @@ describe("buildDrillDownGraphData", () => {
       const spec1 = makeSpec("spec-000001", "req-000001");
       const spec2 = makeSpec("spec-000002", "req-000001");
 
-      const result = buildDrillDownGraphData(req, [spec1, spec2]);
+      const result = buildDrillDownGraphData(req, [spec1, spec2], []);
 
       const specNodes = result.nodes.filter((n) => n.type === "specification");
       expect(specNodes[0].position).toEqual({ x: 400, y: 0 });
@@ -109,7 +125,7 @@ describe("buildDrillDownGraphData", () => {
       const req = makeReq("req-000001");
       const spec1 = makeSpec("spec-000001", "req-000001");
 
-      const result = buildDrillDownGraphData(req, [spec1]);
+      const result = buildDrillDownGraphData(req, [spec1], []);
 
       expect(result.edges[0]).toMatchObject({
         id: "impl-req-000001-spec-000001",
@@ -125,7 +141,7 @@ describe("buildDrillDownGraphData", () => {
         status: "approved",
       });
 
-      const result = buildDrillDownGraphData(req, [spec1]);
+      const result = buildDrillDownGraphData(req, [spec1], []);
 
       const specNode = result.nodes.find((n) => n.type === "specification");
       expect(specNode?.data).toMatchObject({
@@ -135,26 +151,13 @@ describe("buildDrillDownGraphData", () => {
     });
   });
 
-  describe("requirement with specifications and issues", () => {
+  describe("requirement with specifications and tasks", () => {
     it("creates issue nodes at x=800 with tracks edges", () => {
       const req = makeReq("req-000001");
-      const spec1 = makeSpec("spec-000001", "req-000001", {
-        implementation: {
-          issues: [
-            {
-              number: 42,
-              title: "Implement feature",
-              url: "https://github.com/test/repo/issues/42",
-              priority: "P1",
-              status: "open",
-            },
-          ],
-          totalEstimatedHours: 8,
-          createdAt: "2026-01-01T00:00:00Z",
-        },
-      });
+      const spec1 = makeSpec("spec-000001", "req-000001");
+      const task = makeTask(42, ["spec-000001"]);
 
-      const result = buildDrillDownGraphData(req, [spec1]);
+      const result = buildDrillDownGraphData(req, [spec1], [task]);
 
       const issueNode = result.nodes.find((n) => n.type === "issue");
       expect(issueNode).toMatchObject({
@@ -166,52 +169,29 @@ describe("buildDrillDownGraphData", () => {
 
     it("includes issue data in the node matching IssueNodeData", () => {
       const req = makeReq("req-000001");
-      const spec1 = makeSpec("spec-000001", "req-000001", {
-        implementation: {
-          issues: [
-            {
-              number: 42,
-              title: "Implement feature",
-              url: "https://github.com/test/repo/issues/42",
-              priority: "P1",
-              status: "in_progress",
-            },
-          ],
-          totalEstimatedHours: 8,
-          createdAt: "2026-01-01T00:00:00Z",
-        },
+      const spec1 = makeSpec("spec-000001", "req-000001");
+      const task = makeTask(42, ["spec-000001"], {
+        title: "Implement feature",
+        status: "open",
       });
 
-      const result = buildDrillDownGraphData(req, [spec1]);
+      const result = buildDrillDownGraphData(req, [spec1], [task]);
 
       const issueNode = result.nodes.find((n) => n.type === "issue");
       expect(issueNode?.data).toMatchObject({
         label: "Implement feature",
-        status: "in_progress",
+        status: "open",
         issueNumber: 42,
         issueUrl: "https://github.com/test/repo/issues/42",
       });
     });
 
-    it("creates tracks edges from spec to issue (source=spec, target=issue for handle compatibility)", () => {
+    it("creates tracks edges from spec to issue", () => {
       const req = makeReq("req-000001");
-      const spec1 = makeSpec("spec-000001", "req-000001", {
-        implementation: {
-          issues: [
-            {
-              number: 42,
-              title: "Implement feature",
-              url: "https://github.com/test/repo/issues/42",
-              priority: "P1",
-              status: "open",
-            },
-          ],
-          totalEstimatedHours: 8,
-          createdAt: "2026-01-01T00:00:00Z",
-        },
-      });
+      const spec1 = makeSpec("spec-000001", "req-000001");
+      const task = makeTask(42, ["spec-000001"]);
 
-      const result = buildDrillDownGraphData(req, [spec1]);
+      const result = buildDrillDownGraphData(req, [spec1], [task]);
 
       const tracksEdge = result.edges.find((e) =>
         e.id.startsWith("track-"),
@@ -224,68 +204,56 @@ describe("buildDrillDownGraphData", () => {
       });
     });
 
-    it("positions issues based on spec index and issue index", () => {
+    it("positions issues based on spec index and task index", () => {
       const req = makeReq("req-000001");
-      const spec1 = makeSpec("spec-000001", "req-000001", {
-        implementation: {
-          issues: [
-            {
-              number: 10,
-              title: "Issue 1",
-              url: "https://github.com/test/repo/issues/10",
-              priority: "P1",
-              status: "open",
-            },
-            {
-              number: 11,
-              title: "Issue 2",
-              url: "https://github.com/test/repo/issues/11",
-              priority: "P2",
-              status: "open",
-            },
-          ],
-          totalEstimatedHours: 16,
-          createdAt: "2026-01-01T00:00:00Z",
-        },
-      });
-      const spec2 = makeSpec("spec-000002", "req-000001", {
-        implementation: {
-          issues: [
-            {
-              number: 20,
-              title: "Issue 3",
-              url: "https://github.com/test/repo/issues/20",
-              priority: "P0",
-              status: "open",
-            },
-          ],
-          totalEstimatedHours: 4,
-          createdAt: "2026-01-01T00:00:00Z",
-        },
-      });
+      const spec1 = makeSpec("spec-000001", "req-000001");
+      const spec2 = makeSpec("spec-000002", "req-000001");
+      const task10 = makeTask(10, ["spec-000001"]);
+      const task11 = makeTask(11, ["spec-000001"]);
+      const task20 = makeTask(20, ["spec-000002"]);
 
-      const result = buildDrillDownGraphData(req, [spec1, spec2]);
+      const result = buildDrillDownGraphData(req, [spec1, spec2], [task10, task11, task20]);
 
       const issueNodes = result.nodes.filter((n) => n.type === "issue");
       expect(issueNodes).toHaveLength(3);
-      // spec1 (index 0): issues at y = 0*120 + 0*80 = 0, y = 0*120 + 1*80 = 80
       expect(issueNodes[0].position).toEqual({ x: 800, y: 0 });
       expect(issueNodes[1].position).toEqual({ x: 800, y: 80 });
-      // spec2 (index 1): issue at y = 1*120 + 0*80 = 120
       expect(issueNodes[2].position).toEqual({ x: 800, y: 120 });
     });
 
-    it("does not create issue nodes when spec has no implementation", () => {
+    it("does not create issue nodes when no tasks are linked to spec", () => {
       const req = makeReq("req-000001");
       const spec1 = makeSpec("spec-000001", "req-000001");
 
-      const result = buildDrillDownGraphData(req, [spec1]);
+      const result = buildDrillDownGraphData(req, [spec1], []);
 
       const issueNodes = result.nodes.filter((n) => n.type === "issue");
       expect(issueNodes).toHaveLength(0);
-      // Only the implements edge, no tracks edges
       expect(result.edges).toHaveLength(1);
       expect(result.edges[0].id).toMatch(/^impl-/);
+    });
+
+    it("does not create issue nodes for tasks linked to other specs", () => {
+      const req = makeReq("req-000001");
+      const spec1 = makeSpec("spec-000001", "req-000001");
+      const task = makeTask(42, ["spec-000002"]);
+
+      const result = buildDrillDownGraphData(req, [spec1], [task]);
+
+      const issueNodes = result.nodes.filter((n) => n.type === "issue");
+      expect(issueNodes).toHaveLength(0);
+    });
+
+    it("a task linked to multiple specs creates issue nodes for each matching spec", () => {
+      const req = makeReq("req-000001");
+      const spec1 = makeSpec("spec-000001", "req-000001");
+      const spec2 = makeSpec("spec-000002", "req-000001");
+      const task = makeTask(42, ["spec-000001", "spec-000002"]);
+
+      const result = buildDrillDownGraphData(req, [spec1, spec2], [task]);
+
+      const issueNodes = result.nodes.filter((n) => n.type === "issue");
+      expect(issueNodes).toHaveLength(2);
     });
   });
 });

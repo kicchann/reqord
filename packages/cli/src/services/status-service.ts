@@ -1,7 +1,8 @@
-import type { Requirement, Specification } from "@reqord/shared";
-import { checkConsistency } from "@reqord/shared";
+import type { Requirement, Specification, TaskEntry } from "@reqord/shared";
+import { checkConsistency, TasksIndexSchema, REQORD_DIR, ISSUES_DIR } from "@reqord/shared";
 import * as reqRepo from "../repositories/requirement.js";
 import * as specRepo from "../repositories/specification.js";
+import * as fs from "../repositories/file-system.js";
 
 export interface StatusSummary {
   total: number;
@@ -94,20 +95,30 @@ export function buildStatusSummary(
   return { total, byStatus, implementedPercentage, approvedPercentage };
 }
 
-export function buildIssueSummary(specs: Specification[]): IssueSummary {
+export function buildIssueSummary(tasks: TaskEntry[]): IssueSummary {
   let total = 0;
   let closed = 0;
-  for (const spec of specs) {
-    if (!spec.implementation) continue;
-    for (const issue of spec.implementation.issues) {
-      total++;
-      if (issue.status === "closed") closed++;
-    }
+  for (const task of tasks) {
+    total++;
+    if (task.status === "closed") closed++;
   }
   const open = total - closed;
   const closedPercentage =
     total > 0 ? Math.round((closed / total) * 100) : 0;
   return { total, closed, open, closedPercentage };
+}
+
+async function loadAllTasks(cwd: string): Promise<TaskEntry[]> {
+  const tasksPath = fs.joinPath(cwd, REQORD_DIR, ISSUES_DIR, "tasks.yaml");
+  if (!(await fs.exists(tasksPath))) return [];
+  const raw = await fs.readYAML<unknown>(tasksPath);
+  const parsed = TasksIndexSchema.parse(raw);
+  return parsed.tasks;
+}
+
+async function loadTasksForSpec(cwd: string, specificationId: string): Promise<TaskEntry[]> {
+  const allTasks = await loadAllTasks(cwd);
+  return allTasks.filter((t) => t.linkedTo.specifications.includes(specificationId));
 }
 
 export function detectWarnings(
@@ -222,11 +233,12 @@ export async function getProjectStatus(
 ): Promise<ProjectStatus> {
   const requirements = await reqRepo.findAll(cwd);
   const specifications = await specRepo.findAll(cwd);
+  const allTasks = await loadAllTasks(cwd);
 
   return {
     requirements: buildStatusSummary(requirements),
     specifications: buildStatusSummary(specifications),
-    issues: buildIssueSummary(specifications),
+    issues: buildIssueSummary(allTasks),
     warnings: detectWarnings(requirements, specifications),
     generatedAt: new Date().toISOString(),
   };
@@ -288,14 +300,18 @@ export async function getRequirementStatus(
     }
   }
 
+  // Collect spec IDs for this requirement and load tasks
+  const relatedSpecIds = new Set(relatedSpecs.map((s) => s.id));
+  const allTasks = await loadAllTasks(cwd);
+  const reqTasks = allTasks.filter((t) =>
+    t.linkedTo.specifications.some((specId) => relatedSpecIds.has(specId)),
+  );
+
   let totalIssues = 0;
   let completedIssues = 0;
-  for (const spec of relatedSpecs) {
-    if (!spec.implementation) continue;
-    for (const issue of spec.implementation.issues) {
-      totalIssues++;
-      if (issue.status === "closed") completedIssues++;
-    }
+  for (const task of reqTasks) {
+    totalIssues++;
+    if (task.status === "closed") completedIssues++;
   }
 
   return {
@@ -313,13 +329,13 @@ export async function getSpecificationStatus(
   const specification = await specRepo.findByIdOrThrow(cwd, specId);
   const req = await reqRepo.findById(cwd, specification.requirementId);
 
+  const specTasks = await loadTasksForSpec(cwd, specId);
+
   let totalIssues = 0;
   let completedIssues = 0;
-  if (specification.implementation) {
-    for (const issue of specification.implementation.issues) {
-      totalIssues++;
-      if (issue.status === "closed") completedIssues++;
-    }
+  for (const task of specTasks) {
+    totalIssues++;
+    if (task.status === "closed") completedIssues++;
   }
 
   // Design validation
@@ -331,7 +347,7 @@ export async function getSpecificationStatus(
       }
     : undefined;
 
-  // Coverage status: based on issue progress
+  // Coverage status: based on task progress
   let coverageStatus: "covered" | "partial" | "not-covered";
   if (totalIssues === 0) {
     coverageStatus = "not-covered";
