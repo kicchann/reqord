@@ -681,16 +681,6 @@ type Requirement = {
     deprecatedReason?: string;
   }[];
 
-  // Approval management
-  currentApproval?: {
-    version: string;
-    phase: "requirement" | "specification";
-    status: "pending" | "approved" | "rejected";
-    prNumber?: number;
-    approvedBy?: string;
-    approvedAt?: string;
-  };
-
   // Flags (Feedback, etc.) ⭐ NEW
   flags?: {
     type: "feedback-review" | "security-review" | "breaking-change" | "tech-debt";

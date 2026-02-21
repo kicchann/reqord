@@ -681,16 +681,6 @@ type Requirement = {
     deprecatedReason?: string;
   }[];
   
-  // 承認管理
-  currentApproval?: {
-    version: string;
-    phase: "requirement" | "specification";
-    status: "pending" | "approved" | "rejected";
-    prNumber?: number;
-    approvedBy?: string;
-    approvedAt?: string;
-  };
-  
   // フラグ（Feedback等）⭐ NEW
   flags?: {
     type: "feedback-review" | "security-review" | "breaking-change" | "tech-debt";

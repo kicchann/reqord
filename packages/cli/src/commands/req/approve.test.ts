@@ -15,8 +15,6 @@ vi.mock("../../services/requirement-approval-handler.js", () => ({
   requirementHandler: {
     revalidate: vi.fn(),
     updateStatus: vi.fn(),
-    saveCurrentApproval: vi.fn(),
-    updatePrInfo: vi.fn(),
     buildPrTitle: vi.fn(),
     buildPrBody: vi.fn(),
   },

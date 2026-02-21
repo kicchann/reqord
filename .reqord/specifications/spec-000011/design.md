@@ -2,7 +2,7 @@
 
 ## 1. 設計概要
 
-要件の承認プロセスをGitHub PR（Pull Request）ベースで管理する。`reqord req approve <id>` コマンドにより、Gitブランチ作成・要件ステータス変更・PR自動生成を一括実行する。CODEOWNERSファイルと連携してレビュアーを自動アサインし、PRマージをトリガーとしてステータスをapprovedに更新する。承認情報はcurrentApproval・versionHistoryフィールドに記録する。
+要件の承認プロセスをGitHub PR（Pull Request）ベースで管理する。`reqord req approve <id>` コマンドにより、Gitブランチ作成・要件ステータス変更・PR自動生成を一括実行する。CODEOWNERSファイルと連携してレビュアーを自動アサインし、PRマージをトリガーとしてステータスをapprovedに更新する。承認情報はversionHistoryフィールドに記録する。
 
 ## 2. アーキテクチャ
 
@@ -124,22 +124,7 @@ export async function createPullRequest(options: CreatePrOptions): Promise<PrInf
 export async function getPullRequest(number: number): Promise<PrInfo>;
 ```
 
-### 3.6 RequirementSchema拡張 (`@reqord/shared/schemas/requirement.ts`)
-
-**追加フィールド:**
-
-```typescript
-currentApproval: z.object({
-  version: z.string(),
-  phase: z.enum(["requirement", "specification"]),
-  prNumber: z.number(),
-  prUrl: z.string(),
-  approvedBy: z.array(z.string()),
-  approvedAt: z.string().optional(),
-}).optional(),
-```
-
-### 3.7 PR本文テンプレート
+### 3.6 PR本文テンプレート
 
 ```markdown
 ## 要件承認依頼

@@ -103,7 +103,6 @@ export const SpecificationSchema = z.object({
     supplementary: z.array(z.string()).default([]),
   }),
   flags: z.array(FeedbackFlagSchema).default([]),
-  currentApproval: SpecCurrentApprovalSchema.optional(),
 });
 ```
 

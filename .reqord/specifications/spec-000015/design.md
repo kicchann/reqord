@@ -111,20 +111,7 @@ reqord/spec-<id>-approve-v<version>
 
 ### 3.5 SpecificationSchema拡張
 
-**追加フィールド（spec-000011で定義したcurrentApprovalと同一パターン）:**
-
-```typescript
-currentApproval: z.object({
-  version: z.string(),
-  phase: z.literal("specification"),
-  prNumber: z.number(),
-  prUrl: z.string(),
-  approvedBy: z.array(z.string()),
-  approvedAt: z.string().optional(),
-}).optional(),
-```
-
-### 3.6 PR本文テンプレート
+### 3.5 PR本文テンプレート
 
 ```markdown
 ## 仕様承認依頼
