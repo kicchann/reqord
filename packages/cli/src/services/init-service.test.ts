@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { SPECIFICATIONS_DIR, ASSETS_DIR } from "@reqord/shared";
+import { SPECIFICATIONS_DIR, ASSETS_DIR, ISSUES_DIR } from "@reqord/shared";
 
 vi.mock("../repositories/file-system.js", () => ({
   exists: vi.fn(),
@@ -33,7 +33,7 @@ describe("initProject", () => {
     expect(fs.writeText).not.toHaveBeenCalled();
   });
 
-  it("必要な6つのディレクトリと.github/workflowsが作成される", async () => {
+  it("必要な7つのディレクトリと.github/workflowsが作成される", async () => {
     vi.mocked(fs.exists).mockResolvedValue(false);
     vi.mocked(fs.readText).mockResolvedValue("workflow-content");
 
@@ -47,6 +47,7 @@ describe("initProject", () => {
     expect(mkdirCalls).toContainEqual("/cwd/.reqord/settings/templates/issue-templates");
     expect(mkdirCalls).toContainEqual("/cwd/.reqord/settings/rules");
     expect(mkdirCalls).toContainEqual("/cwd/.reqord/assets");
+    expect(mkdirCalls).toContainEqual("/cwd/.reqord/issues");
     // GitHub Actions ワークフロー用ディレクトリ
     expect(mkdirCalls).toContainEqual("/cwd/.github/workflows");
     expect(result.alreadyExists).toBe(false);
@@ -82,9 +83,10 @@ describe("initProject", () => {
     const gitkeepWrites = writeCalls.filter(
       ([path, content]) => path.endsWith(".gitkeep") && content === "",
     );
-    expect(gitkeepWrites).toHaveLength(2);
+    expect(gitkeepWrites).toHaveLength(3);
     expect(gitkeepWrites.some(([p]) => p.includes(SPECIFICATIONS_DIR))).toBe(true);
     expect(gitkeepWrites.some(([p]) => p.includes(ASSETS_DIR))).toBe(true);
+    expect(gitkeepWrites.some(([p]) => p.includes(ISSUES_DIR))).toBe(true);
   });
 
   it("GitHub Actions ワークフローが生成される", async () => {
@@ -123,11 +125,11 @@ describe("initProject", () => {
 
     const result = await initProject("/cwd");
 
-    // 6 dirs + template + rules + 2 gitkeeps + workflow = 11
-    expect(result.created).toHaveLength(11);
+    // 7 dirs + template + rules + 3 gitkeeps + workflow = 13
+    expect(result.created).toHaveLength(13);
     expect(result.created.some((p) => p.includes("requirement-description.md"))).toBe(true);
     expect(result.created.some((p) => p.includes("requirement-quality.md"))).toBe(true);
-    expect(result.created.filter((p) => p.endsWith(".gitkeep"))).toHaveLength(2);
+    expect(result.created.filter((p) => p.endsWith(".gitkeep"))).toHaveLength(3);
     expect(result.created.some((p) => p.includes("finalize-approval.yml"))).toBe(true);
   });
 });
