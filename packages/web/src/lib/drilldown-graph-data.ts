@@ -1,5 +1,5 @@
 import type { Node, Edge } from "@xyflow/react";
-import type { Requirement, Specification } from "@reqord/shared";
+import type { Requirement, Specification, TaskEntry } from "@reqord/shared";
 import { EDGE_STYLES } from "@/components/graph/edge-styles";
 
 export interface DrillDownGraphData {
@@ -18,6 +18,7 @@ const LAYOUT = {
 export function buildDrillDownGraphData(
   requirement: Requirement,
   specifications: Specification[],
+  tasks: TaskEntry[],
 ): DrillDownGraphData {
   const nodes: Node[] = [];
   const edges: Edge[] = [];
@@ -56,34 +57,35 @@ export function buildDrillDownGraphData(
       animated: false,
     });
 
-    // 3. Issue nodes (right column) + tracks edges
-    if (spec.implementation?.issues) {
-      spec.implementation.issues.forEach((issue, j) => {
-        const issueNodeId = `issue-${issue.number}`;
-        nodes.push({
-          id: issueNodeId,
-          type: "issue",
-          position: {
-            x: LAYOUT.ISSUE_X,
-            y: i * LAYOUT.VERTICAL_GAP + j * LAYOUT.ISSUE_VERTICAL_GAP,
-          },
-          data: {
-            label: issue.title,
-            status: issue.status,
-            issueNumber: issue.number,
-            issueUrl: issue.url,
-          },
-        });
-
-        edges.push({
-          id: `track-${specNodeId}-${issueNodeId}`,
-          source: specNodeId,
-          target: issueNodeId,
-          style: EDGE_STYLES.tracks,
-          animated: false,
-        });
+    // 3. Issue nodes (right column) from tasks.yaml linked to this spec
+    const specTasks = tasks.filter((t) =>
+      t.linkedTo.specifications.includes(spec.id),
+    );
+    specTasks.forEach((task, j) => {
+      const issueNodeId = `issue-${task.number}`;
+      nodes.push({
+        id: issueNodeId,
+        type: "issue",
+        position: {
+          x: LAYOUT.ISSUE_X,
+          y: i * LAYOUT.VERTICAL_GAP + j * LAYOUT.ISSUE_VERTICAL_GAP,
+        },
+        data: {
+          label: task.title,
+          status: task.status,
+          issueNumber: task.number,
+          issueUrl: task.url,
+        },
       });
-    }
+
+      edges.push({
+        id: `track-${specNodeId}-${issueNodeId}`,
+        source: specNodeId,
+        target: issueNodeId,
+        style: EDGE_STYLES.tracks,
+        animated: false,
+      });
+    });
   });
 
   return { nodes, edges };
