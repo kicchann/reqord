@@ -34,7 +34,6 @@ successCriteria:
   - PR本文にreqordメタデータコメントタグが埋め込まれる
   - CODEOWNERSからレビュアーが自動アサインされる
   - PRマージ時にSpecificationのstatusがapprovedに更新される
-  - 承認PR情報がversionHistoryに記録される
   - approve実行時にバージョンをインクリメントしない（バージョン変更はreqord versionコマンドで行う）
   - reqord spec implement <id> でapproved状態のspecをimplementedに遷移できる
   - コマンドのヘルプ・出力が各コマンドの実際の動作を正確に伝える
