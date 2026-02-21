@@ -1,4 +1,4 @@
-import type { Implementation, ImplementationIssue } from "@reqord/shared";
+import type { TaskEntry } from "@reqord/shared";
 
 export const DEFAULT_HOURS = 4;
 
@@ -42,49 +42,60 @@ const PRIORITY_CONFIGS: Record<string, PriorityConfig> = {
   P3: { priority: "P3", label: "P3: Parallel", isSerial: false },
 };
 
+function getEstimatedHours(task: TaskEntry): number {
+  return task.estimatedHours ?? DEFAULT_HOURS;
+}
+
 function createGanttTask(
-  issue: ImplementationIssue,
+  task: TaskEntry,
   startOffset: number,
   isCriticalPath: boolean,
 ): GanttTask {
   return {
-    id: String(issue.number),
-    title: issue.title,
-    issueNumber: issue.number,
-    issueUrl: issue.url,
-    priority: issue.priority,
-    state: issue.status,
-    estimatedHours: DEFAULT_HOURS,
+    id: String(task.number),
+    title: task.title,
+    issueNumber: task.number,
+    issueUrl: task.url,
+    priority: task.priority ?? "",
+    state: task.status,
+    estimatedHours: getEstimatedHours(task),
     startOffset,
     dependencies: [],
     isCriticalPath,
   };
 }
 
-function groupIssuesByPriority(
-  issues: ImplementationIssue[],
-): Map<string, ImplementationIssue[]> {
-  const groups = new Map<string, ImplementationIssue[]>();
+function groupTasksByPriority(
+  tasks: TaskEntry[],
+): Map<string, TaskEntry[]> {
+  const groups = new Map<string, TaskEntry[]>();
 
-  for (const issue of issues) {
-    const existing = groups.get(issue.priority) || [];
-    groups.set(issue.priority, [...existing, issue]);
+  for (const task of tasks) {
+    if (!task.priority) continue;
+    const existing = groups.get(task.priority) || [];
+    groups.set(task.priority, [...existing, task]);
   }
 
   return groups;
 }
 
-function calculateStartOffsets(issueGroups: Map<string, ImplementationIssue[]>): Map<string, number> {
+function calculateStartOffsets(taskGroups: Map<string, TaskEntry[]>): Map<string, number> {
   const startOffsets = new Map<string, number>();
 
-  const p0Issues = issueGroups.get("P0") || [];
-  const p1Issues = issueGroups.get("P1") || [];
-  const p2Issues = issueGroups.get("P2") || [];
+  const p0Tasks = taskGroups.get("P0") || [];
+  const p1Tasks = taskGroups.get("P1") || [];
+  const p2Tasks = taskGroups.get("P2") || [];
 
-  const p0TotalTime = p0Issues.length * DEFAULT_HOURS;
+  const p0TotalTime = p0Tasks.reduce((sum, t) => sum + getEstimatedHours(t), 0);
   const p1StartTime = p0TotalTime;
-  const p2StartTime = p1Issues.length > 0 ? p1StartTime + DEFAULT_HOURS : p1StartTime;
-  const p3StartTime = p2Issues.length > 0 ? p2StartTime + DEFAULT_HOURS : p2StartTime;
+  const p1MaxHours = p1Tasks.length > 0
+    ? Math.max(...p1Tasks.map(getEstimatedHours))
+    : 0;
+  const p2StartTime = p1Tasks.length > 0 ? p1StartTime + p1MaxHours : p1StartTime;
+  const p2MaxHours = p2Tasks.length > 0
+    ? Math.max(...p2Tasks.map(getEstimatedHours))
+    : 0;
+  const p3StartTime = p2Tasks.length > 0 ? p2StartTime + p2MaxHours : p2StartTime;
 
   startOffsets.set("P0", 0);
   startOffsets.set("P1", p1StartTime);
@@ -96,20 +107,23 @@ function calculateStartOffsets(issueGroups: Map<string, ImplementationIssue[]>):
 
 function createPriorityGroup(
   priority: string,
-  issues: ImplementationIssue[],
+  tasks: TaskEntry[],
   startOffset: number,
   config: PriorityConfig,
 ): GanttGroup {
-  const tasks = config.isSerial
-    ? issues.map((issue, index) =>
-        createGanttTask(issue, startOffset + index * DEFAULT_HOURS, true),
-      )
-    : issues.map((issue) => createGanttTask(issue, startOffset, false));
+  let currentOffset = startOffset;
+  const ganttTasks = config.isSerial
+    ? tasks.map((task) => {
+        const ganttTask = createGanttTask(task, currentOffset, true);
+        currentOffset += getEstimatedHours(task);
+        return ganttTask;
+      })
+    : tasks.map((task) => createGanttTask(task, startOffset, false));
 
   return {
     priority,
     label: config.label,
-    tasks,
+    tasks: ganttTasks,
   };
 }
 
@@ -125,25 +139,29 @@ function calculateTimelineEnd(groups: GanttGroup[]): number {
 
 export function transformToGanttData(
   specId: string,
-  implementation: Implementation,
+  tasks: TaskEntry[],
 ): GanttData {
-  const issueGroups = groupIssuesByPriority(implementation.issues);
-  const startOffsets = calculateStartOffsets(issueGroups);
+  const taskGroups = groupTasksByPriority(tasks);
+  const startOffsets = calculateStartOffsets(taskGroups);
 
   const groups: GanttGroup[] = [];
 
   for (const [priority, config] of Object.entries(PRIORITY_CONFIGS)) {
-    const issues = issueGroups.get(priority);
-    if (issues && issues.length > 0) {
+    const priorityTasks = taskGroups.get(priority);
+    if (priorityTasks && priorityTasks.length > 0) {
       const startOffset = startOffsets.get(priority) || 0;
-      groups.push(createPriorityGroup(priority, issues, startOffset, config));
+      groups.push(createPriorityGroup(priority, priorityTasks, startOffset, config));
     }
   }
+
+  const totalEstimatedHours = groups
+    .flatMap((g) => g.tasks)
+    .reduce((sum, t) => sum + t.estimatedHours, 0);
 
   return {
     specId,
     groups,
-    totalEstimatedHours: implementation.totalEstimatedHours,
+    totalEstimatedHours,
     timelineStart: 0,
     timelineEnd: calculateTimelineEnd(groups),
   };
