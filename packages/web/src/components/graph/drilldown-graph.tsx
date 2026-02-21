@@ -6,11 +6,12 @@ import { RequirementNode } from "./requirement-node";
 import { SpecificationNode } from "./specification-node";
 import { IssueNode } from "./issue-node";
 import { buildDrillDownGraphData } from "@/lib/drilldown-graph-data";
-import type { Requirement, Specification } from "@reqord/shared";
+import type { Requirement, Specification, TaskEntry } from "@reqord/shared";
 
 interface DrillDownGraphProps {
   requirement: Requirement;
   specifications: Specification[];
+  tasks: TaskEntry[];
 }
 
 const nodeTypes = {
@@ -19,10 +20,10 @@ const nodeTypes = {
   issue: IssueNode,
 };
 
-export function DrillDownGraph({ requirement, specifications }: DrillDownGraphProps) {
+export function DrillDownGraph({ requirement, specifications, tasks }: DrillDownGraphProps) {
   const { nodes, edges } = useMemo(
-    () => buildDrillDownGraphData(requirement, specifications),
-    [requirement, specifications],
+    () => buildDrillDownGraphData(requirement, specifications, tasks),
+    [requirement, specifications, tasks],
   );
 
   return (

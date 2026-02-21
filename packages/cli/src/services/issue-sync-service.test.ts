@@ -52,6 +52,8 @@ describe("syncSpecification", () => {
         state: "closed",
         labels: [],
         createdAt: "2026-01-01T00:00:00Z",
+        updatedAt: "2026-01-01T00:00:00Z",
+        closedAt: null,
       })
       .mockResolvedValueOnce({
         number: 102,
@@ -59,6 +61,8 @@ describe("syncSpecification", () => {
         state: "open",
         labels: [],
         createdAt: "2026-01-01T00:00:00Z",
+        updatedAt: "2026-01-01T00:00:00Z",
+        closedAt: null,
       });
 
     const result = await syncSpecification("/cwd", "spec-000022");
@@ -131,6 +135,8 @@ describe("syncSpecification", () => {
       state: "open",
       labels: [],
       createdAt: "2026-01-01T00:00:00Z",
+      updatedAt: "2026-01-01T00:00:00Z",
+      closedAt: null,
     });
 
     await syncSpecification("/cwd", "spec-000022");
@@ -155,6 +161,8 @@ describe("syncSpecification", () => {
       state: "open",
       labels: [],
       createdAt: "2026-01-01T00:00:00Z",
+      updatedAt: "2026-01-01T00:00:00Z",
+      closedAt: null,
     });
 
     const result = await syncSpecification("/cwd", "spec-000022");
@@ -178,6 +186,8 @@ describe("syncSpecification", () => {
       state: "closed",
       labels: [],
       createdAt: "2026-01-01T00:00:00Z",
+      updatedAt: "2026-01-01T00:00:00Z",
+      closedAt: null,
     });
 
     const result = await syncSpecification("/cwd", "spec-000022");
@@ -216,6 +226,8 @@ describe("syncAll", () => {
       state: "open",
       labels: [],
       createdAt: "2026-01-01T00:00:00Z",
+      updatedAt: "2026-01-01T00:00:00Z",
+      closedAt: null,
     });
 
     const results = await syncAll("/cwd");
