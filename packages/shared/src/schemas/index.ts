@@ -75,6 +75,12 @@ export {
 export {
   TaskDefinitionSchema,
   TaskDefinitionFileSchema,
+  TaskLinkedToSchema,
+  TaskEntrySchema,
+  TasksIndexSchema,
   type TaskDefinition,
   type TaskDefinitionFile,
+  type TaskLinkedTo,
+  type TaskEntry,
+  type TasksIndex,
 } from "./task.js";

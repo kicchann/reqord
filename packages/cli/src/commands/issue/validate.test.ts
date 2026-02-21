@@ -1,68 +1,36 @@
 import { describe, it, expect } from "vitest";
-import { validateSpecification, issueValidateCommand } from "./validate.js";
-import type { Specification } from "@reqord/shared";
+import { validateSpecTasks, issueValidateCommand } from "./validate.js";
+import type { TaskEntry } from "@reqord/shared";
 
-function createMockSpec(overrides: Partial<Specification> = {}): Specification {
+function makeTask(overrides: Partial<TaskEntry> = {}): TaskEntry {
   return {
-    id: "spec-000001",
-    requirementId: "req-000001",
-    version: "1.0.0",
-    status: "approved",
-    createdAt: "2026-01-01T00:00:00Z",
-    updatedAt: "2026-01-01T00:00:00Z",
-    versionHistory: [],
-    files: { design: "design.md", supplementary: [] },
-    flags: [],
+    number: 1,
+    title: "Task 1",
+    url: "https://github.com/owner/repo/issues/1",
+    linkedTo: { specifications: ["spec-000001"] },
+    priority: "P1",
+    status: "open",
+    syncedAt: "2026-01-01T00:00:00Z",
     ...overrides,
-  } as Specification;
+  };
 }
 
-describe("validateSpecification", () => {
-  it("returns error when spec has no implementation field", () => {
-    const spec = createMockSpec();
-    const result = validateSpecification(spec);
-
-    expect(result.specId).toBe("spec-000001");
-    expect(result.valid).toBe(false);
-    expect(result.issues).toHaveLength(1);
-    expect(result.issues[0].type).toBe("error");
-    expect(result.issues[0].message).toBe("No implementation field found");
-  });
-
-  it("returns warning when spec has implementation but empty issues", () => {
-    const spec = createMockSpec({
-      implementation: {
-        issues: [],
-        totalEstimatedHours: 0,
-        createdAt: "2026-01-01T00:00:00Z",
-      },
-    });
-    const result = validateSpecification(spec);
+describe("validateSpecTasks", () => {
+  it("returns warning when no tasks found for spec", () => {
+    const result = validateSpecTasks("spec-000001", []);
 
     expect(result.specId).toBe("spec-000001");
     expect(result.valid).toBe(true);
     expect(result.issues).toHaveLength(1);
     expect(result.issues[0].type).toBe("warning");
-    expect(result.issues[0].message).toBe("No issues found in implementation");
+    expect(result.issues[0].message).toBe(
+      "No tasks found in tasks.yaml for this specification"
+    );
   });
 
-  it("returns info when spec has implementation but no progress", () => {
-    const spec = createMockSpec({
-      implementation: {
-        issues: [
-          {
-            number: 1,
-            title: "Task 1",
-            url: "https://github.com/owner/repo/issues/1",
-            priority: "P1",
-            status: "open",
-          },
-        ],
-        totalEstimatedHours: 8,
-        createdAt: "2026-01-01T00:00:00Z",
-      },
-    });
-    const result = validateSpecification(spec);
+  it("returns info when tasks exist but none have been synced", () => {
+    const tasks = [makeTask({ syncedAt: undefined as unknown as string })];
+    const result = validateSpecTasks("spec-000001", tasks);
 
     expect(result.specId).toBe("spec-000001");
     expect(result.valid).toBe(true);
@@ -73,98 +41,34 @@ describe("validateSpecification", () => {
     );
   });
 
-  it("returns no issues when spec has all issues closed and progress is 100%", () => {
-    const spec = createMockSpec({
-      implementation: {
-        issues: [
-          {
-            number: 1,
-            title: "Task 1",
-            url: "https://github.com/owner/repo/issues/1",
-            priority: "P1",
-            status: "closed",
-          },
-        ],
-        totalEstimatedHours: 8,
-        createdAt: "2026-01-01T00:00:00Z",
-        progress: {
-          total: 1,
-          completed: 1,
-          percentage: 100,
-          lastSyncedAt: "2026-01-02T00:00:00Z",
-        },
-      },
-    });
-    const result = validateSpecification(spec);
+  it("returns no issues when all tasks are closed", () => {
+    const tasks = [
+      makeTask({ status: "closed", syncedAt: "2026-01-02T00:00:00Z" }),
+    ];
+    const result = validateSpecTasks("spec-000001", tasks);
 
     expect(result.specId).toBe("spec-000001");
     expect(result.valid).toBe(true);
     expect(result.issues).toHaveLength(0);
   });
 
-  it("returns warning when all issues are closed but progress is not 100%", () => {
-    const spec = createMockSpec({
-      implementation: {
-        issues: [
-          {
-            number: 1,
-            title: "Task 1",
-            url: "https://github.com/owner/repo/issues/1",
-            priority: "P1",
-            status: "closed",
-          },
-        ],
-        totalEstimatedHours: 8,
-        createdAt: "2026-01-01T00:00:00Z",
-        progress: {
-          total: 1,
-          completed: 0,
-          percentage: 0,
-          lastSyncedAt: "2026-01-02T00:00:00Z",
-        },
-      },
-    });
-    const result = validateSpecification(spec);
+  it("returns no issues when some tasks are open and some closed", () => {
+    const tasks = [
+      makeTask({ number: 1, status: "closed", syncedAt: "2026-01-02T00:00:00Z" }),
+      makeTask({ number: 2, status: "open", syncedAt: "2026-01-02T00:00:00Z" }),
+    ];
+    const result = validateSpecTasks("spec-000001", tasks);
 
     expect(result.specId).toBe("spec-000001");
     expect(result.valid).toBe(true);
-    expect(result.issues).toHaveLength(1);
-    expect(result.issues[0].type).toBe("warning");
-    expect(result.issues[0].message).toBe(
-      "All issues are closed but progress is not 100%"
-    );
+    expect(result.issues).toHaveLength(0);
   });
 
-  it("returns no warnings when spec has some open issues and progress", () => {
-    const spec = createMockSpec({
-      implementation: {
-        issues: [
-          {
-            number: 1,
-            title: "Task 1",
-            url: "https://github.com/owner/repo/issues/1",
-            priority: "P1",
-            status: "closed",
-          },
-          {
-            number: 2,
-            title: "Task 2",
-            url: "https://github.com/owner/repo/issues/2",
-            priority: "P2",
-            status: "open",
-          },
-        ],
-        totalEstimatedHours: 16,
-        createdAt: "2026-01-01T00:00:00Z",
-        progress: {
-          total: 2,
-          completed: 1,
-          percentage: 50,
-          lastSyncedAt: "2026-01-02T00:00:00Z",
-        },
-      },
-    });
-    const result = validateSpecification(spec);
+  it("returns no issues when all tasks are open and synced", () => {
+    const tasks = [
+      makeTask({ status: "open", syncedAt: "2026-01-02T00:00:00Z" }),
+    ];
+    const result = validateSpecTasks("spec-000001", tasks);
 
     expect(result.specId).toBe("spec-000001");
     expect(result.valid).toBe(true);

@@ -1,6 +1,8 @@
-import * as specRepo from "../repositories/specification.js";
 import * as githubClient from "./github-client.js";
-import { calculateProgress, type ProgressInfo } from "../utils/progress-calculator.js";
+import * as fs from "../repositories/file-system.js";
+import { TasksIndexSchema, REQORD_DIR, ISSUES_DIR } from "@reqord/shared";
+import type { TaskEntry } from "@reqord/shared";
+import path from "node:path";
 
 export interface SyncResult {
   specId: string;
@@ -17,61 +19,91 @@ export interface SyncedIssue {
   changed: boolean;
 }
 
+export interface ProgressInfo {
+  total: number;
+  completed: number;
+  percentage: number;
+}
+
 export interface SyncError {
   issueNumber: number;
   message: string;
 }
 
-export { type ProgressInfo };
+async function loadTasksYaml(
+  cwd: string,
+): Promise<{ title: string; tasks: TaskEntry[] } | null> {
+  const tasksPath = path.join(cwd, REQORD_DIR, ISSUES_DIR, "tasks.yaml");
+  const raw = await fs.readYAML(tasksPath).catch(() => null);
+  if (!raw) return null;
+  const parsed = TasksIndexSchema.safeParse(raw);
+  if (!parsed.success) return null;
+  return parsed.data;
+}
 
-export async function syncSpecification(cwd: string, specId: string): Promise<SyncResult> {
-  const spec = await specRepo.findByIdOrThrow(cwd, specId);
+async function saveTasksYaml(
+  cwd: string,
+  data: { title: string; tasks: TaskEntry[] },
+): Promise<void> {
+  const tasksPath = path.join(cwd, REQORD_DIR, ISSUES_DIR, "tasks.yaml");
+  await fs.writeYAML(tasksPath, data);
+}
 
-  if (!spec.implementation) {
-    throw new Error(`No implementation found for ${specId}`);
+function calculateProgress(tasks: TaskEntry[]): ProgressInfo {
+  const total = tasks.length;
+  const completed = tasks.filter((t) => t.status === "closed").length;
+  const percentage = total === 0 ? 0 : Math.round((completed / total) * 100);
+  return { total, completed, percentage };
+}
+
+export async function syncSpecification(
+  cwd: string,
+  specId: string,
+): Promise<SyncResult> {
+  const tasksIndex = await loadTasksYaml(cwd);
+
+  if (!tasksIndex) {
+    throw new Error(`No tasks found for ${specId}`);
   }
 
-  if (spec.implementation.issues.length === 0) {
-    throw new Error(`No issues found for ${specId}`);
+  const specTasks = tasksIndex.tasks.filter((t) =>
+    t.linkedTo.specifications.includes(specId),
+  );
+
+  if (specTasks.length === 0) {
+    throw new Error(`No tasks found for ${specId}`);
   }
 
   const synced: SyncedIssue[] = [];
   const errors: SyncError[] = [];
 
-  for (const issue of spec.implementation.issues) {
+  for (const task of specTasks) {
     try {
-      const ghIssue = await githubClient.getIssueDetail(issue.number);
-      const currentStatus = ghIssue.state;
-      const previousStatus = issue.status;
+      const ghIssue = await githubClient.getIssueDetail(task.number);
+      const currentStatus = ghIssue.state as "open" | "closed";
+      const previousStatus = task.status;
 
       synced.push({
-        number: issue.number,
-        title: issue.title,
+        number: task.number,
+        title: task.title,
         previousStatus,
         currentStatus,
         changed: previousStatus !== currentStatus,
       });
 
-      // Update issue status in spec
-      issue.status = currentStatus as "open" | "in_progress" | "closed";
+      task.status = currentStatus;
+      task.syncedAt = new Date().toISOString();
     } catch (error) {
       errors.push({
-        issueNumber: issue.number,
+        issueNumber: task.number,
         message: error instanceof Error ? error.message : String(error),
       });
     }
   }
 
-  // Calculate and update progress
-  const progress = calculateProgress(spec.implementation.issues);
-  spec.implementation.progress = {
-    ...progress,
-    lastSyncedAt: new Date().toISOString(),
-  };
+  await saveTasksYaml(cwd, tasksIndex);
 
-  // Update spec metadata
-  spec.updatedAt = new Date().toISOString();
-  await specRepo.save(cwd, spec);
+  const progress = calculateProgress(specTasks);
 
   return {
     specId,
@@ -82,14 +114,22 @@ export async function syncSpecification(cwd: string, specId: string): Promise<Sy
 }
 
 export async function syncAll(cwd: string): Promise<SyncResult[]> {
-  const specs = await specRepo.findAll(cwd);
-  const results: SyncResult[] = [];
+  const tasksIndex = await loadTasksYaml(cwd);
+  if (!tasksIndex || tasksIndex.tasks.length === 0) {
+    return [];
+  }
 
-  for (const spec of specs) {
-    if (spec.implementation && spec.implementation.issues.length > 0) {
-      const result = await syncSpecification(cwd, spec.id);
-      results.push(result);
+  const specIds = new Set<string>();
+  for (const task of tasksIndex.tasks) {
+    for (const specId of task.linkedTo.specifications) {
+      specIds.add(specId);
     }
+  }
+
+  const results: SyncResult[] = [];
+  for (const specId of specIds) {
+    const result = await syncSpecification(cwd, specId);
+    results.push(result);
   }
 
   return results;
