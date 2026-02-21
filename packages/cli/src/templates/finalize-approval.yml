@@ -52,7 +52,6 @@ jobs:
           ENTITY_TYPE="${{ steps.extract.outputs.entity_type }}"
           ENTITY_ID="${{ steps.extract.outputs.entity_id }}"
           VERSION="${{ steps.extract.outputs.version }}"
-          MERGED_BY="${{ github.event.pull_request.merged_by.login }}"
           NOW="$(date -u +%Y-%m-%dT%H:%M:%S.000Z)"
 
           # Determine file path (YAML preferred, JSON fallback)
