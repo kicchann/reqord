@@ -1,3 +1,4 @@
+import { TasksIndexSchema, REQORD_DIR, ISSUES_DIR } from "@reqord/shared";
 import * as specRepo from "../repositories/specification.js";
 import * as fs from "../repositories/file-system.js";
 
@@ -7,7 +8,7 @@ export interface IssueCheckResult {
   issues: Array<{
     number: number;
     title: string;
-    state: "open" | "in_progress" | "closed";
+    state: "open" | "closed";
     priority?: string;
   }>;
 }
@@ -45,6 +46,35 @@ export interface ImplValidation {
 export interface DesignPaths {
   components: Array<{ path: string; description: string }>;
   tests: Array<{ path: string; type: "unit" | "integration" }>;
+}
+
+async function loadTasksForSpec(
+  cwd: string,
+  specId: string,
+): Promise<
+  Array<{
+    number: number;
+    title: string;
+    url: string;
+    status: "open" | "closed";
+    priority?: string;
+  }>
+> {
+  const tasksPath = fs.joinPath(cwd, REQORD_DIR, ISSUES_DIR, "tasks.yaml");
+  if (!(await fs.exists(tasksPath))) {
+    return [];
+  }
+  const raw = await fs.readYAML<unknown>(tasksPath);
+  const parsed = TasksIndexSchema.parse(raw);
+  return parsed.tasks
+    .filter((t) => t.linkedTo.specifications.includes(specId))
+    .map((t) => ({
+      number: t.number,
+      title: t.title,
+      url: t.url,
+      status: t.status,
+      priority: t.priority,
+    }));
 }
 
 export function parseDesignPaths(designContent: string): DesignPaths {
@@ -137,19 +167,18 @@ export async function validateImplementation(
   const spec = await specRepo.findByIdOrThrow(cwd, specId);
   const design = await specRepo.loadFile(cwd, specId, "design.md");
 
-  // Issue check from implementation field
+  // Issue check from tasks.yaml
   const issueCheck: IssueCheckResult = { total: 0, completed: 0, issues: [] };
-  if (spec.implementation) {
-    for (const issue of spec.implementation.issues) {
-      issueCheck.issues.push({
-        number: issue.number,
-        title: issue.title,
-        state: issue.status,
-        priority: issue.priority,
-      });
-      issueCheck.total++;
-      if (issue.status === "closed") issueCheck.completed++;
-    }
+  const tasks = await loadTasksForSpec(cwd, specId);
+  for (const task of tasks) {
+    issueCheck.issues.push({
+      number: task.number,
+      title: task.title,
+      state: task.status,
+      priority: task.priority,
+    });
+    issueCheck.total++;
+    if (task.status === "closed") issueCheck.completed++;
   }
 
   // If design.md is missing, we cannot validate — treat as not-started
@@ -243,15 +272,14 @@ export async function checkImplementConsistency(
       });
     }
 
-    if (spec.implementation?.issues) {
-      for (const issue of spec.implementation.issues) {
-        if (issue.status !== "closed") {
-          warnings.push({
-            type: "issue-not-closed",
-            message: `#${issue.number} (${issue.title}) is ${issue.status}`,
-            details: { id: String(issue.number), currentStatus: issue.status },
-          });
-        }
+    const tasks = await loadTasksForSpec(cwd, spec.id);
+    for (const task of tasks) {
+      if (task.status !== "closed") {
+        warnings.push({
+          type: "issue-not-closed",
+          message: `#${task.number} (${task.title}) is ${task.status}`,
+          details: { id: String(task.number), currentStatus: task.status },
+        });
       }
     }
   }
