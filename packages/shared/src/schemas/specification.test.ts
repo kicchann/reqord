@@ -69,8 +69,8 @@ describe("SpecificationSchema", () => {
     });
   });
 
-  describe("implementation field (backward compatibility)", () => {
-    it("implementationフィールドを含む既存データがパースできる（後方互換性）", () => {
+  describe("implementation field (removed)", () => {
+    it("implementationフィールドを含む入力データはパース時に除去される", () => {
       const specification = {
         ...baseSpecification,
         implementation: {
@@ -88,14 +88,16 @@ describe("SpecificationSchema", () => {
         },
       };
 
-      // implementation is explicitly defined as z.unknown().optional() - parse should succeed
+      // implementation field should be stripped (Zod default strip behavior for unknown keys)
       const result = SpecificationSchema.parse(specification);
       expect(result.id).toBe("spec-000001");
+      expect("implementation" in result).toBe(false);
     });
 
     it("implementationなしのデータが引き続きパースできる", () => {
       const result = SpecificationSchema.parse(baseSpecification);
       expect(result.id).toBe("spec-000001");
+      expect("implementation" in result).toBe(false);
     });
   });
 });
