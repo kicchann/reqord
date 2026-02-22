@@ -106,26 +106,6 @@ describe("dashboard-data", () => {
             supplementary: [],
           },
           flags: [],
-          implementation: {
-            issues: [
-              {
-                number: 1,
-                title: "Issue 1",
-                url: "https://github.com/owner/repo/issues/1",
-                priority: "P0",
-                status: "closed",
-              },
-              {
-                number: 2,
-                title: "Issue 2",
-                url: "https://github.com/owner/repo/issues/2",
-                priority: "P1",
-                status: "open",
-              },
-            ],
-            totalEstimatedHours: 10,
-            createdAt: "2026-01-01T00:00:00Z",
-          },
         },
         {
           id: "spec-000002",
@@ -163,9 +143,10 @@ describe("dashboard-data", () => {
       });
       expect(result.specifications.approvalRate).toBe(0.5);
 
-      expect(result.issues.total).toBe(2);
-      expect(result.issues.completed).toBe(1);
-      expect(result.issues.completionRate).toBe(0.5);
+      // spec.implementation is no longer used; issues always returns zeros
+      expect(result.issues.total).toBe(0);
+      expect(result.issues.completed).toBe(0);
+      expect(result.issues.completionRate).toBe(0);
     });
 
     it("handles zero requirements correctly", async () => {
@@ -254,7 +235,7 @@ describe("dashboard-data", () => {
       );
       const { getDashboardData } = await import("../../lib/dashboard-data.js");
 
-      // req: 100% (1/1 approved), spec: 50% (1/2 approved), issues: 0% (0/2 completed)
+      // req: 100% (1/1 approved), spec: 50% (1/2 approved), issues: 0% (always 0 since spec.implementation removed)
       const mockRequirements: Requirement[] = [
         {
           id: "req-000001",
@@ -294,26 +275,6 @@ describe("dashboard-data", () => {
             supplementary: [],
           },
           flags: [],
-          implementation: {
-            issues: [
-              {
-                number: 1,
-                title: "Issue 1",
-                url: "https://github.com/owner/repo/issues/1",
-                priority: "P0",
-                status: "open",
-              },
-              {
-                number: 2,
-                title: "Issue 2",
-                url: "https://github.com/owner/repo/issues/2",
-                priority: "P1",
-                status: "open",
-              },
-            ],
-            totalEstimatedHours: 10,
-            createdAt: "2026-01-01T00:00:00Z",
-          },
         },
         {
           id: "spec-000002",
@@ -622,7 +583,7 @@ describe("dashboard-data", () => {
   });
 
   describe("extractCriticalPath", () => {
-    it("extracts tasks from implementation issues", async () => {
+    it("returns null since spec.implementation is no longer used", async () => {
       const { extractCriticalPath } = await import(
         "../../lib/dashboard-data.js"
       );
@@ -632,107 +593,6 @@ describe("dashboard-data", () => {
           id: "spec-000001",
           requirementId: "req-000001",
           status: "approved",
-          version: "1.0.0",
-          createdAt: "2026-01-01T00:00:00Z",
-          updatedAt: "2026-01-01T00:00:00Z",
-          versionHistory: [],
-          files: {
-            design: "specifications/spec-000001/design.md",
-            supplementary: [],
-          },
-          flags: [],
-          implementation: {
-            issues: [
-              {
-                number: 1,
-                title: "Issue 1",
-                url: "https://github.com/owner/repo/issues/1",
-                priority: "P0",
-                status: "open",
-              },
-              {
-                number: 2,
-                title: "Issue 2",
-                url: "https://github.com/owner/repo/issues/2",
-                priority: "P1",
-                status: "closed",
-              },
-            ],
-            totalEstimatedHours: 10,
-            createdAt: "2026-01-01T00:00:00Z",
-          },
-        },
-        {
-          id: "spec-000002",
-          requirementId: "req-000002",
-          status: "draft",
-          version: "1.0.0",
-          createdAt: "2026-01-01T00:00:00Z",
-          updatedAt: "2026-01-01T00:00:00Z",
-          versionHistory: [],
-          files: {
-            design: "specifications/spec-000002/design.md",
-            supplementary: [],
-          },
-          flags: [],
-          implementation: {
-            issues: [
-              {
-                number: 3,
-                title: "Issue 3",
-                url: "https://github.com/owner/repo/issues/3",
-                priority: "P2",
-                status: "in_progress",
-              },
-            ],
-            totalEstimatedHours: 5,
-            createdAt: "2026-01-01T00:00:00Z",
-          },
-        },
-      ];
-
-      const result = extractCriticalPath(specifications);
-
-      expect(result).toHaveLength(3);
-      expect(result![0]).toEqual({
-        issueNumber: 1,
-        title: "Issue 1",
-        url: "https://github.com/owner/repo/issues/1",
-        priority: "P0",
-        status: "open",
-        estimatedHours: 10,
-        specId: "spec-000001",
-      });
-      expect(result![1]).toEqual({
-        issueNumber: 2,
-        title: "Issue 2",
-        url: "https://github.com/owner/repo/issues/2",
-        priority: "P1",
-        status: "closed",
-        estimatedHours: 10,
-        specId: "spec-000001",
-      });
-      expect(result![2]).toEqual({
-        issueNumber: 3,
-        title: "Issue 3",
-        url: "https://github.com/owner/repo/issues/3",
-        priority: "P2",
-        status: "in_progress",
-        estimatedHours: 5,
-        specId: "spec-000002",
-      });
-    });
-
-    it("returns null when no implementations exist", async () => {
-      const { extractCriticalPath } = await import(
-        "../../lib/dashboard-data.js"
-      );
-
-      const specifications: Specification[] = [
-        {
-          id: "spec-000001",
-          requirementId: "req-000001",
-          status: "draft",
           version: "1.0.0",
           createdAt: "2026-01-01T00:00:00Z",
           updatedAt: "2026-01-01T00:00:00Z",

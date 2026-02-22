@@ -136,43 +136,15 @@ describe("buildIssueSummary", () => {
     });
   });
 
-  it("Issues集計が正確", () => {
-    const specs = [
-      makeSpecification({
-        implementation: {
-          issues: [
-            {
-              number: 1,
-              title: "Issue 1",
-              url: "https://example.com/1",
-              priority: "P1",
-              status: "closed",
-            },
-            {
-              number: 2,
-              title: "Issue 2",
-              url: "https://example.com/2",
-              priority: "P2",
-              status: "open",
-            },
-            {
-              number: 3,
-              title: "Issue 3",
-              url: "https://example.com/3",
-              priority: "P2",
-              status: "closed",
-            },
-          ],
-          totalEstimatedHours: 10,
-          createdAt: "2026-01-01T00:00:00Z",
-        },
-      }),
-    ];
+  it("spec.implementationは使用しないため常に0を返す", () => {
+    const specs = [makeSpecification()];
     const result = buildIssueSummary(specs);
-    expect(result.total).toBe(3);
-    expect(result.closed).toBe(2);
-    expect(result.open).toBe(1);
-    expect(result.closedPercentage).toBe(67);
+    expect(result).toEqual({
+      total: 0,
+      closed: 0,
+      open: 0,
+      closedPercentage: 0,
+    });
   });
 });
 
@@ -493,19 +465,11 @@ describe("getSpecificationStatus", () => {
     expect(result.issueProgress).toEqual({ total: 0, completed: 0 });
   });
 
-  it("全issueがclosed → coverageStatus: covered", async () => {
+  it("spec.implementationは使用しないため常にnot-covered", async () => {
     mockFindByIdOrThrow.mockResolvedValue(
       makeSpecification({
         id: "spec-000001",
         requirementId: "req-000001",
-        implementation: {
-          issues: [
-            { number: 1, title: "Issue 1", url: "https://example.com/1", priority: "P1", status: "closed" },
-            { number: 2, title: "Issue 2", url: "https://example.com/2", priority: "P2", status: "closed" },
-          ],
-          totalEstimatedHours: 5,
-          createdAt: "2026-01-01T00:00:00Z",
-        },
       }),
     );
     mockReqFindById.mockResolvedValue(
@@ -514,33 +478,8 @@ describe("getSpecificationStatus", () => {
 
     const result = await getSpecificationStatus("/tmp", "spec-000001");
 
-    expect(result.coverageStatus).toBe("covered");
-    expect(result.issueProgress).toEqual({ total: 2, completed: 2 });
-  });
-
-  it("一部issueがopen → coverageStatus: partial", async () => {
-    mockFindByIdOrThrow.mockResolvedValue(
-      makeSpecification({
-        id: "spec-000001",
-        requirementId: "req-000001",
-        implementation: {
-          issues: [
-            { number: 1, title: "Issue 1", url: "https://example.com/1", priority: "P1", status: "closed" },
-            { number: 2, title: "Issue 2", url: "https://example.com/2", priority: "P2", status: "open" },
-          ],
-          totalEstimatedHours: 5,
-          createdAt: "2026-01-01T00:00:00Z",
-        },
-      }),
-    );
-    mockReqFindById.mockResolvedValue(
-      makeRequirement({ id: "req-000001", status: "approved" }),
-    );
-
-    const result = await getSpecificationStatus("/tmp", "spec-000001");
-
-    expect(result.coverageStatus).toBe("partial");
-    expect(result.issueProgress).toEqual({ total: 2, completed: 1 });
+    expect(result.coverageStatus).toBe("not-covered");
+    expect(result.issueProgress).toEqual({ total: 0, completed: 0 });
   });
 
   it("親Requirementが存在しない場合はnull", async () => {

@@ -137,20 +137,8 @@ export async function validateImplementation(
   const spec = await specRepo.findByIdOrThrow(cwd, specId);
   const design = await specRepo.loadFile(cwd, specId, "design.md");
 
-  // Issue check from implementation field
+  // Issue check (spec.implementation is no longer used; issues come from tasks.yaml)
   const issueCheck: IssueCheckResult = { total: 0, completed: 0, issues: [] };
-  if (spec.implementation) {
-    for (const issue of spec.implementation.issues) {
-      issueCheck.issues.push({
-        number: issue.number,
-        title: issue.title,
-        state: issue.status,
-        priority: issue.priority,
-      });
-      issueCheck.total++;
-      if (issue.status === "closed") issueCheck.completed++;
-    }
-  }
 
   // If design.md is missing, we cannot validate — treat as not-started
   if (!design) {
@@ -243,17 +231,7 @@ export async function checkImplementConsistency(
       });
     }
 
-    if (spec.implementation?.issues) {
-      for (const issue of spec.implementation.issues) {
-        if (issue.status !== "closed") {
-          warnings.push({
-            type: "issue-not-closed",
-            message: `#${issue.number} (${issue.title}) is ${issue.status}`,
-            details: { id: String(issue.number), currentStatus: issue.status },
-          });
-        }
-      }
-    }
+    // spec.implementation is no longer used; issue status comes from tasks.yaml
   }
 
   return { warnings };

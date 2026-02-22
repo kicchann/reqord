@@ -3,7 +3,7 @@ import React from "react";
 import { describe, it, expect, afterEach } from "vitest";
 import { render, screen, cleanup } from "@testing-library/react";
 import "@testing-library/jest-dom/vitest";
-import type { ImplementationIssue } from "@reqord/shared";
+import type { IssueItem } from "../../../components/specification/tab-issues";
 import { TabIssues } from "../../../components/specification/tab-issues";
 
 describe("TabIssues", () => {
@@ -11,7 +11,7 @@ describe("TabIssues", () => {
     cleanup();
   });
 
-  const mockIssues: ImplementationIssue[] = [
+  const mockIssues: IssueItem[] = [
     {
       number: 123,
       title: "Implement user authentication",
@@ -107,7 +107,7 @@ describe("TabIssues", () => {
   });
 
   it("renders P3 priority with gray color", () => {
-    const p3Issue: ImplementationIssue[] = [
+    const p3Issue: IssueItem[] = [
       {
         number: 126,
         title: "Low priority task",

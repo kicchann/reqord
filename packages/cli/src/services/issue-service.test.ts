@@ -185,7 +185,7 @@ describe("createIssuesFromSpec", () => {
     expect(mockSpecRepo.save).not.toHaveBeenCalled();
   });
 
-  it("Updates specification JSON with implementation after creation", async () => {
+  it("Does not update specification JSON after creation (spec.implementation removed)", async () => {
     const spec = makeSpecification();
     mockSpecRepo.findByIdOrThrow.mockResolvedValue(spec);
     mockFs.exists.mockResolvedValue(true);
@@ -199,31 +199,16 @@ describe("createIssuesFromSpec", () => {
       url: "https://github.com/test/repo/issues/101"
     });
 
-    await createIssuesFromSpec("/cwd", {
+    const result = await createIssuesFromSpec("/cwd", {
       specId: "spec-000001",
       tasksFile: "tasks.json",
     });
 
-    expect(mockSpecRepo.save).toHaveBeenCalledWith(
-      "/cwd",
-      expect.objectContaining({
-        id: "spec-000001",
-        implementation: expect.objectContaining({
-          issues: expect.arrayContaining([
-            expect.objectContaining({
-              number: 101,
-              title: "Task 1",
-              url: "https://github.com/test/repo/issues/101",
-              priority: "P1",
-              status: "open",
-            }),
-          ]),
-          totalEstimatedHours: 2,
-          createdAt: expect.any(String),
-        }),
-        updatedAt: expect.any(String),
-      })
-    );
+    // spec.implementation is no longer updated; result contains the issue data directly
+    expect(result.issues).toHaveLength(1);
+    expect(result.issues[0].number).toBe(101);
+    expect(result.totalEstimatedHours).toBe(2);
+    expect(mockSpecRepo.save).not.toHaveBeenCalled();
   });
 });
 

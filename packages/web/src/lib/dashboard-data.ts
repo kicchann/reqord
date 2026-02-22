@@ -78,25 +78,12 @@ function calculateApprovalRate(items: Array<{ status: string }>): number {
   return approvedCount / items.length;
 }
 
-function calculateIssueSummary(specifications: Specification[]): IssueSummary {
-  let totalIssues = 0;
-  let completedIssues = 0;
-
-  for (const spec of specifications) {
-    if (spec.implementation) {
-      for (const issue of spec.implementation.issues) {
-        totalIssues++;
-        if (issue.status === "closed") {
-          completedIssues++;
-        }
-      }
-    }
-  }
-
+function calculateIssueSummary(_specifications: Specification[]): IssueSummary {
+  // spec.implementation is no longer used; issue data comes from tasks.yaml
   return {
-    total: totalIssues,
-    completed: completedIssues,
-    completionRate: totalIssues > 0 ? completedIssues / totalIssues : 0,
+    total: 0,
+    completed: 0,
+    completionRate: 0,
   };
 }
 
@@ -170,28 +157,10 @@ export function detectWarnings(
 }
 
 export function extractCriticalPath(
-  specifications: Specification[]
+  _specifications: Specification[]
 ): CriticalPathItem[] | null {
-  const items: CriticalPathItem[] = [];
-
-  for (const spec of specifications) {
-    if (spec.implementation) {
-      for (const issue of spec.implementation.issues) {
-        items.push({
-          issueNumber: issue.number,
-          title: issue.title,
-          url: issue.url,
-          priority: issue.priority,
-          status: issue.status,
-          // Per-issue estimates not available; use spec-level total as approximation
-          estimatedHours: spec.implementation.totalEstimatedHours,
-          specId: spec.id,
-        });
-      }
-    }
-  }
-
-  return items.length > 0 ? items : null;
+  // spec.implementation is no longer used; issue data comes from tasks.yaml
+  return null;
 }
 
 export async function getDashboardData(): Promise<DashboardData> {

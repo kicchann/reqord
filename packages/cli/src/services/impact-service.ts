@@ -137,21 +137,8 @@ async function analyzeFromRequirement(
     .filter((s) => s.requirementId === id)
     .map((s) => ({ id: s.id, requirementId: s.requirementId, status: s.status }));
 
-  // Related issues from specifications
+  // Related issues from specifications (no longer read from spec.implementation)
   const relatedIssues: IssueRef[] = [];
-  for (const spec of allSpecifications) {
-    if (spec.requirementId === id && spec.implementation) {
-      for (const issue of spec.implementation.issues) {
-        relatedIssues.push({
-          number: issue.number,
-          title: issue.title,
-          url: issue.url,
-          status: issue.status,
-          specificationId: spec.id,
-        });
-      }
-    }
-  }
 
   return {
     sourceId: id,
@@ -179,19 +166,8 @@ async function analyzeFromSpecification(cwd: string, id: string): Promise<Impact
     .filter((s) => s.requirementId === spec.requirementId && s.id !== id)
     .map((s) => ({ id: s.id, requirementId: s.requirementId, status: s.status }));
 
-  // Issues from this spec
+  // Issues from this spec (no longer read from spec.implementation)
   const relatedIssues: IssueRef[] = [];
-  if (spec.implementation) {
-    for (const issue of spec.implementation.issues) {
-      relatedIssues.push({
-        number: issue.number,
-        title: issue.title,
-        url: issue.url,
-        status: issue.status,
-        specificationId: id,
-      });
-    }
-  }
 
   return {
     sourceId: id,
@@ -289,32 +265,7 @@ export async function notifyImpact(
       });
     }
   } else {
-    // Requirement-origin: collect related issues from direct/indirect impacts
-    const impactedIds = new Set([
-      ...analysis.directImpacts.map((e) => e.id),
-      ...analysis.indirectImpacts.map((e) => e.id),
-    ]);
-
-    const impactMap = new Map<string, ImpactEntry>();
-    for (const entry of [...analysis.directImpacts, ...analysis.indirectImpacts]) {
-      impactMap.set(entry.id, entry);
-    }
-
-    const allSpecs = await specRepo.findAll(cwd);
-    for (const spec of allSpecs) {
-      if (impactedIds.has(spec.requirementId) && spec.implementation) {
-        for (const issue of spec.implementation.issues) {
-          const impact = impactMap.get(spec.requirementId);
-          issuesWithContext.push({
-            number: issue.number,
-            title: issue.title,
-            status: issue.status,
-            relation: impact?.relation ?? "unknown",
-            path: impact?.path.join(" → ") ?? "",
-          });
-        }
-      }
-    }
+    // Requirement-origin: spec.implementation is no longer used; issue data comes from tasks.yaml
   }
 
   // Dedupe by issue number

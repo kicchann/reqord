@@ -73,15 +73,6 @@ describe("impact analyze → notify integration", () => {
       id: "spec-000001",
       requirementId: "req-000002",
       status: "approved",
-      implementation: {
-        issues: [
-          { number: 123, title: "ログイン画面の実装", url: "https://github.com/test/123", priority: "P1", status: "open" },
-          { number: 124, title: "認証API統合テスト", url: "https://github.com/test/124", priority: "P2", status: "open" },
-          { number: 125, title: "旧認証モジュール削除", url: "https://github.com/test/125", priority: "P3", status: "closed" },
-        ],
-        totalEstimatedHours: 16,
-        createdAt: "2024-01-01T00:00:00Z",
-      },
     });
 
     vi.mocked(reqRepo.findAll).mockResolvedValue([sourceReq, targetReq]);
@@ -98,17 +89,15 @@ describe("impact analyze → notify integration", () => {
     expect(analysis.directImpacts[0].id).toBe("req-000002");
 
     // Step 2: Notify
+    // spec.implementation is no longer used, so no issues are notified
     const notifyResult = await notifyImpact("/cwd", "req-000001");
 
     expect(notifyResult.dryRun).toBe(false);
-    expect(notifyResult.notified).toHaveLength(2);
-    expect(notifyResult.notified.map((n) => n.number).sort()).toEqual([123, 124]);
-    expect(notifyResult.skipped).toHaveLength(1);
-    expect(notifyResult.skipped[0].number).toBe(125);
-    expect(notifyResult.skipped[0].reason).toBe("closed");
+    expect(notifyResult.notified).toHaveLength(0);
+    expect(notifyResult.skipped).toHaveLength(0);
 
-    // Verify GitHub API called for open issues only
-    expect(github.createIssueComment).toHaveBeenCalledTimes(2);
+    // Verify GitHub API NOT called since there are no related issues
+    expect(github.createIssueComment).not.toHaveBeenCalled();
   });
 
   it("--json 出力が JSON.parseable であること (analyzeImpact)", async () => {
@@ -154,13 +143,6 @@ describe("impact analyze → notify integration", () => {
       id: "spec-000001",
       requirementId: "req-000001",
       status: "approved",
-      implementation: {
-        issues: [
-          { number: 200, title: "Design implementation", url: "https://github.com/test/200", priority: "P1", status: "open" },
-        ],
-        totalEstimatedHours: 4,
-        createdAt: "2024-01-01T00:00:00Z",
-      },
     });
     const spec2 = makeSpecification({
       id: "spec-000002",
@@ -172,22 +154,22 @@ describe("impact analyze → notify integration", () => {
     vi.mocked(specRepo.findAll).mockResolvedValue([spec1, spec2]);
 
     // Analyze from specification
+    // spec.implementation is no longer used, so relatedIssues is always empty
     const analysis = await analyzeImpact("/cwd", "spec-000001");
     expect(analysis.sourceType).toBe("specification");
     expect(analysis.directImpacts).toEqual([]);
     expect(analysis.indirectImpacts).toEqual([]);
     expect(analysis.relatedSpecifications).toHaveLength(1);
-    expect(analysis.relatedIssues).toHaveLength(1);
-    expect(analysis.relatedIssues[0].number).toBe(200);
+    expect(analysis.relatedIssues).toHaveLength(0);
 
-    // Notify from specification - spec起点では relatedIssues から通知対象を収集
+    // Notify from specification - no issues to notify since spec.implementation not used
     const reqA = makeRequirement({ id: "req-000001", title: "A" });
     vi.mocked(reqRepo.findAll).mockResolvedValue([reqA]);
     vi.mocked(reqRepo.findById).mockResolvedValue(reqA);
 
     const notifyResult = await notifyImpact("/cwd", "spec-000001");
-    expect(notifyResult.notified).toHaveLength(1);
-    expect(notifyResult.notified[0].number).toBe(200);
-    expect(github.createIssueComment).toHaveBeenCalledOnce();
+    expect(notifyResult.notified).toHaveLength(0);
+    expect(notifyResult.skipped).toHaveLength(0);
+    expect(github.createIssueComment).not.toHaveBeenCalled();
   });
 });
