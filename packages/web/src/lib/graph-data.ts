@@ -133,6 +133,7 @@ export function buildMultiLevelGraphData(
 ): MultiLevelGraphData {
   const nodes: MultiLevelNode[] = [];
   const edges: MultiLevelEdge[] = [];
+  const addedIssueIds = new Set<string>();
 
   requirements.forEach((req, index) => {
     nodes.push(createRequirementNode(req, index));
@@ -148,7 +149,10 @@ export function buildMultiLevelGraphData(
     );
     specTasks.forEach((task, issueIndex) => {
       const issueId = `issue-${task.number}`;
-      nodes.push(createIssueNode(task, specIndex, issueIndex));
+      if (!addedIssueIds.has(issueId)) {
+        nodes.push(createIssueNode(task, specIndex, issueIndex));
+        addedIssueIds.add(issueId);
+      }
       edges.push(createTracksEdge(issueId, spec.id));
     });
   });

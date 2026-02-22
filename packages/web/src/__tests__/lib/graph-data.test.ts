@@ -262,6 +262,22 @@ describe("buildMultiLevelGraphData", () => {
       expect(issueNodes[0].position).toEqual({ x: 800, y: 0 });
       expect(issueNodes[1].position).toEqual({ x: 800, y: 80 });
     });
+
+    it("creates only one issue node when a task is linked to multiple specs", () => {
+      const req1 = makeReq("req-000001");
+      const spec1 = makeSpec("spec-000001", "req-000001");
+      const spec2 = makeSpec("spec-000002", "req-000001");
+      const task = makeTask(123, ["spec-000001", "spec-000002"]);
+      const result = buildMultiLevelGraphData([req1], [spec1, spec2], [task]);
+      const issueNodes = result.nodes.filter((n) => n.type === "issue");
+      expect(issueNodes).toHaveLength(1);
+      expect(issueNodes[0].id).toBe("issue-123");
+      const tracksEdges = result.edges.filter((e) => e.type === "tracks");
+      expect(tracksEdges).toHaveLength(2);
+      expect(tracksEdges.map((e) => e.target)).toEqual(
+        expect.arrayContaining(["spec-000001", "spec-000002"]),
+      );
+    });
   });
 
   describe("node positioning", () => {
