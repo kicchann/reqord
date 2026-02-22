@@ -243,4 +243,8 @@ describe("TasksIndexSchema", () => {
   it("titleが欠けている場合は拒否する", () => {
     expect(() => TasksIndexSchema.parse({ tasks: [] })).toThrow();
   });
+
+  it("title空文字で拒否する", () => {
+    expect(() => TasksIndexSchema.parse({ title: "", tasks: [] })).toThrow();
+  });
 });
