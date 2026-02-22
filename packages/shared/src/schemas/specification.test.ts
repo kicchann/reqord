@@ -88,7 +88,7 @@ describe("SpecificationSchema", () => {
         },
       };
 
-      // passthrough() allows unknown fields - parse should succeed
+      // implementation is explicitly defined as z.unknown().optional() - parse should succeed
       const result = SpecificationSchema.parse(specification);
       expect(result.id).toBe("spec-000001");
     });

@@ -32,8 +32,9 @@ export const SpecificationSchema = z.object({
     supplementary: z.array(z.string()).default([]),
   }),
   flags: z.array(FlagSchema).default([]),
+  implementation: z.unknown().optional(), // 後方互換: 旧フィールドを許容して無視
   designValidation: DesignValidationSchema.optional(),
-}).passthrough();
+});
 
 export type Specification = z.infer<typeof SpecificationSchema>;
 export type DesignValidation = z.infer<typeof DesignValidationSchema>;
