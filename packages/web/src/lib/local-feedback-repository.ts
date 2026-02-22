@@ -21,7 +21,9 @@ export class LocalFeedbackRepository implements FeedbackRepository {
     return feedbacks.filter((f) => {
       const linked = [
         ...f.linkedTo.requirements,
+        ...(f.linkedTo.createdRequirements ?? []),
         ...f.linkedTo.specifications,
+        ...(f.linkedTo.createdSpecifications ?? []),
       ];
       if (!linked.includes(artifactId)) return false;
       const resolved = [

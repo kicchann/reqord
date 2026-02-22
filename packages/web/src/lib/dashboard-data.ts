@@ -140,7 +140,8 @@ export async function detectWarnings(
 
   for (const spec of specifications) {
     const unresolvedFeedbacks = allFeedbacks.filter((f) => {
-      const linked = f.linkedTo.specifications.includes(spec.id);
+      const linked = f.linkedTo.specifications.includes(spec.id)
+        || (f.linkedTo.createdSpecifications ?? []).includes(spec.id);
       const resolved = f.linkedTo.resolved?.specifications?.includes(spec.id) ?? false;
       return linked && !resolved;
     });

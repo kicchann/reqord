@@ -173,7 +173,8 @@ export async function detectWarnings(
 
     // Check for unresolved feedbacks
     const reqFeedbacks = allFeedbacks.filter((f) => {
-      const linked = f.linkedTo.requirements.includes(req.id);
+      const linked = f.linkedTo.requirements.includes(req.id)
+        || (f.linkedTo.createdRequirements ?? []).includes(req.id);
       const resolved = f.linkedTo.resolved?.requirements?.includes(req.id) ?? false;
       return linked && !resolved;
     });
@@ -214,7 +215,8 @@ export async function detectWarnings(
     }
 
     const specFeedbacks = allFeedbacks.filter((f) => {
-      const linked = f.linkedTo.specifications.includes(spec.id);
+      const linked = f.linkedTo.specifications.includes(spec.id)
+        || (f.linkedTo.createdSpecifications ?? []).includes(spec.id);
       const resolved = f.linkedTo.resolved?.specifications?.includes(spec.id) ?? false;
       return linked && !resolved;
     });

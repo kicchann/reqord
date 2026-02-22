@@ -251,7 +251,7 @@ describe("approveCommand", () => {
       expect.stringContaining("Warning: req-000001 has 1 unresolved feedback(s)")
     );
     expect(consoleLogSpy).toHaveBeenCalledWith(
-      expect.stringContaining("#17: Feedback from issue #17 (severity: medium)")
+      expect.stringContaining("#17 (bug, severity: medium)")
     );
     expect(consoleLogSpy).toHaveBeenCalledWith(
       expect.stringContaining("Proceeding with approval...")

@@ -55,7 +55,7 @@ export const specApproveCommand = new Command("approve")
         for (const fb of unresolvedFeedbacks) {
           console.log(
             chalk.yellow(
-              `  - #${fb.githubIssue}: Feedback from issue #${fb.githubIssue} (severity: ${fb.severity ?? "medium"})`,
+              `  - #${fb.githubIssue} (${fb.type ?? "unclassified"}, severity: ${fb.severity ?? "medium"})`,
             ),
           );
         }
