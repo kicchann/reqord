@@ -1,11 +1,11 @@
 import type { FeedbackIndex, FeedbackEntry } from "@reqord/shared";
-import { FeedbackIndexSchema, FEEDBACK_DIR } from "@reqord/shared";
+import { FeedbackIndexSchema, ISSUES_DIR } from "@reqord/shared";
 import * as fs from "./file-system.js";
 
-const INDEX_FILENAME = "index.yaml";
+const INDEX_FILENAME = "feedbacks.yaml";
 
 function getFeedbackDir(cwd: string): string {
-  return fs.getReqordDir(cwd, FEEDBACK_DIR);
+  return fs.getReqordDir(cwd, ISSUES_DIR);
 }
 
 function getIndexPath(cwd: string): string {

@@ -3,7 +3,7 @@
 import React, { useCallback } from "react";
 import dynamic from "next/dynamic";
 import { useSearchParams, useRouter } from "next/navigation";
-import type { Requirement, Specification } from "@reqord/shared";
+import type { Requirement, Specification, TaskEntry } from "@reqord/shared";
 import { DrillDownBreadcrumb } from "./drilldown-breadcrumb";
 
 const DependencyGraph = dynamic(
@@ -30,12 +30,14 @@ type GraphPageClientProps = {
   requirements: Requirement[];
   specifications: Specification[];
   specCountMap: Record<string, number>;
+  tasks: TaskEntry[];
 };
 
 export function GraphPageClient({
   requirements,
   specifications,
   specCountMap,
+  tasks,
 }: GraphPageClientProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -78,7 +80,7 @@ export function GraphPageClient({
           requirementTitle={requirement.title}
           onBack={handleBackToOverview}
         />
-        <DrillDownGraph requirement={requirement} specifications={relatedSpecs} />
+        <DrillDownGraph requirement={requirement} specifications={relatedSpecs} tasks={tasks} />
       </div>
     );
   }

@@ -6,7 +6,7 @@ vi.mock("../../lib/file-system", () => ({
 }));
 
 vi.mock("../../lib/reqord-root", () => ({
-  getFeedbackDir: vi.fn(() => "/test/.reqord/feedback"),
+  getIssuesDir: vi.fn(() => "/test/.reqord/issues"),
 }));
 
 import { LocalFeedbackRepository } from "../../lib/local-feedback-repository";
@@ -22,7 +22,7 @@ describe("LocalFeedbackRepository", () => {
     repo = new LocalFeedbackRepository();
   });
 
-  it("index.yaml存在時にFeedbackEntry配列を返す", async () => {
+  it("feedbacks.yaml存在時にFeedbackEntry配列を返す", async () => {
     mockReadYAML.mockResolvedValue({
       feedbacks: [
         {
@@ -48,7 +48,7 @@ describe("LocalFeedbackRepository", () => {
     expect(result[0].type).toBe("bug");
   });
 
-  it("index.yaml不在時に空配列を返す", async () => {
+  it("feedbacks.yaml不在時に空配列を返す", async () => {
     mockReadYAML.mockRejectedValue(new Error("ENOENT"));
 
     const result = await repo.findAll();
