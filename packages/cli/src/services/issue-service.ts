@@ -94,10 +94,14 @@ async function appendToTasksFile(
   const index = await loadTasksIndex(tasksYamlPath);
   const syncedAt = new Date().toISOString();
 
-  const newEntries: TaskEntry[] = issues.map((issue) => ({
-    number: issue.number!,
+  const validIssues = issues.filter(
+    (issue): issue is typeof issue & { number: number; url: string } =>
+      issue.number !== undefined && issue.url !== undefined
+  );
+  const newEntries: TaskEntry[] = validIssues.map((issue) => ({
+    number: issue.number,
     title: issue.title,
-    url: issue.url!,
+    url: issue.url,
     linkedTo: { specifications: [specId] },
     priority: issue.priority,
     status: "open" as const,
