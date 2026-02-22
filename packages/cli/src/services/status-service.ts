@@ -112,8 +112,9 @@ async function loadAllTasks(cwd: string): Promise<TaskEntry[]> {
   const tasksPath = fs.joinPath(cwd, REQORD_DIR, ISSUES_DIR, "tasks.yaml");
   if (!(await fs.exists(tasksPath))) return [];
   const raw = await fs.readYAML<unknown>(tasksPath);
-  const parsed = TasksIndexSchema.parse(raw);
-  return parsed.tasks;
+  const parsed = TasksIndexSchema.safeParse(raw);
+  if (!parsed.success) return [];
+  return parsed.data.tasks;
 }
 
 async function loadTasksForSpec(cwd: string, specificationId: string): Promise<TaskEntry[]> {

@@ -37,6 +37,7 @@ export function buildDrillDownGraphData(
   });
 
   // 2. Specification nodes (middle column) + implements edges
+  const addedIssueIds = new Set<string>();
   specifications.forEach((spec, i) => {
     const specNodeId = spec.id;
     nodes.push({
@@ -61,22 +62,27 @@ export function buildDrillDownGraphData(
     const specTasks = tasks.filter((t) =>
       t.linkedTo.specifications.includes(spec.id),
     );
-    specTasks.forEach((task, j) => {
+    let issueOffset = 0;
+    specTasks.forEach((task) => {
       const issueNodeId = `issue-${task.number}`;
-      nodes.push({
-        id: issueNodeId,
-        type: "issue",
-        position: {
-          x: LAYOUT.ISSUE_X,
-          y: i * LAYOUT.VERTICAL_GAP + j * LAYOUT.ISSUE_VERTICAL_GAP,
-        },
-        data: {
-          label: task.title,
-          status: task.status,
-          issueNumber: task.number,
-          issueUrl: task.url,
-        },
-      });
+      if (!addedIssueIds.has(issueNodeId)) {
+        addedIssueIds.add(issueNodeId);
+        nodes.push({
+          id: issueNodeId,
+          type: "issue",
+          position: {
+            x: LAYOUT.ISSUE_X,
+            y: i * LAYOUT.VERTICAL_GAP + issueOffset * LAYOUT.ISSUE_VERTICAL_GAP,
+          },
+          data: {
+            label: task.title,
+            status: task.status,
+            issueNumber: task.number,
+            issueUrl: task.url,
+          },
+        });
+        issueOffset++;
+      }
 
       edges.push({
         id: `track-${specNodeId}-${issueNodeId}`,

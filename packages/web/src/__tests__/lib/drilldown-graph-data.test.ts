@@ -244,7 +244,7 @@ describe("buildDrillDownGraphData", () => {
       expect(issueNodes).toHaveLength(0);
     });
 
-    it("a task linked to multiple specs creates issue nodes for each matching spec", () => {
+    it("a task linked to multiple specs creates one issue node with edges to each spec", () => {
       const req = makeReq("req-000001");
       const spec1 = makeSpec("spec-000001", "req-000001");
       const spec2 = makeSpec("spec-000002", "req-000001");
@@ -253,7 +253,17 @@ describe("buildDrillDownGraphData", () => {
       const result = buildDrillDownGraphData(req, [spec1, spec2], [task]);
 
       const issueNodes = result.nodes.filter((n) => n.type === "issue");
-      expect(issueNodes).toHaveLength(2);
+      expect(issueNodes).toHaveLength(1);
+      expect(issueNodes[0].id).toBe("issue-42");
+
+      const tracksEdges = result.edges.filter((e) => e.id.startsWith("track-"));
+      expect(tracksEdges).toHaveLength(2);
+      expect(tracksEdges.map((e) => e.id)).toEqual(
+        expect.arrayContaining([
+          "track-spec-000001-issue-42",
+          "track-spec-000002-issue-42",
+        ]),
+      );
     });
   });
 });
