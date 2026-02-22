@@ -11,6 +11,7 @@ vi.mock("../repositories/requirement.js", () => ({}));
 vi.mock("../repositories/file-system.js", () => ({
   joinPath: vi.fn((...parts: string[]) => parts.join("/")),
   exists: vi.fn(),
+  readYAML: vi.fn(),
 }));
 
 import {
@@ -204,6 +205,7 @@ describe("validateImplementation", () => {
     );
 
     vi.mocked(fs.exists)
+      .mockResolvedValueOnce(false)  // tasks.yaml does not exist
       .mockResolvedValueOnce(true)   // component exists
       .mockResolvedValueOnce(false); // test missing
 
@@ -211,7 +213,7 @@ describe("validateImplementation", () => {
 
     expect(result.specId).toBe("spec-000001");
     expect(result.requirementId).toBe("req-000001");
-    // spec.implementation is no longer used; issueCheck is always empty
+    // tasks.yaml does not exist; issueCheck is empty
     expect(result.issueCheck.total).toBe(0);
     expect(result.issueCheck.completed).toBe(0);
     expect(result.componentCheck.total).toBe(1);
@@ -244,7 +246,7 @@ describe("validateImplementation", () => {
     expect(result.overallStatus).toBe("not-started");
   });
 
-  it("issueCheckは常に空（spec.implementationは使用しない）", async () => {
+  it("tasks.yamlが空の場合issueCheckは空", async () => {
     vi.mocked(specRepo.findByIdOrThrow).mockResolvedValue({
       id: "spec-000003",
       requirementId: "req-000003",
@@ -260,7 +262,9 @@ describe("validateImplementation", () => {
     vi.mocked(specRepo.loadFile).mockResolvedValue(
       `### 3.1 Service (\`packages/cli/src/services/foo.ts\`)`,
     );
-    vi.mocked(fs.exists).mockResolvedValue(true);
+    vi.mocked(fs.exists)
+      .mockResolvedValueOnce(false)  // tasks.yaml does not exist
+      .mockResolvedValue(true);      // all component/test files exist
 
     const result = await validateImplementation("/project", "spec-000003");
 

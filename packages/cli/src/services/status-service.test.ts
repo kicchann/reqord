@@ -1,11 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import type { Requirement, Specification } from "@reqord/shared";
+import type { Requirement, Specification, TaskEntry } from "@reqord/shared";
 import {
   buildStatusSummary,
   buildIssueSummary,
   detectWarnings,
   renderProgressBar,
   getSpecificationStatus,
+  getProjectStatus,
+  getRequirementStatus,
 } from "./status-service.js";
 
 vi.mock("../repositories/requirement.js", () => ({
@@ -18,15 +20,21 @@ vi.mock("../repositories/specification.js", () => ({
   findById: vi.fn(),
   findByIdOrThrow: vi.fn(),
 }));
+vi.mock("../repositories/file-system.js", () => ({
+  joinPath: vi.fn((...args: string[]) => args.join("/")),
+  exists: vi.fn(),
+  readYAML: vi.fn(),
+}));
 
 import * as reqRepo from "../repositories/requirement.js";
 import * as specRepo from "../repositories/specification.js";
+import * as fs from "../repositories/file-system.js";
 
 function makeRequirement(overrides: Partial<Requirement> = {}): Requirement {
   return {
     id: "req-000001",
     version: "1.0",
-    title: "テスト要件",
+    title: "test requirement",
     status: "draft",
     priority: "medium",
     createdAt: "2026-01-01T00:00:00Z",
@@ -64,12 +72,30 @@ function makeSpecification(
   };
 }
 
+function makeTaskEntry(overrides: Partial<TaskEntry> = {}): TaskEntry {
+  return {
+    number: 1,
+    title: "Task 1",
+    url: "https://example.com/issues/1",
+    linkedTo: { specifications: ["spec-000001"] },
+    priority: "P2",
+    status: "open",
+    syncedAt: "2026-01-01T00:00:00Z",
+    ...overrides,
+  };
+}
+
+function mockReadYAML(tasks: TaskEntry[]): void {
+  vi.mocked(fs.exists).mockResolvedValue(true);
+  vi.mocked(fs.readYAML).mockResolvedValue({ title: "Tasks", tasks });
+}
+
 beforeEach(() => {
   vi.clearAllMocks();
 });
 
 describe("buildStatusSummary", () => {
-  it("空配列の場合 total=0, implementedPercentage=0", () => {
+  it("empty array returns total=0", () => {
     const result = buildStatusSummary([]);
     expect(result).toEqual({
       total: 0,
@@ -79,7 +105,7 @@ describe("buildStatusSummary", () => {
     });
   });
 
-  it("全要件がdraftの場合 implementedPercentage=0, approvedPercentage=0", () => {
+  it("all draft: implementedPercentage=0, approvedPercentage=0", () => {
     const items = [{ status: "draft" }, { status: "draft" }, { status: "draft" }];
     const result = buildStatusSummary(items);
     expect(result.total).toBe(3);
@@ -88,7 +114,7 @@ describe("buildStatusSummary", () => {
     expect(result.approvedPercentage).toBe(0);
   });
 
-  it("全要件がimplementedの場合 implementedPercentage=100, approvedPercentage=100", () => {
+  it("all implemented: implementedPercentage=100, approvedPercentage=100", () => {
     const items = [{ status: "implemented" }, { status: "implemented" }];
     const result = buildStatusSummary(items);
     expect(result.total).toBe(2);
@@ -96,14 +122,14 @@ describe("buildStatusSummary", () => {
     expect(result.approvedPercentage).toBe(100);
   });
 
-  it("全要件がapprovedの場合 approvedPercentage=100", () => {
+  it("all approved: approvedPercentage=100", () => {
     const items = [{ status: "approved" }, { status: "approved" }];
     const result = buildStatusSummary(items);
     expect(result.approvedPercentage).toBe(100);
     expect(result.implementedPercentage).toBe(0);
   });
 
-  it("混在ステータスの集計が正確", () => {
+  it("mixed statuses aggregate correctly", () => {
     const items = [
       { status: "draft" },
       { status: "approved" },
@@ -125,9 +151,8 @@ describe("buildStatusSummary", () => {
 });
 
 describe("buildIssueSummary", () => {
-  it("implementationが無いSpecificationはスキップ", () => {
-    const specs = [makeSpecification()];
-    const result = buildIssueSummary(specs);
+  it("empty array returns total=0", () => {
+    const result = buildIssueSummary([]);
     expect(result).toEqual({
       total: 0,
       closed: 0,
@@ -136,59 +161,59 @@ describe("buildIssueSummary", () => {
     });
   });
 
-  it("spec.implementationは使用しないため常に0を返す", () => {
-    const specs = [makeSpecification()];
-    const result = buildIssueSummary(specs);
-    expect(result).toEqual({
-      total: 0,
-      closed: 0,
-      open: 0,
-      closedPercentage: 0,
-    });
+  it("task aggregation is accurate", () => {
+    const tasks = [
+      makeTaskEntry({ number: 1, status: "closed" }),
+      makeTaskEntry({ number: 2, status: "open" }),
+      makeTaskEntry({ number: 3, status: "closed" }),
+    ];
+    const result = buildIssueSummary(tasks);
+    expect(result.total).toBe(3);
+    expect(result.closed).toBe(2);
+    expect(result.open).toBe(1);
+    expect(result.closedPercentage).toBe(67);
+  });
+
+  it("all closed: closedPercentage=100", () => {
+    const tasks = [
+      makeTaskEntry({ number: 1, status: "closed" }),
+      makeTaskEntry({ number: 2, status: "closed" }),
+    ];
+    const result = buildIssueSummary(tasks);
+    expect(result.total).toBe(2);
+    expect(result.closed).toBe(2);
+    expect(result.open).toBe(0);
+    expect(result.closedPercentage).toBe(100);
   });
 });
 
 describe("detectWarnings", () => {
-  it("Specificationが無い非draft要件に警告", () => {
+  it("non-draft requirement with no specification gets warning", () => {
     const reqs = [makeRequirement({ id: "req-000001", status: "approved" })];
     const specs: Specification[] = [];
     const warnings = detectWarnings(reqs, specs);
     expect(warnings).toContainEqual(
-      expect.objectContaining({
-        id: "req-000001",
-        type: "no-specification",
-        severity: "warning",
-      }),
+      expect.objectContaining({ id: "req-000001", type: "no-specification", severity: "warning" }),
     );
   });
 
-  it("draft要件にはno-specification警告を出さない", () => {
+  it("draft requirement does not get no-specification warning", () => {
     const reqs = [makeRequirement({ id: "req-000001", status: "draft" })];
     const specs: Specification[] = [];
     const warnings = detectWarnings(reqs, specs);
-    expect(
-      warnings.find(
-        (w) => w.id === "req-000001" && w.type === "no-specification",
-      ),
-    ).toBeUndefined();
+    expect(warnings.find((w) => w.id === "req-000001" && w.type === "no-specification")).toBeUndefined();
   });
 
-  it("deprecated要件は警告対象外", () => {
+  it("deprecated requirement is excluded from warnings", () => {
     const reqs = [makeRequirement({ id: "req-000001", status: "deprecated" })];
     const specs: Specification[] = [];
     const warnings = detectWarnings(reqs, specs);
-    expect(
-      warnings.find((w) => w.id === "req-000001"),
-    ).toBeUndefined();
+    expect(warnings.find((w) => w.id === "req-000001")).toBeUndefined();
   });
 
-  it("未承認の依存先がある要件に警告", () => {
+  it("requirement with unapproved dependency gets warning", () => {
     const reqs = [
-      makeRequirement({
-        id: "req-000001",
-        status: "approved",
-        dependencies: { blockedBy: ["req-000002"], blocks: [], relatedTo: [] },
-      }),
+      makeRequirement({ id: "req-000001", status: "approved", dependencies: { blockedBy: ["req-000002"], blocks: [], relatedTo: [] } }),
       makeRequirement({ id: "req-000002", status: "draft" }),
     ];
     const specs = [
@@ -197,21 +222,13 @@ describe("detectWarnings", () => {
     ];
     const warnings = detectWarnings(reqs, specs);
     expect(warnings).toContainEqual(
-      expect.objectContaining({
-        id: "req-000001",
-        type: "blocked-dependency",
-        severity: "warning",
-      }),
+      expect.objectContaining({ id: "req-000001", type: "blocked-dependency", severity: "warning" }),
     );
   });
 
-  it("承認済み依存先には警告なし", () => {
+  it("approved dependency does not generate warning", () => {
     const reqs = [
-      makeRequirement({
-        id: "req-000001",
-        status: "approved",
-        dependencies: { blockedBy: ["req-000002"], blocks: [], relatedTo: [] },
-      }),
+      makeRequirement({ id: "req-000001", status: "approved", dependencies: { blockedBy: ["req-000002"], blocks: [], relatedTo: [] } }),
       makeRequirement({ id: "req-000002", status: "approved" }),
     ];
     const specs = [
@@ -219,277 +236,261 @@ describe("detectWarnings", () => {
       makeSpecification({ id: "spec-000002", requirementId: "req-000002" }),
     ];
     const warnings = detectWarnings(reqs, specs);
-    expect(
-      warnings.find(
-        (w) => w.id === "req-000001" && w.type === "blocked-dependency",
-      ),
-    ).toBeUndefined();
+    expect(warnings.find((w) => w.id === "req-000001" && w.type === "blocked-dependency")).toBeUndefined();
   });
 
-  it("Req/Spec間のステータス整合性チェック: Specがimplementedだが要件がdraft", () => {
+  it("status inconsistency: spec implemented but req is draft", () => {
     const reqs = [makeRequirement({ id: "req-000001", status: "draft" })];
-    const specs = [
-      makeSpecification({
-        id: "spec-000001",
-        requirementId: "req-000001",
-        status: "implemented",
-      }),
-    ];
+    const specs = [makeSpecification({ id: "spec-000001", requirementId: "req-000001", status: "implemented" })];
     const warnings = detectWarnings(reqs, specs);
     expect(warnings).toContainEqual(
-      expect.objectContaining({
-        id: "spec-000001",
-        type: "status-inconsistency",
-        severity: "warning",
-      }),
+      expect.objectContaining({ id: "spec-000001", type: "status-inconsistency", severity: "warning" }),
     );
   });
 
-  it("設計検証エラーがあるSpecificationに警告", () => {
+  it("design validation error generates warning", () => {
     const reqs = [makeRequirement({ id: "req-000001", status: "approved" })];
     const specs = [
       makeSpecification({
-        id: "spec-000001",
-        requirementId: "req-000001",
-        designValidation: {
-          passed: 3,
-          warnings: 1,
-          errors: 2,
-          rules: [],
-          validatedAt: "2026-01-01T00:00:00Z",
-        },
+        id: "spec-000001", requirementId: "req-000001",
+        designValidation: { passed: 3, warnings: 1, errors: 2, rules: [], validatedAt: "2026-01-01T00:00:00Z" },
       }),
     ];
     const warnings = detectWarnings(reqs, specs);
     expect(warnings).toContainEqual(
-      expect.objectContaining({
-        id: "spec-000001",
-        type: "validation-failed",
-        severity: "warning",
-      }),
+      expect.objectContaining({ id: "spec-000001", type: "validation-failed", severity: "warning" }),
     );
   });
 
-  it("checkConsistency統合: 全SpecがimplementedだがReqがapproved", () => {
+  it("checkConsistency: all specs implemented but req is approved", () => {
     const reqs = [makeRequirement({ id: "req-000001", status: "approved" })];
-    const specs = [
-      makeSpecification({
-        id: "spec-000001",
-        requirementId: "req-000001",
-        status: "implemented",
-      }),
-    ];
+    const specs = [makeSpecification({ id: "spec-000001", requirementId: "req-000001", status: "implemented" })];
     const warnings = detectWarnings(reqs, specs);
     expect(warnings).toContainEqual(
-      expect.objectContaining({
-        id: "req-000001",
-        type: "all-specs-implemented",
-        severity: "warning",
-      }),
+      expect.objectContaining({ id: "req-000001", type: "all-specs-implemented", severity: "warning" }),
     );
   });
 
-  it("checkConsistency統合: Reqがdeprecatedだが関連Specがactive → 警告", () => {
+  it("checkConsistency: req is deprecated but related spec is active", () => {
     const reqs = [makeRequirement({ id: "req-000001", status: "deprecated" })];
-    const specs = [
-      makeSpecification({
-        id: "spec-000001",
-        requirementId: "req-000001",
-        status: "draft",
-      }),
-    ];
+    const specs = [makeSpecification({ id: "spec-000001", requirementId: "req-000001", status: "draft" })];
     const warnings = detectWarnings(reqs, specs);
-    // checkConsistency runs before deprecated skip to detect this case
     expect(warnings).toContainEqual(
-      expect.objectContaining({
-        id: "req-000001",
-        type: "deprecated-with-active-specs",
-      }),
+      expect.objectContaining({ id: "req-000001", type: "deprecated-with-active-specs" }),
     );
   });
 
-  it("feedback-reviewフラグがあるRequirementにinfo表示", () => {
+  it("feedback-review flag on requirement generates info", () => {
     const reqs = [
       makeRequirement({
-        id: "req-000001",
-        status: "approved",
-        flags: [
-          {
-            type: "feedback-review" as const,
-            reason: "セキュリティ関連の指摘",
-            createdAt: "2026-01-01T00:00:00Z",
-            relatedIssues: [42, 43],
-            severity: "high" as const,
-          },
-        ],
+        id: "req-000001", status: "approved",
+        flags: [{ type: "feedback-review" as const, reason: "security concern", createdAt: "2026-01-01T00:00:00Z", relatedIssues: [42, 43], severity: "high" as const }],
       }),
     ];
     const specs = [makeSpecification({ requirementId: "req-000001" })];
     const warnings = detectWarnings(reqs, specs);
-    const feedbackWarning = warnings.find(
-      (w) => w.id === "req-000001" && w.type === "feedback-review",
-    );
-    expect(feedbackWarning).toBeDefined();
-    expect(feedbackWarning?.severity).toBe("info");
-    expect(feedbackWarning?.message).toContain("#42");
-    expect(feedbackWarning?.message).toContain("#43");
+    const fw = warnings.find((w) => w.id === "req-000001" && w.type === "feedback-review");
+    expect(fw).toBeDefined();
+    expect(fw?.severity).toBe("info");
+    expect(fw?.message).toContain("#42");
+    expect(fw?.message).toContain("#43");
   });
 
-  it("feedback-reviewフラグがないRequirementには情報表示なし", () => {
+  it("no feedback-review flag means no info", () => {
     const reqs = [makeRequirement({ id: "req-000001", status: "approved" })];
     const specs = [makeSpecification({ requirementId: "req-000001" })];
     const warnings = detectWarnings(reqs, specs);
-    expect(
-      warnings.find(
-        (w) => w.id === "req-000001" && w.type === "feedback-review",
-      ),
-    ).toBeUndefined();
+    expect(warnings.find((w) => w.id === "req-000001" && w.type === "feedback-review")).toBeUndefined();
   });
 
-  it("feedback-reviewフラグがあるSpecificationにinfo表示", () => {
+  it("feedback-review flag on specification generates info", () => {
     const reqs = [makeRequirement({ id: "req-000001", status: "approved" })];
     const specs = [
       makeSpecification({
-        id: "spec-000001",
-        requirementId: "req-000001",
-        flags: [
-          {
-            type: "feedback-review" as const,
-            reason: "パフォーマンス改善提案",
-            createdAt: "2026-01-01T00:00:00Z",
-            relatedIssues: [50],
-            severity: "medium" as const,
-          },
-        ],
+        id: "spec-000001", requirementId: "req-000001",
+        flags: [{ type: "feedback-review" as const, reason: "performance", createdAt: "2026-01-01T00:00:00Z", relatedIssues: [50], severity: "medium" as const }],
       }),
     ];
     const warnings = detectWarnings(reqs, specs);
-    const feedbackWarning = warnings.find(
-      (w) => w.id === "spec-000001" && w.type === "feedback-review",
-    );
-    expect(feedbackWarning).toBeDefined();
-    expect(feedbackWarning?.severity).toBe("info");
+    const fw = warnings.find((w) => w.id === "spec-000001" && w.type === "feedback-review");
+    expect(fw).toBeDefined();
+    expect(fw?.severity).toBe("info");
   });
 
-  it("Spec 0件でcheckConsistency整合性警告なし", () => {
+  it("zero specs: no consistency warnings", () => {
     const reqs = [makeRequirement({ id: "req-000001", status: "approved" })];
     const specs: Specification[] = [];
     const warnings = detectWarnings(reqs, specs);
-    expect(
-      warnings.find(
-        (w) => w.type === "all-specs-implemented" || w.type === "deprecated-with-active-specs",
-      ),
-    ).toBeUndefined();
+    expect(warnings.find((w) => w.type === "all-specs-implemented" || w.type === "deprecated-with-active-specs")).toBeUndefined();
   });
 });
 
 describe("renderProgressBar", () => {
-  it("0%で全て空", () => {
-    const bar = renderProgressBar(0);
-    expect(bar).toBe("░".repeat(20));
+  it("0% renders all empty", () => {
+    expect(renderProgressBar(0)).toBe("\u2591".repeat(20));
   });
-
-  it("100%で全て埋まる", () => {
-    const bar = renderProgressBar(100);
-    expect(bar).toBe("█".repeat(20));
+  it("100% renders all filled", () => {
+    expect(renderProgressBar(100)).toBe("\u2588".repeat(20));
   });
-
-  it("50%で半分埋まる", () => {
-    const bar = renderProgressBar(50);
-    expect(bar).toBe("█".repeat(10) + "░".repeat(10));
+  it("50% renders half filled", () => {
+    expect(renderProgressBar(50)).toBe("\u2588".repeat(10) + "\u2591".repeat(10));
   });
-
-  it("カスタム幅", () => {
+  it("custom width", () => {
     const bar = renderProgressBar(50, 10);
-    expect(bar).toBe("█".repeat(5) + "░".repeat(5));
+    expect(bar).toBe("\u2588".repeat(5) + "\u2591".repeat(5));
     expect(bar.length).toBe(10);
   });
 });
 
-describe("getSpecificationStatus", () => {
-  const mockFindByIdOrThrow = vi.mocked(specRepo.findByIdOrThrow);
-  const mockReqFindById = vi.mocked(reqRepo.findById);
-
-  it("designValidationがある場合はサマリーを返す", async () => {
-    mockFindByIdOrThrow.mockResolvedValue(
-      makeSpecification({
-        id: "spec-000001",
-        requirementId: "req-000001",
-        status: "approved",
-        designValidation: {
-          passed: 5,
-          warnings: 2,
-          errors: 1,
-          rules: [],
-          validatedAt: "2026-01-01T00:00:00Z",
-        },
-      }),
-    );
-    mockReqFindById.mockResolvedValue(
-      makeRequirement({ id: "req-000001", status: "approved" }),
-    );
-
-    const result = await getSpecificationStatus("/tmp", "spec-000001");
-
-    expect(result.designValidation).toEqual({
-      passed: 5,
-      warnings: 2,
-      errors: 1,
-    });
+describe("getProjectStatus", () => {
+  it("no tasks.yaml: issues.total=0", async () => {
+    vi.mocked(reqRepo.findAll).mockResolvedValue([]);
+    vi.mocked(specRepo.findAll).mockResolvedValue([]);
+    vi.mocked(fs.exists).mockResolvedValue(false);
+    const result = await getProjectStatus("/cwd");
+    expect(result.issues).toEqual({ total: 0, closed: 0, open: 0, closedPercentage: 0 });
   });
 
-  it("designValidationがない場合はundefined", async () => {
-    mockFindByIdOrThrow.mockResolvedValue(
-      makeSpecification({ id: "spec-000001", requirementId: "req-000001" }),
-    );
-    mockReqFindById.mockResolvedValue(
+  it("tasks.yaml with tasks: aggregates correctly", async () => {
+    vi.mocked(reqRepo.findAll).mockResolvedValue([]);
+    vi.mocked(specRepo.findAll).mockResolvedValue([]);
+    mockReadYAML([
+      makeTaskEntry({ number: 1, status: "closed" }),
+      makeTaskEntry({ number: 2, status: "open" }),
+      makeTaskEntry({ number: 3, status: "closed" }),
+    ]);
+    const result = await getProjectStatus("/cwd");
+    expect(result.issues.total).toBe(3);
+    expect(result.issues.closed).toBe(2);
+    expect(result.issues.open).toBe(1);
+    expect(result.issues.closedPercentage).toBe(67);
+  });
+
+  it("requirements and specifications summaries are accurate", async () => {
+    vi.mocked(reqRepo.findAll).mockResolvedValue([
       makeRequirement({ id: "req-000001", status: "approved" }),
+      makeRequirement({ id: "req-000002", status: "draft" }),
+    ]);
+    vi.mocked(specRepo.findAll).mockResolvedValue([
+      makeSpecification({ id: "spec-000001", requirementId: "req-000001", status: "implemented" }),
+    ]);
+    vi.mocked(fs.exists).mockResolvedValue(false);
+    const result = await getProjectStatus("/cwd");
+    expect(result.requirements.total).toBe(2);
+    expect(result.specifications.total).toBe(1);
+    expect(result.generatedAt).toBeDefined();
+  });
+});
+
+describe("getRequirementStatus", () => {
+  it("aggregates issue progress from tasks.yaml for related specs", async () => {
+    vi.mocked(reqRepo.findByIdOrThrow).mockResolvedValue(makeRequirement({ id: "req-000001", status: "approved" }));
+    vi.mocked(specRepo.findAll).mockResolvedValue([makeSpecification({ id: "spec-000001", requirementId: "req-000001" })]);
+    vi.mocked(reqRepo.findAll).mockResolvedValue([makeRequirement({ id: "req-000001", status: "approved" })]);
+    mockReadYAML([
+      makeTaskEntry({ number: 1, status: "closed", linkedTo: { specifications: ["spec-000001"] } }),
+      makeTaskEntry({ number: 2, status: "open", linkedTo: { specifications: ["spec-000001"] } }),
+    ]);
+    const result = await getRequirementStatus("/cwd", "req-000001");
+    expect(result.issueProgress.total).toBe(2);
+    expect(result.issueProgress.completed).toBe(1);
+  });
+
+  it("no tasks.yaml: issueProgress.total=0", async () => {
+    vi.mocked(reqRepo.findByIdOrThrow).mockResolvedValue(makeRequirement({ id: "req-000001", status: "approved" }));
+    vi.mocked(specRepo.findAll).mockResolvedValue([makeSpecification({ id: "spec-000001", requirementId: "req-000001" })]);
+    vi.mocked(reqRepo.findAll).mockResolvedValue([makeRequirement({ id: "req-000001", status: "approved" })]);
+    vi.mocked(fs.exists).mockResolvedValue(false);
+    const result = await getRequirementStatus("/cwd", "req-000001");
+    expect(result.issueProgress.total).toBe(0);
+    expect(result.issueProgress.completed).toBe(0);
+  });
+
+  it("tasks linked to other specs are not counted", async () => {
+    vi.mocked(reqRepo.findByIdOrThrow).mockResolvedValue(makeRequirement({ id: "req-000001", status: "approved" }));
+    vi.mocked(specRepo.findAll).mockResolvedValue([makeSpecification({ id: "spec-000001", requirementId: "req-000001" })]);
+    vi.mocked(reqRepo.findAll).mockResolvedValue([makeRequirement({ id: "req-000001", status: "approved" })]);
+    mockReadYAML([
+      makeTaskEntry({ number: 1, status: "closed", linkedTo: { specifications: ["spec-000001"] } }),
+      makeTaskEntry({ number: 2, status: "open", linkedTo: { specifications: ["spec-000099"] } }),
+    ]);
+    const result = await getRequirementStatus("/cwd", "req-000001");
+    expect(result.issueProgress.total).toBe(1);
+    expect(result.issueProgress.completed).toBe(1);
+  });
+});
+
+describe("getSpecificationStatus", () => {
+  it("returns design validation summary when present", async () => {
+    vi.mocked(specRepo.findByIdOrThrow).mockResolvedValue(
+      makeSpecification({ id: "spec-000001", requirementId: "req-000001", status: "approved",
+        designValidation: { passed: 5, warnings: 2, errors: 1, rules: [], validatedAt: "2026-01-01T00:00:00Z" } }),
     );
-
+    vi.mocked(reqRepo.findById).mockResolvedValue(makeRequirement({ id: "req-000001", status: "approved" }));
+    vi.mocked(fs.exists).mockResolvedValue(false);
     const result = await getSpecificationStatus("/tmp", "spec-000001");
+    expect(result.designValidation).toEqual({ passed: 5, warnings: 2, errors: 1 });
+  });
 
+  it("returns undefined when no design validation", async () => {
+    vi.mocked(specRepo.findByIdOrThrow).mockResolvedValue(makeSpecification({ id: "spec-000001", requirementId: "req-000001" }));
+    vi.mocked(reqRepo.findById).mockResolvedValue(makeRequirement({ id: "req-000001", status: "approved" }));
+    vi.mocked(fs.exists).mockResolvedValue(false);
+    const result = await getSpecificationStatus("/tmp", "spec-000001");
     expect(result.designValidation).toBeUndefined();
   });
 
-  it("implementation.issuesが0件 → coverageStatus: not-covered", async () => {
-    mockFindByIdOrThrow.mockResolvedValue(
-      makeSpecification({ id: "spec-000001", requirementId: "req-000001" }),
-    );
-    mockReqFindById.mockResolvedValue(
-      makeRequirement({ id: "req-000001", status: "approved" }),
-    );
-
+  it("no tasks: coverageStatus is not-covered", async () => {
+    vi.mocked(specRepo.findByIdOrThrow).mockResolvedValue(makeSpecification({ id: "spec-000001", requirementId: "req-000001" }));
+    vi.mocked(reqRepo.findById).mockResolvedValue(makeRequirement({ id: "req-000001", status: "approved" }));
+    vi.mocked(fs.exists).mockResolvedValue(false);
     const result = await getSpecificationStatus("/tmp", "spec-000001");
-
     expect(result.coverageStatus).toBe("not-covered");
     expect(result.issueProgress).toEqual({ total: 0, completed: 0 });
   });
 
-  it("spec.implementationは使用しないため常にnot-covered", async () => {
-    mockFindByIdOrThrow.mockResolvedValue(
-      makeSpecification({
-        id: "spec-000001",
-        requirementId: "req-000001",
-      }),
-    );
-    mockReqFindById.mockResolvedValue(
-      makeRequirement({ id: "req-000001", status: "approved" }),
-    );
-
+  it("all tasks closed: coverageStatus is covered", async () => {
+    vi.mocked(specRepo.findByIdOrThrow).mockResolvedValue(makeSpecification({ id: "spec-000001", requirementId: "req-000001" }));
+    vi.mocked(reqRepo.findById).mockResolvedValue(makeRequirement({ id: "req-000001", status: "approved" }));
+    mockReadYAML([
+      makeTaskEntry({ number: 1, status: "closed", linkedTo: { specifications: ["spec-000001"] } }),
+      makeTaskEntry({ number: 2, status: "closed", linkedTo: { specifications: ["spec-000001"] } }),
+    ]);
     const result = await getSpecificationStatus("/tmp", "spec-000001");
-
-    expect(result.coverageStatus).toBe("not-covered");
-    expect(result.issueProgress).toEqual({ total: 0, completed: 0 });
+    expect(result.coverageStatus).toBe("covered");
+    expect(result.issueProgress).toEqual({ total: 2, completed: 2 });
   });
 
-  it("親Requirementが存在しない場合はnull", async () => {
-    mockFindByIdOrThrow.mockResolvedValue(
-      makeSpecification({ id: "spec-000001", requirementId: "req-999999" }),
-    );
-    mockReqFindById.mockResolvedValue(null);
-
+  it("some tasks open: coverageStatus is partial", async () => {
+    vi.mocked(specRepo.findByIdOrThrow).mockResolvedValue(makeSpecification({ id: "spec-000001", requirementId: "req-000001" }));
+    vi.mocked(reqRepo.findById).mockResolvedValue(makeRequirement({ id: "req-000001", status: "approved" }));
+    mockReadYAML([
+      makeTaskEntry({ number: 1, status: "closed", linkedTo: { specifications: ["spec-000001"] } }),
+      makeTaskEntry({ number: 2, status: "open", linkedTo: { specifications: ["spec-000001"] } }),
+    ]);
     const result = await getSpecificationStatus("/tmp", "spec-000001");
+    expect(result.coverageStatus).toBe("partial");
+    expect(result.issueProgress).toEqual({ total: 2, completed: 1 });
+  });
 
+  it("parent requirement not found returns null", async () => {
+    vi.mocked(specRepo.findByIdOrThrow).mockResolvedValue(makeSpecification({ id: "spec-000001", requirementId: "req-999999" }));
+    vi.mocked(reqRepo.findById).mockResolvedValue(null);
+    vi.mocked(fs.exists).mockResolvedValue(false);
+    const result = await getSpecificationStatus("/tmp", "spec-000001");
     expect(result.requirement).toBeNull();
+  });
+
+  it("tasks linked to other specs are not counted", async () => {
+    vi.mocked(specRepo.findByIdOrThrow).mockResolvedValue(makeSpecification({ id: "spec-000001", requirementId: "req-000001" }));
+    vi.mocked(reqRepo.findById).mockResolvedValue(makeRequirement({ id: "req-000001", status: "approved" }));
+    mockReadYAML([
+      makeTaskEntry({ number: 1, status: "closed", linkedTo: { specifications: ["spec-000001"] } }),
+      makeTaskEntry({ number: 2, status: "open", linkedTo: { specifications: ["spec-000099"] } }),
+    ]);
+    const result = await getSpecificationStatus("/tmp", "spec-000001");
+    expect(result.issueProgress.total).toBe(1);
+    expect(result.issueProgress.completed).toBe(1);
+    expect(result.coverageStatus).toBe("covered");
   });
 });

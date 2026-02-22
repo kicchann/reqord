@@ -1,3 +1,4 @@
+import { TasksIndexSchema, REQORD_DIR, ISSUES_DIR } from "@reqord/shared";
 import * as specRepo from "../repositories/specification.js";
 import * as fs from "../repositories/file-system.js";
 
@@ -7,7 +8,7 @@ export interface IssueCheckResult {
   issues: Array<{
     number: number;
     title: string;
-    state: "open" | "in_progress" | "closed";
+    state: "open" | "closed";
     priority?: string;
   }>;
 }
@@ -45,6 +46,35 @@ export interface ImplValidation {
 export interface DesignPaths {
   components: Array<{ path: string; description: string }>;
   tests: Array<{ path: string; type: "unit" | "integration" }>;
+}
+
+async function loadTasksForSpec(
+  cwd: string,
+  specId: string,
+): Promise<
+  Array<{
+    number: number;
+    title: string;
+    url: string;
+    status: "open" | "closed";
+    priority?: string;
+  }>
+> {
+  const tasksPath = fs.joinPath(cwd, REQORD_DIR, ISSUES_DIR, "tasks.yaml");
+  if (!(await fs.exists(tasksPath))) {
+    return [];
+  }
+  const raw = await fs.readYAML<unknown>(tasksPath);
+  const parsed = TasksIndexSchema.parse(raw);
+  return parsed.tasks
+    .filter((t) => t.linkedTo.specifications.includes(specId))
+    .map((t) => ({
+      number: t.number,
+      title: t.title,
+      url: t.url,
+      status: t.status,
+      priority: t.priority,
+    }));
 }
 
 export function parseDesignPaths(designContent: string): DesignPaths {
@@ -137,8 +167,19 @@ export async function validateImplementation(
   const spec = await specRepo.findByIdOrThrow(cwd, specId);
   const design = await specRepo.loadFile(cwd, specId, "design.md");
 
-  // Issue check (spec.implementation is no longer used; issues come from tasks.yaml)
+  // Issue check from tasks.yaml
   const issueCheck: IssueCheckResult = { total: 0, completed: 0, issues: [] };
+  const tasks = await loadTasksForSpec(cwd, specId);
+  for (const task of tasks) {
+    issueCheck.issues.push({
+      number: task.number,
+      title: task.title,
+      state: task.status,
+      priority: task.priority,
+    });
+    issueCheck.total++;
+    if (task.status === "closed") issueCheck.completed++;
+  }
 
   // If design.md is missing, we cannot validate — treat as not-started
   if (!design) {
@@ -231,7 +272,16 @@ export async function checkImplementConsistency(
       });
     }
 
-    // spec.implementation is no longer used; issue status comes from tasks.yaml
+    const tasks = await loadTasksForSpec(cwd, spec.id);
+    for (const task of tasks) {
+      if (task.status !== "closed") {
+        warnings.push({
+          type: "issue-not-closed",
+          message: `#${task.number} (${task.title}) is ${task.status}`,
+          details: { id: String(task.number), currentStatus: task.status },
+        });
+      }
+    }
   }
 
   return { warnings };

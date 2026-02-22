@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { Requirement, Specification } from "@reqord/shared";
-import { REQORD_DIR, ISSUES_DIR } from "@reqord/shared";
+
 
 vi.mock("../repositories/requirement.js", () => ({
   findAll: vi.fn(),
