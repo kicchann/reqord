@@ -1,6 +1,5 @@
 import { Command } from "commander";
 import chalk from "chalk";
-import path from "node:path";
 import * as specRepo from "../../repositories/specification.js";
 import * as fs from "../../repositories/file-system.js";
 import { TasksIndexSchema, REQORD_DIR, ISSUES_DIR } from "@reqord/shared";
@@ -48,7 +47,7 @@ async function loadTasksForSpec(
   cwd: string,
   specId: string,
 ): Promise<TaskEntry[]> {
-  const tasksPath = path.join(cwd, REQORD_DIR, ISSUES_DIR, "tasks.yaml");
+  const tasksPath = fs.joinPath(cwd, REQORD_DIR, ISSUES_DIR, "tasks.yaml");
   const raw = await fs.readYAML(tasksPath).catch(() => null);
   if (!raw) return [];
   const parsed = TasksIndexSchema.safeParse(raw);
