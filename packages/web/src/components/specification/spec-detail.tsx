@@ -93,7 +93,7 @@ export function SpecDetail({
         design={design}
         research={research}
         successCriteria={requirement?.successCriteria ?? null}
-        issues={specification.implementation?.issues ?? null}
+        issues={null}
         versionHistory={specification.versionHistory}
       />
     </div>

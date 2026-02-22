@@ -1,8 +1,6 @@
-import type { Implementation, ImplementationIssue } from "@reqord/shared";
 import * as specRepo from "../repositories/specification.js";
 import * as githubClient from "./github-client.js";
 import { parseSpecTag, type SpecTagMetadata } from "../utils/spec-tag-parser.js";
-import { calculateProgress } from "../utils/progress-calculator.js";
 
 export interface FetchOptions {
   specId?: string;
@@ -43,7 +41,6 @@ export async function fetchIssues(
 ): Promise<FetchResult> {
   // 1. Fetch all issues from GitHub
   const allIssues = await githubClient.listAllIssues("all", 500);
-  const repoUrl = await githubClient.getRepoUrl();
 
   // 2. Parse spec tags from issue bodies
   const parsedIssues: ParsedIssue[] = [];
@@ -101,46 +98,17 @@ export async function fetchIssues(
       continue;
     }
 
-    const previousIssueCount = spec.implementation?.issues.length ?? 0;
-
-    // Build Implementation object
-    const implIssues: ImplementationIssue[] = issues.map((issue) => ({
-      number: issue.number,
-      title: issue.title,
-      url: `${repoUrl}/issues/${issue.number}`,
-      priority: issue.metadata.priority ?? "P2",
-      status: issue.state as "open" | "closed",
-    }));
-
     const totalEstimatedHours = issues.reduce(
       (sum, issue) => sum + (issue.metadata.estimatedHours ?? 0),
       0,
     );
 
-    const progress = calculateProgress(implIssues);
-
-    const implementation: Implementation = {
-      issues: implIssues,
-      totalEstimatedHours,
-      createdAt: spec.implementation?.createdAt ?? new Date().toISOString(),
-      progress: {
-        ...progress,
-        lastSyncedAt: new Date().toISOString(),
-      },
-    };
-
-    if (!options?.dryRun) {
-      spec.implementation = implementation;
-      spec.updatedAt = new Date().toISOString();
-      await specRepo.save(cwd, spec);
-    }
-
     specsUpdated.push({
       specId,
       issueCount: issues.length,
       totalEstimatedHours,
-      previousIssueCount,
-      updated: !options?.dryRun,
+      previousIssueCount: 0,
+      updated: false,
     });
   }
 
