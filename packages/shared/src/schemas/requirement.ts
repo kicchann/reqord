@@ -5,7 +5,6 @@ import {
   ComplexitySchema,
   VersionHistoryEntrySchema,
 } from "./common.js";
-import { FeedbackSeveritySchema } from "./feedback.js";
 
 const UserStorySchema = z.object({
   as: z.string(),
@@ -33,33 +32,6 @@ const DependenciesSchema = z.object({
   relatedTo: z.array(z.string()).default([]),
 });
 
-const FeedbackFlagSchema = z.object({
-  type: z.literal("feedback-review"),
-  reason: z.string(),
-  createdAt: z.string(),
-  relatedIssues: z.array(z.number()),
-  severity: FeedbackSeveritySchema,
-});
-
-const SecurityReviewFlagSchema = z.object({
-  type: z.literal("security-review"),
-  reason: z.string(),
-  createdAt: z.string(),
-});
-
-const BreakingChangeFlagSchema = z.object({
-  type: z.literal("breaking-change"),
-  reason: z.string(),
-  createdAt: z.string(),
-  affectedVersions: z.array(z.string()).optional(),
-});
-
-const FlagSchema = z.discriminatedUnion("type", [
-  FeedbackFlagSchema,
-  SecurityReviewFlagSchema,
-  BreakingChangeFlagSchema,
-]);
-
 const RequirementOriginSchema = z.object({
   feedbackIssue: z.number(),
 });
@@ -86,13 +58,7 @@ export const RequirementSchema = z.object({
   }),
   estimatedComplexity: ComplexitySchema.optional(),
   estimatedHours: z.number().positive().optional(),
-  flags: z.array(FlagSchema).default([]),
   origin: RequirementOriginSchema.optional(),
 });
 
-export { FeedbackFlagSchema, SecurityReviewFlagSchema, BreakingChangeFlagSchema, FlagSchema };
-export type FeedbackFlag = z.infer<typeof FeedbackFlagSchema>;
-export type SecurityReviewFlag = z.infer<typeof SecurityReviewFlagSchema>;
-export type BreakingChangeFlag = z.infer<typeof BreakingChangeFlagSchema>;
-export type Flag = z.infer<typeof FlagSchema>;
 export type Requirement = z.infer<typeof RequirementSchema>;

@@ -43,7 +43,6 @@ function makeSpecification(overrides: Partial<Specification> = {}): Specificatio
     updatedAt: "2025-01-01T00:00:00.000Z",
     versionHistory: [],
     files: { design: "specifications/spec-000001/design.md", supplementary: [] },
-    flags: [],
     ...overrides,
   };
 }

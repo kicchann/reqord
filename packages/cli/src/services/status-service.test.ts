@@ -25,10 +25,14 @@ vi.mock("../repositories/file-system.js", () => ({
   exists: vi.fn(),
   readYAML: vi.fn(),
 }));
+vi.mock("../repositories/feedback.js", () => ({
+  loadIndex: vi.fn(),
+}));
 
 import * as reqRepo from "../repositories/requirement.js";
 import * as specRepo from "../repositories/specification.js";
 import * as fs from "../repositories/file-system.js";
+import * as feedbackRepo from "../repositories/feedback.js";
 
 function makeRequirement(overrides: Partial<Requirement> = {}): Requirement {
   return {
@@ -47,7 +51,6 @@ function makeRequirement(overrides: Partial<Requirement> = {}): Requirement {
     successCriteria: [],
     format: { type: "free-form" },
     dependencies: { blockedBy: [], blocks: [], relatedTo: [] },
-    flags: [],
     ...overrides,
   };
 }
@@ -67,7 +70,6 @@ function makeSpecification(
       design: "specifications/spec-000001/design.md",
       supplementary: [],
     },
-    flags: [],
     ...overrides,
   };
 }
@@ -92,6 +94,7 @@ function mockReadYAML(tasks: TaskEntry[]): void {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  vi.mocked(feedbackRepo.loadIndex).mockResolvedValue({ feedbacks: [] });
 });
 
 describe("buildStatusSummary", () => {
@@ -188,30 +191,32 @@ describe("buildIssueSummary", () => {
 });
 
 describe("detectWarnings", () => {
-  it("non-draft requirement with no specification gets warning", () => {
+  const cwd = "/test";
+
+  it("non-draft requirement with no specification gets warning", async () => {
     const reqs = [makeRequirement({ id: "req-000001", status: "approved" })];
     const specs: Specification[] = [];
-    const warnings = detectWarnings(reqs, specs);
+    const warnings = await detectWarnings(cwd, reqs, specs);
     expect(warnings).toContainEqual(
       expect.objectContaining({ id: "req-000001", type: "no-specification", severity: "warning" }),
     );
   });
 
-  it("draft requirement does not get no-specification warning", () => {
+  it("draft requirement does not get no-specification warning", async () => {
     const reqs = [makeRequirement({ id: "req-000001", status: "draft" })];
     const specs: Specification[] = [];
-    const warnings = detectWarnings(reqs, specs);
+    const warnings = await detectWarnings(cwd, reqs, specs);
     expect(warnings.find((w) => w.id === "req-000001" && w.type === "no-specification")).toBeUndefined();
   });
 
-  it("deprecated requirement is excluded from warnings", () => {
+  it("deprecated requirement is excluded from warnings", async () => {
     const reqs = [makeRequirement({ id: "req-000001", status: "deprecated" })];
     const specs: Specification[] = [];
-    const warnings = detectWarnings(reqs, specs);
+    const warnings = await detectWarnings(cwd, reqs, specs);
     expect(warnings.find((w) => w.id === "req-000001")).toBeUndefined();
   });
 
-  it("requirement with unapproved dependency gets warning", () => {
+  it("requirement with unapproved dependency gets warning", async () => {
     const reqs = [
       makeRequirement({ id: "req-000001", status: "approved", dependencies: { blockedBy: ["req-000002"], blocks: [], relatedTo: [] } }),
       makeRequirement({ id: "req-000002", status: "draft" }),
@@ -220,13 +225,13 @@ describe("detectWarnings", () => {
       makeSpecification({ requirementId: "req-000001" }),
       makeSpecification({ id: "spec-000002", requirementId: "req-000002" }),
     ];
-    const warnings = detectWarnings(reqs, specs);
+    const warnings = await detectWarnings(cwd, reqs, specs);
     expect(warnings).toContainEqual(
       expect.objectContaining({ id: "req-000001", type: "blocked-dependency", severity: "warning" }),
     );
   });
 
-  it("approved dependency does not generate warning", () => {
+  it("approved dependency does not generate warning", async () => {
     const reqs = [
       makeRequirement({ id: "req-000001", status: "approved", dependencies: { blockedBy: ["req-000002"], blocks: [], relatedTo: [] } }),
       makeRequirement({ id: "req-000002", status: "approved" }),
@@ -235,20 +240,20 @@ describe("detectWarnings", () => {
       makeSpecification({ requirementId: "req-000001" }),
       makeSpecification({ id: "spec-000002", requirementId: "req-000002" }),
     ];
-    const warnings = detectWarnings(reqs, specs);
+    const warnings = await detectWarnings(cwd, reqs, specs);
     expect(warnings.find((w) => w.id === "req-000001" && w.type === "blocked-dependency")).toBeUndefined();
   });
 
-  it("status inconsistency: spec implemented but req is draft", () => {
+  it("status inconsistency: spec implemented but req is draft", async () => {
     const reqs = [makeRequirement({ id: "req-000001", status: "draft" })];
     const specs = [makeSpecification({ id: "spec-000001", requirementId: "req-000001", status: "implemented" })];
-    const warnings = detectWarnings(reqs, specs);
+    const warnings = await detectWarnings(cwd, reqs, specs);
     expect(warnings).toContainEqual(
       expect.objectContaining({ id: "spec-000001", type: "status-inconsistency", severity: "warning" }),
     );
   });
 
-  it("design validation error generates warning", () => {
+  it("design validation error generates warning", async () => {
     const reqs = [makeRequirement({ id: "req-000001", status: "approved" })];
     const specs = [
       makeSpecification({
@@ -256,71 +261,84 @@ describe("detectWarnings", () => {
         designValidation: { passed: 3, warnings: 1, errors: 2, rules: [], validatedAt: "2026-01-01T00:00:00Z" },
       }),
     ];
-    const warnings = detectWarnings(reqs, specs);
+    const warnings = await detectWarnings(cwd, reqs, specs);
     expect(warnings).toContainEqual(
       expect.objectContaining({ id: "spec-000001", type: "validation-failed", severity: "warning" }),
     );
   });
 
-  it("checkConsistency: all specs implemented but req is approved", () => {
+  it("checkConsistency: all specs implemented but req is approved", async () => {
     const reqs = [makeRequirement({ id: "req-000001", status: "approved" })];
     const specs = [makeSpecification({ id: "spec-000001", requirementId: "req-000001", status: "implemented" })];
-    const warnings = detectWarnings(reqs, specs);
+    const warnings = await detectWarnings(cwd, reqs, specs);
     expect(warnings).toContainEqual(
       expect.objectContaining({ id: "req-000001", type: "all-specs-implemented", severity: "warning" }),
     );
   });
 
-  it("checkConsistency: req is deprecated but related spec is active", () => {
+  it("checkConsistency: req is deprecated but related spec is active", async () => {
     const reqs = [makeRequirement({ id: "req-000001", status: "deprecated" })];
     const specs = [makeSpecification({ id: "spec-000001", requirementId: "req-000001", status: "draft" })];
-    const warnings = detectWarnings(reqs, specs);
+    const warnings = await detectWarnings(cwd, reqs, specs);
     expect(warnings).toContainEqual(
       expect.objectContaining({ id: "req-000001", type: "deprecated-with-active-specs" }),
     );
   });
 
-  it("feedback-review flag on requirement generates info", () => {
-    const reqs = [
-      makeRequirement({
-        id: "req-000001", status: "approved",
-        flags: [{ type: "feedback-review" as const, reason: "security concern", createdAt: "2026-01-01T00:00:00Z", relatedIssues: [42, 43], severity: "high" as const }],
-      }),
-    ];
+  it("unresolved feedback on requirement generates info warning", async () => {
+    vi.mocked(feedbackRepo.loadIndex).mockResolvedValue({
+      feedbacks: [
+        {
+          githubIssue: 42,
+          type: "bug",
+          severity: "high",
+          linkedTo: { requirements: ["req-000001"], createdRequirements: [], specifications: [], createdSpecifications: [] },
+          syncedAt: "2026-01-01T00:00:00Z",
+          status: "open",
+        },
+      ],
+    });
+    const reqs = [makeRequirement({ id: "req-000001", status: "approved" })];
     const specs = [makeSpecification({ requirementId: "req-000001" })];
-    const warnings = detectWarnings(reqs, specs);
+    const warnings = await detectWarnings(cwd, reqs, specs);
     const fw = warnings.find((w) => w.id === "req-000001" && w.type === "feedback-review");
     expect(fw).toBeDefined();
     expect(fw?.severity).toBe("info");
     expect(fw?.message).toContain("#42");
-    expect(fw?.message).toContain("#43");
   });
 
-  it("no feedback-review flag means no info", () => {
+  it("no unresolved feedbacks means no feedback-review warning", async () => {
     const reqs = [makeRequirement({ id: "req-000001", status: "approved" })];
     const specs = [makeSpecification({ requirementId: "req-000001" })];
-    const warnings = detectWarnings(reqs, specs);
+    const warnings = await detectWarnings(cwd, reqs, specs);
     expect(warnings.find((w) => w.id === "req-000001" && w.type === "feedback-review")).toBeUndefined();
   });
 
-  it("feedback-review flag on specification generates info", () => {
+  it("unresolved feedback on specification generates info warning", async () => {
+    vi.mocked(feedbackRepo.loadIndex).mockResolvedValue({
+      feedbacks: [
+        {
+          githubIssue: 50,
+          type: "improvement",
+          severity: "medium",
+          linkedTo: { requirements: [], createdRequirements: [], specifications: ["spec-000001"], createdSpecifications: [] },
+          syncedAt: "2026-01-01T00:00:00Z",
+          status: "open",
+        },
+      ],
+    });
     const reqs = [makeRequirement({ id: "req-000001", status: "approved" })];
-    const specs = [
-      makeSpecification({
-        id: "spec-000001", requirementId: "req-000001",
-        flags: [{ type: "feedback-review" as const, reason: "performance", createdAt: "2026-01-01T00:00:00Z", relatedIssues: [50], severity: "medium" as const }],
-      }),
-    ];
-    const warnings = detectWarnings(reqs, specs);
+    const specs = [makeSpecification({ id: "spec-000001", requirementId: "req-000001" })];
+    const warnings = await detectWarnings(cwd, reqs, specs);
     const fw = warnings.find((w) => w.id === "spec-000001" && w.type === "feedback-review");
     expect(fw).toBeDefined();
     expect(fw?.severity).toBe("info");
   });
 
-  it("zero specs: no consistency warnings", () => {
+  it("zero specs: no consistency warnings", async () => {
     const reqs = [makeRequirement({ id: "req-000001", status: "approved" })];
     const specs: Specification[] = [];
-    const warnings = detectWarnings(reqs, specs);
+    const warnings = await detectWarnings(cwd, reqs, specs);
     expect(warnings.find((w) => w.type === "all-specs-implemented" || w.type === "deprecated-with-active-specs")).toBeUndefined();
   });
 });

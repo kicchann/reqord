@@ -51,7 +51,7 @@ function makeReq(id: string, overrides: Partial<Requirement> = {}): Requirement 
     createdAt: "2026-01-01T00:00:00Z", updatedAt: "2026-01-01T00:00:00Z", versionHistory: [],
     files: { description: `requirements/${id}/description.md`, supplementary: [] },
     successCriteria: [], format: { type: "free-form" },
-    dependencies: { blockedBy: [], blocks: [], relatedTo: [] }, flags: [],
+    dependencies: { blockedBy: [], blocks: [], relatedTo: [] },
     ...overrides,
   } as Requirement;
 }
@@ -60,7 +60,7 @@ function makeSpec(id: string, reqId: string, overrides: Partial<Specification> =
   return {
     id, requirementId: reqId, version: "1.0.0", status: "draft",
     createdAt: "2026-01-01T00:00:00Z", updatedAt: "2026-01-01T00:00:00Z", versionHistory: [],
-    files: { design: `specifications/${id}/design.md`, supplementary: [] }, flags: [],
+    files: { design: `specifications/${id}/design.md`, supplementary: [] },
     ...overrides,
   } as Specification;
 }

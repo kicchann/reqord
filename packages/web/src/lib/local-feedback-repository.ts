@@ -15,4 +15,22 @@ export class LocalFeedbackRepository implements FeedbackRepository {
       return [];
     }
   }
+
+  async findUnresolvedByArtifactId(artifactId: string): Promise<FeedbackEntry[]> {
+    const feedbacks = await this.findAll();
+    return feedbacks.filter((f) => {
+      const linked = [
+        ...f.linkedTo.requirements,
+        ...(f.linkedTo.createdRequirements ?? []),
+        ...f.linkedTo.specifications,
+        ...(f.linkedTo.createdSpecifications ?? []),
+      ];
+      if (!linked.includes(artifactId)) return false;
+      const resolved = [
+        ...(f.linkedTo.resolved?.requirements ?? []),
+        ...(f.linkedTo.resolved?.specifications ?? []),
+      ];
+      return !resolved.includes(artifactId);
+    });
+  }
 }

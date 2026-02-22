@@ -70,7 +70,6 @@ describe("status command", () => {
           successCriteria: [],
           format: { type: "free-form" },
           dependencies: { blockedBy: [], blocks: [], relatedTo: [] },
-          flags: [],
         },
         specifications: [],
 
@@ -97,7 +96,6 @@ describe("status command", () => {
           updatedAt: "2026-01-01T00:00:00Z",
           versionHistory: [],
           files: { design: "design.md", supplementary: [] },
-          flags: [],
         },
         requirement: { id: "req-000001", title: "テスト", status: "approved" },
         issueProgress: { total: 0, completed: 0 },
@@ -164,7 +162,6 @@ describe("status command", () => {
           successCriteria: [],
           format: { type: "free-form" },
           dependencies: { blockedBy: [], blocks: [], relatedTo: [] },
-          flags: [],
         },
         specifications: [
           { id: "spec-000001", title: "Spec A", status: "approved" },
@@ -207,7 +204,6 @@ describe("status command", () => {
           updatedAt: "2026-01-01T00:00:00Z",
           versionHistory: [],
           files: { design: "design.md", supplementary: [] },
-          flags: [],
           designValidation: {
             passed: 5,
             warnings: 1,

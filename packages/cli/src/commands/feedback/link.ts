@@ -42,7 +42,6 @@ export const feedbackLinkCommand = new Command("link")
           severity: options.severity as FeedbackSeverity | undefined,
         });
         console.log(chalk.green(`✓ Linked Feedback #${issueNumber} to ${options.req}`));
-        console.log(chalk.gray(`  Added feedback-review flag to ${options.req}`));
       } else if (options.createdReq) {
         const newId = await linkWithNewRequirement(cwd, {
           issueNumber,
@@ -58,7 +57,6 @@ export const feedbackLinkCommand = new Command("link")
           severity: options.severity as FeedbackSeverity | undefined,
         });
         console.log(chalk.green(`✓ Linked Feedback #${issueNumber} to ${options.spec}`));
-        console.log(chalk.gray(`  Added feedback-review flag to ${options.spec}`));
       }
     } catch (error) {
       handleError(error);

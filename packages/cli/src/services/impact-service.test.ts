@@ -40,7 +40,6 @@ function makeRequirement(overrides: Partial<Requirement> = {}): Requirement {
     successCriteria: [],
     format: { type: "free-form" },
     dependencies: { blockedBy: [], blocks: [], relatedTo: [] },
-    flags: [],
     ...overrides,
   };
 }
@@ -55,7 +54,6 @@ function makeSpecification(overrides: Partial<Specification> = {}): Specificatio
     updatedAt: "2024-01-01T00:00:00Z",
     versionHistory: [],
     files: { design: "design.md", supplementary: [] },
-    flags: [],
     ...overrides,
   };
 }

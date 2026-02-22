@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { getSpecificationById } from "@/lib/specification-data";
 import { getRequirementById } from "@/lib/data";
 import { loadSpecFile } from "@/lib/specification-file";
+import { findUnresolvedByArtifactId } from "@/lib/feedback-data";
 import { SpecDetail } from "@/components/specification/spec-detail";
 
 export const dynamic = "force-dynamic";
@@ -34,7 +35,10 @@ export default async function SpecificationPage({
     notFound();
   }
 
-  const requirement = await getRequirementById(specification.requirementId);
+  const [requirement, feedbacks] = await Promise.all([
+    getRequirementById(specification.requirementId),
+    findUnresolvedByArtifactId(id),
+  ]);
 
   return (
     <SpecDetail
@@ -42,6 +46,7 @@ export default async function SpecificationPage({
       design={design}
       research={research}
       requirement={requirement}
+      feedbacks={feedbacks}
     />
   );
 }

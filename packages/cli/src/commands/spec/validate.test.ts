@@ -26,7 +26,6 @@ function makeSpec(overrides: Partial<Specification> = {}): Specification {
     updatedAt: "2026-01-01T00:00:00Z",
     versionHistory: [],
     files: { design: "specifications/spec-000001/design.md", supplementary: [] },
-    flags: [],
     ...overrides,
   };
 }

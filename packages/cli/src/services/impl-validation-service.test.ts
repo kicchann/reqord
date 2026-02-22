@@ -248,7 +248,6 @@ describe("validateImplementation", () => {
       updatedAt: "2024-01-01",
       versionHistory: [],
       files: { design: "design.md", supplementary: [] },
-      flags: [],
     });
 
     vi.mocked(specRepo.loadFile).mockResolvedValue(
@@ -280,7 +279,6 @@ describe("validateImplementation", () => {
       updatedAt: "2024-01-01",
       versionHistory: [],
       files: { design: "design.md", supplementary: [] },
-      flags: [],
     });
 
     vi.mocked(specRepo.loadFile).mockResolvedValue(
@@ -308,7 +306,6 @@ describe("validateImplementation", () => {
       updatedAt: "2024-01-01",
       versionHistory: [],
       files: { design: "design.md", supplementary: [] },
-      flags: [],
     });
 
     vi.mocked(specRepo.loadFile).mockResolvedValue(null);
@@ -332,7 +329,6 @@ describe("validateImplementation", () => {
       updatedAt: "2024-01-01",
       versionHistory: [],
       files: { design: "design.md", supplementary: [] },
-      flags: [],
     });
 
     vi.mocked(specRepo.loadFile).mockResolvedValue(
@@ -361,7 +357,6 @@ describe("validateImplementation", () => {
       updatedAt: "2024-01-01",
       versionHistory: [],
       files: { design: "design.md", supplementary: [] },
-      flags: [],
     });
 
     vi.mocked(specRepo.loadFile).mockResolvedValue(
@@ -392,7 +387,7 @@ describe("checkImplementConsistency", () => {
       {
         id: "spec-000001", requirementId: "req-000001", version: "1.0.0", status: "implemented",
         createdAt: "2024-01-01", updatedAt: "2024-01-01", versionHistory: [],
-        files: { design: "design.md", supplementary: [] }, flags: [],
+        files: { design: "design.md", supplementary: [] },
       },
     ]);
 
@@ -409,7 +404,7 @@ describe("checkImplementConsistency", () => {
       {
         id: "spec-000001", requirementId: "req-000001", version: "1.0.0", status: "approved",
         createdAt: "2024-01-01", updatedAt: "2024-01-01", versionHistory: [],
-        files: { design: "design.md", supplementary: [] }, flags: [],
+        files: { design: "design.md", supplementary: [] },
       },
     ]);
 
@@ -429,7 +424,7 @@ describe("checkImplementConsistency", () => {
       {
         id: "spec-000001", requirementId: "req-000001", version: "1.0.0", status: "implemented",
         createdAt: "2024-01-01", updatedAt: "2024-01-01", versionHistory: [],
-        files: { design: "design.md", supplementary: [] }, flags: [],
+        files: { design: "design.md", supplementary: [] },
       },
     ]);
 
@@ -458,7 +453,7 @@ describe("checkImplementConsistency", () => {
       {
         id: "spec-000001", requirementId: "req-000001", version: "1.0.0", status: "deprecated",
         createdAt: "2024-01-01", updatedAt: "2024-01-01", versionHistory: [],
-        files: { design: "design.md", supplementary: [] }, flags: [],
+        files: { design: "design.md", supplementary: [] },
       },
     ]);
 
@@ -478,7 +473,7 @@ describe("checkImplementConsistency", () => {
       {
         id: "spec-000001", requirementId: "req-000001", version: "1.0.0", status: "implemented",
         createdAt: "2024-01-01", updatedAt: "2024-01-01", versionHistory: [],
-        files: { design: "design.md", supplementary: [] }, flags: [],
+        files: { design: "design.md", supplementary: [] },
       },
     ]);
 
@@ -493,7 +488,7 @@ describe("checkImplementConsistency", () => {
       {
         id: "spec-000001", requirementId: "req-000001", version: "1.0.0", status: "implemented",
         createdAt: "2024-01-01", updatedAt: "2024-01-01", versionHistory: [],
-        files: { design: "design.md", supplementary: [] }, flags: [],
+        files: { design: "design.md", supplementary: [] },
       },
     ]);
 

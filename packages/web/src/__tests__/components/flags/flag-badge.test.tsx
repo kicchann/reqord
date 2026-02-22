@@ -3,39 +3,39 @@ import React from "react";
 import { describe, it, expect, afterEach } from "vitest";
 import { render, screen, cleanup } from "@testing-library/react";
 import "@testing-library/jest-dom/vitest";
-import { FlagBadge } from "../../../components/flags/flag-badge";
+import { FeedbackBadge } from "../../../components/feedback/feedback-badge";
 
-describe("FlagBadge", () => {
+describe("FeedbackBadge", () => {
   afterEach(() => cleanup());
 
-  it("feedback-reviewにamber色クラスが適用される", () => {
-    render(<FlagBadge type="feedback-review" />);
-    const badge = screen.getByTestId("flag-badge-feedback-review");
-    expect(badge).toHaveClass("bg-amber-100");
-    expect(badge).toHaveTextContent("Feedback Review");
-  });
-
-  it("security-reviewにred色クラスが適用される", () => {
-    render(<FlagBadge type="security-review" />);
-    const badge = screen.getByTestId("flag-badge-security-review");
+  it("bugタイプにred色クラスが適用される", () => {
+    render(<FeedbackBadge type="bug" />);
+    const badge = screen.getByTestId("feedback-badge-bug");
     expect(badge).toHaveClass("bg-red-100");
-    expect(badge).toHaveTextContent("Security Review");
+    expect(badge).toHaveTextContent("Bug");
   });
 
-  it("breaking-changeにpurple色クラスが適用される", () => {
-    render(<FlagBadge type="breaking-change" />);
-    const badge = screen.getByTestId("flag-badge-breaking-change");
+  it("improvementタイプにblue色クラスが適用される", () => {
+    render(<FeedbackBadge type="improvement" />);
+    const badge = screen.getByTestId("feedback-badge-improvement");
+    expect(badge).toHaveClass("bg-blue-100");
+    expect(badge).toHaveTextContent("Improvement");
+  });
+
+  it("spec-mismatchタイプにpurple色クラスが適用される", () => {
+    render(<FeedbackBadge type="spec-mismatch" />);
+    const badge = screen.getByTestId("feedback-badge-spec-mismatch");
     expect(badge).toHaveClass("bg-purple-100");
-    expect(badge).toHaveTextContent("Breaking Change");
+    expect(badge).toHaveTextContent("Spec Mismatch");
   });
 
   it("severity propsがある場合のみseverityバッジが表示される", () => {
-    render(<FlagBadge type="feedback-review" severity="high" />);
-    expect(screen.getByTestId("flag-severity")).toHaveTextContent("high");
+    render(<FeedbackBadge type="bug" severity="high" />);
+    expect(screen.getByTestId("feedback-severity")).toHaveTextContent("high");
   });
 
   it("severity propsがない場合はseverityバッジが表示されない", () => {
-    render(<FlagBadge type="feedback-review" />);
-    expect(screen.queryByTestId("flag-severity")).toBeNull();
+    render(<FeedbackBadge type="bug" />);
+    expect(screen.queryByTestId("feedback-severity")).toBeNull();
   });
 });

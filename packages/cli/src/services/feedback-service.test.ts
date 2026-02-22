@@ -88,7 +88,6 @@ function makeRequirement(overrides: Partial<Requirement> = {}): Requirement {
     successCriteria: [],
     format: { type: "free-form" },
     dependencies: { blockedBy: [], blocks: [], relatedTo: [] },
-    flags: [],
     ...overrides,
   };
 }
@@ -103,7 +102,6 @@ function makeSpecification(overrides: Partial<Specification> = {}): Specificatio
     updatedAt: "2025-01-01T00:00:00.000Z",
     versionHistory: [],
     files: { design: "specifications/spec-000001/design.md", supplementary: [] },
-    flags: [],
     ...overrides,
   };
 }
@@ -255,32 +253,6 @@ describe("linkToRequirement", () => {
     );
   });
 
-  it("Requirementにfeedback-reviewフラグを追加する", async () => {
-    const feedback = makeFeedbackEntry({ githubIssue: 17 });
-    mockFeedbackRepo.loadIndex.mockResolvedValue(makeFeedbackIndex([feedback]));
-    const requirement = makeRequirement({ id: "req-000001" });
-    mockReqRepo.findByIdOrThrow.mockResolvedValue(requirement);
-
-    await linkToRequirement("/test/cwd", {
-      issueNumber: 17,
-      requirementId: "req-000001",
-      severity: "high",
-    });
-
-    expect(mockReqRepo.save).toHaveBeenCalledWith(
-      "/test/cwd",
-      expect.objectContaining({
-        flags: expect.arrayContaining([
-          expect.objectContaining({
-            type: "feedback-review",
-            relatedIssues: [17],
-            severity: "high",
-          }),
-        ]),
-      }),
-    );
-  });
-
   it("GitHub Issue bodyにHTMLコメントを挿入する", async () => {
     const feedback = makeFeedbackEntry({ githubIssue: 17 });
     mockFeedbackRepo.loadIndex.mockResolvedValue(makeFeedbackIndex([feedback]));
@@ -326,32 +298,6 @@ describe("linkToRequirement", () => {
 
     const savedIndex = mockFeedbackRepo.saveIndex.mock.calls[0][1];
     expect(savedIndex.feedbacks[0].linkedTo.requirements).toEqual(["req-000001"]);
-  });
-
-  it("既存フラグがある場合は追加しない", async () => {
-    const feedback = makeFeedbackEntry({ githubIssue: 17 });
-    mockFeedbackRepo.loadIndex.mockResolvedValue(makeFeedbackIndex([feedback]));
-    const requirement = makeRequirement({
-      id: "req-000001",
-      flags: [
-        {
-          type: "feedback-review",
-          reason: "Existing flag",
-          createdAt: "2026-01-01T00:00:00.000Z",
-          relatedIssues: [17],
-          severity: "medium",
-        },
-      ],
-    });
-    mockReqRepo.findByIdOrThrow.mockResolvedValue(requirement);
-
-    await linkToRequirement("/test/cwd", {
-      issueNumber: 17,
-      requirementId: "req-000001",
-    });
-
-    const savedReq = mockReqRepo.save.mock.calls[0]?.[1];
-    expect(savedReq).toBeUndefined();
   });
 
   it("index.yamlにfeedbackがない場合は新規作成する", async () => {
@@ -487,32 +433,6 @@ describe("linkToSpecification", () => {
     );
   });
 
-  it("Specificationにfeedback-reviewフラグを追加する", async () => {
-    const feedback = makeFeedbackEntry({ githubIssue: 17 });
-    mockFeedbackRepo.loadIndex.mockResolvedValue(makeFeedbackIndex([feedback]));
-    const specification = makeSpecification({ id: "spec-000001" });
-    mockSpecRepo.findByIdOrThrow.mockResolvedValue(specification);
-
-    await linkToSpecification("/test/cwd", {
-      issueNumber: 17,
-      specificationId: "spec-000001",
-      severity: "critical",
-    });
-
-    expect(mockSpecRepo.save).toHaveBeenCalledWith(
-      "/test/cwd",
-      expect.objectContaining({
-        flags: expect.arrayContaining([
-          expect.objectContaining({
-            type: "feedback-review",
-            relatedIssues: [17],
-            severity: "critical",
-          }),
-        ]),
-      }),
-    );
-  });
-
   it("GitHub Issue bodyにHTMLコメントを挿入する", async () => {
     const feedback = makeFeedbackEntry({ githubIssue: 17 });
     mockFeedbackRepo.loadIndex.mockResolvedValue(makeFeedbackIndex([feedback]));
@@ -619,7 +539,7 @@ describe("resolveFeedback", () => {
     vi.clearAllMocks();
   });
 
-  it("req-プレフィックスのアーティファクトのflagを削除してresolvedに追加する", async () => {
+  it("req-プレフィックスのアーティファクトをresolvedに追加する", async () => {
     const feedback = makeFeedbackEntry({
       githubIssue: 17,
       linkedTo: {
@@ -630,32 +550,12 @@ describe("resolveFeedback", () => {
       },
     });
     mockFeedbackRepo.loadIndex.mockResolvedValue(makeFeedbackIndex([feedback]));
-    const requirement = makeRequirement({
-      id: "req-000001",
-      flags: [
-        {
-          type: "feedback-review",
-          reason: "Feedback from issue #17",
-          createdAt: "2026-01-01T00:00:00.000Z",
-          relatedIssues: [17],
-          severity: "medium",
-        },
-      ],
-    });
-    mockReqRepo.findByIdOrThrow.mockResolvedValue(requirement);
 
     await resolveFeedback("/test/cwd", {
       issueNumber: 17,
       artifactId: "req-000001",
     });
 
-    // Flag removed from requirement
-    expect(mockReqRepo.save).toHaveBeenCalledWith(
-      "/test/cwd",
-      expect.objectContaining({ flags: [] }),
-    );
-
-    // Added to linkedTo.resolved
     const savedIndex = mockFeedbackRepo.saveIndex.mock.calls[0][1];
     expect(savedIndex.feedbacks[0].linkedTo.resolved).toEqual({
       requirements: ["req-000001"],
@@ -663,7 +563,7 @@ describe("resolveFeedback", () => {
     });
   });
 
-  it("spec-プレフィックスのアーティファクトのflagを削除してresolvedに追加する", async () => {
+  it("spec-プレフィックスのアーティファクトをresolvedに追加する", async () => {
     const feedback = makeFeedbackEntry({
       githubIssue: 17,
       linkedTo: {
@@ -674,32 +574,12 @@ describe("resolveFeedback", () => {
       },
     });
     mockFeedbackRepo.loadIndex.mockResolvedValue(makeFeedbackIndex([feedback]));
-    const specification = makeSpecification({
-      id: "spec-000001",
-      flags: [
-        {
-          type: "feedback-review",
-          reason: "Feedback from issue #17",
-          createdAt: "2026-01-01T00:00:00.000Z",
-          relatedIssues: [17],
-          severity: "high",
-        },
-      ],
-    });
-    mockSpecRepo.findByIdOrThrow.mockResolvedValue(specification);
 
     await resolveFeedback("/test/cwd", {
       issueNumber: 17,
       artifactId: "spec-000001",
     });
 
-    // Flag removed from specification
-    expect(mockSpecRepo.save).toHaveBeenCalledWith(
-      "/test/cwd",
-      expect.objectContaining({ flags: [] }),
-    );
-
-    // Added to linkedTo.resolved
     const savedIndex = mockFeedbackRepo.saveIndex.mock.calls[0][1];
     expect(savedIndex.feedbacks[0].linkedTo.resolved).toEqual({
       requirements: [],
@@ -718,26 +598,12 @@ describe("resolveFeedback", () => {
       },
     });
     mockFeedbackRepo.loadIndex.mockResolvedValue(makeFeedbackIndex([feedback]));
-    const requirement = makeRequirement({
-      id: "req-000002",
-      flags: [
-        {
-          type: "feedback-review",
-          reason: "Feedback from issue #17",
-          createdAt: "2026-01-01T00:00:00.000Z",
-          relatedIssues: [17],
-          severity: "medium",
-        },
-      ],
-    });
-    mockReqRepo.findByIdOrThrow.mockResolvedValue(requirement);
 
     await resolveFeedback("/test/cwd", {
       issueNumber: 17,
       artifactId: "req-000002",
     });
 
-    expect(mockReqRepo.save).toHaveBeenCalled();
     const savedIndex = mockFeedbackRepo.saveIndex.mock.calls[0][1];
     expect(savedIndex.feedbacks[0].linkedTo.resolved?.requirements).toContain("req-000002");
   });
@@ -753,26 +619,12 @@ describe("resolveFeedback", () => {
       },
     });
     mockFeedbackRepo.loadIndex.mockResolvedValue(makeFeedbackIndex([feedback]));
-    const specification = makeSpecification({
-      id: "spec-000002",
-      flags: [
-        {
-          type: "feedback-review",
-          reason: "Feedback from issue #17",
-          createdAt: "2026-01-01T00:00:00.000Z",
-          relatedIssues: [17],
-          severity: "high",
-        },
-      ],
-    });
-    mockSpecRepo.findByIdOrThrow.mockResolvedValue(specification);
 
     await resolveFeedback("/test/cwd", {
       issueNumber: 17,
       artifactId: "spec-000002",
     });
 
-    expect(mockSpecRepo.save).toHaveBeenCalled();
     const savedIndex = mockFeedbackRepo.saveIndex.mock.calls[0][1];
     expect(savedIndex.feedbacks[0].linkedTo.resolved?.specifications).toContain("spec-000002");
   });
@@ -835,8 +687,6 @@ describe("resolveFeedback", () => {
       },
     });
     mockFeedbackRepo.loadIndex.mockResolvedValue(makeFeedbackIndex([feedback]));
-    const requirement = makeRequirement({ id: "req-000001" });
-    mockReqRepo.findByIdOrThrow.mockResolvedValue(requirement);
 
     await resolveFeedback("/test/cwd", {
       issueNumber: 17,
@@ -845,48 +695,6 @@ describe("resolveFeedback", () => {
 
     const savedIndex = mockFeedbackRepo.saveIndex.mock.calls[0][1];
     expect(savedIndex.feedbacks[0].linkedTo.resolved?.requirements).toEqual(["req-000001"]);
-  });
-
-  it("操作順序: flag削除が先、resolved追加が後（安全性）", async () => {
-    const callOrder: string[] = [];
-
-    const feedback = makeFeedbackEntry({
-      githubIssue: 17,
-      linkedTo: {
-        requirements: ["req-000001"],
-        createdRequirements: [],
-        specifications: [],
-        createdSpecifications: [],
-      },
-    });
-    mockFeedbackRepo.loadIndex.mockResolvedValue(makeFeedbackIndex([feedback]));
-    const requirement = makeRequirement({
-      id: "req-000001",
-      flags: [
-        {
-          type: "feedback-review",
-          reason: "Feedback from issue #17",
-          createdAt: "2026-01-01T00:00:00.000Z",
-          relatedIssues: [17],
-          severity: "medium",
-        },
-      ],
-    });
-    mockReqRepo.findByIdOrThrow.mockResolvedValue(requirement);
-
-    mockReqRepo.save.mockImplementation(async () => {
-      callOrder.push("reqRepo.save");
-    });
-    mockFeedbackRepo.saveIndex.mockImplementation(async () => {
-      callOrder.push("feedbackRepo.saveIndex");
-    });
-
-    await resolveFeedback("/test/cwd", {
-      issueNumber: 17,
-      artifactId: "req-000001",
-    });
-
-    expect(callOrder).toEqual(["reqRepo.save", "feedbackRepo.saveIndex"]);
   });
 });
 
@@ -1028,19 +836,6 @@ describe("unlinkFromRequirement", () => {
       },
     });
     mockFeedbackRepo.loadIndex.mockResolvedValue(makeFeedbackIndex([feedback]));
-    const requirement = makeRequirement({
-      id: "req-000001",
-      flags: [
-        {
-          type: "feedback-review",
-          reason: "Feedback from issue #17",
-          createdAt: "2026-01-01T00:00:00.000Z",
-          relatedIssues: [17],
-          severity: "medium",
-        },
-      ],
-    });
-    mockReqRepo.findByIdOrThrow.mockResolvedValue(requirement);
     mockGithubClient.getIssue.mockResolvedValue(makeGitHubIssue({ number: 17 }));
 
     await unlinkFromRequirement("/test/cwd", {
@@ -1050,52 +845,6 @@ describe("unlinkFromRequirement", () => {
 
     const savedIndex = mockFeedbackRepo.saveIndex.mock.calls[0][1];
     expect(savedIndex.feedbacks[0].linkedTo.requirements).toEqual(["req-000002"]);
-  });
-
-  it("Requirementからfeedback-reviewフラグを削除する", async () => {
-    const feedback = makeFeedbackEntry({
-      githubIssue: 17,
-      linkedTo: {
-        requirements: ["req-000001"],
-        createdRequirements: [],
-        specifications: [],
-        createdSpecifications: [],
-      },
-    });
-    mockFeedbackRepo.loadIndex.mockResolvedValue(makeFeedbackIndex([feedback]));
-    const requirement = makeRequirement({
-      id: "req-000001",
-      flags: [
-        {
-          type: "feedback-review",
-          reason: "Feedback from issue #17",
-          createdAt: "2026-01-01T00:00:00.000Z",
-          relatedIssues: [17],
-          severity: "medium",
-        },
-        {
-          type: "feedback-review",
-          reason: "Other feedback flag",
-          createdAt: "2026-01-01T00:00:00.000Z",
-          relatedIssues: [99],
-          severity: "low",
-        },
-      ],
-    });
-    mockReqRepo.findByIdOrThrow.mockResolvedValue(requirement);
-    mockGithubClient.getIssue.mockResolvedValue(makeGitHubIssue({ number: 17 }));
-
-    await unlinkFromRequirement("/test/cwd", {
-      issueNumber: 17,
-      requirementId: "req-000001",
-    });
-
-    expect(mockReqRepo.save).toHaveBeenCalledWith(
-      "/test/cwd",
-      expect.objectContaining({
-        flags: [expect.objectContaining({ type: "feedback-review", relatedIssues: [99] })],
-      }),
-    );
   });
 
   it("GitHub Issue bodyのHTMLコメントを更新する", async () => {
@@ -1109,8 +858,6 @@ describe("unlinkFromRequirement", () => {
       },
     });
     mockFeedbackRepo.loadIndex.mockResolvedValue(makeFeedbackIndex([feedback]));
-    const requirement = makeRequirement({ id: "req-000001" });
-    mockReqRepo.findByIdOrThrow.mockResolvedValue(requirement);
     mockGithubClient.getIssue.mockResolvedValue(makeGitHubIssue({ number: 17, body: "Issue body" }));
 
     await unlinkFromRequirement("/test/cwd", {
@@ -1153,6 +900,32 @@ describe("unlinkFromRequirement", () => {
         requirementId: "req-000001",
       }),
     ).rejects.toThrow("Feedback for issue #99 not found");
+  });
+
+  it("resolved.requirementsからも削除する", async () => {
+    const feedback = makeFeedbackEntry({
+      githubIssue: 17,
+      linkedTo: {
+        requirements: ["req-000001"],
+        createdRequirements: [],
+        specifications: [],
+        createdSpecifications: [],
+        resolved: {
+          requirements: ["req-000001"],
+          specifications: [],
+        },
+      },
+    });
+    mockFeedbackRepo.loadIndex.mockResolvedValue(makeFeedbackIndex([feedback]));
+    mockGithubClient.getIssue.mockResolvedValue(makeGitHubIssue({ number: 17 }));
+
+    await unlinkFromRequirement("/test/cwd", {
+      issueNumber: 17,
+      requirementId: "req-000001",
+    });
+
+    const savedIndex = mockFeedbackRepo.saveIndex.mock.calls[0][1];
+    expect(savedIndex.feedbacks[0].linkedTo.resolved?.requirements).toEqual([]);
   });
 });
 
@@ -1207,43 +980,6 @@ describe("unlinkFromSpecification", () => {
     );
   });
 
-  it("Specificationからfeedback-reviewフラグを削除する", async () => {
-    const feedback = makeFeedbackEntry({
-      githubIssue: 17,
-      linkedTo: {
-        requirements: [],
-        createdRequirements: [],
-        specifications: ["spec-000001"],
-        createdSpecifications: [],
-      },
-    });
-    mockFeedbackRepo.loadIndex.mockResolvedValue(makeFeedbackIndex([feedback]));
-    const specification = makeSpecification({
-      id: "spec-000001",
-      flags: [
-        {
-          type: "feedback-review",
-          reason: "Feedback from issue #17",
-          createdAt: "2026-01-01T00:00:00.000Z",
-          relatedIssues: [17],
-          severity: "medium",
-        },
-      ],
-    });
-    mockSpecRepo.findByIdOrThrow.mockResolvedValue(specification);
-    mockGithubClient.getIssue.mockResolvedValue(makeGitHubIssue({ number: 17 }));
-
-    await unlinkFromSpecification("/test/cwd", {
-      issueNumber: 17,
-      specificationId: "spec-000001",
-    });
-
-    expect(mockSpecRepo.save).toHaveBeenCalledWith(
-      "/test/cwd",
-      expect.objectContaining({ flags: [] }),
-    );
-  });
-
   it("紐付けされていないspecificationでエラーを投げる", async () => {
     const feedback = makeFeedbackEntry({
       githubIssue: 17,
@@ -1274,6 +1010,32 @@ describe("unlinkFromSpecification", () => {
       }),
     ).rejects.toThrow("Feedback for issue #99 not found");
   });
+
+  it("resolved.specificationsからも削除する", async () => {
+    const feedback = makeFeedbackEntry({
+      githubIssue: 17,
+      linkedTo: {
+        requirements: [],
+        createdRequirements: [],
+        specifications: ["spec-000001"],
+        createdSpecifications: [],
+        resolved: {
+          requirements: [],
+          specifications: ["spec-000001"],
+        },
+      },
+    });
+    mockFeedbackRepo.loadIndex.mockResolvedValue(makeFeedbackIndex([feedback]));
+    mockGithubClient.getIssue.mockResolvedValue(makeGitHubIssue({ number: 17 }));
+
+    await unlinkFromSpecification("/test/cwd", {
+      issueNumber: 17,
+      specificationId: "spec-000001",
+    });
+
+    const savedIndex = mockFeedbackRepo.saveIndex.mock.calls[0][1];
+    expect(savedIndex.feedbacks[0].linkedTo.resolved?.specifications).toEqual([]);
+  });
 });
 
 describe("checkRemainingFlags", () => {
@@ -1281,7 +1043,7 @@ describe("checkRemainingFlags", () => {
     vi.clearAllMocks();
   });
 
-  it("残存するfeedback-reviewフラグを検出する", async () => {
+  it("未resolveのrequirementを検出する", async () => {
     const feedback = makeFeedbackEntry({
       githubIssue: 17,
       linkedTo: {
@@ -1291,32 +1053,19 @@ describe("checkRemainingFlags", () => {
         createdSpecifications: [],
       },
     });
-    const requirement = makeRequirement({
-      id: "req-000001",
-      flags: [
-        {
-          type: "feedback-review",
-          reason: "Feedback from issue #17",
-          createdAt: "2026-01-01T00:00:00.000Z",
-          relatedIssues: [17],
-          severity: "high",
-        },
-      ],
-    });
-    mockReqRepo.findByIdOrThrow.mockResolvedValue(requirement);
 
-    const result = await checkRemainingFlags("/test/cwd", feedback);
+    const result = checkRemainingFlags(feedback);
 
     expect(result).toEqual([
       {
         artifactId: "req-000001",
         issueNumber: 17,
-        severity: "high",
+        severity: "medium",
       },
     ]);
   });
 
-  it("フラグがない場合は空配列を返す", async () => {
+  it("全てresolve済みの場合は空配列を返す", async () => {
     const feedback = makeFeedbackEntry({
       githubIssue: 17,
       linkedTo: {
@@ -1324,17 +1073,19 @@ describe("checkRemainingFlags", () => {
         createdRequirements: [],
         specifications: [],
         createdSpecifications: [],
+        resolved: {
+          requirements: ["req-000001"],
+          specifications: [],
+        },
       },
     });
-    const requirement = makeRequirement({ id: "req-000001", flags: [] });
-    mockReqRepo.findByIdOrThrow.mockResolvedValue(requirement);
 
-    const result = await checkRemainingFlags("/test/cwd", feedback);
+    const result = checkRemainingFlags(feedback);
 
     expect(result).toEqual([]);
   });
 
-  it("紐付けされたrequirementがない場合は空配列を返す", async () => {
+  it("紐付けがない場合は空配列を返す", async () => {
     const feedback = makeFeedbackEntry({
       githubIssue: 17,
       linkedTo: {
@@ -1345,12 +1096,12 @@ describe("checkRemainingFlags", () => {
       },
     });
 
-    const result = await checkRemainingFlags("/test/cwd", feedback);
+    const result = checkRemainingFlags(feedback);
 
     expect(result).toEqual([]);
   });
 
-  it("複数のrequirementに残存flagがある場合はすべて返す", async () => {
+  it("複数の未resolveのrequirementを返す", async () => {
     const feedback = makeFeedbackEntry({
       githubIssue: 17,
       linkedTo: {
@@ -1360,46 +1111,59 @@ describe("checkRemainingFlags", () => {
         createdSpecifications: [],
       },
     });
-    mockReqRepo.findByIdOrThrow
-      .mockResolvedValueOnce(
-        makeRequirement({
-          id: "req-000001",
-          flags: [
-            {
-              type: "feedback-review",
-              reason: "Feedback from issue #17",
-              createdAt: "2026-01-01T00:00:00.000Z",
-              relatedIssues: [17],
-              severity: "medium",
-            },
-          ],
-        }),
-      )
-      .mockResolvedValueOnce(
-        makeRequirement({
-          id: "req-000002",
-          flags: [
-            {
-              type: "feedback-review",
-              reason: "Feedback from issue #17",
-              createdAt: "2026-01-01T00:00:00.000Z",
-              relatedIssues: [17],
-              severity: "critical",
-            },
-          ],
-        }),
-      );
 
-    const result = await checkRemainingFlags("/test/cwd", feedback);
+    const result = checkRemainingFlags(feedback);
 
     expect(result).toHaveLength(2);
     expect(result[0]).toMatchObject({ artifactId: "req-000001", severity: "medium" });
-    expect(result[1]).toMatchObject({ artifactId: "req-000002", severity: "critical" });
+    expect(result[1]).toMatchObject({ artifactId: "req-000002", severity: "medium" });
   });
 
-  it("存在しないrequirementはスキップする", async () => {
+  it("未resolveのspecificationを検出する", async () => {
     const feedback = makeFeedbackEntry({
       githubIssue: 17,
+      linkedTo: {
+        requirements: [],
+        createdRequirements: [],
+        specifications: ["spec-000001"],
+        createdSpecifications: [],
+      },
+    });
+
+    const result = checkRemainingFlags(feedback);
+
+    expect(result).toEqual([
+      {
+        artifactId: "spec-000001",
+        issueNumber: 17,
+        severity: "medium",
+      },
+    ]);
+  });
+
+  it("RequirementとSpecification両方の未resolveを返す", async () => {
+    const feedback = makeFeedbackEntry({
+      githubIssue: 17,
+      severity: "high",
+      linkedTo: {
+        requirements: ["req-000001"],
+        createdRequirements: [],
+        specifications: ["spec-000001"],
+        createdSpecifications: [],
+      },
+    });
+
+    const result = checkRemainingFlags(feedback);
+
+    expect(result).toHaveLength(2);
+    expect(result[0]).toMatchObject({ artifactId: "req-000001", severity: "high" });
+    expect(result[1]).toMatchObject({ artifactId: "spec-000001", severity: "high" });
+  });
+
+  it("feedbackのseverityがundefinedの場合はmediumがデフォルト", async () => {
+    const feedback = makeFeedbackEntry({
+      githubIssue: 17,
+      severity: undefined,
       linkedTo: {
         requirements: ["req-000001"],
         createdRequirements: [],
@@ -1407,107 +1171,72 @@ describe("checkRemainingFlags", () => {
         createdSpecifications: [],
       },
     });
-    mockReqRepo.findByIdOrThrow.mockRejectedValue(new Error("Not found"));
 
-    const result = await checkRemainingFlags("/test/cwd", feedback);
+    const result = checkRemainingFlags(feedback);
 
-    expect(result).toEqual([]);
+    expect(result[0].severity).toBe("medium");
   });
 
-  it("Specificationの残存flagも検出する", async () => {
+  it("createdRequirementsの未resolveも検出する", () => {
     const feedback = makeFeedbackEntry({
       githubIssue: 17,
       linkedTo: {
         requirements: [],
-        createdRequirements: [],
-        specifications: ["spec-000001"],
+        createdRequirements: ["req-000010"],
+        specifications: [],
         createdSpecifications: [],
       },
     });
-    const specification = makeSpecification({
-      id: "spec-000001",
-      flags: [
-        {
-          type: "feedback-review",
-          reason: "Feedback from issue #17",
-          createdAt: "2026-01-01T00:00:00.000Z",
-          relatedIssues: [17],
-          severity: "critical",
-        },
-      ],
-    });
-    mockSpecRepo.findByIdOrThrow.mockResolvedValue(specification);
 
-    const result = await checkRemainingFlags("/test/cwd", feedback);
+    const result = checkRemainingFlags(feedback);
 
     expect(result).toEqual([
       {
-        artifactId: "spec-000001",
+        artifactId: "req-000010",
         issueNumber: 17,
-        severity: "critical",
+        severity: "medium",
       },
     ]);
   });
 
-  it("RequirementとSpecification両方の残存flagを返す", async () => {
-    const feedback = makeFeedbackEntry({
-      githubIssue: 17,
-      linkedTo: {
-        requirements: ["req-000001"],
-        createdRequirements: [],
-        specifications: ["spec-000001"],
-        createdSpecifications: [],
-      },
-    });
-    mockReqRepo.findByIdOrThrow.mockResolvedValue(
-      makeRequirement({
-        id: "req-000001",
-        flags: [
-          {
-            type: "feedback-review",
-            reason: "Feedback from issue #17",
-            createdAt: "2026-01-01T00:00:00.000Z",
-            relatedIssues: [17],
-            severity: "medium",
-          },
-        ],
-      }),
-    );
-    mockSpecRepo.findByIdOrThrow.mockResolvedValue(
-      makeSpecification({
-        id: "spec-000001",
-        flags: [
-          {
-            type: "feedback-review",
-            reason: "Feedback from issue #17",
-            createdAt: "2026-01-01T00:00:00.000Z",
-            relatedIssues: [17],
-            severity: "high",
-          },
-        ],
-      }),
-    );
-
-    const result = await checkRemainingFlags("/test/cwd", feedback);
-
-    expect(result).toHaveLength(2);
-    expect(result[0]).toMatchObject({ artifactId: "req-000001", severity: "medium" });
-    expect(result[1]).toMatchObject({ artifactId: "spec-000001", severity: "high" });
-  });
-
-  it("存在しないspecificationはスキップする", async () => {
+  it("createdSpecificationsの未resolveも検出する", () => {
     const feedback = makeFeedbackEntry({
       githubIssue: 17,
       linkedTo: {
         requirements: [],
         createdRequirements: [],
-        specifications: ["spec-000001"],
-        createdSpecifications: [],
+        specifications: [],
+        createdSpecifications: ["spec-000010"],
       },
     });
-    mockSpecRepo.findByIdOrThrow.mockRejectedValue(new Error("Not found"));
 
-    const result = await checkRemainingFlags("/test/cwd", feedback);
+    const result = checkRemainingFlags(feedback);
+
+    expect(result).toEqual([
+      {
+        artifactId: "spec-000010",
+        issueNumber: 17,
+        severity: "medium",
+      },
+    ]);
+  });
+
+  it("createdRequirementsがresolve済みなら含まない", () => {
+    const feedback = makeFeedbackEntry({
+      githubIssue: 17,
+      linkedTo: {
+        requirements: [],
+        createdRequirements: ["req-000010"],
+        specifications: [],
+        createdSpecifications: [],
+        resolved: {
+          requirements: ["req-000010"],
+          specifications: [],
+        },
+      },
+    });
+
+    const result = checkRemainingFlags(feedback);
 
     expect(result).toEqual([]);
   });

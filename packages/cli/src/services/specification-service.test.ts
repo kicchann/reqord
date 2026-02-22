@@ -61,7 +61,6 @@ function makeRequirement(overrides: Partial<Requirement> = {}): Requirement {
     successCriteria: [],
     format: { type: "free-form" },
     dependencies: { blockedBy: [], blocks: [], relatedTo: [] },
-    flags: [],
     ...overrides,
   };
 }
@@ -79,7 +78,6 @@ function makeSpecification(overrides: Partial<Specification> = {}): Specificatio
       design: "specifications/spec-000001/design.md",
       supplementary: [],
     },
-    flags: [],
     ...overrides,
   };
 }
@@ -545,21 +543,6 @@ describe("hasSpecMetadataChanges", () => {
     expect(hasSpecMetadataChanges(before, after)).toBe(false);
   });
 
-  it("flags変更は検出しない", () => {
-    const before = makeSpecification({ flags: [] });
-    const after = makeSpecification({
-      flags: [
-        {
-          type: "feedback-review",
-          reason: "test",
-          createdAt: "2026-01-01T00:00:00Z",
-          relatedIssues: [],
-          severity: "medium",
-        },
-      ],
-    });
-    expect(hasSpecMetadataChanges(before, after)).toBe(false);
-  });
 
   it("updatedAt変更は検出しない", () => {
     const before = makeSpecification({ updatedAt: "2025-01-01T00:00:00.000Z" });

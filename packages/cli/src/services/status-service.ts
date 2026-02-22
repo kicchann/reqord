@@ -3,6 +3,7 @@ import { checkConsistency, TasksIndexSchema, REQORD_DIR, ISSUES_DIR } from "@req
 import * as reqRepo from "../repositories/requirement.js";
 import * as specRepo from "../repositories/specification.js";
 import * as fs from "../repositories/file-system.js";
+import * as feedbackRepo from "../repositories/feedback.js";
 
 export interface StatusSummary {
   total: number;
@@ -121,11 +122,14 @@ async function loadTasksForSpec(cwd: string, specificationId: string): Promise<T
   return allTasks.filter((t) => t.linkedTo.specifications.includes(specificationId));
 }
 
-export function detectWarnings(
+export async function detectWarnings(
+  cwd: string,
   requirements: Requirement[],
   specifications: Specification[],
-): Warning[] {
+): Promise<Warning[]> {
   const warnings: Warning[] = [];
+  const feedbackIndex = await feedbackRepo.loadIndex(cwd);
+  const allFeedbacks = feedbackIndex.feedbacks;
 
   for (const req of requirements) {
     const relatedSpecs = specifications.filter(
@@ -167,13 +171,18 @@ export function detectWarnings(
       }
     }
 
-    const feedbackFlags =
-      req.flags?.filter((f) => f.type === "feedback-review") ?? [];
-    for (const flag of feedbackFlags) {
+    // Check for unresolved feedbacks
+    const reqFeedbacks = allFeedbacks.filter((f) => {
+      const linked = f.linkedTo.requirements.includes(req.id)
+        || (f.linkedTo.createdRequirements ?? []).includes(req.id);
+      const resolved = f.linkedTo.resolved?.requirements?.includes(req.id) ?? false;
+      return linked && !resolved;
+    });
+    for (const fb of reqFeedbacks) {
       warnings.push({
         id: req.id,
         type: "feedback-review",
-        message: `Pending feedback review: ${flag.reason} (related issues: ${flag.relatedIssues.map((n) => `#${n}`).join(", ")})`,
+        message: `Unresolved feedback: #${fb.githubIssue} (${fb.type ?? "unclassified"}, ${fb.severity ?? "medium"})`,
         severity: "info",
       });
     }
@@ -205,13 +214,17 @@ export function detectWarnings(
       });
     }
 
-    const specFeedbackFlags =
-      spec.flags?.filter((f) => f.type === "feedback-review") ?? [];
-    for (const flag of specFeedbackFlags) {
+    const specFeedbacks = allFeedbacks.filter((f) => {
+      const linked = f.linkedTo.specifications.includes(spec.id)
+        || (f.linkedTo.createdSpecifications ?? []).includes(spec.id);
+      const resolved = f.linkedTo.resolved?.specifications?.includes(spec.id) ?? false;
+      return linked && !resolved;
+    });
+    for (const fb of specFeedbacks) {
       warnings.push({
         id: spec.id,
         type: "feedback-review",
-        message: `Pending feedback review: ${flag.reason} (related issues: ${flag.relatedIssues.map((n) => `#${n}`).join(", ")})`,
+        message: `Unresolved feedback: #${fb.githubIssue} (${fb.type ?? "unclassified"}, ${fb.severity ?? "medium"})`,
         severity: "info",
       });
     }
@@ -231,7 +244,7 @@ export async function getProjectStatus(
     requirements: buildStatusSummary(requirements),
     specifications: buildStatusSummary(specifications),
     issues: buildIssueSummary(allTasks),
-    warnings: detectWarnings(requirements, specifications),
+    warnings: await detectWarnings(cwd, requirements, specifications),
     generatedAt: new Date().toISOString(),
   };
 }

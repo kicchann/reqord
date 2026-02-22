@@ -8,6 +8,7 @@ import {
 } from "../../services/approval-service.js";
 import { requirementHandler, buildReqApprovalPrBody } from "../../services/requirement-approval-handler.js";
 import { handleError } from "../../utils/error-handler.js";
+import { findUnresolvedByArtifactId } from "../../repositories/feedback.js";
 
 export const approveCommand = new Command("approve")
   .description("Create an approval request PR for a requirement (approval is confirmed when the PR is merged)")
@@ -19,17 +20,18 @@ export const approveCommand = new Command("approve")
     try {
       const { requirement } = await showRequirement(cwd, id);
 
-      // v2.0.0: Flag warning before approval
-      if (requirement.flags.length > 0) {
+      // Feedback warning before approval
+      const unresolvedFeedbacks = await findUnresolvedByArtifactId(cwd, id);
+      if (unresolvedFeedbacks.length > 0) {
         console.log(
           chalk.yellow(
-            `⚠ Warning: ${requirement.id} has ${requirement.flags.length} unresolved feedback flag(s):`,
+            `⚠ Warning: ${requirement.id} has ${unresolvedFeedbacks.length} unresolved feedback(s):`,
           ),
         );
-        for (const flag of requirement.flags) {
+        for (const fb of unresolvedFeedbacks) {
           console.log(
             chalk.yellow(
-              `  - ${flag.type}: ${flag.reason}${"severity" in flag ? ` (${flag.severity})` : ""}`,
+              `  - #${fb.githubIssue} (${fb.type ?? "unclassified"}, severity: ${fb.severity ?? "medium"})`,
             ),
           );
         }

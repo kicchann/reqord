@@ -14,7 +14,6 @@ describe("SpecificationSchema", () => {
       design: "specifications/spec-000001/design.md",
       supplementary: [],
     },
-    flags: [],
   };
 
   describe("title", () => {

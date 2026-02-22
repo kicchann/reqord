@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import type { Requirement, Specification, TaskEntry } from "@reqord/shared";
+import type { Requirement, Specification, TaskEntry, FeedbackEntry } from "@reqord/shared";
 
 vi.mock("../../lib/data.js", () => ({
   getAllRequirements: vi.fn(),
@@ -11,6 +11,10 @@ vi.mock("../../lib/specification-data.js", () => ({
 
 vi.mock("../../lib/tasks-data.js", () => ({
   loadTasksYaml: vi.fn(),
+}));
+
+vi.mock("../../lib/feedback-data.js", () => ({
+  getAllFeedbacks: vi.fn().mockResolvedValue([]),
 }));
 
 const makeRequirement = (
@@ -33,7 +37,6 @@ const makeRequirement = (
   successCriteria: [],
   format: { type: "free-form" },
   dependencies: { blockedBy: [], blocks: [], relatedTo: [] },
-  flags: [],
   ...overrides,
 });
 
@@ -54,7 +57,6 @@ const makeSpecification = (
     design: `specifications/${id}/design.md`,
     supplementary: [],
   },
-  flags: [],
   ...overrides,
 });
 
@@ -84,8 +86,10 @@ describe("dashboard-data", () => {
       const { getAllRequirements } = await import("../../lib/data.js");
       const { getAllSpecifications } = await import("../../lib/specification-data.js");
       const { loadTasksYaml } = await import("../../lib/tasks-data.js");
+      const { getAllFeedbacks } = await import("../../lib/feedback-data.js");
       const { getDashboardData } = await import("../../lib/dashboard-data.js");
 
+      vi.mocked(getAllFeedbacks).mockResolvedValue([]);
       vi.mocked(getAllRequirements).mockResolvedValue([
         makeRequirement("req-000001", "approved"),
         makeRequirement("req-000002", "implemented"),
@@ -120,8 +124,10 @@ describe("dashboard-data", () => {
       const { getAllRequirements } = await import("../../lib/data.js");
       const { getAllSpecifications } = await import("../../lib/specification-data.js");
       const { loadTasksYaml } = await import("../../lib/tasks-data.js");
+      const { getAllFeedbacks } = await import("../../lib/feedback-data.js");
       const { getDashboardData } = await import("../../lib/dashboard-data.js");
 
+      vi.mocked(getAllFeedbacks).mockResolvedValue([]);
       vi.mocked(getAllRequirements).mockResolvedValue([]);
       vi.mocked(getAllSpecifications).mockResolvedValue([]);
       vi.mocked(loadTasksYaml).mockResolvedValue({ title: "Tasks", tasks: [] });
@@ -140,8 +146,10 @@ describe("dashboard-data", () => {
       const { getAllRequirements } = await import("../../lib/data.js");
       const { getAllSpecifications } = await import("../../lib/specification-data.js");
       const { loadTasksYaml } = await import("../../lib/tasks-data.js");
+      const { getAllFeedbacks } = await import("../../lib/feedback-data.js");
       const { getDashboardData } = await import("../../lib/dashboard-data.js");
 
+      vi.mocked(getAllFeedbacks).mockResolvedValue([]);
       vi.mocked(getAllRequirements).mockResolvedValue([makeRequirement("req-000001", "approved")]);
       vi.mocked(getAllSpecifications).mockResolvedValue([makeSpecification("spec-000001", "req-000001", "approved")]);
       vi.mocked(loadTasksYaml).mockResolvedValue({ title: "Tasks", tasks: [] });
@@ -157,8 +165,10 @@ describe("dashboard-data", () => {
       const { getAllRequirements } = await import("../../lib/data.js");
       const { getAllSpecifications } = await import("../../lib/specification-data.js");
       const { loadTasksYaml } = await import("../../lib/tasks-data.js");
+      const { getAllFeedbacks } = await import("../../lib/feedback-data.js");
       const { getDashboardData } = await import("../../lib/dashboard-data.js");
 
+      vi.mocked(getAllFeedbacks).mockResolvedValue([]);
       vi.mocked(getAllRequirements).mockResolvedValue([makeRequirement("req-000001", "approved")]);
       vi.mocked(getAllSpecifications).mockResolvedValue([
         makeSpecification("spec-000001", "req-000001", "approved"),
@@ -181,8 +191,10 @@ describe("dashboard-data", () => {
 
   describe("detectWarnings", () => {
     it("detects missing specification warnings", async () => {
+      const { getAllFeedbacks } = await import("../../lib/feedback-data.js");
+      vi.mocked(getAllFeedbacks).mockResolvedValue([]);
       const { detectWarnings } = await import("../../lib/dashboard-data.js");
-      const warnings = detectWarnings([makeRequirement("req-000001", "approved")], []);
+      const warnings = await detectWarnings([makeRequirement("req-000001", "approved")], []);
       expect(warnings).toHaveLength(1);
       expect(warnings[0]).toEqual({
         type: "missing_specification",
@@ -193,14 +205,18 @@ describe("dashboard-data", () => {
     });
 
     it("does not warn for draft requirements without specifications", async () => {
+      const { getAllFeedbacks } = await import("../../lib/feedback-data.js");
+      vi.mocked(getAllFeedbacks).mockResolvedValue([]);
       const { detectWarnings } = await import("../../lib/dashboard-data.js");
-      const warnings = detectWarnings([makeRequirement("req-000001", "draft")], []);
+      const warnings = await detectWarnings([makeRequirement("req-000001", "draft")], []);
       expect(warnings).toHaveLength(0);
     });
 
     it("detects unapproved dependency warnings", async () => {
+      const { getAllFeedbacks } = await import("../../lib/feedback-data.js");
+      vi.mocked(getAllFeedbacks).mockResolvedValue([]);
       const { detectWarnings } = await import("../../lib/dashboard-data.js");
-      const warnings = detectWarnings(
+      const warnings = await detectWarnings(
         [
           makeRequirement("req-000001", "draft"),
           makeRequirement("req-000002", "approved", {
@@ -218,34 +234,41 @@ describe("dashboard-data", () => {
       });
     });
 
-    it("detects design verification error warnings", async () => {
+    it("detects design verification error warnings from critical unresolved feedback", async () => {
+      const { getAllFeedbacks } = await import("../../lib/feedback-data.js");
+      const criticalFeedback: FeedbackEntry = {
+        githubIssue: 123,
+        type: "bug",
+        severity: "critical",
+        linkedTo: {
+          requirements: [],
+          createdRequirements: [],
+          specifications: ["spec-000001"],
+          createdSpecifications: [],
+        },
+        syncedAt: "2026-01-02T00:00:00Z",
+        status: "open",
+      };
+      vi.mocked(getAllFeedbacks).mockResolvedValue([criticalFeedback]);
       const { detectWarnings } = await import("../../lib/dashboard-data.js");
-      const warnings = detectWarnings(
+      const warnings = await detectWarnings(
         [],
-        [
-          makeSpecification("spec-000001", "req-000001", "draft", {
-            flags: [{
-              type: "feedback-review",
-              reason: "Critical design issue",
-              createdAt: "2026-01-02T00:00:00Z",
-              relatedIssues: [123],
-              severity: "critical",
-            }],
-          }),
-        ]
+        [makeSpecification("spec-000001", "req-000001", "draft")]
       );
       expect(warnings).toHaveLength(1);
       expect(warnings[0]).toEqual({
         type: "design_verification_error",
-        message: "Specification spec-000001 has critical feedback flags requiring attention",
+        message: "Specification spec-000001 has critical/high unresolved feedback requiring attention",
         severity: "error",
         relatedId: "spec-000001",
       });
     });
 
     it("returns empty array when no warnings detected", async () => {
+      const { getAllFeedbacks } = await import("../../lib/feedback-data.js");
+      vi.mocked(getAllFeedbacks).mockResolvedValue([]);
       const { detectWarnings } = await import("../../lib/dashboard-data.js");
-      const warnings = detectWarnings(
+      const warnings = await detectWarnings(
         [makeRequirement("req-000001", "approved")],
         [makeSpecification("spec-000001", "req-000001", "approved")]
       );

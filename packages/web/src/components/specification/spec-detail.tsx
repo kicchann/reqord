@@ -1,7 +1,7 @@
 import Link from "next/link";
-import type { Specification, Requirement } from "@reqord/shared";
+import type { Specification, Requirement, FeedbackEntry } from "@reqord/shared";
 import { StatusBadge } from "@/components/ui/badge";
-import { FlagList } from "@/components/flags/flag-list";
+import { FeedbackList } from "@/components/feedback/feedback-list";
 import { SpecTabs } from "./spec-tabs";
 
 export function SpecDetail({
@@ -9,11 +9,13 @@ export function SpecDetail({
   design,
   research,
   requirement,
+  feedbacks,
 }: {
   specification: Specification;
   design: string | null;
   research: string | null;
   requirement: Requirement | null;
+  feedbacks: FeedbackEntry[];
 }) {
   return (
     <div className="space-y-6">
@@ -83,9 +85,9 @@ export function SpecDetail({
         </div>
       ) : null}
 
-      {/* Flags */}
-      {specification.flags.length > 0 ? (
-        <FlagList flags={specification.flags} />
+      {/* Feedbacks */}
+      {feedbacks.length > 0 ? (
+        <FeedbackList feedbacks={feedbacks} />
       ) : null}
 
       {/* Tabs for Design, Research, Coverage, Issues, and History */}

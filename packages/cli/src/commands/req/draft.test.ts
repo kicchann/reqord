@@ -12,8 +12,13 @@ vi.mock("../../services/draft-reversion-service.js", () => ({
   revertToDraft: vi.fn(),
 }));
 
+vi.mock("../../repositories/feedback.js", () => ({
+  findUnresolvedByArtifactId: vi.fn(),
+}));
+
 import { updateRequirement, showRequirement } from "../../services/requirement-service.js";
 import { revertToDraft } from "../../services/draft-reversion-service.js";
+import { findUnresolvedByArtifactId } from "../../repositories/feedback.js";
 
 const mockUpdateRequirement = vi.mocked(updateRequirement);
 const mockShowRequirement = vi.mocked(showRequirement);
@@ -36,7 +41,6 @@ function makeRequirement(overrides: Partial<Requirement> = {}): Requirement {
     successCriteria: [],
     format: { type: "free-form" },
     dependencies: { blockedBy: [], blocks: [], relatedTo: [] },
-    flags: [],
     ...overrides,
   };
 }
@@ -52,6 +56,8 @@ describe("req draft command", () => {
     // Reset Commander option state
     draftCommand.setOptionValue("dryRun", undefined);
     draftCommand.setOptionValue("json", undefined);
+    // Default: no unresolved feedbacks
+    vi.mocked(findUnresolvedByArtifactId).mockResolvedValue([]);
   });
 
   describe("approved/implemented → draft (PR flow)", () => {
@@ -146,19 +152,18 @@ describe("req draft command", () => {
     });
   });
 
-  it("フラグがある場合に警告表示", async () => {
-    const requirement = makeRequirement({
-      status: "approved",
-      flags: [
-        {
-          type: "feedback-review",
-          reason: "要確認",
-          createdAt: "2026-01-01T00:00:00Z",
-          relatedIssues: [123],
-          severity: "medium",
-        },
-      ],
-    });
+  it("未解決feedbackがある場合に警告表示", async () => {
+    vi.mocked(findUnresolvedByArtifactId).mockResolvedValue([
+      {
+        githubIssue: 123,
+        type: "bug",
+        severity: "medium",
+        linkedTo: { requirements: ["req-000001"], createdRequirements: [], specifications: [], createdSpecifications: [] },
+        syncedAt: "2026-01-01T00:00:00Z",
+        status: "open",
+      },
+    ]);
+    const requirement = makeRequirement({ status: "approved" });
     mockShowRequirement.mockResolvedValue({ requirement, description: null });
     mockRevertToDraft.mockResolvedValue({
       previousStatus: "approved",
@@ -170,7 +175,7 @@ describe("req draft command", () => {
     await draftCommand.parseAsync(["node", "test", "req-000001"]);
 
     expect(consoleLogSpy).toHaveBeenCalledWith(
-      expect.stringContaining("Warning: req-000001 has 1 unresolved feedback flag(s)"),
+      expect.stringContaining("Warning: req-000001 has 1 unresolved feedback(s)"),
     );
   });
 

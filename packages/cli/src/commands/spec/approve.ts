@@ -18,6 +18,7 @@ import {
   buildSpecApprovalPrBody,
 } from "../../services/spec-approval-helpers.js";
 import { handleError } from "../../utils/error-handler.js";
+import { findUnresolvedByArtifactId } from "../../repositories/feedback.js";
 
 export const specApproveCommand = new Command("approve")
   .description("Create an approval request PR for a specification (approval is confirmed when the PR is merged)")
@@ -43,17 +44,18 @@ export const specApproveCommand = new Command("approve")
 
       const { requirement } = await showRequirement(cwd, specification.requirementId);
 
-      // Flag warning before approval
-      if (specification.flags.length > 0) {
+      // Feedback warning before approval
+      const unresolvedFeedbacks = await findUnresolvedByArtifactId(cwd, id);
+      if (unresolvedFeedbacks.length > 0) {
         console.log(
           chalk.yellow(
-            `⚠ Warning: ${specification.id} has ${specification.flags.length} unresolved feedback flag(s):`,
+            `⚠ Warning: ${specification.id} has ${unresolvedFeedbacks.length} unresolved feedback(s):`,
           ),
         );
-        for (const flag of specification.flags) {
+        for (const fb of unresolvedFeedbacks) {
           console.log(
             chalk.yellow(
-              `  - ${flag.type}: ${flag.reason}${"severity" in flag ? ` (${flag.severity})` : ""}`,
+              `  - #${fb.githubIssue} (${fb.type ?? "unclassified"}, severity: ${fb.severity ?? "medium"})`,
             ),
           );
         }
