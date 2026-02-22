@@ -128,29 +128,23 @@ export function fixUnquotedHash(content: string, filePath: string): string {
       continue;
     }
 
-    // Key-value line with unquoted value containing ' #\d'
-    const kvUnquoted = line.match(/^(\s*[\w-]+:\s+)(.+)$/);
-    if (kvUnquoted) {
-      const [, prefix, value] = kvUnquoted;
-      if (/ #\d/.test(value) && !(/^'.*'$/.test(value) || /^".*"$/.test(value))) {
-        const escaped = value.replace(/'/g, "''");
-        fixedLines.push(`${prefix}'${escaped}'`);
-        modified = true;
-        continue;
+    // Key-value or list item with unquoted value containing ' #\d'
+    const unquotedPatterns = [/^(\s*[\w-]+:\s+)(.+)$/, /^(\s*-\s+)(.+)$/];
+    let matched = false;
+    for (const pattern of unquotedPatterns) {
+      const m = line.match(pattern);
+      if (m) {
+        const [, prefix, value] = m;
+        if (/ #\d/.test(value) && !(/^'.*'$/.test(value) || /^".*"$/.test(value))) {
+          const escaped = value.replace(/'/g, "''");
+          fixedLines.push(`${prefix}'${escaped}'`);
+          modified = true;
+          matched = true;
+        }
+        break;
       }
     }
-
-    // List item with unquoted value containing ' #\d'
-    const listUnquoted = line.match(/^(\s*-\s+)(.+)$/);
-    if (listUnquoted) {
-      const [, prefix, value] = listUnquoted;
-      if (/ #\d/.test(value) && !(/^'.*'$/.test(value) || /^".*"$/.test(value))) {
-        const escaped = value.replace(/'/g, "''");
-        fixedLines.push(`${prefix}'${escaped}'`);
-        modified = true;
-        continue;
-      }
-    }
+    if (matched) continue;
 
     fixedLines.push(line);
   }

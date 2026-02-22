@@ -3,6 +3,21 @@ import { promisify } from "node:util";
 
 const execFileAsync = promisify(execFile);
 
+function runGhWithStdin(args: string[], stdin: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const proc = spawn("gh", args);
+    proc.stdin.write(stdin);
+    proc.stdin.end();
+    let stderr = "";
+    proc.stderr.on("data", (chunk: Buffer) => { stderr += chunk.toString(); });
+    proc.on("close", (code) => {
+      if (code === 0) resolve();
+      else reject(new Error(`gh ${args[0]} ${args[1] ?? ""} failed (code ${code}): ${stderr}`.trim()));
+    });
+    proc.on("error", reject);
+  });
+}
+
 export interface CreatePrOptions {
   title: string;
   body: string;
@@ -31,18 +46,7 @@ export async function createPullRequest(options: CreatePrOptions): Promise<PrInf
   }
 
   // Pass body via stdin to avoid shell escaping issues
-  await new Promise<void>((resolve, reject) => {
-    const proc = spawn("gh", args);
-    proc.stdin.write(options.body);
-    proc.stdin.end();
-    let stderr = "";
-    proc.stderr.on("data", (chunk: Buffer) => { stderr += chunk.toString(); });
-    proc.on("close", (code) => {
-      if (code === 0) resolve();
-      else reject(new Error(`gh pr create failed (code ${code}): ${stderr}`));
-    });
-    proc.on("error", reject);
-  });
+  await runGhWithStdin(args, options.body);
 
   // Get the PR info from the branch
   const { stdout } = await execFileAsync("gh", [
@@ -58,18 +62,7 @@ export async function createIssueComment(
   body: string,
 ): Promise<void> {
   const args = ["issue", "comment", String(issueNumber), "--body-file", "-"];
-  await new Promise<void>((resolve, reject) => {
-    const proc = spawn("gh", args);
-    proc.stdin.write(body);
-    proc.stdin.end();
-    let stderr = "";
-    proc.stderr.on("data", (chunk: Buffer) => { stderr += chunk.toString(); });
-    proc.on("close", (code) => {
-      if (code === 0) resolve();
-      else reject(new Error(`gh issue comment failed (code ${code}): ${stderr}`));
-    });
-    proc.on("error", reject);
-  });
+  await runGhWithStdin(args, body);
 }
 
 export async function createPrComment(
@@ -77,18 +70,7 @@ export async function createPrComment(
   body: string,
 ): Promise<void> {
   const args = ["pr", "comment", String(prNumber), "--body-file", "-"];
-  await new Promise<void>((resolve, reject) => {
-    const proc = spawn("gh", args);
-    proc.stdin.write(body);
-    proc.stdin.end();
-    let stderr = "";
-    proc.stderr.on("data", (chunk: Buffer) => { stderr += chunk.toString(); });
-    proc.on("close", (code) => {
-      if (code === 0) resolve();
-      else reject(new Error(`gh pr comment failed (code ${code}): ${stderr}`));
-    });
-    proc.on("error", reject);
-  });
+  await runGhWithStdin(args, body);
 }
 
 export async function getPullRequest(prNumber: number): Promise<PrInfo & { state: string }> {
