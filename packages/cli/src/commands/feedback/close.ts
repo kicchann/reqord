@@ -14,7 +14,7 @@ export const feedbackCloseCommand = new Command("close")
 
       // v3.0.0: Remaining flag warning
       const { feedback } = await showFeedback(cwd, issueNumber);
-      const remainingFlags = await checkRemainingFlags(cwd, feedback);
+      const remainingFlags = checkRemainingFlags(feedback);
       if (remainingFlags.length > 0) {
         console.log(
           chalk.yellow(

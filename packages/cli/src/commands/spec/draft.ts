@@ -93,7 +93,7 @@ export const draftCommand = new Command("draft")
           return;
         }
 
-        // flagged → draft: use existing updateSpecification (no PR needed)
+        // other → draft: use existing updateSpecification (no PR needed)
         const updateOpts: UpdateSpecOptions = {
           status: "draft",
         };

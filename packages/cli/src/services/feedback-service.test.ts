@@ -901,6 +901,32 @@ describe("unlinkFromRequirement", () => {
       }),
     ).rejects.toThrow("Feedback for issue #99 not found");
   });
+
+  it("resolved.requirementsからも削除する", async () => {
+    const feedback = makeFeedbackEntry({
+      githubIssue: 17,
+      linkedTo: {
+        requirements: ["req-000001"],
+        createdRequirements: [],
+        specifications: [],
+        createdSpecifications: [],
+        resolved: {
+          requirements: ["req-000001"],
+          specifications: [],
+        },
+      },
+    });
+    mockFeedbackRepo.loadIndex.mockResolvedValue(makeFeedbackIndex([feedback]));
+    mockGithubClient.getIssue.mockResolvedValue(makeGitHubIssue({ number: 17 }));
+
+    await unlinkFromRequirement("/test/cwd", {
+      issueNumber: 17,
+      requirementId: "req-000001",
+    });
+
+    const savedIndex = mockFeedbackRepo.saveIndex.mock.calls[0][1];
+    expect(savedIndex.feedbacks[0].linkedTo.resolved?.requirements).toEqual([]);
+  });
 });
 
 describe("unlinkFromSpecification", () => {
@@ -984,6 +1010,32 @@ describe("unlinkFromSpecification", () => {
       }),
     ).rejects.toThrow("Feedback for issue #99 not found");
   });
+
+  it("resolved.specificationsからも削除する", async () => {
+    const feedback = makeFeedbackEntry({
+      githubIssue: 17,
+      linkedTo: {
+        requirements: [],
+        createdRequirements: [],
+        specifications: ["spec-000001"],
+        createdSpecifications: [],
+        resolved: {
+          requirements: [],
+          specifications: ["spec-000001"],
+        },
+      },
+    });
+    mockFeedbackRepo.loadIndex.mockResolvedValue(makeFeedbackIndex([feedback]));
+    mockGithubClient.getIssue.mockResolvedValue(makeGitHubIssue({ number: 17 }));
+
+    await unlinkFromSpecification("/test/cwd", {
+      issueNumber: 17,
+      specificationId: "spec-000001",
+    });
+
+    const savedIndex = mockFeedbackRepo.saveIndex.mock.calls[0][1];
+    expect(savedIndex.feedbacks[0].linkedTo.resolved?.specifications).toEqual([]);
+  });
 });
 
 describe("checkRemainingFlags", () => {
@@ -1002,7 +1054,7 @@ describe("checkRemainingFlags", () => {
       },
     });
 
-    const result = await checkRemainingFlags("/test/cwd", feedback);
+    const result = checkRemainingFlags(feedback);
 
     expect(result).toEqual([
       {
@@ -1028,7 +1080,7 @@ describe("checkRemainingFlags", () => {
       },
     });
 
-    const result = await checkRemainingFlags("/test/cwd", feedback);
+    const result = checkRemainingFlags(feedback);
 
     expect(result).toEqual([]);
   });
@@ -1044,7 +1096,7 @@ describe("checkRemainingFlags", () => {
       },
     });
 
-    const result = await checkRemainingFlags("/test/cwd", feedback);
+    const result = checkRemainingFlags(feedback);
 
     expect(result).toEqual([]);
   });
@@ -1060,7 +1112,7 @@ describe("checkRemainingFlags", () => {
       },
     });
 
-    const result = await checkRemainingFlags("/test/cwd", feedback);
+    const result = checkRemainingFlags(feedback);
 
     expect(result).toHaveLength(2);
     expect(result[0]).toMatchObject({ artifactId: "req-000001", severity: "medium" });
@@ -1078,7 +1130,7 @@ describe("checkRemainingFlags", () => {
       },
     });
 
-    const result = await checkRemainingFlags("/test/cwd", feedback);
+    const result = checkRemainingFlags(feedback);
 
     expect(result).toEqual([
       {
@@ -1101,7 +1153,7 @@ describe("checkRemainingFlags", () => {
       },
     });
 
-    const result = await checkRemainingFlags("/test/cwd", feedback);
+    const result = checkRemainingFlags(feedback);
 
     expect(result).toHaveLength(2);
     expect(result[0]).toMatchObject({ artifactId: "req-000001", severity: "high" });
@@ -1120,8 +1172,72 @@ describe("checkRemainingFlags", () => {
       },
     });
 
-    const result = await checkRemainingFlags("/test/cwd", feedback);
+    const result = checkRemainingFlags(feedback);
 
     expect(result[0].severity).toBe("medium");
+  });
+
+  it("createdRequirementsの未resolveも検出する", () => {
+    const feedback = makeFeedbackEntry({
+      githubIssue: 17,
+      linkedTo: {
+        requirements: [],
+        createdRequirements: ["req-000010"],
+        specifications: [],
+        createdSpecifications: [],
+      },
+    });
+
+    const result = checkRemainingFlags(feedback);
+
+    expect(result).toEqual([
+      {
+        artifactId: "req-000010",
+        issueNumber: 17,
+        severity: "medium",
+      },
+    ]);
+  });
+
+  it("createdSpecificationsの未resolveも検出する", () => {
+    const feedback = makeFeedbackEntry({
+      githubIssue: 17,
+      linkedTo: {
+        requirements: [],
+        createdRequirements: [],
+        specifications: [],
+        createdSpecifications: ["spec-000010"],
+      },
+    });
+
+    const result = checkRemainingFlags(feedback);
+
+    expect(result).toEqual([
+      {
+        artifactId: "spec-000010",
+        issueNumber: 17,
+        severity: "medium",
+      },
+    ]);
+  });
+
+  it("createdRequirementsがresolve済みなら含まない", () => {
+    const feedback = makeFeedbackEntry({
+      githubIssue: 17,
+      linkedTo: {
+        requirements: [],
+        createdRequirements: ["req-000010"],
+        specifications: [],
+        createdSpecifications: [],
+        resolved: {
+          requirements: ["req-000010"],
+          specifications: [],
+        },
+      },
+    });
+
+    const result = checkRemainingFlags(feedback);
+
+    expect(result).toEqual([]);
   });
 });

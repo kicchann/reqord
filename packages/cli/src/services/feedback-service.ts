@@ -399,15 +399,23 @@ export interface RemainingFlag {
   severity: string;
 }
 
-export async function checkRemainingFlags(
-  _cwd: string,
+export function checkRemainingFlags(
   feedback: FeedbackEntry,
-): Promise<RemainingFlag[]> {
+): RemainingFlag[] {
   const remaining: RemainingFlag[] = [];
   const resolvedReqs = new Set(feedback.linkedTo.resolved?.requirements ?? []);
   const resolvedSpecs = new Set(feedback.linkedTo.resolved?.specifications ?? []);
 
-  for (const reqId of feedback.linkedTo.requirements) {
+  const allReqs = [
+    ...feedback.linkedTo.requirements,
+    ...(feedback.linkedTo.createdRequirements ?? []),
+  ];
+  const allSpecs = [
+    ...feedback.linkedTo.specifications,
+    ...(feedback.linkedTo.createdSpecifications ?? []),
+  ];
+
+  for (const reqId of allReqs) {
     if (!resolvedReqs.has(reqId)) {
       remaining.push({
         artifactId: reqId,
@@ -416,7 +424,7 @@ export async function checkRemainingFlags(
       });
     }
   }
-  for (const specId of feedback.linkedTo.specifications) {
+  for (const specId of allSpecs) {
     if (!resolvedSpecs.has(specId)) {
       remaining.push({
         artifactId: specId,
@@ -459,6 +467,14 @@ export async function unlinkFromRequirement(
   }
   feedback.linkedTo.requirements.splice(reqIndex, 1);
 
+  // Also remove from resolved to avoid stale resolved entries on re-link
+  if (feedback.linkedTo.resolved?.requirements) {
+    const resolvedIdx = feedback.linkedTo.resolved.requirements.indexOf(options.requirementId);
+    if (resolvedIdx !== -1) {
+      feedback.linkedTo.resolved.requirements.splice(resolvedIdx, 1);
+    }
+  }
+
   await feedbackRepo.saveIndex(cwd, index);
 
   // Update HTML comment in GitHub Issue body
@@ -484,6 +500,14 @@ export async function unlinkFromSpecification(
     );
   }
   feedback.linkedTo.specifications.splice(specIndex, 1);
+
+  // Also remove from resolved to avoid stale resolved entries on re-link
+  if (feedback.linkedTo.resolved?.specifications) {
+    const resolvedIdx = feedback.linkedTo.resolved.specifications.indexOf(options.specificationId);
+    if (resolvedIdx !== -1) {
+      feedback.linkedTo.resolved.specifications.splice(resolvedIdx, 1);
+    }
+  }
 
   await feedbackRepo.saveIndex(cwd, index);
 
