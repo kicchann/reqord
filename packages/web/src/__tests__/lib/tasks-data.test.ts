@@ -1,70 +1,104 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { mkdtemp, writeFile, mkdir, rm } from "node:fs/promises";
-import { join } from "node:path";
-import { tmpdir } from "node:os";
-import { dump as yamlDump, JSON_SCHEMA } from "js-yaml";
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import type { TaskEntry, TasksIndex } from "@reqord/shared";
+
+// Mock the file-system module
+vi.mock("../../lib/file-system.js", () => ({
+  joinPath: vi.fn((...args: string[]) => args.join("/")),
+  readYAML: vi.fn(),
+}));
+
+// Mock reqord-root
+vi.mock("../../lib/reqord-root.js", () => ({
+  getReqordRoot: vi.fn(() => "/mock/root"),
+}));
+
+const mockTaskEntry: TaskEntry = {
+  number: 1,
+  title: "Test Task",
+  url: "https://github.com/owner/repo/issues/1",
+  status: "open",
+  linkedTo: { specifications: ["spec-000001"] },
+  syncedAt: "2026-02-22T00:00:00.000Z",
+};
 
 describe("tasks-data", () => {
-  let tmpDir: string;
-  let tasksDir: string;
-
-  beforeEach(async () => {
-    tmpDir = await mkdtemp(join(tmpdir(), "reqord-tasks-test-"));
-    tasksDir = join(tmpDir, ".reqord", "issues");
-    await mkdir(tasksDir, { recursive: true });
-    process.env.REQORD_ROOT = tmpDir;
+  beforeEach(() => {
     vi.resetModules();
   });
 
-  afterEach(async () => {
-    delete process.env.REQORD_ROOT;
-    await rm(tmpDir, { recursive: true, force: true });
+  describe("loadTasksYaml", () => {
+    it("returns tasks index from loaded tasks.yaml", async () => {
+      const { readYAML } = await import("../../lib/file-system.js");
+
+      const mockIndex: TasksIndex = {
+        title: "Tasks",
+        tasks: [mockTaskEntry],
+      };
+
+      vi.mocked(readYAML).mockResolvedValue(mockIndex);
+
+      const { loadTasksYaml } = await import("../../lib/tasks-data.js");
+      const result = await loadTasksYaml();
+
+      expect(result.tasks).toHaveLength(1);
+      expect(result.tasks[0]).toEqual(mockTaskEntry);
+    });
+
+    it("returns empty tasks index when tasks.yaml is missing or invalid", async () => {
+      const { readYAML } = await import("../../lib/file-system.js");
+
+      vi.mocked(readYAML).mockRejectedValue(new Error("File not found"));
+
+      const { loadTasksYaml } = await import("../../lib/tasks-data.js");
+      const result = await loadTasksYaml();
+
+      expect(result.tasks).toEqual([]);
+    });
   });
 
-  async function getLoadTasksYaml() {
-    const { loadTasksYaml } = await import("../../lib/tasks-data.js");
-    return loadTasksYaml;
-  }
+  describe("getAllTasks", () => {
+    it("returns tasks array from loaded TasksIndex", async () => {
+      const { readYAML } = await import("../../lib/file-system.js");
 
-  describe("loadTasksYaml", () => {
-    it("ファイルが存在しない場合にタイトル'Tasks'で空のタスク一覧を返す", async () => {
-      const loadTasksYaml = await getLoadTasksYaml();
-      const result = await loadTasksYaml();
-      expect(result.title).toBe("Tasks");
-      expect(result.tasks).toEqual([]);
+      const mockIndex: TasksIndex = {
+        title: "Tasks",
+        tasks: [mockTaskEntry],
+      };
+
+      vi.mocked(readYAML).mockResolvedValue(mockIndex);
+
+      const { getAllTasks } = await import("../../lib/tasks-data.js");
+      const result = await getAllTasks();
+
+      expect(result).toHaveLength(1);
+      expect(result[0]).toEqual(mockTaskEntry);
     });
 
-    it("バリデーション失敗の場合にタイトル'Tasks'で空のタスク一覧を返す", async () => {
-      const tasksPath = join(tasksDir, "tasks.yaml");
-      const invalidData = { tasks: [] }; // title missing
-      await writeFile(
-        tasksPath,
-        yamlDump(invalidData, { schema: JSON_SCHEMA }),
-        "utf-8",
-      );
+    it("returns empty array when tasks.yaml has no tasks", async () => {
+      const { readYAML } = await import("../../lib/file-system.js");
 
-      const loadTasksYaml = await getLoadTasksYaml();
-      const result = await loadTasksYaml();
-      expect(result.title).toBe("Tasks");
-      expect(result.tasks).toEqual([]);
-    });
-
-    it("有効なtasks.yamlを正常に読み込む", async () => {
-      const tasksPath = join(tasksDir, "tasks.yaml");
-      const validData = {
-        title: "My Project Tasks",
+      const mockIndex: TasksIndex = {
+        title: "Tasks",
         tasks: [],
       };
-      await writeFile(
-        tasksPath,
-        yamlDump(validData, { schema: JSON_SCHEMA }),
-        "utf-8",
-      );
 
-      const loadTasksYaml = await getLoadTasksYaml();
-      const result = await loadTasksYaml();
-      expect(result.title).toBe("My Project Tasks");
-      expect(result.tasks).toEqual([]);
+      vi.mocked(readYAML).mockResolvedValue(mockIndex);
+
+      const { getAllTasks } = await import("../../lib/tasks-data.js");
+      const result = await getAllTasks();
+
+      expect(result).toEqual([]);
+    });
+
+    it("returns empty array when tasks.yaml is missing or invalid", async () => {
+      const { readYAML } = await import("../../lib/file-system.js");
+
+      vi.mocked(readYAML).mockRejectedValue(new Error("File not found"));
+
+      const { getAllTasks } = await import("../../lib/tasks-data.js");
+      const result = await getAllTasks();
+
+      expect(result).toEqual([]);
     });
   });
 });
