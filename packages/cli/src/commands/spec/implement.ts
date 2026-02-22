@@ -33,28 +33,6 @@ export const implementCommand = new Command("implement")
           );
         }
 
-        // Check implementation issues if present
-        if (specification.implementation?.issues && specification.implementation.issues.length > 0 && !options.json) {
-          const issues = specification.implementation.issues;
-          const completedCount = issues.filter(issue => issue.status === "closed").length;
-
-          console.log(chalk.cyan(`Related implementation issues (${issues.length}):`));
-          for (const issue of issues) {
-            const statusIcon = issue.status === "closed" ? "✓" : "○";
-            const statusColor = issue.status === "closed" ? chalk.green : chalk.gray;
-            console.log(statusColor(`  ${statusIcon} #${issue.number}: ${issue.title}`));
-          }
-
-          if (completedCount === 0) {
-            console.log(chalk.yellow("\n⚠ Warning: All implementation issues are still open."));
-            console.log(chalk.yellow("Proceeding with marking as implemented..."));
-          } else if (completedCount < issues.length) {
-            console.log(chalk.yellow(`\n⚠ Warning: ${issues.length - completedCount} issue(s) still open.`));
-            console.log(chalk.yellow("Proceeding with marking as implemented..."));
-          }
-          console.log();
-        }
-
         const updateOpts: UpdateSpecOptions = {
           status: "implemented",
         };

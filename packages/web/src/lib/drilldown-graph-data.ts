@@ -56,34 +56,7 @@ export function buildDrillDownGraphData(
       animated: false,
     });
 
-    // 3. Issue nodes (right column) + tracks edges
-    if (spec.implementation?.issues) {
-      spec.implementation.issues.forEach((issue, j) => {
-        const issueNodeId = `issue-${issue.number}`;
-        nodes.push({
-          id: issueNodeId,
-          type: "issue",
-          position: {
-            x: LAYOUT.ISSUE_X,
-            y: i * LAYOUT.VERTICAL_GAP + j * LAYOUT.ISSUE_VERTICAL_GAP,
-          },
-          data: {
-            label: issue.title,
-            status: issue.status,
-            issueNumber: issue.number,
-            issueUrl: issue.url,
-          },
-        });
-
-        edges.push({
-          id: `track-${specNodeId}-${issueNodeId}`,
-          source: specNodeId,
-          target: issueNodeId,
-          style: EDGE_STYLES.tracks,
-          animated: false,
-        });
-      });
-    }
+    // Issue nodes are no longer sourced from spec.implementation
   });
 
   return { nodes, edges };
