@@ -32,6 +32,7 @@ describe("TaskDefinitionSchema", () => {
 
       const result = TaskDefinitionSchema.parse(task);
       expect(result.priority).toBe("P2");
+      expect(result.title).toBe("Implement feature Y");
     });
 
     it("dependencies省略時に空配列をデフォルト値として設定する", () => {
@@ -49,33 +50,54 @@ describe("TaskDefinitionSchema", () => {
 
   describe("異常系", () => {
     it("title空文字で拒否する", () => {
-      expect(() =>
-        TaskDefinitionSchema.parse({ title: "", description: "desc", estimatedHours: 5 })
-      ).toThrow();
+      const task = {
+        title: "",
+        description: "Some description",
+        estimatedHours: 5,
+      };
+
+      expect(() => TaskDefinitionSchema.parse(task)).toThrow();
     });
 
     it("description空文字で拒否する", () => {
-      expect(() =>
-        TaskDefinitionSchema.parse({ title: "title", description: "", estimatedHours: 5 })
-      ).toThrow();
+      const task = {
+        title: "Valid title",
+        description: "",
+        estimatedHours: 5,
+      };
+
+      expect(() => TaskDefinitionSchema.parse(task)).toThrow();
     });
 
     it("estimatedHours 0で拒否する", () => {
-      expect(() =>
-        TaskDefinitionSchema.parse({ title: "t", description: "d", estimatedHours: 0 })
-      ).toThrow();
+      const task = {
+        title: "Valid title",
+        description: "Valid description",
+        estimatedHours: 0,
+      };
+
+      expect(() => TaskDefinitionSchema.parse(task)).toThrow();
     });
 
     it("estimatedHours負数で拒否する", () => {
-      expect(() =>
-        TaskDefinitionSchema.parse({ title: "t", description: "d", estimatedHours: -5 })
-      ).toThrow();
+      const task = {
+        title: "Valid title",
+        description: "Valid description",
+        estimatedHours: -5,
+      };
+
+      expect(() => TaskDefinitionSchema.parse(task)).toThrow();
     });
 
     it("無効なpriorityで拒否する", () => {
-      expect(() =>
-        TaskDefinitionSchema.parse({ title: "t", description: "d", priority: "P4", estimatedHours: 5 })
-      ).toThrow();
+      const task = {
+        title: "Valid title",
+        description: "Valid description",
+        priority: "P4",
+        estimatedHours: 5,
+      };
+
+      expect(() => TaskDefinitionSchema.parse(task)).toThrow();
     });
   });
 });
@@ -85,31 +107,53 @@ describe("TaskDefinitionFileSchema", () => {
     it("複数タスクを受け入れる", () => {
       const file = {
         tasks: [
-          { title: "Task 1", description: "First task", priority: "P0" as const, estimatedHours: 3, dependencies: [] },
-          { title: "Task 2", description: "Second task", priority: "P2" as const, estimatedHours: 5, dependencies: ["req-000001"] },
+          {
+            title: "Task 1",
+            description: "First task",
+            priority: "P0" as const,
+            estimatedHours: 3,
+            dependencies: [],
+          },
+          {
+            title: "Task 2",
+            description: "Second task",
+            priority: "P2" as const,
+            estimatedHours: 5,
+            dependencies: ["req-000001"],
+          },
         ],
       };
 
       const result = TaskDefinitionFileSchema.parse(file);
       expect(result.tasks).toHaveLength(2);
+      expect(result.tasks[0].title).toBe("Task 1");
+      expect(result.tasks[1].title).toBe("Task 2");
     });
   });
 
   describe("異常系", () => {
     it("空配列で拒否する", () => {
-      expect(() => TaskDefinitionFileSchema.parse({ tasks: [] })).toThrow();
+      const file = {
+        tasks: [],
+      };
+
+      expect(() => TaskDefinitionFileSchema.parse(file)).toThrow();
     });
 
     it("tasksフィールド欠落で拒否する", () => {
-      expect(() => TaskDefinitionFileSchema.parse({})).toThrow();
+      const file = {};
+
+      expect(() => TaskDefinitionFileSchema.parse(file)).toThrow();
     });
   });
 });
 
 describe("TaskLinkedToSchema", () => {
   it("specifications配列を受け入れる", () => {
-    const result = TaskLinkedToSchema.parse({ specifications: ["spec-000001"] });
-    expect(result.specifications).toEqual(["spec-000001"]);
+    const result = TaskLinkedToSchema.parse({
+      specifications: ["spec-000001", "spec-000002"],
+    });
+    expect(result.specifications).toEqual(["spec-000001", "spec-000002"]);
   });
 
   it("specifications省略時に空配列をデフォルト値として設定する", () => {
@@ -133,6 +177,8 @@ describe("TaskEntrySchema", () => {
   it("全フィールド指定で受け入れる", () => {
     const result = TaskEntrySchema.parse(baseEntry);
     expect(result.number).toBe(101);
+    expect(result.title).toBe("Implement feature X");
+    expect(result.linkedTo.specifications).toEqual(["spec-000001"]);
     expect(result.status).toBe("open");
   });
 
@@ -145,14 +191,21 @@ describe("TaskEntrySchema", () => {
 
   it("numberが0以下で拒否する", () => {
     expect(() => TaskEntrySchema.parse({ ...baseEntry, number: 0 })).toThrow();
+    expect(() =>
+      TaskEntrySchema.parse({ ...baseEntry, number: -1 })
+    ).toThrow();
   });
 
   it("不正なURLで拒否する", () => {
-    expect(() => TaskEntrySchema.parse({ ...baseEntry, url: "not-a-url" })).toThrow();
+    expect(() =>
+      TaskEntrySchema.parse({ ...baseEntry, url: "not-a-url" })
+    ).toThrow();
   });
 
   it("不正なstatusで拒否する", () => {
-    expect(() => TaskEntrySchema.parse({ ...baseEntry, status: "in_progress" })).toThrow();
+    expect(() =>
+      TaskEntrySchema.parse({ ...baseEntry, status: "in_progress" })
+    ).toThrow();
   });
 });
 
@@ -178,11 +231,20 @@ describe("TasksIndexSchema", () => {
   });
 
   it("空のタスク配列を受け入れる", () => {
-    const result = TasksIndexSchema.parse({ title: "Empty", tasks: [] });
+    const index = {
+      title: "Empty Project",
+      tasks: [],
+    };
+
+    const result = TasksIndexSchema.parse(index);
     expect(result.tasks).toEqual([]);
   });
 
   it("titleが欠けている場合は拒否する", () => {
     expect(() => TasksIndexSchema.parse({ tasks: [] })).toThrow();
+  });
+
+  it("title空文字で拒否する", () => {
+    expect(() => TasksIndexSchema.parse({ title: "", tasks: [] })).toThrow();
   });
 });

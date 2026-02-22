@@ -28,7 +28,7 @@ export const TaskEntrySchema = z.object({
 });
 
 export const TasksIndexSchema = z.object({
-  title: z.string(),
+  title: z.string().min(1),
   tasks: z.array(TaskEntrySchema),
 });
 
