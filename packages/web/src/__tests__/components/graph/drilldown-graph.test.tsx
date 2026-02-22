@@ -3,9 +3,8 @@ import React from "react";
 import { describe, it, expect, afterEach, vi } from "vitest";
 import { render, cleanup } from "@testing-library/react";
 import "@testing-library/jest-dom/vitest";
-import type { Requirement, Specification } from "@reqord/shared";
+import type { Requirement, Specification, TaskEntry } from "@reqord/shared";
 
-// Mock @xyflow/react - ReactFlow is complex, so we mock it
 vi.mock("@xyflow/react", () => ({
   ReactFlow: ({ nodes, edges, children }: any) => (
     <div data-testid="react-flow" data-nodes={nodes.length} data-edges={edges.length}>
@@ -21,61 +20,42 @@ vi.mock("@xyflow/react", () => ({
   Position: { Left: "left", Right: "right", Top: "top", Bottom: "bottom" },
 }));
 
-// Mock next/navigation
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn() }),
 }));
 
 import { DrillDownGraph } from "../../../components/graph/drilldown-graph";
 
-function makeReq(
-  id: string,
-  overrides: Partial<Requirement> = {},
-): Requirement {
+function makeReq(id: string, overrides: Partial<Requirement> = {}): Requirement {
   return {
-    id,
-    version: "1.0.0",
-    title: `Requirement ${id}`,
-    status: "draft",
-    priority: "medium",
-    createdAt: "2026-01-01T00:00:00Z",
-    updatedAt: "2026-01-01T00:00:00Z",
-    versionHistory: [],
-    files: {
-      description: `requirements/${id}/description.md`,
-      supplementary: [],
-    },
-    successCriteria: [],
-    format: { type: "free-form" },
-    dependencies: { blockedBy: [], blocks: [], relatedTo: [] },
-    flags: [],
+    id, version: "1.0.0", title: `Requirement ${id}`, status: "draft", priority: "medium",
+    createdAt: "2026-01-01T00:00:00Z", updatedAt: "2026-01-01T00:00:00Z", versionHistory: [],
+    files: { description: `requirements/${id}/description.md`, supplementary: [] },
+    successCriteria: [], format: { type: "free-form" },
+    dependencies: { blockedBy: [], blocks: [], relatedTo: [] }, flags: [],
     ...overrides,
   } as Requirement;
 }
 
-function makeSpec(
-  id: string,
-  reqId: string,
-  overrides: Partial<Specification> = {},
-): Specification {
+function makeSpec(id: string, reqId: string, overrides: Partial<Specification> = {}): Specification {
   return {
-    id,
-    requirementId: reqId,
-    version: "1.0.0",
-    status: "draft",
-    createdAt: "2026-01-01T00:00:00Z",
-    updatedAt: "2026-01-01T00:00:00Z",
-    versionHistory: [],
-    files: { design: `specifications/${id}/design.md`, supplementary: [] },
-    flags: [],
+    id, requirementId: reqId, version: "1.0.0", status: "draft",
+    createdAt: "2026-01-01T00:00:00Z", updatedAt: "2026-01-01T00:00:00Z", versionHistory: [],
+    files: { design: `specifications/${id}/design.md`, supplementary: [] }, flags: [],
     ...overrides,
   } as Specification;
 }
 
+function makeTask(number: number, specIds: string[], overrides: Partial<TaskEntry> = {}): TaskEntry {
+  return {
+    number, title: `Task ${number}`, url: `https://github.com/test/repo/issues/${number}`,
+    linkedTo: { specifications: specIds }, status: "open", syncedAt: "2026-01-01T00:00:00Z",
+    ...overrides,
+  };
+}
+
 describe("DrillDownGraph", () => {
-  afterEach(() => {
-    cleanup();
-  });
+  afterEach(() => { cleanup(); });
 
   it("renders ReactFlow with nodes from requirement and specifications", () => {
     const req = makeReq("req-000001");
@@ -83,13 +63,11 @@ describe("DrillDownGraph", () => {
     const spec2 = makeSpec("spec-000002", "req-000001");
 
     const { getByTestId } = render(
-      <DrillDownGraph requirement={req} specifications={[spec1, spec2]} />
+      <DrillDownGraph requirement={req} specifications={[spec1, spec2]} tasks={[]} />
     );
 
     const flow = getByTestId("react-flow");
-    // 1 requirement + 2 specifications = 3 nodes
     expect(flow.getAttribute("data-nodes")).toBe("3");
-    // 2 implements edges
     expect(flow.getAttribute("data-edges")).toBe("2");
   });
 
@@ -97,7 +75,7 @@ describe("DrillDownGraph", () => {
     const req = makeReq("req-000001");
 
     const { getByTestId } = render(
-      <DrillDownGraph requirement={req} specifications={[]} />
+      <DrillDownGraph requirement={req} specifications={[]} tasks={[]} />
     );
 
     expect(getByTestId("background")).toBeInTheDocument();
@@ -108,9 +86,23 @@ describe("DrillDownGraph", () => {
     const req = makeReq("req-000001");
 
     const { getByTestId } = render(
-      <DrillDownGraph requirement={req} specifications={[]} />
+      <DrillDownGraph requirement={req} specifications={[]} tasks={[]} />
     );
 
     expect(getByTestId("node-req-000001")).toBeInTheDocument();
+  });
+
+  it("renders ReactFlow with issue nodes when tasks are linked to specs", () => {
+    const req = makeReq("req-000001");
+    const spec1 = makeSpec("spec-000001", "req-000001");
+    const task = makeTask(42, ["spec-000001"]);
+
+    const { getByTestId } = render(
+      <DrillDownGraph requirement={req} specifications={[spec1]} tasks={[task]} />
+    );
+
+    const flow = getByTestId("react-flow");
+    expect(flow.getAttribute("data-nodes")).toBe("3");
+    expect(flow.getAttribute("data-edges")).toBe("2");
   });
 });

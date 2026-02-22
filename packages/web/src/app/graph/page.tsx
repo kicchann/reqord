@@ -1,5 +1,6 @@
 import { getAllRequirements } from "@/lib/data";
 import { getAllSpecifications } from "@/lib/specification-data";
+import { getAllTasks } from "@/lib/tasks-data";
 import { GraphPageClient } from "@/components/graph/graph-page-client";
 
 export const metadata = {
@@ -9,9 +10,10 @@ export const metadata = {
 export const dynamic = "force-dynamic";
 
 export default async function GraphPage() {
-  const [requirements, specifications] = await Promise.all([
+  const [requirements, specifications, tasks] = await Promise.all([
     getAllRequirements(),
     getAllSpecifications(),
+    getAllTasks(),
   ]);
 
   const specCountMap: Record<string, number> = {};
@@ -24,6 +26,7 @@ export default async function GraphPage() {
       requirements={requirements}
       specifications={specifications}
       specCountMap={specCountMap}
+      tasks={tasks}
     />
   );
 }

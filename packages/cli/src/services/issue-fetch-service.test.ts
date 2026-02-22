@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import type { Specification } from "@reqord/shared";
+import type { Specification, TaskEntry } from "@reqord/shared";
 
 vi.mock("../repositories/specification.js", () => ({
   findById: vi.fn(),
@@ -12,9 +12,23 @@ vi.mock("./github-client.js", () => ({
   getRepoUrl: vi.fn(),
 }));
 
+vi.mock("../repositories/file-system.js", () => ({
+  joinPath: vi.fn((...args: string[]) => args.join("/")),
+  readYAML: vi.fn(),
+  writeYAML: vi.fn(),
+  getReqordDir: vi.fn(),
+}));
+
 import { fetchIssues } from "./issue-fetch-service.js";
 import * as specRepo from "../repositories/specification.js";
 import * as githubClient from "./github-client.js";
+import * as fs from "../repositories/file-system.js";
+
+const SPEC_TAG_22_P1 = '<!-- reqord:specification {"specificationId":"spec-000022","priority":"P1","estimatedHours":8} -->\n\n## Task 1';
+const SPEC_TAG_22_P2 = '<!-- reqord:specification {"specificationId":"spec-000022","priority":"P2","estimatedHours":4} -->\n\n## Task 2';
+const SPEC_TAG_22_SIMPLE = '<!-- reqord:specification {"specificationId":"spec-000022"} -->';
+const SPEC_TAG_25_SIMPLE = '<!-- reqord:specification {"specificationId":"spec-000025"} -->';
+const SPEC_TAG_999 = '<!-- reqord:specification {"specificationId":"spec-999999"} -->';
 
 function makeSpec(id: string, overrides?: Partial<Specification>): Specification {
   return {
@@ -35,9 +49,11 @@ describe("fetchIssues", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(githubClient.getRepoUrl).mockResolvedValue("https://github.com/owner/repo");
+    vi.mocked(fs.readYAML).mockResolvedValue({ title: "Tasks", tasks: [] });
+    vi.mocked(fs.writeYAML).mockResolvedValue(undefined);
   });
 
-  it("fetches issues and returns spec fetch results", async () => {
+  it("fetches issues and writes to tasks.yaml", async () => {
     vi.mocked(githubClient.listAllIssues).mockResolvedValue([
       {
         number: 101,
@@ -45,7 +61,7 @@ describe("fetchIssues", () => {
         state: "open",
         labels: ["reqord-generated"],
         createdAt: "2026-01-01T00:00:00Z",
-        body: '<!-- reqord:specification {"specificationId":"spec-000022","priority":"P1","estimatedHours":8} -->\n\n## Task 1',
+        body: SPEC_TAG_22_P1,
       },
       {
         number: 102,
@@ -53,12 +69,11 @@ describe("fetchIssues", () => {
         state: "closed",
         labels: ["reqord-generated"],
         createdAt: "2026-01-01T00:00:00Z",
-        body: '<!-- reqord:specification {"specificationId":"spec-000022","priority":"P2","estimatedHours":4} -->\n\n## Task 2',
+        body: SPEC_TAG_22_P2,
       },
     ]);
 
-    const spec = makeSpec("spec-000022");
-    vi.mocked(specRepo.findById).mockResolvedValue(spec);
+    vi.mocked(specRepo.findById).mockResolvedValue(makeSpec("spec-000022"));
 
     const result = await fetchIssues("/cwd");
 
@@ -68,9 +83,26 @@ describe("fetchIssues", () => {
     expect(result.specsUpdated[0].specId).toBe("spec-000022");
     expect(result.specsUpdated[0].issueCount).toBe(2);
     expect(result.specsUpdated[0].totalEstimatedHours).toBe(12);
+    expect(result.specsUpdated[0].updated).toBe(true);
+
+    expect(fs.writeYAML).toHaveBeenCalledTimes(1);
+    const savedData = vi.mocked(fs.writeYAML).mock.calls[0][1] as { tasks: TaskEntry[] };
+    expect(savedData.tasks).toHaveLength(2);
+    expect(savedData.tasks[0]).toMatchObject({
+      number: 101,
+      title: "Task 1",
+      url: "https://github.com/owner/repo/issues/101",
+      priority: "P1",
+      status: "open",
+    });
+    expect(savedData.tasks[1]).toMatchObject({
+      number: 102,
+      priority: "P2",
+      status: "closed",
+    });
   });
 
-  it("does not write to spec when dryRun is true", async () => {
+  it("does not write when dryRun is true", async () => {
     vi.mocked(githubClient.listAllIssues).mockResolvedValue([
       {
         number: 101,
@@ -78,15 +110,14 @@ describe("fetchIssues", () => {
         state: "open",
         labels: [],
         createdAt: "2026-01-01T00:00:00Z",
-        body: '<!-- reqord:specification {"specificationId":"spec-000022"} -->',
+        body: SPEC_TAG_22_SIMPLE,
       },
     ]);
-
     vi.mocked(specRepo.findById).mockResolvedValue(makeSpec("spec-000022"));
 
     const result = await fetchIssues("/cwd", { dryRun: true });
 
-    expect(specRepo.save).not.toHaveBeenCalled();
+    expect(fs.writeYAML).not.toHaveBeenCalled();
     expect(result.specsUpdated[0].updated).toBe(false);
   });
 
@@ -98,7 +129,7 @@ describe("fetchIssues", () => {
         state: "open",
         labels: [],
         createdAt: "2026-01-01T00:00:00Z",
-        body: '<!-- reqord:specification {"specificationId":"spec-000022"} -->',
+        body: SPEC_TAG_22_SIMPLE,
       },
       {
         number: 102,
@@ -106,17 +137,15 @@ describe("fetchIssues", () => {
         state: "open",
         labels: [],
         createdAt: "2026-01-01T00:00:00Z",
-        body: '<!-- reqord:specification {"specificationId":"spec-000025"} -->',
+        body: SPEC_TAG_25_SIMPLE,
       },
     ]);
-
     vi.mocked(specRepo.findById).mockResolvedValue(makeSpec("spec-000022"));
 
     const result = await fetchIssues("/cwd", { specId: "spec-000022" });
 
     expect(result.specsUpdated).toHaveLength(1);
     expect(result.specsUpdated[0].specId).toBe("spec-000022");
-    // spec-000025 should not be processed
     expect(specRepo.findById).toHaveBeenCalledTimes(1);
     expect(specRepo.findById).toHaveBeenCalledWith("/cwd", "spec-000022");
   });
@@ -129,10 +158,9 @@ describe("fetchIssues", () => {
         state: "open",
         labels: [],
         createdAt: "2026-01-01T00:00:00Z",
-        body: '<!-- reqord:specification {"specificationId":"spec-999999"} -->',
+        body: SPEC_TAG_999,
       },
     ]);
-
     vi.mocked(specRepo.findById).mockResolvedValue(null);
 
     const result = await fetchIssues("/cwd");
@@ -144,7 +172,7 @@ describe("fetchIssues", () => {
       specId: "spec-999999",
     });
     expect(result.specsUpdated).toHaveLength(0);
-    expect(specRepo.save).not.toHaveBeenCalled();
+    expect(fs.writeYAML).not.toHaveBeenCalled();
   });
 
   it("skips issues without body or without spec tag", async () => {
@@ -170,10 +198,9 @@ describe("fetchIssues", () => {
         state: "open",
         labels: [],
         createdAt: "2026-01-01T00:00:00Z",
-        body: '<!-- reqord:specification {"specificationId":"spec-000022"} -->',
+        body: SPEC_TAG_22_SIMPLE,
       },
     ]);
-
     vi.mocked(specRepo.findById).mockResolvedValue(makeSpec("spec-000022"));
 
     const result = await fetchIssues("/cwd");
@@ -182,6 +209,25 @@ describe("fetchIssues", () => {
     expect(result.totalIssuesWithTag).toBe(1);
     expect(result.specsUpdated).toHaveLength(1);
     expect(result.specsUpdated[0].issueCount).toBe(1);
+  });
+
+  it("defaults priority to P2 when tag has no priority", async () => {
+    vi.mocked(githubClient.listAllIssues).mockResolvedValue([
+      {
+        number: 101,
+        title: "Task 1",
+        state: "open",
+        labels: [],
+        createdAt: "2026-01-01T00:00:00Z",
+        body: SPEC_TAG_22_SIMPLE,
+      },
+    ]);
+    vi.mocked(specRepo.findById).mockResolvedValue(makeSpec("spec-000022"));
+
+    await fetchIssues("/cwd");
+
+    const savedData = vi.mocked(fs.writeYAML).mock.calls[0][1] as { tasks: TaskEntry[] };
+    expect(savedData.tasks[0].priority).toBe("P2");
   });
 
   it("handles empty result when no issues exist", async () => {
@@ -193,5 +239,39 @@ describe("fetchIssues", () => {
     expect(result.totalIssuesWithTag).toBe(0);
     expect(result.specsUpdated).toHaveLength(0);
     expect(result.issuesWithoutSpec).toHaveLength(0);
+    expect(fs.writeYAML).not.toHaveBeenCalled();
+  });
+
+  it("upserts existing tasks by issue number", async () => {
+    vi.mocked(fs.readYAML).mockResolvedValue({
+      title: "Tasks",
+      tasks: [{
+        number: 101,
+        title: "Old Title",
+        url: "https://github.com/owner/repo/issues/101",
+        linkedTo: { specifications: ["spec-000022"] },
+        priority: "P1",
+        status: "open",
+        syncedAt: "2026-01-01T00:00:00Z",
+      }],
+    });
+    vi.mocked(githubClient.listAllIssues).mockResolvedValue([
+      {
+        number: 101,
+        title: "New Title",
+        state: "closed",
+        labels: [],
+        createdAt: "2026-01-01T00:00:00Z",
+        body: SPEC_TAG_22_SIMPLE,
+      },
+    ]);
+    vi.mocked(specRepo.findById).mockResolvedValue(makeSpec("spec-000022"));
+
+    await fetchIssues("/cwd");
+
+    const savedData = vi.mocked(fs.writeYAML).mock.calls[0][1] as { tasks: TaskEntry[] };
+    expect(savedData.tasks).toHaveLength(1);
+    expect(savedData.tasks[0].title).toBe("New Title");
+    expect(savedData.tasks[0].status).toBe("closed");
   });
 });

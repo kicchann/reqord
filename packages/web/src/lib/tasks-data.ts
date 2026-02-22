@@ -1,5 +1,6 @@
 import {
   TasksIndexSchema,
+  type TaskEntry,
   type TasksIndex,
   REQORD_DIR,
   ISSUES_DIR,
@@ -23,4 +24,9 @@ export async function loadTasksYaml(): Promise<TasksIndex> {
   } catch {
     return { title: "Tasks", tasks: [] };
   }
+}
+
+export async function getAllTasks(): Promise<TaskEntry[]> {
+  const index = await loadTasksYaml();
+  return index.tasks;
 }
