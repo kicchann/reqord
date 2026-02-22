@@ -41,6 +41,25 @@ export async function findFeedbackByIssue(
   return index.feedbacks.find((f) => f.githubIssue === issueNumber);
 }
 
+export async function findUnresolvedByArtifactId(
+  cwd: string,
+  artifactId: string,
+): Promise<FeedbackEntry[]> {
+  const index = await loadIndex(cwd);
+  return index.feedbacks.filter((f) => {
+    const linked = [
+      ...f.linkedTo.requirements,
+      ...f.linkedTo.specifications,
+    ];
+    if (!linked.includes(artifactId)) return false;
+    const resolved = [
+      ...(f.linkedTo.resolved?.requirements ?? []),
+      ...(f.linkedTo.resolved?.specifications ?? []),
+    ];
+    return !resolved.includes(artifactId);
+  });
+}
+
 export async function upsertFeedback(
   cwd: string,
   feedback: FeedbackEntry,

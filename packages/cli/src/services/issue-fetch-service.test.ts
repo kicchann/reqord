@@ -40,7 +40,6 @@ function makeSpec(id: string, overrides?: Partial<Specification>): Specification
     updatedAt: "2026-01-01T00:00:00Z",
     versionHistory: [],
     files: { design: `specifications/${id}/design.md`, supplementary: [] },
-    flags: [],
     ...overrides,
   };
 }

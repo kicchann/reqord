@@ -18,13 +18,13 @@ export const feedbackCloseCommand = new Command("close")
       if (remainingFlags.length > 0) {
         console.log(
           chalk.yellow(
-            `⚠ Warning: Linked artifacts have remaining feedback-review flags:`,
+            `⚠ Warning: Linked artifacts have unresolved feedback:`,
           ),
         );
         for (const flag of remainingFlags) {
           console.log(
             chalk.yellow(
-              `  - ${flag.artifactId}: feedback-review (issue #${flag.issueNumber}, ${flag.severity})`,
+              `  - ${flag.artifactId}: unresolved (issue #${flag.issueNumber}, ${flag.severity})`,
             ),
           );
         }
@@ -34,7 +34,7 @@ export const feedbackCloseCommand = new Command("close")
 
       console.log(chalk.green(`✓ Closed Feedback #${issueNumber}`));
       if (remainingFlags.length > 0) {
-        console.log(chalk.gray("  Flags remain on linked artifacts. Use 'reqord feedback resolve' to remove."));
+        console.log(chalk.gray("  Unresolved feedback remains. Use 'reqord feedback resolve' to mark as resolved."));
       }
     } catch (error) {
       handleError(error);

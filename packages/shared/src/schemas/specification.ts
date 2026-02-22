@@ -1,6 +1,5 @@
 import { z } from "zod";
 import { StatusSchema, VersionHistoryEntrySchema } from "./common.js";
-import { FlagSchema } from "./requirement.js";
 
 export const DesignValidationRuleSchema = z.object({
   ruleId: z.string(),
@@ -31,7 +30,6 @@ export const SpecificationSchema = z.object({
     design: z.string(),
     supplementary: z.array(z.string()).default([]),
   }),
-  flags: z.array(FlagSchema).default([]),
   designValidation: DesignValidationSchema.optional(),
 });
 

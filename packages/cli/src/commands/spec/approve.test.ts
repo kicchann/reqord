@@ -32,6 +32,10 @@ vi.mock("../../services/spec-approval-helpers.js", () => ({
   buildSpecApprovalPrBody: vi.fn(),
 }));
 
+vi.mock("../../repositories/feedback.js", () => ({
+  findUnresolvedByArtifactId: vi.fn(),
+}));
+
 import {
   showSpecification,
   checkSpecApprovalPrerequisites,
@@ -45,6 +49,7 @@ import {
   extractDesignSummary,
   buildSpecApprovalPrBody,
 } from "../../services/spec-approval-helpers.js";
+import { findUnresolvedByArtifactId } from "../../repositories/feedback.js";
 
 function makeRequirement(overrides: Partial<Requirement> = {}): Requirement {
   return {
@@ -63,7 +68,6 @@ function makeRequirement(overrides: Partial<Requirement> = {}): Requirement {
     successCriteria: ["Criterion 1"],
     format: { type: "free-form" },
     dependencies: { blockedBy: [], blocks: [], relatedTo: [] },
-    flags: [],
     ...overrides,
   };
 }
@@ -81,7 +85,6 @@ function makeSpecification(overrides: Partial<Specification> = {}): Specificatio
       design: "specifications/spec-000001/design.md",
       supplementary: [],
     },
-    flags: [],
     ...overrides,
   };
 }
@@ -92,6 +95,8 @@ describe("specApproveCommand", () => {
     process.exitCode = 0;
     // Reset Commander option state to avoid leak between tests
     specApproveCommand.setOptionValue("dryRun", undefined);
+    // Default: no unresolved feedbacks
+    vi.mocked(findUnresolvedByArtifactId).mockResolvedValue([]);
   });
 
   it("正常系: 前提条件OKでPR作成", async () => {
@@ -311,18 +316,18 @@ describe("specApproveCommand", () => {
     consoleLogSpy.mockRestore();
   });
 
-  it("flags付きSpecificationで警告を表示してから承認を続行する", async () => {
-    const specification = makeSpecification({
-      flags: [
-        {
-          type: "feedback-review",
-          reason: "Feedback from issue #21",
-          createdAt: "2026-01-01T00:00:00.000Z",
-          relatedIssues: [21],
-          severity: "high",
-        },
-      ],
-    });
+  it("未解決feedbackがある場合に警告を表示してから承認を続行する", async () => {
+    vi.mocked(findUnresolvedByArtifactId).mockResolvedValue([
+      {
+        githubIssue: 21,
+        type: "bug",
+        severity: "high",
+        linkedTo: { requirements: [], createdRequirements: [], specifications: ["spec-000001"], createdSpecifications: [] },
+        syncedAt: "2026-01-01T00:00:00Z",
+        status: "open",
+      },
+    ]);
+    const specification = makeSpecification();
     const requirement = makeRequirement();
 
     vi.mocked(checkSpecApprovalPrerequisites).mockResolvedValue({
@@ -353,10 +358,10 @@ describe("specApproveCommand", () => {
 
     // Warning displayed
     expect(consoleLogSpy).toHaveBeenCalledWith(
-      expect.stringContaining("Warning: spec-000001 has 1 unresolved feedback flag(s)")
+      expect.stringContaining("Warning: spec-000001 has 1 unresolved feedback(s)")
     );
     expect(consoleLogSpy).toHaveBeenCalledWith(
-      expect.stringContaining("feedback-review: Feedback from issue #21 (high)")
+      expect.stringContaining("#21: Feedback from issue #21 (severity: high)")
     );
     expect(consoleLogSpy).toHaveBeenCalledWith(
       expect.stringContaining("Proceeding with approval...")
@@ -371,8 +376,8 @@ describe("specApproveCommand", () => {
     consoleLogSpy.mockRestore();
   });
 
-  it("flagsが空の場合は警告を表示しない", async () => {
-    const specification = makeSpecification({ flags: [] });
+  it("未解決feedbackがない場合は警告を表示しない", async () => {
+    const specification = makeSpecification();
     const requirement = makeRequirement();
 
     vi.mocked(checkSpecApprovalPrerequisites).mockResolvedValue({

@@ -25,7 +25,6 @@ export const resolveCommand = new Command("resolve")
           `✓ Resolved feedback #${issueNumber} flag on ${artifactId}`,
         ),
       );
-      console.log(chalk.gray(`  Removed feedback-review flag from ${artifactId}`));
       console.log(chalk.gray(`  Added ${artifactId} to linkedTo.resolved`));
     } catch (error) {
       handleError(error);

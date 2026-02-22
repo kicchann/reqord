@@ -1,7 +1,7 @@
 import Link from "next/link";
-import type { Requirement, Specification } from "@reqord/shared";
+import type { Requirement, Specification, FeedbackEntry } from "@reqord/shared";
 import { StatusBadge, PriorityBadge, ComplexityBadge } from "@/components/ui/badge";
-import { FlagList } from "@/components/flags/flag-list";
+import { FeedbackList } from "@/components/feedback/feedback-list";
 import { DeleteButton } from "./delete-button";
 import { RequirementTabs } from "./requirement-tabs";
 
@@ -9,10 +9,12 @@ export function RequirementDetail({
   requirement,
   description,
   specifications = [],
+  feedbacks,
 }: {
   requirement: Requirement;
   description: string | null;
   specifications?: Specification[];
+  feedbacks?: FeedbackEntry[];
 }) {
   const { dependencies } = requirement;
   const hasDeps =
@@ -138,9 +140,9 @@ export function RequirementDetail({
         </div>
       ) : null}
 
-      {/* Flags */}
-      {requirement.flags.length > 0 ? (
-        <FlagList flags={requirement.flags} />
+      {/* Feedbacks */}
+      {feedbacks && feedbacks.length > 0 ? (
+        <FeedbackList feedbacks={feedbacks} />
       ) : null}
 
       {/* Dependencies */}

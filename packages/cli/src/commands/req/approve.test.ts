@@ -21,11 +21,16 @@ vi.mock("../../services/requirement-approval-handler.js", () => ({
   buildReqApprovalPrBody: vi.fn().mockReturnValue("PR body"),
 }));
 
+vi.mock("../../repositories/feedback.js", () => ({
+  findUnresolvedByArtifactId: vi.fn(),
+}));
+
 import { showRequirement } from "../../services/requirement-service.js";
 import {
   startApproval,
   type ApprovalResult,
 } from "../../services/approval-service.js";
+import { findUnresolvedByArtifactId } from "../../repositories/feedback.js";
 
 
 function makeRequirement(overrides: Partial<Requirement> = {}): Requirement {
@@ -45,7 +50,6 @@ function makeRequirement(overrides: Partial<Requirement> = {}): Requirement {
     successCriteria: ["Criterion 1"],
     format: { type: "free-form" },
     dependencies: { blockedBy: [], blocks: [], relatedTo: [] },
-    flags: [],
     ...overrides,
   };
 }
@@ -57,6 +61,8 @@ describe("approveCommand", () => {
     process.exitCode = 0;
     // Reset Commander option state to avoid leak between tests
     approveCommand.setOptionValue("dryRun", undefined);
+    // Default: no unresolved feedbacks
+    vi.mocked(findUnresolvedByArtifactId).mockResolvedValue([]);
   });
 
   it("正常系: approveコマンド実行", async () => {
@@ -212,18 +218,18 @@ describe("approveCommand", () => {
     consoleLogSpy.mockRestore();
   });
 
-  it("flags付きRequirementで警告を表示してから承認を続行する", async () => {
-    const requirement = makeRequirement({
-      flags: [
-        {
-          type: "feedback-review",
-          reason: "Feedback from issue #17",
-          createdAt: "2026-01-01T00:00:00.000Z",
-          relatedIssues: [17],
-          severity: "medium",
-        },
-      ],
-    });
+  it("未解決feedbackがある場合に警告を表示してから承認を続行する", async () => {
+    vi.mocked(findUnresolvedByArtifactId).mockResolvedValue([
+      {
+        githubIssue: 17,
+        type: "bug",
+        severity: "medium",
+        linkedTo: { requirements: ["req-000001"], createdRequirements: [], specifications: [], createdSpecifications: [] },
+        syncedAt: "2026-01-01T00:00:00Z",
+        status: "open",
+      },
+    ]);
+    const requirement = makeRequirement();
     vi.mocked(showRequirement).mockResolvedValue({
       requirement,
       description: null,
@@ -242,10 +248,10 @@ describe("approveCommand", () => {
 
     // Warning displayed
     expect(consoleLogSpy).toHaveBeenCalledWith(
-      expect.stringContaining("Warning: req-000001 has 1 unresolved feedback flag(s)")
+      expect.stringContaining("Warning: req-000001 has 1 unresolved feedback(s)")
     );
     expect(consoleLogSpy).toHaveBeenCalledWith(
-      expect.stringContaining("feedback-review: Feedback from issue #17 (medium)")
+      expect.stringContaining("#17: Feedback from issue #17 (severity: medium)")
     );
     expect(consoleLogSpy).toHaveBeenCalledWith(
       expect.stringContaining("Proceeding with approval...")
@@ -260,8 +266,8 @@ describe("approveCommand", () => {
     consoleLogSpy.mockRestore();
   });
 
-  it("flagsが空の場合は警告を表示しない", async () => {
-    const requirement = makeRequirement({ flags: [] });
+  it("未解決feedbackがない場合は警告を表示しない", async () => {
+    const requirement = makeRequirement();
     vi.mocked(showRequirement).mockResolvedValue({
       requirement,
       description: null,

@@ -26,3 +26,8 @@ export async function getAllFeedbacks(): Promise<FeedbackEntry[]> {
   const repo = getFeedbackRepository();
   return repo.findAll();
 }
+
+export async function findUnresolvedByArtifactId(artifactId: string): Promise<FeedbackEntry[]> {
+  const repo = getFeedbackRepository();
+  return repo.findUnresolvedByArtifactId(artifactId);
+}

@@ -229,9 +229,5 @@ export function generateSpecChangeSummary(before: Specification, after: Specific
     changes.push("Design file path updated");
   }
 
-  if (hasChanged(before.flags, after.flags)) {
-    changes.push("Flags updated");
-  }
-
   return changes.length > 0 ? changes.join(", ") : "Specification updated";
 }

@@ -31,7 +31,6 @@ function makeRequirement(overrides: Partial<Requirement> = {}): Requirement {
     successCriteria: ["基準1"],
     format: { type: "free-form" },
     dependencies: { blockedBy: [], blocks: [], relatedTo: [] },
-    flags: [],
     ...overrides,
   };
 }
@@ -50,7 +49,6 @@ function makeSpecification(overrides: Partial<Specification> = {}): Specificatio
       design: "specifications/spec-000001/design.md",
       supplementary: [],
     },
-    flags: [],
     ...overrides,
   };
 }
@@ -138,23 +136,6 @@ describe("determineNextVersion", () => {
     expect(determineNextVersion(before, after)).toBe("1.0");
   });
 
-  it("flagsのみ変更でもバージョン据え置き", () => {
-    const before = makeRequirement({ version: "2.3", status: "approved", flags: [] });
-    const after = makeRequirement({
-      version: "2.3",
-      status: "approved",
-      flags: [
-        {
-          type: "feedback-review",
-          reason: "要確認",
-          createdAt: "2026-01-01T00:00:00Z",
-          relatedIssues: [123],
-          severity: "medium",
-        },
-      ],
-    });
-    expect(determineNextVersion(before, after)).toBe("2.3");
-  });
 });
 
 describe("determineNextVersionForSpec", () => {
@@ -184,15 +165,6 @@ describe("determineNextVersionForSpec", () => {
         design: "specifications/spec-000001/design-v2.md",
         supplementary: [],
       },
-    });
-    expect(determineNextVersionForSpec(before, after)).toBe("1.0");
-  });
-
-  it("flagsのみ変更 → 据え置き", () => {
-    const before = makeSpecification({ version: "1.0", flags: [] });
-    const after = makeSpecification({
-      version: "1.0",
-      flags: [{ type: "feedback-review", reason: "test", createdAt: "2026-01-01T00:00:00Z", relatedIssues: [], severity: "medium" }],
     });
     expect(determineNextVersionForSpec(before, after)).toBe("1.0");
   });
@@ -406,15 +378,6 @@ describe("generateSpecChangeSummary", () => {
     });
     const summary = generateSpecChangeSummary(before, after);
     expect(summary).toBe("Design file path updated");
-  });
-
-  it("flags変更時のサマリー", () => {
-    const before = makeSpecification({ flags: [] });
-    const after = makeSpecification({
-      flags: [{ type: "feedback-review", reason: "test", createdAt: "2026-01-01T00:00:00Z", relatedIssues: [], severity: "medium" }],
-    });
-    const summary = generateSpecChangeSummary(before, after);
-    expect(summary).toBe("Flags updated");
   });
 
   it("複数変更の結合", () => {

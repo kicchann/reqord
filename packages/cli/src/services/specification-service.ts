@@ -44,7 +44,6 @@ export async function createSpecification(
       design: `${SPECIFICATIONS_DIR}/${id}/design.md`,
       supplementary: [],
     },
-    flags: [],
   };
 
   await specRepo.ensureSpecDir(cwd, id);
@@ -191,7 +190,7 @@ export async function checkSpecApprovalPrerequisites(
  * Note: This does NOT check actual file content. Design file content changes
  * should be detected separately via the designContent option.
  *
- * Excludes: status, flags, updatedAt, versionHistory
+ * Excludes: status, updatedAt, versionHistory
  */
 export function hasSpecMetadataChanges(before: Specification, after: Specification): boolean {
   // Extract metadata fields only (file paths, not content)

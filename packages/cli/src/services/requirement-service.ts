@@ -50,7 +50,6 @@ export async function createRequirement(
       blocks: [],
       relatedTo: [],
     },
-    flags: [],
   };
 
   await reqRepo.save(cwd, requirement);

@@ -51,7 +51,6 @@ describe("validateSpecDesign", () => {
       updatedAt: "2026-01-01T00:00:00Z",
       versionHistory: [],
       files: { design: "specifications/spec-000001/design.md", supplementary: [] },
-      flags: [],
     });
     vi.mocked(specRepo.findAll).mockResolvedValue([]);
     vi.mocked(reqRepo.findAll).mockResolvedValue([
@@ -68,7 +67,6 @@ describe("validateSpecDesign", () => {
         successCriteria: [],
         format: { type: "free-form" },
         dependencies: { blockedBy: [], blocks: [], relatedTo: [] },
-        flags: [],
       },
     ]);
     vi.mocked(contextRepo.loadContextFile).mockResolvedValue(null);

@@ -7,6 +7,7 @@ import {
 } from "../../services/requirement-service.js";
 import { revertToDraft } from "../../services/draft-reversion-service.js";
 import { handleError } from "../../utils/error-handler.js";
+import { findUnresolvedByArtifactId } from "../../repositories/feedback.js";
 
 export const draftCommand = new Command("draft")
   .description("Revert a requirement to draft status")
@@ -39,17 +40,18 @@ export const draftCommand = new Command("draft")
         // Show current requirement and flags
         const { requirement } = await showRequirement(cwd, id);
 
-        // Display flag status before reversion
-        if (requirement.flags.length > 0 && !options.json) {
+        // Display feedback status before reversion
+        const unresolvedFeedbacks = await findUnresolvedByArtifactId(cwd, id);
+        if (unresolvedFeedbacks.length > 0 && !options.json) {
           console.log(
             chalk.yellow(
-              `⚠ Warning: ${requirement.id} has ${requirement.flags.length} unresolved feedback flag(s):`,
+              `⚠ Warning: ${requirement.id} has ${unresolvedFeedbacks.length} unresolved feedback(s):`,
             ),
           );
-          for (const flag of requirement.flags) {
+          for (const fb of unresolvedFeedbacks) {
             console.log(
               chalk.yellow(
-                `  - ${flag.type}: ${flag.reason}${"severity" in flag ? ` (${flag.severity})` : ""}`,
+                `  - #${fb.githubIssue}: Feedback from issue #${fb.githubIssue} (severity: ${fb.severity ?? "medium"})`,
               ),
             );
           }

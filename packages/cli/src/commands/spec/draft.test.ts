@@ -12,8 +12,13 @@ vi.mock("../../services/draft-reversion-service.js", () => ({
   revertToDraft: vi.fn(),
 }));
 
+vi.mock("../../repositories/feedback.js", () => ({
+  findUnresolvedByArtifactId: vi.fn(),
+}));
+
 import { updateSpecification, showSpecification } from "../../services/specification-service.js";
 import { revertToDraft } from "../../services/draft-reversion-service.js";
+import { findUnresolvedByArtifactId } from "../../repositories/feedback.js";
 
 const mockUpdateSpecification = vi.mocked(updateSpecification);
 const mockShowSpecification = vi.mocked(showSpecification);
@@ -32,7 +37,6 @@ function makeSpecification(overrides: Partial<Specification> = {}): Specificatio
       design: "specifications/spec-000001/design.md",
       supplementary: [],
     },
-    flags: [],
     ...overrides,
   };
 }
@@ -48,6 +52,8 @@ describe("spec draft command", () => {
     // Reset Commander option state
     draftCommand.setOptionValue("dryRun", undefined);
     draftCommand.setOptionValue("json", undefined);
+    // Default: no unresolved feedbacks
+    vi.mocked(findUnresolvedByArtifactId).mockResolvedValue([]);
   });
 
   describe("approved/implemented → draft (PR flow)", () => {
@@ -125,19 +131,18 @@ describe("spec draft command", () => {
     });
   });
 
-  it("フラグがある場合に警告表示", async () => {
-    const specification = makeSpecification({
-      status: "approved",
-      flags: [
-        {
-          type: "feedback-review",
-          reason: "要確認",
-          createdAt: "2026-01-01T00:00:00Z",
-          relatedIssues: [123],
-          severity: "medium",
-        },
-      ],
-    });
+  it("未解決feedbackがある場合に警告表示", async () => {
+    vi.mocked(findUnresolvedByArtifactId).mockResolvedValue([
+      {
+        githubIssue: 123,
+        type: "bug",
+        severity: "medium",
+        linkedTo: { requirements: [], createdRequirements: [], specifications: ["spec-000001"], createdSpecifications: [] },
+        syncedAt: "2026-01-01T00:00:00Z",
+        status: "open",
+      },
+    ]);
+    const specification = makeSpecification({ status: "approved" });
     mockShowSpecification.mockResolvedValue({ specification, design: null });
     mockRevertToDraft.mockResolvedValue({
       previousStatus: "approved",
@@ -149,7 +154,7 @@ describe("spec draft command", () => {
     await draftCommand.parseAsync(["node", "test", "spec-000001"]);
 
     expect(consoleLogSpy).toHaveBeenCalledWith(
-      expect.stringContaining("Warning: spec-000001 has 1 unresolved feedback flag(s)"),
+      expect.stringContaining("Warning: spec-000001 has 1 unresolved feedback(s)"),
     );
   });
 

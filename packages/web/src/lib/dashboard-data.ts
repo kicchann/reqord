@@ -2,6 +2,7 @@ import type { Requirement, Specification, TaskEntry } from "@reqord/shared";
 import { getAllRequirements } from "./data.js";
 import { getAllSpecifications } from "./specification-data.js";
 import { loadTasksYaml } from "./tasks-data.js";
+import { getAllFeedbacks } from "./feedback-data.js";
 
 export type Warning = {
   type:
@@ -90,11 +91,12 @@ function calculateIssueSummary(tasks: TaskEntry[]): IssueSummary {
   };
 }
 
-export function detectWarnings(
+export async function detectWarnings(
   requirements: Requirement[],
   specifications: Specification[]
-): Warning[] {
+): Promise<Warning[]> {
   const warnings: Warning[] = [];
+  const allFeedbacks = await getAllFeedbacks();
 
   const specsByReqId = new Map<string, Specification[]>();
   for (const spec of specifications) {
@@ -137,16 +139,20 @@ export function detectWarnings(
   }
 
   for (const spec of specifications) {
-    const hasErrorFlag = spec.flags.some(
-      (flag) =>
-        flag.type === "feedback-review" &&
-        (flag.severity === "critical" || flag.severity === "high")
+    const unresolvedFeedbacks = allFeedbacks.filter((f) => {
+      const linked = f.linkedTo.specifications.includes(spec.id);
+      const resolved = f.linkedTo.resolved?.specifications?.includes(spec.id) ?? false;
+      return linked && !resolved;
+    });
+
+    const hasCriticalFeedback = unresolvedFeedbacks.some(
+      (f) => f.severity === "critical" || f.severity === "high"
     );
 
-    if (hasErrorFlag) {
+    if (hasCriticalFeedback) {
       warnings.push({
         type: "design_verification_error",
-        message: `Specification ${spec.id} has critical feedback flags requiring attention`,
+        message: `Specification ${spec.id} has critical/high unresolved feedback requiring attention`,
         severity: "error",
         relatedId: spec.id,
       });
@@ -195,7 +201,7 @@ export async function getDashboardData(): Promise<DashboardData> {
     specificationsApprovalRate * HEALTH_WEIGHTS.specifications +
     issues.completionRate * HEALTH_WEIGHTS.issues;
 
-  const warnings = detectWarnings(requirements, specifications);
+  const warnings = await detectWarnings(requirements, specifications);
   const criticalPath = extractCriticalPath(allTasks);
 
   return {

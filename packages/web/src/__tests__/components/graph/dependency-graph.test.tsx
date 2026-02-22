@@ -52,7 +52,6 @@ function makeReq(
     successCriteria: [],
     format: { type: "free-form" },
     dependencies: { blockedBy: [], blocks: [], relatedTo: [] },
-    flags: [],
     ...overrides,
   } as Requirement;
 }

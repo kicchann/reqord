@@ -13,15 +13,7 @@ export {
 
 export {
   RequirementSchema,
-  FeedbackFlagSchema,
-  SecurityReviewFlagSchema,
-  BreakingChangeFlagSchema,
-  FlagSchema,
   type Requirement,
-  type FeedbackFlag,
-  type SecurityReviewFlag,
-  type BreakingChangeFlag,
-  type Flag,
 } from "./requirement.js";
 
 export {

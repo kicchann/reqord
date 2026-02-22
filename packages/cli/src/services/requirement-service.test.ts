@@ -39,7 +39,6 @@ function makeRequirement(overrides: Partial<Requirement> = {}): Requirement {
     successCriteria: ["基準1"],
     format: { type: "free-form" },
     dependencies: { blockedBy: [], blocks: [], relatedTo: [] },
-    flags: [],
     ...overrides,
   };
 }

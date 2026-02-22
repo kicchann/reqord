@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { getRequirementById, getRequirementDescription } from "@/lib/data";
 import { getSpecificationsByRequirementId } from "@/lib/specification-data";
+import { findUnresolvedByArtifactId } from "@/lib/feedback-data";
 import { RequirementDetail } from "@/components/requirement/requirement-detail";
 
 export const dynamic = "force-dynamic";
@@ -20,10 +21,11 @@ export default async function RequirementPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const [requirement, description, specifications] = await Promise.all([
+  const [requirement, description, specifications, feedbacks] = await Promise.all([
     getRequirementById(id),
     getRequirementDescription(id),
     getSpecificationsByRequirementId(id),
+    findUnresolvedByArtifactId(id),
   ]);
 
   if (!requirement) {
@@ -35,6 +37,7 @@ export default async function RequirementPage({
       requirement={requirement}
       description={description}
       specifications={specifications}
+      feedbacks={feedbacks}
     />
   );
 }
