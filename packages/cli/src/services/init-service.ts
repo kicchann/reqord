@@ -10,6 +10,7 @@ import {
   ASSETS_DIR,
   DOMAIN_DIR,
   ISSUE_TEMPLATES_DIR,
+  ISSUES_DIR,
 } from "@reqord/shared";
 import * as fs from "../repositories/file-system.js";
 import {
@@ -38,6 +39,7 @@ export async function initProject(cwd: string): Promise<InitResult> {
     fs.joinPath(reqordRoot, SETTINGS_DIR, TEMPLATES_DIR, ISSUE_TEMPLATES_DIR),
     fs.joinPath(reqordRoot, SETTINGS_DIR, RULES_DIR),
     fs.joinPath(reqordRoot, ASSETS_DIR),
+    fs.joinPath(reqordRoot, ISSUES_DIR),
   ];
 
   for (const dir of dirs) {
@@ -69,6 +71,7 @@ export async function initProject(cwd: string): Promise<InitResult> {
   const gitkeepDirs = [
     fs.joinPath(reqordRoot, SPECIFICATIONS_DIR),
     fs.joinPath(reqordRoot, ASSETS_DIR),
+    fs.joinPath(reqordRoot, ISSUES_DIR),
   ];
   for (const dir of gitkeepDirs) {
     const gitkeepPath = fs.joinPath(dir, ".gitkeep");

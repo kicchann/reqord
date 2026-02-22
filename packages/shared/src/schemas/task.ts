@@ -12,9 +12,6 @@ export const TaskDefinitionFileSchema = z.object({
   tasks: z.array(TaskDefinitionSchema).min(1),
 });
 
-export type TaskDefinition = z.infer<typeof TaskDefinitionSchema>;
-export type TaskDefinitionFile = z.infer<typeof TaskDefinitionFileSchema>;
-
 export const TaskLinkedToSchema = z.object({
   specifications: z.array(z.string()).default([]),
 });
@@ -31,10 +28,12 @@ export const TaskEntrySchema = z.object({
 });
 
 export const TasksIndexSchema = z.object({
-  title: z.string(),
+  title: z.string().min(1),
   tasks: z.array(TaskEntrySchema),
 });
 
+export type TaskDefinition = z.infer<typeof TaskDefinitionSchema>;
+export type TaskDefinitionFile = z.infer<typeof TaskDefinitionFileSchema>;
 export type TaskLinkedTo = z.infer<typeof TaskLinkedToSchema>;
 export type TaskEntry = z.infer<typeof TaskEntrySchema>;
 export type TasksIndex = z.infer<typeof TasksIndexSchema>;

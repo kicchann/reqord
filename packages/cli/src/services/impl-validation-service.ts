@@ -65,9 +65,8 @@ async function loadTasksForSpec(
     return [];
   }
   const raw = await fs.readYAML<unknown>(tasksPath);
-  const parsed = TasksIndexSchema.safeParse(raw);
-  if (!parsed.success) return [];
-  return parsed.data.tasks
+  const parsed = TasksIndexSchema.parse(raw);
+  return parsed.tasks
     .filter((t) => t.linkedTo.specifications.includes(specId))
     .map((t) => ({
       number: t.number,

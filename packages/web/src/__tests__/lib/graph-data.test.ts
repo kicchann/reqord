@@ -1,10 +1,7 @@
 import { describe, it, expect } from "vitest";
-import type { Requirement, Specification } from "@reqord/shared";
-import {
-  buildMultiLevelGraphData,
-} from "../../lib/graph-data.js";
+import type { Requirement, Specification, TaskEntry } from "@reqord/shared";
+import { buildMultiLevelGraphData } from "../../lib/graph-data.js";
 
-// Test helpers
 function makeReq(
   id: string,
   overrides: Partial<Requirement> = {},
@@ -49,11 +46,27 @@ function makeSpec(
   } as Specification;
 }
 
+function makeTask(
+  number: number,
+  specIds: string[],
+  overrides: Partial<TaskEntry> = {},
+): TaskEntry {
+  return {
+    number,
+    title: `Task #${number}`,
+    url: `https://github.com/test/repo/issues/${number}`,
+    status: "open",
+    linkedTo: { specifications: specIds },
+    syncedAt: "2026-01-01T00:00:00Z",
+    priority: "P1",
+    ...overrides,
+  };
+}
+
 describe("buildMultiLevelGraphData", () => {
   describe("empty inputs", () => {
     it("returns empty nodes and edges when both arrays are empty", () => {
-      const result = buildMultiLevelGraphData([], []);
-
+      const result = buildMultiLevelGraphData([], [], []);
       expect(result.nodes).toEqual([]);
       expect(result.edges).toEqual([]);
     });
@@ -63,18 +76,12 @@ describe("buildMultiLevelGraphData", () => {
     it("creates requirement nodes without specification or issue nodes", () => {
       const req1 = makeReq("req-000001");
       const req2 = makeReq("req-000002");
-
-      const result = buildMultiLevelGraphData([req1, req2], []);
-
+      const result = buildMultiLevelGraphData([req1, req2], [], []);
       expect(result.nodes).toHaveLength(2);
       expect(result.nodes[0]).toMatchObject({
         id: "req-000001",
         type: "requirement",
-        data: {
-          label: "Requirement req-000001",
-          status: "draft",
-          priority: "medium",
-        },
+        data: { label: "Requirement req-000001", status: "draft", priority: "medium" },
         position: { x: 0, y: 0 },
       });
       expect(result.nodes[1]).toMatchObject({
@@ -90,9 +97,7 @@ describe("buildMultiLevelGraphData", () => {
       const req2 = makeReq("req-000002", {
         dependencies: { blockedBy: ["req-000001"], blocks: [], relatedTo: [] },
       });
-
-      const result = buildMultiLevelGraphData([req1, req2], []);
-
+      const result = buildMultiLevelGraphData([req1, req2], [], []);
       expect(result.edges).toHaveLength(1);
       expect(result.edges[0]).toMatchObject({
         id: "dep-req-000001-req-000002",
@@ -107,17 +112,12 @@ describe("buildMultiLevelGraphData", () => {
     it("creates specification nodes at center column", () => {
       const req1 = makeReq("req-000001");
       const spec1 = makeSpec("spec-000001", "req-000001");
-
-      const result = buildMultiLevelGraphData([req1], [spec1]);
-
+      const result = buildMultiLevelGraphData([req1], [spec1], []);
       const specNode = result.nodes.find((n) => n.type === "specification");
       expect(specNode).toMatchObject({
         id: "spec-000001",
         type: "specification",
-        data: {
-          label: "spec-000001",
-          status: "draft",
-        },
+        data: { label: "spec-000001", status: "draft" },
         position: { x: 400, y: 0 },
       });
     });
@@ -125,9 +125,7 @@ describe("buildMultiLevelGraphData", () => {
     it("creates implements edge from specification to requirement", () => {
       const req1 = makeReq("req-000001");
       const spec1 = makeSpec("spec-000001", "req-000001");
-
-      const result = buildMultiLevelGraphData([req1], [spec1]);
-
+      const result = buildMultiLevelGraphData([req1], [spec1], []);
       const implementsEdge = result.edges.find((e) => e.type === "implements");
       expect(implementsEdge).toMatchObject({
         id: "impl-spec-000001-req-000001",
@@ -139,9 +137,7 @@ describe("buildMultiLevelGraphData", () => {
 
     it("creates implements edge even when requirementId does not exist", () => {
       const spec1 = makeSpec("spec-000001", "req-999999");
-
-      const result = buildMultiLevelGraphData([], [spec1]);
-
+      const result = buildMultiLevelGraphData([], [spec1], []);
       expect(result.edges).toHaveLength(1);
       expect(result.edges[0]).toMatchObject({
         source: "spec-000001",
@@ -154,9 +150,7 @@ describe("buildMultiLevelGraphData", () => {
       const req1 = makeReq("req-000001");
       const spec1 = makeSpec("spec-000001", "req-000001");
       const spec2 = makeSpec("spec-000002", "req-000001");
-
-      const result = buildMultiLevelGraphData([req1], [spec1, spec2]);
-
+      const result = buildMultiLevelGraphData([req1], [spec1, spec2], []);
       const implementsEdges = result.edges.filter((e) => e.type === "implements");
       expect(implementsEdges).toHaveLength(2);
       expect(implementsEdges[0].target).toBe("req-000001");
@@ -164,30 +158,20 @@ describe("buildMultiLevelGraphData", () => {
     });
   });
 
-  describe("requirements, specifications, and issues", () => {
+  describe("requirements, specifications, and tasks", () => {
     it("creates issue nodes at right column", () => {
       const req1 = makeReq("req-000001");
-      const spec1 = makeSpec("spec-000001", "req-000001", {
-        implementation: {
-          issues: [
-            {
-              number: 123,
-              title: "Implement feature X",
-              url: "https://github.com/test/repo/issues/123",
-              priority: "P1",
-              status: "open",
-            },
-          ],
-          totalEstimatedHours: 8,
-          createdAt: "2026-01-01T00:00:00Z",
-        },
+      const spec1 = makeSpec("spec-000001", "req-000001");
+      const task = makeTask(123, ["spec-000001"], {
+        title: "Implement feature X",
+        url: "https://github.com/test/repo/issues/123",
+        priority: "P1",
+        status: "open",
       });
-
-      const result = buildMultiLevelGraphData([req1], [spec1]);
-
+      const result = buildMultiLevelGraphData([req1], [spec1], [task]);
       const issueNode = result.nodes.find((n) => n.type === "issue");
       expect(issueNode).toMatchObject({
-        id: "issue-spec-000001-123",
+        id: "issue-123",
         type: "issue",
         data: {
           label: "Issue #123",
@@ -202,28 +186,18 @@ describe("buildMultiLevelGraphData", () => {
 
     it("creates tracks edge from issue to specification", () => {
       const req1 = makeReq("req-000001");
-      const spec1 = makeSpec("spec-000001", "req-000001", {
-        implementation: {
-          issues: [
-            {
-              number: 123,
-              title: "Implement feature X",
-              url: "https://github.com/test/repo/issues/123",
-              priority: "P1",
-              status: "open",
-            },
-          ],
-          totalEstimatedHours: 8,
-          createdAt: "2026-01-01T00:00:00Z",
-        },
+      const spec1 = makeSpec("spec-000001", "req-000001");
+      const task = makeTask(123, ["spec-000001"], {
+        title: "Implement feature X",
+        url: "https://github.com/test/repo/issues/123",
+        priority: "P1",
+        status: "open",
       });
-
-      const result = buildMultiLevelGraphData([req1], [spec1]);
-
+      const result = buildMultiLevelGraphData([req1], [spec1], [task]);
       const tracksEdge = result.edges.find((e) => e.type === "tracks");
       expect(tracksEdge).toMatchObject({
-        id: "track-issue-spec-000001-123-spec-000001",
-        source: "issue-spec-000001-123",
+        id: "track-issue-123-spec-000001",
+        source: "issue-123",
         target: "spec-000001",
         type: "tracks",
       });
@@ -234,87 +208,75 @@ describe("buildMultiLevelGraphData", () => {
       const req2 = makeReq("req-000002", {
         dependencies: { blockedBy: ["req-000001"], blocks: [], relatedTo: [] },
       });
-      const spec1 = makeSpec("spec-000001", "req-000002", {
-        implementation: {
-          issues: [
-            {
-              number: 123,
-              title: "Implement feature X",
-              url: "https://github.com/test/repo/issues/123",
-              priority: "P1",
-              status: "open",
-            },
-          ],
-          totalEstimatedHours: 8,
-          createdAt: "2026-01-01T00:00:00Z",
-        },
+      const spec1 = makeSpec("spec-000001", "req-000002");
+      const task = makeTask(123, ["spec-000001"], {
+        title: "Implement feature X",
+        url: "https://github.com/test/repo/issues/123",
+        priority: "P1",
+        status: "open",
       });
-
-      const result = buildMultiLevelGraphData([req1, req2], [spec1]);
-
-      // Verify node types
+      const result = buildMultiLevelGraphData([req1, req2], [spec1], [task]);
       const reqNodes = result.nodes.filter((n) => n.type === "requirement");
       const specNodes = result.nodes.filter((n) => n.type === "specification");
       const issueNodes = result.nodes.filter((n) => n.type === "issue");
-
       expect(reqNodes).toHaveLength(2);
       expect(specNodes).toHaveLength(1);
       expect(issueNodes).toHaveLength(1);
-
-      // Verify edge types
       const depEdges = result.edges.filter((e) => e.type === "dependency");
       const implEdges = result.edges.filter((e) => e.type === "implements");
       const trackEdges = result.edges.filter((e) => e.type === "tracks");
-
       expect(depEdges).toHaveLength(1);
       expect(implEdges).toHaveLength(1);
       expect(trackEdges).toHaveLength(1);
     });
 
-    it("does not create issue nodes or tracks edges when implementation field is missing", () => {
+    it("does not create issue nodes or tracks edges when no tasks match spec", () => {
       const req1 = makeReq("req-000001");
       const spec1 = makeSpec("spec-000001", "req-000001");
-
-      const result = buildMultiLevelGraphData([req1], [spec1]);
-
+      const result = buildMultiLevelGraphData([req1], [spec1], []);
       const issueNodes = result.nodes.filter((n) => n.type === "issue");
       const trackEdges = result.edges.filter((e) => e.type === "tracks");
-
       expect(issueNodes).toHaveLength(0);
       expect(trackEdges).toHaveLength(0);
     });
 
+    it("only includes tasks linked to the matching spec", () => {
+      const req1 = makeReq("req-000001");
+      const spec1 = makeSpec("spec-000001", "req-000001");
+      const task1 = makeTask(123, ["spec-000001"]);
+      const task2 = makeTask(124, ["spec-000002"]);
+      const result = buildMultiLevelGraphData([req1], [spec1], [task1, task2]);
+      const issueNodes = result.nodes.filter((n) => n.type === "issue");
+      expect(issueNodes).toHaveLength(1);
+      expect(issueNodes[0].id).toBe("issue-123");
+    });
+
     it("positions multiple issues vertically with offset", () => {
       const req1 = makeReq("req-000001");
-      const spec1 = makeSpec("spec-000001", "req-000001", {
-        implementation: {
-          issues: [
-            {
-              number: 123,
-              title: "Issue 1",
-              url: "https://github.com/test/repo/issues/123",
-              priority: "P1",
-              status: "open",
-            },
-            {
-              number: 124,
-              title: "Issue 2",
-              url: "https://github.com/test/repo/issues/124",
-              priority: "P2",
-              status: "open",
-            },
-          ],
-          totalEstimatedHours: 16,
-          createdAt: "2026-01-01T00:00:00Z",
-        },
-      });
-
-      const result = buildMultiLevelGraphData([req1], [spec1]);
-
+      const spec1 = makeSpec("spec-000001", "req-000001");
+      const task1 = makeTask(123, ["spec-000001"]);
+      const task2 = makeTask(124, ["spec-000001"]);
+      const result = buildMultiLevelGraphData([req1], [spec1], [task1, task2]);
       const issueNodes = result.nodes.filter((n) => n.type === "issue");
       expect(issueNodes).toHaveLength(2);
       expect(issueNodes[0].position).toEqual({ x: 800, y: 0 });
       expect(issueNodes[1].position).toEqual({ x: 800, y: 80 });
+    });
+
+    it("creates only one issue node when a task is linked to multiple specs", () => {
+      const req1 = makeReq("req-000001");
+      const spec1 = makeSpec("spec-000001", "req-000001");
+      const spec2 = makeSpec("spec-000002", "req-000001");
+      const task = makeTask(123, ["spec-000001", "spec-000002"]);
+      const result = buildMultiLevelGraphData([req1], [spec1, spec2], [task]);
+      const issueNodes = result.nodes.filter((n) => n.type === "issue");
+      expect(issueNodes).toHaveLength(1);
+      expect(issueNodes[0].id).toBe("issue-123");
+      const tracksEdges = result.edges.filter((e) => e.type === "tracks");
+      expect(tracksEdges).toHaveLength(2);
+      expect(tracksEdges.map((e) => e.target)).toEqual(
+        expect.arrayContaining(["spec-000001", "spec-000002"]),
+      );
     });
   });
 
@@ -322,9 +284,7 @@ describe("buildMultiLevelGraphData", () => {
     it("positions requirement nodes at x=0", () => {
       const req1 = makeReq("req-000001");
       const req2 = makeReq("req-000002");
-
-      const result = buildMultiLevelGraphData([req1, req2], []);
-
+      const result = buildMultiLevelGraphData([req1, req2], [], []);
       expect(result.nodes[0].position.x).toBe(0);
       expect(result.nodes[1].position.x).toBe(0);
     });
@@ -333,9 +293,7 @@ describe("buildMultiLevelGraphData", () => {
       const req1 = makeReq("req-000001");
       const spec1 = makeSpec("spec-000001", "req-000001");
       const spec2 = makeSpec("spec-000002", "req-000001");
-
-      const result = buildMultiLevelGraphData([req1], [spec1, spec2]);
-
+      const result = buildMultiLevelGraphData([req1], [spec1, spec2], []);
       const specNodes = result.nodes.filter((n) => n.type === "specification");
       expect(specNodes[0].position.x).toBe(400);
       expect(specNodes[1].position.x).toBe(400);
@@ -343,24 +301,9 @@ describe("buildMultiLevelGraphData", () => {
 
     it("positions issue nodes at x=800", () => {
       const req1 = makeReq("req-000001");
-      const spec1 = makeSpec("spec-000001", "req-000001", {
-        implementation: {
-          issues: [
-            {
-              number: 123,
-              title: "Issue 1",
-              url: "https://github.com/test/repo/issues/123",
-              priority: "P1",
-              status: "open",
-            },
-          ],
-          totalEstimatedHours: 8,
-          createdAt: "2026-01-01T00:00:00Z",
-        },
-      });
-
-      const result = buildMultiLevelGraphData([req1], [spec1]);
-
+      const spec1 = makeSpec("spec-000001", "req-000001");
+      const task = makeTask(123, ["spec-000001"]);
+      const result = buildMultiLevelGraphData([req1], [spec1], [task]);
       const issueNode = result.nodes.find((n) => n.type === "issue");
       expect(issueNode?.position.x).toBe(800);
     });
