@@ -462,7 +462,7 @@ async function collectFlagsForIds(
     try {
       artifact = await findById(cwd, artifactId);
     } catch {
-      continue;
+      continue; // Artifact may have been deleted; skip gracefully
     }
     const flags = artifact.flags.filter(
       (f): f is Extract<Flag, { type: "feedback-review" }> =>

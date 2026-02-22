@@ -141,7 +141,7 @@ export function fixUnquotedHash(content: string, filePath: string): string {
           modified = true;
           matched = true;
         }
-        break;
+        break; // A line matches at most one pattern (key-value or list item), so stop checking
       }
     }
     if (matched) continue;
