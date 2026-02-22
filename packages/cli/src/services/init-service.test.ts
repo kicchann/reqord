@@ -73,7 +73,7 @@ describe("initProject", () => {
     expect(rulesWrite![1]).toBe("# Rules");
   });
 
-  it(".gitkeep が specifications と assets に書き込まれる", async () => {
+  it(".gitkeep が specifications と assets と issues に書き込まれる", async () => {
     vi.mocked(fs.exists).mockResolvedValue(false);
     vi.mocked(fs.readText).mockResolvedValue("workflow-content");
 
