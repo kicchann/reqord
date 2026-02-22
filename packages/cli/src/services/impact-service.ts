@@ -338,7 +338,7 @@ export async function notifyImpact(
             title: task.title,
             status: task.status,
             relation: impact?.relation ?? "unknown",
-            path: impact?.path.join(" \u2192 ") ?? "",
+            path: impact?.path.join(" → ") ?? "",
           });
         }
       }
