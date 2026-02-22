@@ -107,51 +107,6 @@ function createImplementsEdge(spec: Specification): MultiLevelEdge {
 }
 
 /**
- * Creates an issue node
- */
-function createIssueNode(
-  spec: Specification,
-  issueNumber: number,
-  issueData: {
-    title: string;
-    url: string;
-    priority: string;
-    status: string;
-  },
-  specIndex: number,
-  issueIndex: number,
-): MultiLevelNode {
-  const issueId = `issue-${spec.id}-${issueNumber}`;
-  return {
-    id: issueId,
-    type: "issue",
-    data: {
-      label: `Issue #${issueNumber}`,
-      status: issueData.status,
-      priority: issueData.priority,
-      issueNumber,
-      issueUrl: issueData.url,
-    },
-    position: {
-      x: COLUMN_X.issue,
-      y: specIndex * NODE_SPACING.specification + issueIndex * NODE_SPACING.issue,
-    },
-  };
-}
-
-/**
- * Creates a tracks edge from issue to specification
- */
-function createTracksEdge(issueId: string, specId: string): MultiLevelEdge {
-  return {
-    id: `track-${issueId}-${specId}`,
-    source: issueId,
-    target: specId,
-    type: "tracks",
-  };
-}
-
-/**
  * Builds multi-level graph data from requirements and specifications
  */
 export function buildMultiLevelGraphData(
@@ -172,16 +127,7 @@ export function buildMultiLevelGraphData(
     nodes.push(createSpecificationNode(spec, specIndex));
     edges.push(createImplementsEdge(spec));
 
-    // Process issues if implementation exists
-    if (spec.implementation?.issues) {
-      spec.implementation.issues.forEach((issue, issueIndex) => {
-        const issueId = `issue-${spec.id}-${issue.number}`;
-        nodes.push(
-          createIssueNode(spec, issue.number, issue, specIndex, issueIndex),
-        );
-        edges.push(createTracksEdge(issueId, spec.id));
-      });
-    }
+    // Issue nodes are no longer sourced from spec.implementation
   });
 
   return { nodes, edges };

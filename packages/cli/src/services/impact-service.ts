@@ -1,7 +1,9 @@
-import type { Requirement } from "@reqord/shared";
+import type { Requirement, TaskEntry } from "@reqord/shared";
+import { TasksIndexSchema, REQORD_DIR, ISSUES_DIR } from "@reqord/shared";
 import * as reqRepo from "../repositories/requirement.js";
 import * as specRepo from "../repositories/specification.js";
 import * as github from "../repositories/github.js";
+import * as fs from "../repositories/file-system.js";
 
 export interface ImpactAnalysis {
   sourceId: string;
@@ -35,6 +37,26 @@ export interface IssueRef {
   url: string;
   status: string;
   specificationId: string;
+}
+
+async function loadTasksForSpec(cwd: string, specificationId: string): Promise<TaskEntry[]> {
+  const tasksPath = fs.joinPath(cwd, REQORD_DIR, ISSUES_DIR, "tasks.yaml");
+  if (!(await fs.exists(tasksPath))) {
+    return [];
+  }
+  const raw = await fs.readYAML<unknown>(tasksPath);
+  const parsed = TasksIndexSchema.parse(raw);
+  return parsed.tasks.filter((t) => t.linkedTo.specifications.includes(specificationId));
+}
+
+async function loadAllTasks(cwd: string): Promise<TaskEntry[]> {
+  const tasksPath = fs.joinPath(cwd, REQORD_DIR, ISSUES_DIR, "tasks.yaml");
+  if (!(await fs.exists(tasksPath))) {
+    return [];
+  }
+  const raw = await fs.readYAML<unknown>(tasksPath);
+  const parsed = TasksIndexSchema.parse(raw);
+  return parsed.tasks;
 }
 
 export async function analyzeImpact(
@@ -137,18 +159,25 @@ async function analyzeFromRequirement(
     .filter((s) => s.requirementId === id)
     .map((s) => ({ id: s.id, requirementId: s.requirementId, status: s.status }));
 
-  // Related issues from specifications
+  // Related issues from tasks.yaml (filtered by specifications linked to this requirement)
   const relatedIssues: IssueRef[] = [];
-  for (const spec of allSpecifications) {
-    if (spec.requirementId === id && spec.implementation) {
-      for (const issue of spec.implementation.issues) {
-        relatedIssues.push({
-          number: issue.number,
-          title: issue.title,
-          url: issue.url,
-          status: issue.status,
-          specificationId: spec.id,
-        });
+  const specIdsForReq = allSpecifications
+    .filter((s) => s.requirementId === id)
+    .map((s) => s.id);
+  if (specIdsForReq.length > 0) {
+    const allTasks = await loadAllTasks(cwd);
+    for (const task of allTasks) {
+      for (const specId of specIdsForReq) {
+        if (task.linkedTo.specifications.includes(specId)) {
+          relatedIssues.push({
+            number: task.number,
+            title: task.title,
+            url: task.url,
+            status: task.status,
+            specificationId: specId,
+          });
+          break; // avoid duplicating same task for multiple specs
+        }
       }
     }
   }
@@ -179,19 +208,15 @@ async function analyzeFromSpecification(cwd: string, id: string): Promise<Impact
     .filter((s) => s.requirementId === spec.requirementId && s.id !== id)
     .map((s) => ({ id: s.id, requirementId: s.requirementId, status: s.status }));
 
-  // Issues from this spec
-  const relatedIssues: IssueRef[] = [];
-  if (spec.implementation) {
-    for (const issue of spec.implementation.issues) {
-      relatedIssues.push({
-        number: issue.number,
-        title: issue.title,
-        url: issue.url,
-        status: issue.status,
-        specificationId: id,
-      });
-    }
-  }
+  // Issues from tasks.yaml linked to this spec
+  const tasksForSpec = await loadTasksForSpec(cwd, id);
+  const relatedIssues: IssueRef[] = tasksForSpec.map((task) => ({
+    number: task.number,
+    title: task.title,
+    url: task.url,
+    status: task.status,
+    specificationId: id,
+  }));
 
   return {
     sourceId: id,
@@ -300,15 +325,18 @@ export async function notifyImpact(
       impactMap.set(entry.id, entry);
     }
 
+    // Load tasks from tasks.yaml and filter by impacted specifications
     const allSpecs = await specRepo.findAll(cwd);
+    const allTasks = await loadAllTasks(cwd);
     for (const spec of allSpecs) {
-      if (impactedIds.has(spec.requirementId) && spec.implementation) {
-        for (const issue of spec.implementation.issues) {
+      if (impactedIds.has(spec.requirementId)) {
+        const tasksForSpec = allTasks.filter((t) => t.linkedTo.specifications.includes(spec.id));
+        for (const task of tasksForSpec) {
           const impact = impactMap.get(spec.requirementId);
           issuesWithContext.push({
-            number: issue.number,
-            title: issue.title,
-            status: issue.status,
+            number: task.number,
+            title: task.title,
+            status: task.status,
             relation: impact?.relation ?? "unknown",
             path: impact?.path.join(" → ") ?? "",
           });

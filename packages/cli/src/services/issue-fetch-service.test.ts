@@ -37,7 +37,7 @@ describe("fetchIssues", () => {
     vi.mocked(githubClient.getRepoUrl).mockResolvedValue("https://github.com/owner/repo");
   });
 
-  it("fetches issues and updates spec implementation", async () => {
+  it("fetches issues and returns spec fetch results", async () => {
     vi.mocked(githubClient.listAllIssues).mockResolvedValue([
       {
         number: 101,
@@ -59,7 +59,6 @@ describe("fetchIssues", () => {
 
     const spec = makeSpec("spec-000022");
     vi.mocked(specRepo.findById).mockResolvedValue(spec);
-    vi.mocked(specRepo.save).mockResolvedValue(undefined);
 
     const result = await fetchIssues("/cwd");
 
@@ -69,32 +68,9 @@ describe("fetchIssues", () => {
     expect(result.specsUpdated[0].specId).toBe("spec-000022");
     expect(result.specsUpdated[0].issueCount).toBe(2);
     expect(result.specsUpdated[0].totalEstimatedHours).toBe(12);
-    expect(result.specsUpdated[0].updated).toBe(true);
-
-    expect(specRepo.save).toHaveBeenCalledTimes(1);
-    const savedSpec = vi.mocked(specRepo.save).mock.calls[0][1];
-    expect(savedSpec.implementation!.issues).toHaveLength(2);
-    expect(savedSpec.implementation!.issues[0]).toMatchObject({
-      number: 101,
-      title: "Task 1",
-      url: "https://github.com/owner/repo/issues/101",
-      priority: "P1",
-      status: "open",
-    });
-    expect(savedSpec.implementation!.issues[1]).toMatchObject({
-      number: 102,
-      priority: "P2",
-      status: "closed",
-    });
-    expect(savedSpec.implementation!.totalEstimatedHours).toBe(12);
-    expect(savedSpec.implementation!.progress).toMatchObject({
-      total: 2,
-      completed: 1,
-      percentage: 50,
-    });
   });
 
-  it("does not write when dryRun is true", async () => {
+  it("does not write to spec when dryRun is true", async () => {
     vi.mocked(githubClient.listAllIssues).mockResolvedValue([
       {
         number: 101,
@@ -135,7 +111,6 @@ describe("fetchIssues", () => {
     ]);
 
     vi.mocked(specRepo.findById).mockResolvedValue(makeSpec("spec-000022"));
-    vi.mocked(specRepo.save).mockResolvedValue(undefined);
 
     const result = await fetchIssues("/cwd", { specId: "spec-000022" });
 
@@ -200,7 +175,6 @@ describe("fetchIssues", () => {
     ]);
 
     vi.mocked(specRepo.findById).mockResolvedValue(makeSpec("spec-000022"));
-    vi.mocked(specRepo.save).mockResolvedValue(undefined);
 
     const result = await fetchIssues("/cwd");
 
@@ -208,56 +182,6 @@ describe("fetchIssues", () => {
     expect(result.totalIssuesWithTag).toBe(1);
     expect(result.specsUpdated).toHaveLength(1);
     expect(result.specsUpdated[0].issueCount).toBe(1);
-  });
-
-  it("preserves existing createdAt when implementation already exists", async () => {
-    vi.mocked(githubClient.listAllIssues).mockResolvedValue([
-      {
-        number: 101,
-        title: "Task 1",
-        state: "open",
-        labels: [],
-        createdAt: "2026-01-01T00:00:00Z",
-        body: '<!-- reqord:specification {"specificationId":"spec-000022"} -->',
-      },
-    ]);
-
-    const existingCreatedAt = "2025-06-01T00:00:00Z";
-    const spec = makeSpec("spec-000022", {
-      implementation: {
-        issues: [{ number: 50, title: "Old", url: "url", priority: "P2", status: "closed" }],
-        totalEstimatedHours: 4,
-        createdAt: existingCreatedAt,
-      },
-    });
-    vi.mocked(specRepo.findById).mockResolvedValue(spec);
-    vi.mocked(specRepo.save).mockResolvedValue(undefined);
-
-    await fetchIssues("/cwd");
-
-    const savedSpec = vi.mocked(specRepo.save).mock.calls[0][1];
-    expect(savedSpec.implementation!.createdAt).toBe(existingCreatedAt);
-  });
-
-  it("defaults priority to P2 when tag has no priority", async () => {
-    vi.mocked(githubClient.listAllIssues).mockResolvedValue([
-      {
-        number: 101,
-        title: "Task 1",
-        state: "open",
-        labels: [],
-        createdAt: "2026-01-01T00:00:00Z",
-        body: '<!-- reqord:specification {"specificationId":"spec-000022"} -->',
-      },
-    ]);
-
-    vi.mocked(specRepo.findById).mockResolvedValue(makeSpec("spec-000022"));
-    vi.mocked(specRepo.save).mockResolvedValue(undefined);
-
-    await fetchIssues("/cwd");
-
-    const savedSpec = vi.mocked(specRepo.save).mock.calls[0][1];
-    expect(savedSpec.implementation!.issues[0].priority).toBe("P2");
   });
 
   it("handles empty result when no issues exist", async () => {

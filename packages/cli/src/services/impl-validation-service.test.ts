@@ -11,6 +11,7 @@ vi.mock("../repositories/requirement.js", () => ({}));
 vi.mock("../repositories/file-system.js", () => ({
   joinPath: vi.fn((...parts: string[]) => parts.join("/")),
   exists: vi.fn(),
+  readYAML: vi.fn(),
 }));
 
 import {
@@ -186,7 +187,7 @@ describe("validateImplementation", () => {
     vi.resetAllMocks();
   });
 
-  it("returns validation with issue, component, and test checks", async () => {
+  it("returns validation with component and test checks (spec.implementation removed)", async () => {
     vi.mocked(specRepo.findByIdOrThrow).mockResolvedValue({
       id: "spec-000001",
       requirementId: "req-000001",
@@ -197,14 +198,6 @@ describe("validateImplementation", () => {
       versionHistory: [],
       files: { design: "design.md", supplementary: [] },
       flags: [],
-      implementation: {
-        issues: [
-          { number: 1, title: "Task 1", url: "http://x", priority: "P1" as const, status: "closed" as const },
-          { number: 2, title: "Task 2", url: "http://x", priority: "P2" as const, status: "open" as const },
-        ],
-        totalEstimatedHours: 10,
-        createdAt: "2024-01-01",
-      },
     });
 
     vi.mocked(specRepo.loadFile).mockResolvedValue(
@@ -212,6 +205,7 @@ describe("validateImplementation", () => {
     );
 
     vi.mocked(fs.exists)
+      .mockResolvedValueOnce(false)  // tasks.yaml does not exist
       .mockResolvedValueOnce(true)   // component exists
       .mockResolvedValueOnce(false); // test missing
 
@@ -219,8 +213,9 @@ describe("validateImplementation", () => {
 
     expect(result.specId).toBe("spec-000001");
     expect(result.requirementId).toBe("req-000001");
-    expect(result.issueCheck.total).toBe(2);
-    expect(result.issueCheck.completed).toBe(1);
+    // tasks.yaml does not exist; issueCheck is empty
+    expect(result.issueCheck.total).toBe(0);
+    expect(result.issueCheck.completed).toBe(0);
     expect(result.componentCheck.total).toBe(1);
     expect(result.componentCheck.exists).toBe(1);
     expect(result.testCheck.total).toBe(1);
@@ -251,7 +246,7 @@ describe("validateImplementation", () => {
     expect(result.overallStatus).toBe("not-started");
   });
 
-  it("preserves in_progress issue status", async () => {
+  it("tasks.yamlが空の場合issueCheckは空", async () => {
     vi.mocked(specRepo.findByIdOrThrow).mockResolvedValue({
       id: "spec-000003",
       requirementId: "req-000003",
@@ -262,23 +257,19 @@ describe("validateImplementation", () => {
       versionHistory: [],
       files: { design: "design.md", supplementary: [] },
       flags: [],
-      implementation: {
-        issues: [
-          { number: 1, title: "Task 1", url: "http://x", priority: "P1" as const, status: "in_progress" as const },
-        ],
-        totalEstimatedHours: 5,
-        createdAt: "2024-01-01",
-      },
     });
 
     vi.mocked(specRepo.loadFile).mockResolvedValue(
       `### 3.1 Service (\`packages/cli/src/services/foo.ts\`)`,
     );
-    vi.mocked(fs.exists).mockResolvedValue(true);
+    vi.mocked(fs.exists)
+      .mockResolvedValueOnce(false)  // tasks.yaml does not exist
+      .mockResolvedValue(true);      // all component/test files exist
 
     const result = await validateImplementation("/project", "spec-000003");
 
-    expect(result.issueCheck.issues[0].state).toBe("in_progress");
+    expect(result.issueCheck.issues).toEqual([]);
+    expect(result.issueCheck.total).toBe(0);
   });
 });
 
@@ -337,7 +328,7 @@ describe("checkImplementConsistency", () => {
     );
   });
 
-  it("一部Issue open → issue-not-closed警告", async () => {
+  it("spec.implementationは使用しないためissue-not-closed警告は出ない", async () => {
     vi.mocked(specRepo.findAll).mockResolvedValue([
       {
         id: "spec-000001",
@@ -349,23 +340,11 @@ describe("checkImplementConsistency", () => {
         versionHistory: [],
         files: { design: "design.md", supplementary: [] },
         flags: [],
-        implementation: {
-          issues: [
-            { number: 42, title: "Open task", url: "http://x", priority: "P1" as const, status: "open" as const },
-          ],
-          totalEstimatedHours: 5,
-          createdAt: "2024-01-01",
-        },
       },
     ]);
 
     const result = await checkImplementConsistency("/project", "req-000001");
-    expect(result.warnings).toContainEqual(
-      expect.objectContaining({
-        type: "issue-not-closed",
-        details: expect.objectContaining({ id: "42", currentStatus: "open" }),
-      }),
-    );
+    expect(result.warnings.filter((w) => w.type === "issue-not-closed")).toEqual([]);
   });
 
   it("Spec 0件 → warnings空", async () => {

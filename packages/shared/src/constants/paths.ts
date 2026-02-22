@@ -9,3 +9,4 @@ export const ASSETS_DIR = "assets";
 export const DOMAIN_DIR = "domain";
 export const ISSUE_TEMPLATES_DIR = "issue-templates";
 export const FEEDBACK_DIR = "feedback";
+export const ISSUES_DIR = "issues";

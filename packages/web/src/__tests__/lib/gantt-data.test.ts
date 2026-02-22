@@ -1,13 +1,13 @@
 import { describe, it, expect } from "vitest";
-import type { Implementation, ImplementationIssue } from "@reqord/shared";
+import type { IssueItem, ImplementationData } from "../../lib/gantt-data.js";
 import {
   transformToGanttData,
   DEFAULT_HOURS,
 } from "../../lib/gantt-data.js";
 
 function makeIssue(
-  overrides: Partial<ImplementationIssue> = {},
-): ImplementationIssue {
+  overrides: Partial<IssueItem> = {},
+): IssueItem {
   return {
     number: 1,
     title: "Test task",
@@ -18,7 +18,7 @@ function makeIssue(
   };
 }
 
-function makeImplementation(issues: ImplementationIssue[]): Implementation {
+function makeImplementation(issues: IssueItem[]): ImplementationData {
   return {
     issues,
     totalEstimatedHours: issues.length * DEFAULT_HOURS,

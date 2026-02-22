@@ -71,7 +71,11 @@ export async function createMigrationPlan(cwd: string): Promise<MigrationPlanIte
     }
   }
 
-  // Feedback
+  // Feedback (legacy format migration only)
+  // This handles JSON→YAML format conversion for the old `.reqord/feedback/index.json` path.
+  // Note: The storage path was later migrated to `.reqord/issues/feedbacks.yaml` (spec-000027),
+  // but this migration-service is only responsible for format migration (JSON→YAML) of
+  // pre-existing data at the original path. Path migration is out of scope here.
   const feedbackIndexPath = join(reqordPath, FEEDBACK_DIR, "index.json");
   if (await fs.exists(feedbackIndexPath)) {
     plan.push({
