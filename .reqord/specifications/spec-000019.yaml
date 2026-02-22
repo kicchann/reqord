@@ -3,9 +3,9 @@ requirementId: req-000019
 title: ステータス表示コマンド
 requirementVersion: '2.0'
 version: '1.1'
-status: approved
+status: draft
 createdAt: 2026-02-08T14:08:08.151Z
-updatedAt: 2026-02-21T13:28:53.543Z
+updatedAt: 2026-02-22T23:44:11.740Z
 versionHistory:
   - version: '1.0'
     status: draft
