@@ -2,28 +2,6 @@ import { z } from "zod";
 import { StatusSchema, VersionHistoryEntrySchema } from "./common.js";
 import { FlagSchema } from "./requirement.js";
 
-export const ImplementationIssueSchema = z.object({
-  number: z.number(),
-  title: z.string(),
-  url: z.string(),
-  priority: z.enum(["P0", "P1", "P2", "P3"]),
-  status: z.enum(["open", "in_progress", "closed"]).default("open"),
-});
-
-export const ProgressSchema = z.object({
-  total: z.number(),
-  completed: z.number(),
-  percentage: z.number(),
-  lastSyncedAt: z.string(),
-});
-
-export const ImplementationSchema = z.object({
-  issues: z.array(ImplementationIssueSchema),
-  totalEstimatedHours: z.number(),
-  createdAt: z.string(),
-  progress: ProgressSchema.optional(),
-});
-
 export const DesignValidationRuleSchema = z.object({
   ruleId: z.string(),
   status: z.enum(["pass", "fail"]),
@@ -54,13 +32,9 @@ export const SpecificationSchema = z.object({
     supplementary: z.array(z.string()).default([]),
   }),
   flags: z.array(FlagSchema).default([]),
-  implementation: ImplementationSchema.optional(),
   designValidation: DesignValidationSchema.optional(),
-});
+}).passthrough();
 
 export type Specification = z.infer<typeof SpecificationSchema>;
-export type ImplementationIssue = z.infer<typeof ImplementationIssueSchema>;
-export type Implementation = z.infer<typeof ImplementationSchema>;
-export type Progress = z.infer<typeof ProgressSchema>;
 export type DesignValidation = z.infer<typeof DesignValidationSchema>;
 export type DesignValidationRule = z.infer<typeof DesignValidationRuleSchema>;

@@ -94,20 +94,9 @@ export function buildStatusSummary(
   return { total, byStatus, implementedPercentage, approvedPercentage };
 }
 
-export function buildIssueSummary(specs: Specification[]): IssueSummary {
-  let total = 0;
-  let closed = 0;
-  for (const spec of specs) {
-    if (!spec.implementation) continue;
-    for (const issue of spec.implementation.issues) {
-      total++;
-      if (issue.status === "closed") closed++;
-    }
-  }
-  const open = total - closed;
-  const closedPercentage =
-    total > 0 ? Math.round((closed / total) * 100) : 0;
-  return { total, closed, open, closedPercentage };
+export function buildIssueSummary(_specs: Specification[]): IssueSummary {
+  // spec.implementation is no longer used; issue data comes from tasks.yaml
+  return { total: 0, closed: 0, open: 0, closedPercentage: 0 };
 }
 
 export function detectWarnings(
@@ -288,21 +277,11 @@ export async function getRequirementStatus(
     }
   }
 
-  let totalIssues = 0;
-  let completedIssues = 0;
-  for (const spec of relatedSpecs) {
-    if (!spec.implementation) continue;
-    for (const issue of spec.implementation.issues) {
-      totalIssues++;
-      if (issue.status === "closed") completedIssues++;
-    }
-  }
-
   return {
     requirement,
     specifications,
     dependencyStatus,
-    issueProgress: { total: totalIssues, completed: completedIssues },
+    issueProgress: { total: 0, completed: 0 },
   };
 }
 
@@ -313,14 +292,9 @@ export async function getSpecificationStatus(
   const specification = await specRepo.findByIdOrThrow(cwd, specId);
   const req = await reqRepo.findById(cwd, specification.requirementId);
 
-  let totalIssues = 0;
-  let completedIssues = 0;
-  if (specification.implementation) {
-    for (const issue of specification.implementation.issues) {
-      totalIssues++;
-      if (issue.status === "closed") completedIssues++;
-    }
-  }
+  // spec.implementation is no longer used; issue data comes from tasks.yaml
+  const totalIssues = 0;
+  const completedIssues = 0;
 
   // Design validation
   const designValidation = specification.designValidation

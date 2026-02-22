@@ -1,6 +1,5 @@
-import type { TaskDefinitionFile, TaskDefinition, Implementation } from "@reqord/shared";
+import type { TaskDefinitionFile, TaskDefinition } from "@reqord/shared";
 import { TaskDefinitionFileSchema } from "@reqord/shared";
-import * as specRepo from "../repositories/specification.js";
 import * as githubClient from "./github-client.js";
 import * as fs from "../repositories/file-system.js";
 
@@ -63,21 +62,11 @@ export function buildIssueBody(
   return body;
 }
 
-export async function updateSpecificationImplementation(
-  cwd: string,
-  specId: string,
-  implementation: Implementation
-): Promise<void> {
-  const spec = await specRepo.findByIdOrThrow(cwd, specId);
-  spec.implementation = implementation;
-  spec.updatedAt = new Date().toISOString();
-  await specRepo.save(cwd, spec);
-}
-
 export async function createIssuesFromSpec(
   cwd: string,
   options: CreateIssuesOptions
 ): Promise<CreateIssuesResult> {
+  const specRepo = await import("../repositories/specification.js");
   const spec = await specRepo.findByIdOrThrow(cwd, options.specId);
   if (spec.status !== "approved") {
     throw new Error(`Specification ${options.specId} must be approved before creating issues`);
@@ -128,23 +117,6 @@ export async function createIssuesFromSpec(
     }
 
     totalEstimatedHours += task.estimatedHours;
-  }
-
-  // Update specification with implementation data (skip in dry-run)
-  if (!options.dryRun) {
-    const implementation: Implementation = {
-      issues: issues.map((issue) => ({
-        number: issue.number!,
-        title: issue.title,
-        url: issue.url!,
-        priority: issue.priority,
-        status: "open" as const,
-      })),
-      totalEstimatedHours,
-      createdAt: new Date().toISOString(),
-    };
-
-    await updateSpecificationImplementation(cwd, options.specId, implementation);
   }
 
   return {

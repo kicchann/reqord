@@ -18,27 +18,10 @@ export interface ValidateResult {
 export function validateSpecification(spec: Specification): ValidateResult {
   const issues: ValidationIssue[] = [];
 
-  if (!spec.implementation) {
-    issues.push({ type: "error", message: "No implementation field found" });
-    return { specId: spec.id, issues, valid: false };
-  }
+  // spec.implementation has been removed; use tasks.yaml-based workflow
+  issues.push({ type: "info", message: "Issue tracking has moved to tasks.yaml. Use `reqord task` commands to manage tasks." });
 
-  if (spec.implementation.issues.length === 0) {
-    issues.push({ type: "warning", message: "No issues found in implementation" });
-  } else {
-    // Only check progress if there are issues
-    if (!spec.implementation.progress) {
-      issues.push({ type: "info", message: "No progress data. Run `reqord issue sync` to calculate progress" });
-    } else {
-      const allClosed = spec.implementation.issues.every(i => i.status === "closed");
-      if (allClosed && spec.implementation.progress.percentage !== 100) {
-        issues.push({ type: "warning", message: "All issues are closed but progress is not 100%" });
-      }
-    }
-  }
-
-  const hasErrors = issues.some(i => i.type === "error");
-  return { specId: spec.id, issues, valid: !hasErrors };
+  return { specId: spec.id, issues, valid: true };
 }
 
 export const issueValidateCommand = new Command("validate")
