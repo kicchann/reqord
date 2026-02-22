@@ -1,4 +1,4 @@
-import type { Requirement, Specification } from "@reqord/shared";
+import type { Requirement, Specification, TaskEntry } from "@reqord/shared";
 
 export type NodeType = "requirement" | "specification" | "issue";
 export type EdgeType = "dependency" | "implements" | "tracks";
@@ -28,23 +28,18 @@ export type MultiLevelGraphData = {
   edges: MultiLevelEdge[];
 };
 
-// Column positions for node types
 const COLUMN_X = {
   requirement: 0,
   specification: 400,
   issue: 800,
 } as const;
 
-// Vertical spacing between nodes
 const NODE_SPACING = {
   requirement: 120,
   specification: 120,
   issue: 80,
 } as const;
 
-/**
- * Creates a requirement node
- */
 function createRequirementNode(
   req: Requirement,
   index: number,
@@ -61,9 +56,6 @@ function createRequirementNode(
   };
 }
 
-/**
- * Creates dependency edges from a requirement's blockedBy list
- */
 function createDependencyEdges(req: Requirement): MultiLevelEdge[] {
   return req.dependencies.blockedBy.map((blockerId) => ({
     id: `dep-${blockerId}-${req.id}`,
@@ -73,9 +65,6 @@ function createDependencyEdges(req: Requirement): MultiLevelEdge[] {
   }));
 }
 
-/**
- * Creates a specification node
- */
 function createSpecificationNode(
   spec: Specification,
   specIndex: number,
@@ -94,9 +83,6 @@ function createSpecificationNode(
   };
 }
 
-/**
- * Creates an implements edge from specification to requirement
- */
 function createImplementsEdge(spec: Specification): MultiLevelEdge {
   return {
     id: `impl-${spec.id}-${spec.requirementId}`,
@@ -106,28 +92,69 @@ function createImplementsEdge(spec: Specification): MultiLevelEdge {
   };
 }
 
-/**
- * Builds multi-level graph data from requirements and specifications
- */
+function createIssueNode(
+  task: TaskEntry,
+  specIndex: number,
+  issueIndex: number,
+): MultiLevelNode {
+  const issueId = `issue-${task.number}`;
+  return {
+    id: issueId,
+    type: "issue",
+    data: {
+      label: `Issue #${task.number}`,
+      status: task.status,
+      priority: task.priority,
+      issueNumber: task.number,
+      issueUrl: task.url,
+    },
+    position: {
+      x: COLUMN_X.issue,
+      y:
+        specIndex * NODE_SPACING.specification +
+        issueIndex * NODE_SPACING.issue,
+    },
+  };
+}
+
+function createTracksEdge(issueId: string, specId: string): MultiLevelEdge {
+  return {
+    id: `track-${issueId}-${specId}`,
+    source: issueId,
+    target: specId,
+    type: "tracks",
+  };
+}
+
 export function buildMultiLevelGraphData(
   requirements: Requirement[],
   specifications: Specification[],
+  tasks: TaskEntry[],
 ): MultiLevelGraphData {
   const nodes: MultiLevelNode[] = [];
   const edges: MultiLevelEdge[] = [];
+  const addedIssueIds = new Set<string>();
 
-  // Process requirements: create nodes and dependency edges
   requirements.forEach((req, index) => {
     nodes.push(createRequirementNode(req, index));
     edges.push(...createDependencyEdges(req));
   });
 
-  // Process specifications: create nodes, implements edges, and issue data
   specifications.forEach((spec, specIndex) => {
     nodes.push(createSpecificationNode(spec, specIndex));
     edges.push(createImplementsEdge(spec));
 
-    // Issue nodes are no longer sourced from spec.implementation
+    const specTasks = tasks.filter((t) =>
+      t.linkedTo.specifications.includes(spec.id),
+    );
+    specTasks.forEach((task, issueIndex) => {
+      const issueId = `issue-${task.number}`;
+      if (!addedIssueIds.has(issueId)) {
+        nodes.push(createIssueNode(task, specIndex, issueIndex));
+        addedIssueIds.add(issueId);
+      }
+      edges.push(createTracksEdge(issueId, spec.id));
+    });
   });
 
   return { nodes, edges };
