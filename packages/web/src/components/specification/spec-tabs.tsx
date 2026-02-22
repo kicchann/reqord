@@ -1,19 +1,19 @@
 "use client";
 
 import React, { useSyncExternalStore } from "react";
-import type { ImplementationIssue, VersionHistoryEntry } from "@reqord/shared";
+import type { VersionHistoryEntry } from "@reqord/shared";
 import { Tabs } from "@/components/ui/tabs";
 import { TabDesign } from "./tab-design";
 import { TabResearch } from "./tab-research";
 import { TabCoverage } from "./tab-coverage";
-import { TabIssues } from "./tab-issues";
+import { TabIssues, type IssueItem } from "./tab-issues";
 import { TabHistory } from "./tab-history";
 
 type SpecTabsProps = {
   design: string | null;
   research: string | null;
   successCriteria: string[] | null;
-  issues: ImplementationIssue[] | null;
+  issues: IssueItem[] | null;
   versionHistory: VersionHistoryEntry[];
 };
 
