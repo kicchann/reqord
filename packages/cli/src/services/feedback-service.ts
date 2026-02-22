@@ -1,4 +1,4 @@
-import type { FeedbackEntry, FeedbackType, FeedbackSeverity } from "@reqord/shared";
+import type { FeedbackEntry, FeedbackType, FeedbackSeverity, Flag } from "@reqord/shared";
 import * as feedbackRepo from "../repositories/feedback.js";
 import * as reqRepo from "../repositories/requirement.js";
 import * as specRepo from "../repositories/specification.js";
@@ -105,16 +105,7 @@ export async function linkToRequirement(
   }
 
   // Update GitHub Issue body with HTML comment
-  const issue = await githubClient.getIssue(options.issueNumber);
-  const currentBody = issue.body ?? "";
-  const newBody = upsertReqordComment(currentBody, {
-    type: feedback.type,
-    severity: feedback.severity,
-    linkedTo: feedback.linkedTo,
-  });
-  if (newBody !== currentBody) {
-    await githubClient.updateIssueBody(options.issueNumber, newBody);
-  }
+  await updateGitHubIssueBody(options.issueNumber, feedback);
 }
 
 export async function linkWithNewRequirement(
@@ -145,15 +136,7 @@ export async function linkWithNewRequirement(
   await feedbackRepo.saveIndex(cwd, index);
 
   // Update GitHub Issue body with HTML comment
-  const currentBody = issue.body ?? "";
-  const newBody = upsertReqordComment(currentBody, {
-    type: feedback.type,
-    severity: feedback.severity,
-    linkedTo: feedback.linkedTo,
-  });
-  if (newBody !== currentBody) {
-    await githubClient.updateIssueBody(options.issueNumber, newBody);
-  }
+  await updateGitHubIssueBody(options.issueNumber, feedback);
 
   return newId;
 }
@@ -192,16 +175,7 @@ export async function linkToSpecification(
   }
 
   // Update GitHub Issue body with HTML comment
-  const issue = await githubClient.getIssue(options.issueNumber);
-  const currentBody = issue.body ?? "";
-  const newBody = upsertReqordComment(currentBody, {
-    type: feedback.type,
-    severity: feedback.severity,
-    linkedTo: feedback.linkedTo,
-  });
-  if (newBody !== currentBody) {
-    await githubClient.updateIssueBody(options.issueNumber, newBody);
-  }
+  await updateGitHubIssueBody(options.issueNumber, feedback);
 }
 
 export async function closeFeedback(
@@ -220,6 +194,28 @@ export async function closeFeedback(
 
   const summary = buildImpactSummary(feedback);
   await githubClient.closeIssue(issueNumber, summary);
+}
+
+function removeFeedbackFlag(flags: Flag[], issueNumber: number): Flag[] {
+  return flags.filter(
+    (f) => !(f.type === "feedback-review" && f.relatedIssues.includes(issueNumber)),
+  );
+}
+
+async function updateGitHubIssueBody(
+  issueNumber: number,
+  feedback: FeedbackEntry,
+): Promise<void> {
+  const issue = await githubClient.getIssue(issueNumber);
+  const currentBody = issue.body ?? "";
+  const newBody = upsertReqordComment(currentBody, {
+    type: feedback.type,
+    severity: feedback.severity,
+    linkedTo: feedback.linkedTo,
+  });
+  if (newBody !== currentBody) {
+    await githubClient.updateIssueBody(issueNumber, newBody);
+  }
 }
 
 function createEmptyFeedbackEntry(issueNumber: number): FeedbackEntry {
@@ -254,17 +250,16 @@ function getOrCreateFeedback(
 function buildImpactSummary(feedback: FeedbackEntry): string {
   const lines = ["**Feedback closed - Impact summary:**", ""];
 
-  if (feedback.linkedTo.requirements.length > 0) {
-    lines.push(`- Linked Requirements: ${feedback.linkedTo.requirements.join(", ")}`);
-  }
-  if (feedback.linkedTo.createdRequirements.length > 0) {
-    lines.push(`- Created Requirements: ${feedback.linkedTo.createdRequirements.join(", ")}`);
-  }
-  if (feedback.linkedTo.specifications.length > 0) {
-    lines.push(`- Linked Specifications: ${feedback.linkedTo.specifications.join(", ")}`);
-  }
-  if (feedback.linkedTo.createdSpecifications.length > 0) {
-    lines.push(`- Created Specifications: ${feedback.linkedTo.createdSpecifications.join(", ")}`);
+  const sections: Array<{ label: string; ids: string[] }> = [
+    { label: "Linked Requirements", ids: feedback.linkedTo.requirements },
+    { label: "Created Requirements", ids: feedback.linkedTo.createdRequirements },
+    { label: "Linked Specifications", ids: feedback.linkedTo.specifications },
+    { label: "Created Specifications", ids: feedback.linkedTo.createdSpecifications },
+  ];
+  for (const { label, ids } of sections) {
+    if (ids.length > 0) {
+      lines.push(`- ${label}: ${ids.join(", ")}`);
+    }
   }
 
   lines.push("", "Flags remain on linked artifacts. Use `reqord feedback resolve` to remove when resolved.");
@@ -426,23 +421,11 @@ export async function resolveFeedback(
   // Step 1: Remove feedback-review flag from artifact (safe side first)
   if (isReq) {
     const requirement = await reqRepo.findByIdOrThrow(cwd, options.artifactId);
-    requirement.flags = requirement.flags.filter(
-      (f) =>
-        !(
-          f.type === "feedback-review" &&
-          f.relatedIssues.includes(options.issueNumber)
-        ),
-    );
+    requirement.flags = removeFeedbackFlag(requirement.flags, options.issueNumber);
     await reqRepo.save(cwd, requirement);
   } else {
     const specification = await specRepo.findByIdOrThrow(cwd, options.artifactId);
-    specification.flags = specification.flags.filter(
-      (f) =>
-        !(
-          f.type === "feedback-review" &&
-          f.relatedIssues.includes(options.issueNumber)
-        ),
-    );
+    specification.flags = removeFeedbackFlag(specification.flags, options.issueNumber);
     await specRepo.save(cwd, specification);
   }
 
@@ -467,57 +450,40 @@ export interface RemainingFlag {
   severity: string;
 }
 
+async function collectFlagsForIds(
+  cwd: string,
+  ids: string[],
+  issueNumber: number,
+  findById: (cwd: string, id: string) => Promise<{ flags: Flag[] }>,
+): Promise<RemainingFlag[]> {
+  const remaining: RemainingFlag[] = [];
+  for (const artifactId of ids) {
+    let artifact;
+    try {
+      artifact = await findById(cwd, artifactId);
+    } catch {
+      continue; // Artifact may have been deleted; skip gracefully
+    }
+    const flags = artifact.flags.filter(
+      (f): f is Extract<Flag, { type: "feedback-review" }> =>
+        f.type === "feedback-review" && f.relatedIssues.includes(issueNumber),
+    );
+    for (const flag of flags) {
+      remaining.push({ artifactId, issueNumber, severity: flag.severity ?? "medium" });
+    }
+  }
+  return remaining;
+}
+
 export async function checkRemainingFlags(
   cwd: string,
   feedback: FeedbackEntry,
 ): Promise<RemainingFlag[]> {
-  const remaining: RemainingFlag[] = [];
-
-  for (const reqId of feedback.linkedTo.requirements) {
-    let requirement;
-    try {
-      requirement = await reqRepo.findByIdOrThrow(cwd, reqId);
-    } catch {
-      continue;
-    }
-
-    const flags = requirement.flags.filter(
-      (f) =>
-        f.type === "feedback-review" &&
-        f.relatedIssues.includes(feedback.githubIssue),
-    );
-    for (const flag of flags) {
-      remaining.push({
-        artifactId: reqId,
-        issueNumber: feedback.githubIssue,
-        severity: flag.type === "feedback-review" ? flag.severity : "medium",
-      });
-    }
-  }
-
-  for (const specId of feedback.linkedTo.specifications) {
-    let specification;
-    try {
-      specification = await specRepo.findByIdOrThrow(cwd, specId);
-    } catch {
-      continue;
-    }
-
-    const flags = specification.flags.filter(
-      (f) =>
-        f.type === "feedback-review" &&
-        f.relatedIssues.includes(feedback.githubIssue),
-    );
-    for (const flag of flags) {
-      remaining.push({
-        artifactId: specId,
-        issueNumber: feedback.githubIssue,
-        severity: flag.type === "feedback-review" ? flag.severity : "medium",
-      });
-    }
-  }
-
-  return remaining;
+  const [fromReqs, fromSpecs] = await Promise.all([
+    collectFlagsForIds(cwd, feedback.linkedTo.requirements, feedback.githubIssue, reqRepo.findByIdOrThrow),
+    collectFlagsForIds(cwd, feedback.linkedTo.specifications, feedback.githubIssue, specRepo.findByIdOrThrow),
+  ]);
+  return [...fromReqs, ...fromSpecs];
 }
 
 // v3.0.0: Feedback link removal (SC-14, SC-15)
@@ -553,25 +519,13 @@ export async function unlinkFromRequirement(
 
   // Remove feedback-review flag from Requirement
   const requirement = await reqRepo.findByIdOrThrow(cwd, options.requirementId);
-  requirement.flags = requirement.flags.filter(
-    (f) =>
-      !(
-        f.type === "feedback-review" &&
-        f.relatedIssues.includes(options.issueNumber)
-      ),
-  );
+  requirement.flags = removeFeedbackFlag(requirement.flags, options.issueNumber);
   await reqRepo.save(cwd, requirement);
 
   await feedbackRepo.saveIndex(cwd, index);
 
   // Update HTML comment in GitHub Issue body
-  const issue = await githubClient.getIssue(options.issueNumber);
-  const newBody = upsertReqordComment(issue.body ?? "", {
-    type: feedback.type,
-    severity: feedback.severity,
-    linkedTo: feedback.linkedTo,
-  });
-  await githubClient.updateIssueBody(options.issueNumber, newBody);
+  await updateGitHubIssueBody(options.issueNumber, feedback);
 }
 
 export async function unlinkFromSpecification(
@@ -596,23 +550,11 @@ export async function unlinkFromSpecification(
 
   // Remove feedback-review flag from Specification
   const specification = await specRepo.findByIdOrThrow(cwd, options.specificationId);
-  specification.flags = specification.flags.filter(
-    (f) =>
-      !(
-        f.type === "feedback-review" &&
-        f.relatedIssues.includes(options.issueNumber)
-      ),
-  );
+  specification.flags = removeFeedbackFlag(specification.flags, options.issueNumber);
   await specRepo.save(cwd, specification);
 
   await feedbackRepo.saveIndex(cwd, index);
 
   // Update HTML comment in GitHub Issue body
-  const issue = await githubClient.getIssue(options.issueNumber);
-  const newBody = upsertReqordComment(issue.body ?? "", {
-    type: feedback.type,
-    severity: feedback.severity,
-    linkedTo: feedback.linkedTo,
-  });
-  await githubClient.updateIssueBody(options.issueNumber, newBody);
+  await updateGitHubIssueBody(options.issueNumber, feedback);
 }
