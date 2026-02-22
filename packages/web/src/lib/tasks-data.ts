@@ -1,5 +1,6 @@
 import {
   TasksIndexSchema,
+  type TasksIndex,
   type TaskEntry,
   REQORD_DIR,
   ISSUES_DIR,
@@ -11,16 +12,21 @@ export function getTasksFilePath(): string {
   return fs.joinPath(getReqordRoot(), REQORD_DIR, ISSUES_DIR, "tasks.yaml");
 }
 
-export async function getAllTasks(): Promise<TaskEntry[]> {
+export async function loadTasksYaml(): Promise<TasksIndex> {
   const filePath = getTasksFilePath();
   try {
     const raw = await fs.readYAML<unknown>(filePath);
     const parsed = TasksIndexSchema.safeParse(raw);
     if (!parsed.success) {
-      return [];
+      return { title: "", tasks: [] };
     }
-    return parsed.data.tasks;
+    return parsed.data;
   } catch {
-    return [];
+    return { title: "", tasks: [] };
   }
+}
+
+export async function getAllTasks(): Promise<TaskEntry[]> {
+  const index = await loadTasksYaml();
+  return index.tasks;
 }
