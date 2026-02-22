@@ -1,10 +1,10 @@
 id: req-000005
 version: '5.0'
 title: Requirement/Specificationバージョン管理
-status: approved
+status: draft
 priority: medium
 createdAt: 2026-02-07T10:00:00Z
-updatedAt: 2026-02-20T14:44:24.109Z
+updatedAt: 2026-02-22T23:43:25.971Z
 versionHistory:
   - version: 1.0.0
     status: implemented
