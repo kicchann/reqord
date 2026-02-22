@@ -64,7 +64,7 @@ export interface GanttGroup {
 }
 
 export interface GanttTask {
-  id: string;                   // Issue番号ベース: "issue-42"
+  id: string;                   // Issue番号ベース: "42"
   title: string;
   issueNumber: number;
   issueUrl: string;

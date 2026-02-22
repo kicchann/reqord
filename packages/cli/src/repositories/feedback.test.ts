@@ -83,8 +83,8 @@ describe("saveIndex", () => {
 
     await saveIndex("/cwd", index);
 
-    expect(mockFs.mkdirp).toHaveBeenCalledWith("/cwd/.reqord/feedback");
-    expect(mockFs.writeYAML).toHaveBeenCalledWith("/cwd/.reqord/feedback/index.yaml", index);
+    expect(mockFs.mkdirp).toHaveBeenCalledWith("/cwd/.reqord/issues");
+    expect(mockFs.writeYAML).toHaveBeenCalledWith("/cwd/.reqord/issues/feedbacks.yaml", index);
   });
 });
 
@@ -120,7 +120,7 @@ describe("upsertFeedback", () => {
     await upsertFeedback("/cwd", newEntry);
 
     expect(mockFs.writeYAML).toHaveBeenCalledWith(
-      "/cwd/.reqord/feedback/index.yaml",
+      "/cwd/.reqord/issues/feedbacks.yaml",
       { feedbacks: [newEntry] },
     );
   });
@@ -136,7 +136,7 @@ describe("upsertFeedback", () => {
     await upsertFeedback("/cwd", updatedEntry);
 
     expect(mockFs.writeYAML).toHaveBeenCalledWith(
-      "/cwd/.reqord/feedback/index.yaml",
+      "/cwd/.reqord/issues/feedbacks.yaml",
       { feedbacks: [updatedEntry] },
     );
   });

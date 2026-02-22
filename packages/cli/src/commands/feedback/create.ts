@@ -34,7 +34,7 @@ export const feedbackCreateCommand = new Command("create")
 
       console.log(chalk.green(`✓ Created Feedback Issue #${issueNumber}`));
       console.log(chalk.gray(`  Label: feedback, reqord-generated`));
-      console.log(chalk.gray(`  Updated .reqord/feedback/index.yaml`));
+      console.log(chalk.gray(`  Updated .reqord/issues/feedbacks.yaml`));
     } catch (error) {
       handleError(error);
     }

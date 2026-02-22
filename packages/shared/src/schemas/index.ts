@@ -31,15 +31,9 @@ export {
 
 export {
   SpecificationSchema,
-  ImplementationIssueSchema,
-  ImplementationSchema,
-  ProgressSchema,
   DesignValidationSchema,
   DesignValidationRuleSchema,
   type Specification,
-  type ImplementationIssue,
-  type Implementation,
-  type Progress,
   type DesignValidation,
   type DesignValidationRule,
 } from "./specification.js";
@@ -75,6 +69,12 @@ export {
 export {
   TaskDefinitionSchema,
   TaskDefinitionFileSchema,
+  TaskLinkedToSchema,
+  TaskEntrySchema,
+  TasksIndexSchema,
   type TaskDefinition,
   type TaskDefinitionFile,
+  type TaskLinkedTo,
+  type TaskEntry,
+  type TasksIndex,
 } from "./task.js";
