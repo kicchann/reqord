@@ -1,6 +1,7 @@
-import type { Requirement, Specification } from "@reqord/shared";
-import { getAllRequirements } from "./data";
-import { getAllSpecifications } from "./specification-data";
+import type { Requirement, Specification, TaskEntry } from "@reqord/shared";
+import { getAllRequirements } from "./data.js";
+import { getAllSpecifications } from "./specification-data.js";
+import { loadTasksYaml } from "./tasks-data.js";
 
 export type Warning = {
   type:
@@ -78,12 +79,14 @@ function calculateApprovalRate(items: Array<{ status: string }>): number {
   return approvedCount / items.length;
 }
 
-function calculateIssueSummary(_specifications: Specification[]): IssueSummary {
-  // spec.implementation is no longer used; issue data comes from tasks.yaml
+function calculateIssueSummary(tasks: TaskEntry[]): IssueSummary {
+  const totalIssues = tasks.length;
+  const completedIssues = tasks.filter((t) => t.status === "closed").length;
+
   return {
-    total: 0,
-    completed: 0,
-    completionRate: 0,
+    total: totalIssues,
+    completed: completedIssues,
+    completionRate: totalIssues > 0 ? completedIssues / totalIssues : 0,
   };
 }
 
@@ -93,7 +96,6 @@ export function detectWarnings(
 ): Warning[] {
   const warnings: Warning[] = [];
 
-  // Build a map of requirement IDs to specifications
   const specsByReqId = new Map<string, Specification[]>();
   for (const spec of specifications) {
     const specs = specsByReqId.get(spec.requirementId) || [];
@@ -101,13 +103,11 @@ export function detectWarnings(
     specsByReqId.set(spec.requirementId, specs);
   }
 
-  // Build a map of requirement IDs to requirements for dependency checks
   const reqMap = new Map<string, Requirement>();
   for (const req of requirements) {
     reqMap.set(req.id, req);
   }
 
-  // Check for missing specifications (non-draft requirements without specs)
   for (const req of requirements) {
     if (req.status !== "draft") {
       const specs = specsByReqId.get(req.id);
@@ -122,7 +122,6 @@ export function detectWarnings(
     }
   }
 
-  // Check for unapproved dependencies
   for (const req of requirements) {
     for (const depId of req.dependencies.blockedBy) {
       const dep = reqMap.get(depId);
@@ -137,10 +136,11 @@ export function detectWarnings(
     }
   }
 
-  // Check for design verification errors (feedback flags with critical/high severity)
   for (const spec of specifications) {
     const hasErrorFlag = spec.flags.some(
-      (flag) => flag.type === "feedback-review" && (flag.severity === "critical" || flag.severity === "high")
+      (flag) =>
+        flag.type === "feedback-review" &&
+        (flag.severity === "critical" || flag.severity === "high")
     );
 
     if (hasErrorFlag) {
@@ -157,38 +157,46 @@ export function detectWarnings(
 }
 
 export function extractCriticalPath(
-  _specifications: Specification[]
+  tasks: TaskEntry[]
 ): CriticalPathItem[] | null {
-  // spec.implementation is no longer used; issue data comes from tasks.yaml
-  return null;
+  if (tasks.length === 0) {
+    return null;
+  }
+
+  const items: CriticalPathItem[] = tasks.map((task) => ({
+    issueNumber: task.number,
+    title: task.title,
+    url: task.url,
+    priority: task.priority ?? "",
+    status: task.status,
+    estimatedHours: task.estimatedHours ?? 0,
+    specId: task.linkedTo.specifications[0] ?? "",
+  }));
+
+  return items;
 }
 
 export async function getDashboardData(): Promise<DashboardData> {
   const requirements = await getAllRequirements();
   const specifications = await getAllSpecifications();
+  const tasksIndex = await loadTasksYaml();
+  const allTasks = tasksIndex.tasks;
 
-  // Calculate requirements summary
   const requirementsBreakdown = groupByStatus(requirements);
   const requirementsApprovalRate = calculateApprovalRate(requirements);
 
-  // Calculate specifications summary
   const specificationsBreakdown = groupByStatus(specifications);
   const specificationsApprovalRate = calculateApprovalRate(specifications);
 
-  // Calculate issues summary
-  const issues = calculateIssueSummary(specifications);
+  const issues = calculateIssueSummary(allTasks);
 
-  // Calculate health score (weighted average)
   const healthScore =
     requirementsApprovalRate * HEALTH_WEIGHTS.requirements +
     specificationsApprovalRate * HEALTH_WEIGHTS.specifications +
     issues.completionRate * HEALTH_WEIGHTS.issues;
 
-  // Detect warnings
   const warnings = detectWarnings(requirements, specifications);
-
-  // Extract critical path
-  const criticalPath = extractCriticalPath(specifications);
+  const criticalPath = extractCriticalPath(allTasks);
 
   return {
     requirements: {

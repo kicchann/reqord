@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import type { Requirement, Specification } from "@reqord/shared";
+import type { Requirement, Specification, TaskEntry } from "@reqord/shared";
 
-// Mock the data modules before importing
 vi.mock("../../lib/data.js", () => ({
   getAllRequirements: vi.fn(),
 }));
@@ -10,154 +9,122 @@ vi.mock("../../lib/specification-data.js", () => ({
   getAllSpecifications: vi.fn(),
 }));
 
+vi.mock("../../lib/tasks-data.js", () => ({
+  loadTasksYaml: vi.fn(),
+}));
+
+const makeRequirement = (
+  id: string,
+  status: string,
+  overrides: Partial<Requirement> = {},
+): Requirement => ({
+  id,
+  title: `Req ${id}`,
+  status: status as Requirement["status"],
+  priority: "high",
+  createdAt: "2026-01-01T00:00:00Z",
+  updatedAt: "2026-01-01T00:00:00Z",
+  version: "1.0.0",
+  versionHistory: [],
+  files: {
+    description: `requirements/${id}/description.md`,
+    supplementary: [],
+  },
+  successCriteria: [],
+  format: { type: "free-form" },
+  dependencies: { blockedBy: [], blocks: [], relatedTo: [] },
+  flags: [],
+  ...overrides,
+});
+
+const makeSpecification = (
+  id: string,
+  requirementId: string,
+  status: string,
+  overrides: Partial<Specification> = {},
+): Specification => ({
+  id,
+  requirementId,
+  status: status as Specification["status"],
+  version: "1.0.0",
+  createdAt: "2026-01-01T00:00:00Z",
+  updatedAt: "2026-01-01T00:00:00Z",
+  versionHistory: [],
+  files: {
+    design: `specifications/${id}/design.md`,
+    supplementary: [],
+  },
+  flags: [],
+  ...overrides,
+});
+
+const makeTaskEntry = (
+  number: number,
+  status: "open" | "closed",
+  specIds: string[] = [],
+  estimatedHours = 4,
+): TaskEntry => ({
+  number,
+  title: `Issue ${number}`,
+  url: `https://github.com/owner/repo/issues/${number}`,
+  linkedTo: { specifications: specIds },
+  priority: "P1",
+  status,
+  estimatedHours,
+  syncedAt: "2026-01-01T00:00:00Z",
+});
+
 describe("dashboard-data", () => {
   beforeEach(() => {
     vi.resetModules();
   });
 
   describe("getDashboardData", () => {
-    it("aggregates requirements, specifications, and issues correctly", async () => {
+    it("aggregates requirements, specifications, and issues from tasks.yaml correctly", async () => {
       const { getAllRequirements } = await import("../../lib/data.js");
-      const { getAllSpecifications } = await import(
-        "../../lib/specification-data.js"
-      );
+      const { getAllSpecifications } = await import("../../lib/specification-data.js");
+      const { loadTasksYaml } = await import("../../lib/tasks-data.js");
       const { getDashboardData } = await import("../../lib/dashboard-data.js");
 
-      const mockRequirements: Requirement[] = [
-        {
-          id: "req-000001",
-          title: "Req 1",
-          status: "approved",
-          priority: "high",
-          createdAt: "2026-01-01T00:00:00Z",
-          updatedAt: "2026-01-01T00:00:00Z",
-          version: "1.0.0",
-          versionHistory: [],
-          files: {
-            description: "requirements/req-000001/description.md",
-            supplementary: [],
-          },
-          successCriteria: [],
-          format: { type: "free-form" },
-          dependencies: {
-            blockedBy: [],
-            blocks: [],
-            relatedTo: [],
-          },
-          flags: [],
-        },
-        {
-          id: "req-000002",
-          title: "Req 2",
-          status: "implemented",
-          priority: "medium",
-          createdAt: "2026-01-01T00:00:00Z",
-          updatedAt: "2026-01-01T00:00:00Z",
-          version: "1.0.0",
-          versionHistory: [],
-          files: {
-            description: "requirements/req-000002/description.md",
-            supplementary: [],
-          },
-          successCriteria: [],
-          format: { type: "free-form" },
-          dependencies: {
-            blockedBy: [],
-            blocks: [],
-            relatedTo: [],
-          },
-          flags: [],
-        },
-        {
-          id: "req-000003",
-          title: "Req 3",
-          status: "draft",
-          priority: "low",
-          createdAt: "2026-01-01T00:00:00Z",
-          updatedAt: "2026-01-01T00:00:00Z",
-          version: "1.0.0",
-          versionHistory: [],
-          files: {
-            description: "requirements/req-000003/description.md",
-            supplementary: [],
-          },
-          successCriteria: [],
-          format: { type: "free-form" },
-          dependencies: {
-            blockedBy: [],
-            blocks: [],
-            relatedTo: [],
-          },
-          flags: [],
-        },
-      ];
-
-      const mockSpecifications: Specification[] = [
-        {
-          id: "spec-000001",
-          requirementId: "req-000001",
-          status: "approved",
-          version: "1.0.0",
-          createdAt: "2026-01-01T00:00:00Z",
-          updatedAt: "2026-01-01T00:00:00Z",
-          versionHistory: [],
-          files: {
-            design: "specifications/spec-000001/design.md",
-            supplementary: [],
-          },
-          flags: [],
-        },
-        {
-          id: "spec-000002",
-          requirementId: "req-000002",
-          status: "draft",
-          version: "1.0.0",
-          createdAt: "2026-01-01T00:00:00Z",
-          updatedAt: "2026-01-01T00:00:00Z",
-          versionHistory: [],
-          files: {
-            design: "specifications/spec-000002/design.md",
-            supplementary: [],
-          },
-          flags: [],
-        },
-      ];
-
-      vi.mocked(getAllRequirements).mockResolvedValue(mockRequirements);
-      vi.mocked(getAllSpecifications).mockResolvedValue(mockSpecifications);
+      vi.mocked(getAllRequirements).mockResolvedValue([
+        makeRequirement("req-000001", "approved"),
+        makeRequirement("req-000002", "implemented"),
+        makeRequirement("req-000003", "draft"),
+      ]);
+      vi.mocked(getAllSpecifications).mockResolvedValue([
+        makeSpecification("spec-000001", "req-000001", "approved"),
+        makeSpecification("spec-000002", "req-000002", "draft"),
+      ]);
+      vi.mocked(loadTasksYaml).mockResolvedValue({
+        title: "Tasks",
+        tasks: [
+          makeTaskEntry(1, "closed", ["spec-000001"]),
+          makeTaskEntry(2, "open", ["spec-000001"]),
+        ],
+      });
 
       const result = await getDashboardData();
 
       expect(result.requirements.total).toBe(3);
-      expect(result.requirements.breakdown).toEqual({
-        approved: 1,
-        implemented: 1,
-        draft: 1,
-      });
+      expect(result.requirements.breakdown).toEqual({ approved: 1, implemented: 1, draft: 1 });
       expect(result.requirements.approvalRate).toBeCloseTo(0.6667, 3);
-
       expect(result.specifications.total).toBe(2);
-      expect(result.specifications.breakdown).toEqual({
-        approved: 1,
-        draft: 1,
-      });
+      expect(result.specifications.breakdown).toEqual({ approved: 1, draft: 1 });
       expect(result.specifications.approvalRate).toBe(0.5);
-
-      // spec.implementation is no longer used; issues always returns zeros
-      expect(result.issues.total).toBe(0);
-      expect(result.issues.completed).toBe(0);
-      expect(result.issues.completionRate).toBe(0);
+      expect(result.issues.total).toBe(2);
+      expect(result.issues.completed).toBe(1);
+      expect(result.issues.completionRate).toBe(0.5);
     });
 
     it("handles zero requirements correctly", async () => {
       const { getAllRequirements } = await import("../../lib/data.js");
-      const { getAllSpecifications } = await import(
-        "../../lib/specification-data.js"
-      );
+      const { getAllSpecifications } = await import("../../lib/specification-data.js");
+      const { loadTasksYaml } = await import("../../lib/tasks-data.js");
       const { getDashboardData } = await import("../../lib/dashboard-data.js");
 
       vi.mocked(getAllRequirements).mockResolvedValue([]);
       vi.mocked(getAllSpecifications).mockResolvedValue([]);
+      vi.mocked(loadTasksYaml).mockResolvedValue({ title: "Tasks", tasks: [] });
 
       const result = await getDashboardData();
 
@@ -169,57 +136,15 @@ describe("dashboard-data", () => {
       expect(result.issues.completionRate).toBe(0);
     });
 
-    it("handles specifications without implementation field", async () => {
+    it("handles tasks.yaml with no tasks (empty tasks array)", async () => {
       const { getAllRequirements } = await import("../../lib/data.js");
-      const { getAllSpecifications } = await import(
-        "../../lib/specification-data.js"
-      );
+      const { getAllSpecifications } = await import("../../lib/specification-data.js");
+      const { loadTasksYaml } = await import("../../lib/tasks-data.js");
       const { getDashboardData } = await import("../../lib/dashboard-data.js");
 
-      const mockRequirements: Requirement[] = [
-        {
-          id: "req-000001",
-          title: "Req 1",
-          status: "approved",
-          priority: "high",
-          createdAt: "2026-01-01T00:00:00Z",
-          updatedAt: "2026-01-01T00:00:00Z",
-          version: "1.0.0",
-          versionHistory: [],
-          files: {
-            description: "requirements/req-000001/description.md",
-            supplementary: [],
-          },
-          successCriteria: [],
-          format: { type: "free-form" },
-          dependencies: {
-            blockedBy: [],
-            blocks: [],
-            relatedTo: [],
-          },
-          flags: [],
-        },
-      ];
-
-      const mockSpecifications: Specification[] = [
-        {
-          id: "spec-000001",
-          requirementId: "req-000001",
-          status: "approved",
-          version: "1.0.0",
-          createdAt: "2026-01-01T00:00:00Z",
-          updatedAt: "2026-01-01T00:00:00Z",
-          versionHistory: [],
-          files: {
-            design: "specifications/spec-000001/design.md",
-            supplementary: [],
-          },
-          flags: [],
-        },
-      ];
-
-      vi.mocked(getAllRequirements).mockResolvedValue(mockRequirements);
-      vi.mocked(getAllSpecifications).mockResolvedValue(mockSpecifications);
+      vi.mocked(getAllRequirements).mockResolvedValue([makeRequirement("req-000001", "approved")]);
+      vi.mocked(getAllSpecifications).mockResolvedValue([makeSpecification("spec-000001", "req-000001", "approved")]);
+      vi.mocked(loadTasksYaml).mockResolvedValue({ title: "Tasks", tasks: [] });
 
       const result = await getDashboardData();
 
@@ -230,74 +155,26 @@ describe("dashboard-data", () => {
 
     it("calculates health score correctly", async () => {
       const { getAllRequirements } = await import("../../lib/data.js");
-      const { getAllSpecifications } = await import(
-        "../../lib/specification-data.js"
-      );
+      const { getAllSpecifications } = await import("../../lib/specification-data.js");
+      const { loadTasksYaml } = await import("../../lib/tasks-data.js");
       const { getDashboardData } = await import("../../lib/dashboard-data.js");
 
-      // req: 100% (1/1 approved), spec: 50% (1/2 approved), issues: 0% (always 0 since spec.implementation removed)
-      const mockRequirements: Requirement[] = [
-        {
-          id: "req-000001",
-          title: "Req 1",
-          status: "approved",
-          priority: "high",
-          createdAt: "2026-01-01T00:00:00Z",
-          updatedAt: "2026-01-01T00:00:00Z",
-          version: "1.0.0",
-          versionHistory: [],
-          files: {
-            description: "requirements/req-000001/description.md",
-            supplementary: [],
-          },
-          successCriteria: [],
-          format: { type: "free-form" },
-          dependencies: {
-            blockedBy: [],
-            blocks: [],
-            relatedTo: [],
-          },
-          flags: [],
-        },
-      ];
-
-      const mockSpecifications: Specification[] = [
-        {
-          id: "spec-000001",
-          requirementId: "req-000001",
-          status: "approved",
-          version: "1.0.0",
-          createdAt: "2026-01-01T00:00:00Z",
-          updatedAt: "2026-01-01T00:00:00Z",
-          versionHistory: [],
-          files: {
-            design: "specifications/spec-000001/design.md",
-            supplementary: [],
-          },
-          flags: [],
-        },
-        {
-          id: "spec-000002",
-          requirementId: "req-000001",
-          status: "draft",
-          version: "1.0.0",
-          createdAt: "2026-01-01T00:00:00Z",
-          updatedAt: "2026-01-01T00:00:00Z",
-          versionHistory: [],
-          files: {
-            design: "specifications/spec-000002/design.md",
-            supplementary: [],
-          },
-          flags: [],
-        },
-      ];
-
-      vi.mocked(getAllRequirements).mockResolvedValue(mockRequirements);
-      vi.mocked(getAllSpecifications).mockResolvedValue(mockSpecifications);
+      vi.mocked(getAllRequirements).mockResolvedValue([makeRequirement("req-000001", "approved")]);
+      vi.mocked(getAllSpecifications).mockResolvedValue([
+        makeSpecification("spec-000001", "req-000001", "approved"),
+        makeSpecification("spec-000002", "req-000001", "draft"),
+      ]);
+      vi.mocked(loadTasksYaml).mockResolvedValue({
+        title: "Tasks",
+        tasks: [
+          makeTaskEntry(1, "open", ["spec-000001"]),
+          makeTaskEntry(2, "open", ["spec-000001"]),
+        ],
+      });
 
       const result = await getDashboardData();
 
-      // Health = 1.0 * 40 + 0.5 * 30 + 0.0 * 30 = 40 + 15 + 0 = 55
+      // Health = 1.0 * 40 + 0.5 * 30 + 0.0 * 30 = 55
       expect(result.healthScore).toBe(55);
     });
   });
@@ -305,36 +182,7 @@ describe("dashboard-data", () => {
   describe("detectWarnings", () => {
     it("detects missing specification warnings", async () => {
       const { detectWarnings } = await import("../../lib/dashboard-data.js");
-
-      const requirements: Requirement[] = [
-        {
-          id: "req-000001",
-          title: "Req without spec",
-          status: "approved",
-          priority: "high",
-          createdAt: "2026-01-01T00:00:00Z",
-          updatedAt: "2026-01-01T00:00:00Z",
-          version: "1.0.0",
-          versionHistory: [],
-          files: {
-            description: "requirements/req-000001/description.md",
-            supplementary: [],
-          },
-          successCriteria: [],
-          format: { type: "free-form" },
-          dependencies: {
-            blockedBy: [],
-            blocks: [],
-            relatedTo: [],
-          },
-          flags: [],
-        },
-      ];
-
-      const specifications: Specification[] = [];
-
-      const warnings = detectWarnings(requirements, specifications);
-
+      const warnings = detectWarnings([makeRequirement("req-000001", "approved")], []);
       expect(warnings).toHaveLength(1);
       expect(warnings[0]).toEqual({
         type: "missing_specification",
@@ -346,113 +194,25 @@ describe("dashboard-data", () => {
 
     it("does not warn for draft requirements without specifications", async () => {
       const { detectWarnings } = await import("../../lib/dashboard-data.js");
-
-      const requirements: Requirement[] = [
-        {
-          id: "req-000001",
-          title: "Draft req",
-          status: "draft",
-          priority: "high",
-          createdAt: "2026-01-01T00:00:00Z",
-          updatedAt: "2026-01-01T00:00:00Z",
-          version: "1.0.0",
-          versionHistory: [],
-          files: {
-            description: "requirements/req-000001/description.md",
-            supplementary: [],
-          },
-          successCriteria: [],
-          format: { type: "free-form" },
-          dependencies: {
-            blockedBy: [],
-            blocks: [],
-            relatedTo: [],
-          },
-          flags: [],
-        },
-      ];
-
-      const specifications: Specification[] = [];
-
-      const warnings = detectWarnings(requirements, specifications);
-
+      const warnings = detectWarnings([makeRequirement("req-000001", "draft")], []);
       expect(warnings).toHaveLength(0);
     });
 
     it("detects unapproved dependency warnings", async () => {
       const { detectWarnings } = await import("../../lib/dashboard-data.js");
-
-      const requirements: Requirement[] = [
-        {
-          id: "req-000001",
-          title: "Req 1",
-          status: "draft",
-          priority: "high",
-          createdAt: "2026-01-01T00:00:00Z",
-          updatedAt: "2026-01-01T00:00:00Z",
-          version: "1.0.0",
-          versionHistory: [],
-          files: {
-            description: "requirements/req-000001/description.md",
-            supplementary: [],
-          },
-          successCriteria: [],
-          format: { type: "free-form" },
-          dependencies: {
-            blockedBy: [],
-            blocks: [],
-            relatedTo: [],
-          },
-          flags: [],
-        },
-        {
-          id: "req-000002",
-          title: "Req 2",
-          status: "approved",
-          priority: "medium",
-          createdAt: "2026-01-01T00:00:00Z",
-          updatedAt: "2026-01-01T00:00:00Z",
-          version: "1.0.0",
-          versionHistory: [],
-          files: {
-            description: "requirements/req-000002/description.md",
-            supplementary: [],
-          },
-          successCriteria: [],
-          format: { type: "free-form" },
-          dependencies: {
-            blockedBy: ["req-000001"],
-            blocks: [],
-            relatedTo: [],
-          },
-          flags: [],
-        },
-      ];
-
-      const specifications: Specification[] = [
-        {
-          id: "spec-000002",
-          requirementId: "req-000002",
-          status: "approved",
-          version: "1.0.0",
-          createdAt: "2026-01-01T00:00:00Z",
-          updatedAt: "2026-01-01T00:00:00Z",
-          versionHistory: [],
-          files: {
-            design: "specifications/spec-000002/design.md",
-            supplementary: [],
-          },
-          flags: [],
-        },
-      ];
-
-      const warnings = detectWarnings(requirements, specifications);
-
+      const warnings = detectWarnings(
+        [
+          makeRequirement("req-000001", "draft"),
+          makeRequirement("req-000002", "approved", {
+            dependencies: { blockedBy: ["req-000001"], blocks: [], relatedTo: [] },
+          }),
+        ],
+        [makeSpecification("spec-000002", "req-000002", "approved")]
+      );
       expect(warnings).toHaveLength(1);
       expect(warnings[0]).toEqual({
         type: "unapproved_dependency",
-        message:
-          "Requirement req-000002 is blocked by unapproved requirement req-000001",
+        message: "Requirement req-000002 is blocked by unapproved requirement req-000001",
         severity: "warning",
         relatedId: "req-000002",
       });
@@ -460,41 +220,24 @@ describe("dashboard-data", () => {
 
     it("detects design verification error warnings", async () => {
       const { detectWarnings } = await import("../../lib/dashboard-data.js");
-
-      const requirements: Requirement[] = [];
-
-      const specifications: Specification[] = [
-        {
-          id: "spec-000001",
-          requirementId: "req-000001",
-          status: "draft",
-          version: "1.0.0",
-          createdAt: "2026-01-01T00:00:00Z",
-          updatedAt: "2026-01-01T00:00:00Z",
-          versionHistory: [],
-          files: {
-            design: "specifications/spec-000001/design.md",
-            supplementary: [],
-          },
-          flags: [
-            {
+      const warnings = detectWarnings(
+        [],
+        [
+          makeSpecification("spec-000001", "req-000001", "draft", {
+            flags: [{
               type: "feedback-review",
               reason: "Critical design issue",
               createdAt: "2026-01-02T00:00:00Z",
               relatedIssues: [123],
               severity: "critical",
-            },
-          ],
-        },
-      ];
-
-      const warnings = detectWarnings(requirements, specifications);
-
+            }],
+          }),
+        ]
+      );
       expect(warnings).toHaveLength(1);
       expect(warnings[0]).toEqual({
         type: "design_verification_error",
-        message:
-          "Specification spec-000001 has critical feedback flags requiring attention",
+        message: "Specification spec-000001 has critical feedback flags requiring attention",
         severity: "error",
         relatedId: "spec-000001",
       });
@@ -502,51 +245,10 @@ describe("dashboard-data", () => {
 
     it("returns empty array when no warnings detected", async () => {
       const { detectWarnings } = await import("../../lib/dashboard-data.js");
-
-      const requirements: Requirement[] = [
-        {
-          id: "req-000001",
-          title: "Req 1",
-          status: "approved",
-          priority: "high",
-          createdAt: "2026-01-01T00:00:00Z",
-          updatedAt: "2026-01-01T00:00:00Z",
-          version: "1.0.0",
-          versionHistory: [],
-          files: {
-            description: "requirements/req-000001/description.md",
-            supplementary: [],
-          },
-          successCriteria: [],
-          format: { type: "free-form" },
-          dependencies: {
-            blockedBy: [],
-            blocks: [],
-            relatedTo: [],
-          },
-          flags: [],
-        },
-      ];
-
-      const specifications: Specification[] = [
-        {
-          id: "spec-000001",
-          requirementId: "req-000001",
-          status: "approved",
-          version: "1.0.0",
-          createdAt: "2026-01-01T00:00:00Z",
-          updatedAt: "2026-01-01T00:00:00Z",
-          versionHistory: [],
-          files: {
-            design: "specifications/spec-000001/design.md",
-            supplementary: [],
-          },
-          flags: [],
-        },
-      ];
-
-      const warnings = detectWarnings(requirements, specifications);
-
+      const warnings = detectWarnings(
+        [makeRequirement("req-000001", "approved")],
+        [makeSpecification("spec-000001", "req-000001", "approved")]
+      );
       expect(warnings).toEqual([]);
     });
   });
@@ -554,70 +256,56 @@ describe("dashboard-data", () => {
   describe("groupByStatus", () => {
     it("counts items by status correctly", async () => {
       const { groupByStatus } = await import("../../lib/dashboard-data.js");
-
-      const items = [
-        { status: "draft" },
-        { status: "approved" },
-        { status: "draft" },
-        { status: "implemented" },
-        { status: "approved" },
-        { status: "approved" },
-      ];
-
-      const result = groupByStatus(items);
-
-      expect(result).toEqual({
-        draft: 2,
-        approved: 3,
-        implemented: 1,
-      });
+      const result = groupByStatus([
+        { status: "draft" }, { status: "approved" }, { status: "draft" },
+        { status: "implemented" }, { status: "approved" }, { status: "approved" },
+      ]);
+      expect(result).toEqual({ draft: 2, approved: 3, implemented: 1 });
     });
 
     it("returns empty object for empty array", async () => {
       const { groupByStatus } = await import("../../lib/dashboard-data.js");
-
-      const result = groupByStatus([]);
-
-      expect(result).toEqual({});
+      expect(groupByStatus([])).toEqual({});
     });
   });
 
   describe("extractCriticalPath", () => {
-    it("returns null since spec.implementation is no longer used", async () => {
-      const { extractCriticalPath } = await import(
-        "../../lib/dashboard-data.js"
-      );
-
-      const specifications: Specification[] = [
-        {
-          id: "spec-000001",
-          requirementId: "req-000001",
-          status: "approved",
-          version: "1.0.0",
-          createdAt: "2026-01-01T00:00:00Z",
-          updatedAt: "2026-01-01T00:00:00Z",
-          versionHistory: [],
-          files: {
-            design: "specifications/spec-000001/design.md",
-            supplementary: [],
-          },
-          flags: [],
-        },
+    it("extracts tasks from tasks.yaml entries", async () => {
+      const { extractCriticalPath } = await import("../../lib/dashboard-data.js");
+      const tasks: TaskEntry[] = [
+        makeTaskEntry(1, "open", ["spec-000001"], 10),
+        makeTaskEntry(2, "closed", ["spec-000001"], 10),
+        makeTaskEntry(3, "open", ["spec-000002"], 5),
       ];
-
-      const result = extractCriticalPath(specifications);
-
-      expect(result).toBeNull();
+      const result = extractCriticalPath(tasks);
+      expect(result).toHaveLength(3);
+      expect(result![0]).toEqual({
+        issueNumber: 1, title: "Issue 1",
+        url: "https://github.com/owner/repo/issues/1",
+        priority: "P1", status: "open", estimatedHours: 10, specId: "spec-000001",
+      });
+      expect(result![1]).toEqual({
+        issueNumber: 2, title: "Issue 2",
+        url: "https://github.com/owner/repo/issues/2",
+        priority: "P1", status: "closed", estimatedHours: 10, specId: "spec-000001",
+      });
+      expect(result![2]).toEqual({
+        issueNumber: 3, title: "Issue 3",
+        url: "https://github.com/owner/repo/issues/3",
+        priority: "P1", status: "open", estimatedHours: 5, specId: "spec-000002",
+      });
     });
 
-    it("returns null for empty specifications array", async () => {
-      const { extractCriticalPath } = await import(
-        "../../lib/dashboard-data.js"
-      );
+    it("uses empty string for specId when task has no linked specifications", async () => {
+      const { extractCriticalPath } = await import("../../lib/dashboard-data.js");
+      const result = extractCriticalPath([makeTaskEntry(1, "open", [], 4)]);
+      expect(result).toHaveLength(1);
+      expect(result![0].specId).toBe("");
+    });
 
-      const result = extractCriticalPath([]);
-
-      expect(result).toBeNull();
+    it("returns null when no tasks exist", async () => {
+      const { extractCriticalPath } = await import("../../lib/dashboard-data.js");
+      expect(extractCriticalPath([])).toBeNull();
     });
   });
 });

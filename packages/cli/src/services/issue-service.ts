@@ -1,7 +1,15 @@
-import type { TaskDefinitionFile, TaskDefinition } from "@reqord/shared";
-import { TaskDefinitionFileSchema } from "@reqord/shared";
+import type {
+  TaskDefinitionFile,
+  TaskDefinition,
+  TaskEntry,
+  TasksIndex,
+} from "@reqord/shared";
+import { TaskDefinitionFileSchema, TasksIndexSchema, ISSUES_DIR } from "@reqord/shared";
+import * as specRepo from "../repositories/specification.js";
 import * as githubClient from "./github-client.js";
 import * as fs from "../repositories/file-system.js";
+
+const TASKS_FILENAME = "tasks.yaml";
 
 export interface CreateIssuesOptions {
   specId: string;
@@ -35,19 +43,15 @@ export async function loadTasksFile(
     throw new Error(`Tasks file not found: ${filePath}`);
   }
 
-  const content = await fs.readText(fullPath);
-  const json = JSON.parse(content);
-  return TaskDefinitionFileSchema.parse(json);
+  const raw = await fs.readYAML<unknown>(fullPath);
+  return TaskDefinitionFileSchema.parse(raw);
 }
 
 export function buildLabels(task: TaskDefinition): string[] {
   return ["reqord-generated", task.priority];
 }
 
-export function buildIssueBody(
-  specId: string,
-  task: TaskDefinition
-): string {
+export function buildIssueBody(specId: string, task: TaskDefinition): string {
   const metadataTag = `<!-- reqord:specification {"specificationId":"${specId}","priority":"${task.priority}","estimatedHours":${task.estimatedHours}} -->`;
 
   let body = metadataTag + "\n\n";
@@ -62,21 +66,71 @@ export function buildIssueBody(
   return body;
 }
 
+function getTasksYamlPath(cwd: string): string {
+  return fs.getReqordDir(cwd, ISSUES_DIR, TASKS_FILENAME);
+}
+
+async function loadTasksIndex(tasksYamlPath: string): Promise<TasksIndex> {
+  if (!(await fs.exists(tasksYamlPath))) {
+    return { title: "Tasks", tasks: [] };
+  }
+  const raw = await fs.readYAML<unknown>(tasksYamlPath);
+  const result = TasksIndexSchema.safeParse(raw);
+  if (!result.success) {
+    throw new Error(`Invalid tasks.yaml: ${result.error.message}`);
+  }
+  return result.data;
+}
+
+async function appendToTasksFile(
+  cwd: string,
+  specId: string,
+  issues: CreatedIssueInfo[]
+): Promise<void> {
+  const tasksYamlPath = getTasksYamlPath(cwd);
+  const issuesDir = fs.getReqordDir(cwd, ISSUES_DIR);
+  await fs.mkdirp(issuesDir);
+
+  const index = await loadTasksIndex(tasksYamlPath);
+  const syncedAt = new Date().toISOString();
+
+  const validIssues = issues.filter(
+    (issue): issue is typeof issue & { number: number; url: string } =>
+      issue.number !== undefined && issue.url !== undefined
+  );
+  const newEntries: TaskEntry[] = validIssues.map((issue) => ({
+    number: issue.number,
+    title: issue.title,
+    url: issue.url,
+    linkedTo: { specifications: [specId] },
+    priority: issue.priority,
+    status: "open" as const,
+    estimatedHours: issue.estimatedHours,
+    syncedAt,
+  }));
+
+  index.tasks.push(...newEntries);
+  await fs.writeYAML(tasksYamlPath, index);
+}
+
 export async function createIssuesFromSpec(
   cwd: string,
   options: CreateIssuesOptions
 ): Promise<CreateIssuesResult> {
-  const specRepo = await import("../repositories/specification.js");
   const spec = await specRepo.findByIdOrThrow(cwd, options.specId);
   if (spec.status !== "approved") {
-    throw new Error(`Specification ${options.specId} must be approved before creating issues`);
+    throw new Error(
+      `Specification ${options.specId} must be approved before creating issues`
+    );
   }
 
   const tasksData = await loadTasksFile(cwd, options.tasksFile);
   const maxIssues = options.maxIssues ?? 20;
 
   if (!Number.isFinite(maxIssues) || maxIssues <= 0) {
-    throw new Error(`Invalid maxIssues value: ${maxIssues}. Must be a positive integer.`);
+    throw new Error(
+      `Invalid maxIssues value: ${maxIssues}. Must be a positive integer.`
+    );
   }
 
   if (tasksData.tasks.length > maxIssues) {
@@ -117,6 +171,10 @@ export async function createIssuesFromSpec(
     }
 
     totalEstimatedHours += task.estimatedHours;
+  }
+
+  if (!options.dryRun) {
+    await appendToTasksFile(cwd, options.specId, issues);
   }
 
   return {
