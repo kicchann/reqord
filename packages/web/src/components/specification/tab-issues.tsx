@@ -1,10 +1,17 @@
 "use client";
 
 import React from "react";
-import type { ImplementationIssue } from "@reqord/shared";
+
+export type IssueItem = {
+  number: number;
+  title: string;
+  url: string;
+  priority: string;
+  status: string;
+};
 
 type TabIssuesProps = {
-  issues: ImplementationIssue[] | null;
+  issues: IssueItem[] | null;
 };
 
 function getPriorityColor(priority: string): string {

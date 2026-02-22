@@ -1,6 +1,18 @@
-import type { Implementation, ImplementationIssue } from "@reqord/shared";
-
 export const DEFAULT_HOURS = 4;
+
+export type IssueItem = {
+  number: number;
+  title: string;
+  url: string;
+  priority: "P0" | "P1" | "P2" | "P3";
+  status: string;
+};
+
+export type ImplementationData = {
+  issues: IssueItem[];
+  totalEstimatedHours: number;
+  createdAt: string;
+};
 
 export type GanttTask = {
   id: string;
@@ -43,7 +55,7 @@ const PRIORITY_CONFIGS: Record<string, PriorityConfig> = {
 };
 
 function createGanttTask(
-  issue: ImplementationIssue,
+  issue: IssueItem,
   startOffset: number,
   isCriticalPath: boolean,
 ): GanttTask {
@@ -62,9 +74,9 @@ function createGanttTask(
 }
 
 function groupIssuesByPriority(
-  issues: ImplementationIssue[],
-): Map<string, ImplementationIssue[]> {
-  const groups = new Map<string, ImplementationIssue[]>();
+  issues: IssueItem[],
+): Map<string, IssueItem[]> {
+  const groups = new Map<string, IssueItem[]>();
 
   for (const issue of issues) {
     const existing = groups.get(issue.priority) || [];
@@ -74,7 +86,7 @@ function groupIssuesByPriority(
   return groups;
 }
 
-function calculateStartOffsets(issueGroups: Map<string, ImplementationIssue[]>): Map<string, number> {
+function calculateStartOffsets(issueGroups: Map<string, IssueItem[]>): Map<string, number> {
   const startOffsets = new Map<string, number>();
 
   const p0Issues = issueGroups.get("P0") || [];
@@ -96,7 +108,7 @@ function calculateStartOffsets(issueGroups: Map<string, ImplementationIssue[]>):
 
 function createPriorityGroup(
   priority: string,
-  issues: ImplementationIssue[],
+  issues: IssueItem[],
   startOffset: number,
   config: PriorityConfig,
 ): GanttGroup {
@@ -125,7 +137,7 @@ function calculateTimelineEnd(groups: GanttGroup[]): number {
 
 export function transformToGanttData(
   specId: string,
-  implementation: Implementation,
+  implementation: ImplementationData,
 ): GanttData {
   const issueGroups = groupIssuesByPriority(implementation.issues);
   const startOffsets = calculateStartOffsets(issueGroups);

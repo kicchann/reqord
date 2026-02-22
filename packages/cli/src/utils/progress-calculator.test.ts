@@ -1,10 +1,17 @@
 import { describe, it, expect } from "vitest";
 import { calculateProgress } from "./progress-calculator.js";
-import type { ImplementationIssue } from "@reqord/shared";
+
+interface IssueItem {
+  number: number;
+  title: string;
+  url: string;
+  priority: string;
+  status: string;
+}
 
 describe("calculateProgress", () => {
   it("空の配列の場合、total=0, completed=0, percentage=0を返す", () => {
-    const issues: ImplementationIssue[] = [];
+    const issues: IssueItem[] = [];
     const result = calculateProgress(issues);
 
     expect(result).toEqual({
@@ -15,7 +22,7 @@ describe("calculateProgress", () => {
   });
 
   it("すべてopenの場合、completed=0, percentage=0を返す", () => {
-    const issues: ImplementationIssue[] = [
+    const issues: IssueItem[] = [
       {
         number: 1,
         title: "Task 1",
@@ -48,7 +55,7 @@ describe("calculateProgress", () => {
   });
 
   it("すべてclosedの場合、completed=total, percentage=100を返す", () => {
-    const issues: ImplementationIssue[] = [
+    const issues: IssueItem[] = [
       {
         number: 1,
         title: "Task 1",
@@ -81,7 +88,7 @@ describe("calculateProgress", () => {
   });
 
   it("1件closed、2件openの場合、completed=1, percentage=33を返す", () => {
-    const issues: ImplementationIssue[] = [
+    const issues: IssueItem[] = [
       {
         number: 1,
         title: "Task 1",
@@ -114,7 +121,7 @@ describe("calculateProgress", () => {
   });
 
   it("2件closed、1件openの場合、completed=2, percentage=67を返す", () => {
-    const issues: ImplementationIssue[] = [
+    const issues: IssueItem[] = [
       {
         number: 1,
         title: "Task 1",
@@ -147,7 +154,7 @@ describe("calculateProgress", () => {
   });
 
   it("単一のclosedの場合、completed=1, percentage=100を返す", () => {
-    const issues: ImplementationIssue[] = [
+    const issues: IssueItem[] = [
       {
         number: 1,
         title: "Task 1",
@@ -166,7 +173,7 @@ describe("calculateProgress", () => {
   });
 
   it("in_progressはcompletedとしてカウントされない", () => {
-    const issues: ImplementationIssue[] = [
+    const issues: IssueItem[] = [
       {
         number: 1,
         title: "Task 1",
