@@ -2,7 +2,6 @@ import * as githubClient from "./github-client.js";
 import * as fs from "../repositories/file-system.js";
 import { TasksIndexSchema, REQORD_DIR, ISSUES_DIR } from "@reqord/shared";
 import type { TaskEntry } from "@reqord/shared";
-import path from "node:path";
 
 export interface SyncResult {
   specId: string;
@@ -33,7 +32,7 @@ export interface SyncError {
 async function loadTasksYaml(
   cwd: string,
 ): Promise<{ title: string; tasks: TaskEntry[] } | null> {
-  const tasksPath = path.join(cwd, REQORD_DIR, ISSUES_DIR, "tasks.yaml");
+  const tasksPath = fs.joinPath(cwd, REQORD_DIR, ISSUES_DIR, "tasks.yaml");
   const raw = await fs.readYAML(tasksPath).catch(() => null);
   if (!raw) return null;
   const parsed = TasksIndexSchema.safeParse(raw);
@@ -45,7 +44,7 @@ async function saveTasksYaml(
   cwd: string,
   data: { title: string; tasks: TaskEntry[] },
 ): Promise<void> {
-  const tasksPath = path.join(cwd, REQORD_DIR, ISSUES_DIR, "tasks.yaml");
+  const tasksPath = fs.joinPath(cwd, REQORD_DIR, ISSUES_DIR, "tasks.yaml");
   await fs.writeYAML(tasksPath, data);
 }
 

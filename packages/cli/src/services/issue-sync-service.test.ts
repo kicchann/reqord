@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { TaskEntry } from "@reqord/shared";
 
 vi.mock("../repositories/file-system.js", () => ({
+  joinPath: vi.fn((...args: string[]) => args.join("/")),
   readYAML: vi.fn(),
   writeYAML: vi.fn(),
   getReqordDir: vi.fn(),

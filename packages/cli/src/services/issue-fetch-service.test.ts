@@ -13,6 +13,7 @@ vi.mock("./github-client.js", () => ({
 }));
 
 vi.mock("../repositories/file-system.js", () => ({
+  joinPath: vi.fn((...args: string[]) => args.join("/")),
   readYAML: vi.fn(),
   writeYAML: vi.fn(),
   getReqordDir: vi.fn(),
