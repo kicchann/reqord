@@ -30,11 +30,11 @@ files:
   description: requirements/req-000016/description.md
   supplementary: []
 successCriteria:
-  - reqord issue create <spec-id> --tasks-file <path> で構造化タスク定義からGitHub Issueが作成される
+  - reqord task create <spec-id> --tasks-file <path> で構造化タスク定義からGitHub Issueが作成される
   - 構造化Markdownテンプレートで本文が生成され、メタデータがHTMLコメントタグとして埋め込まれる
-  - reqord issue sync <spec-id> でGitHub Issueの状態が .reqord/issues/tasks.yaml に同期される
-  - reqord issue sync-all で全Specificationの同期が実行される
-  - reqord issue validate <spec-id> でメタデータ整合性チェックが実行される
+  - reqord task sync <spec-id> でGitHub Issueの状態が .reqord/issues/tasks.yaml に同期される
+  - reqord task sync-all で全Specificationの同期が実行される
+  - reqord task validate <spec-id> でメタデータ整合性チェックが実行される
   - Reqordメタデータ（spec-id）がHTMLコメントタグに、reqord-generatedと優先度がラベルに付与される
 format:
   type: user-story

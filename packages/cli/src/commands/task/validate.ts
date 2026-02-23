@@ -35,7 +35,7 @@ export function validateSpecTasks(
   if (!hasSyncedAt) {
     issues.push({
       type: "info",
-      message: "No progress data. Run `reqord issue sync` to calculate progress",
+      message: "No progress data. Run `reqord task sync` to calculate progress",
     });
     return { specId, issues, valid: true };
   }
@@ -57,7 +57,7 @@ async function loadTasksForSpec(
   );
 }
 
-export const issueValidateCommand = new Command("validate")
+export const taskValidateCommand = new Command("validate")
   .description("Validate specification-issue integrity")
   .argument("[spec-id]", "Specification ID")
   .option("--all", "Validate all specifications")

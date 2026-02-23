@@ -50,8 +50,8 @@ reqord req list
 | `reqord feedback show <id>` | Show feedback details |
 | `reqord feedback close <id>` | Close a feedback item |
 | `reqord feedback link <id>` | Link feedback to requirement/spec |
-| `reqord issue create <spec-id>` | Generate GitHub Issues from tasks |
-| `reqord issue sync <spec-id>` | Sync issue status to specification |
+| `reqord task create <spec-id>` | Generate GitHub Issues from tasks |
+| `reqord task sync <spec-id>` | Sync issue status to specification |
 | `reqord ui` | Launch web dashboard |
 
 For the full command reference including planned features, see the [CLI Reference](../../docs/cli-reference.md).

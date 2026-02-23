@@ -1,37 +1,37 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { issueSyncCommand, issueSyncAllCommand } from "./sync.js";
-import type { SyncResult } from "../../services/issue-sync-service.js";
+import { taskSyncCommand, taskSyncAllCommand } from "./sync.js";
+import type { SyncResult } from "../../services/task-sync-service.js";
 
 // Mock services BEFORE imports
-vi.mock("../../services/issue-sync-service.js", () => ({
+vi.mock("../../services/task-sync-service.js", () => ({
   syncSpecification: vi.fn(),
   syncAll: vi.fn(),
 }));
 
-import { syncSpecification, syncAll } from "../../services/issue-sync-service.js";
+import { syncSpecification, syncAll } from "../../services/task-sync-service.js";
 
-describe("issueSyncCommand", () => {
+describe("taskSyncCommand", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     process.exitCode = 0;
     // Reset command state between tests
-    delete (issueSyncCommand as any)._optionValues.json;
-    (issueSyncCommand as any).args = [];
+    delete (taskSyncCommand as any)._optionValues.json;
+    (taskSyncCommand as any).args = [];
   });
 
   it("has correct command name 'sync'", () => {
-    expect(issueSyncCommand.name()).toBe("sync");
+    expect(taskSyncCommand.name()).toBe("sync");
   });
 
   it("has required argument 'spec-id'", () => {
-    const args = issueSyncCommand.registeredArguments;
+    const args = taskSyncCommand.registeredArguments;
     expect(args).toHaveLength(1);
     expect(args[0].name()).toBe("spec-id");
     expect(args[0].required).toBe(true);
   });
 
   it("has optional '--json' option", () => {
-    const option = issueSyncCommand.options.find(
+    const option = taskSyncCommand.options.find(
       (opt) => opt.long === "--json"
     );
     expect(option).toBeDefined();
@@ -62,7 +62,7 @@ describe("issueSyncCommand", () => {
 
     const consoleLogSpy = vi.spyOn(console, "log").mockImplementation(() => {});
 
-    await issueSyncCommand.parseAsync([
+    await taskSyncCommand.parseAsync([
       "node",
       "test",
       "spec-000001",
@@ -97,7 +97,7 @@ describe("issueSyncCommand", () => {
 
     const consoleLogSpy = vi.spyOn(console, "log").mockImplementation(() => {});
 
-    await issueSyncCommand.parseAsync([
+    await taskSyncCommand.parseAsync([
       "node",
       "test",
       "spec-000001",
@@ -135,7 +135,7 @@ describe("issueSyncCommand", () => {
 
     const consoleLogSpy = vi.spyOn(console, "log").mockImplementation(() => {});
 
-    await issueSyncCommand.parseAsync([
+    await taskSyncCommand.parseAsync([
       "node",
       "test",
       "spec-000001",
@@ -157,7 +157,7 @@ describe("issueSyncCommand", () => {
       .spyOn(console, "error")
       .mockImplementation(() => {});
 
-    await issueSyncCommand.parseAsync([
+    await taskSyncCommand.parseAsync([
       "node",
       "test",
       "spec-999999",
@@ -173,20 +173,20 @@ describe("issueSyncCommand", () => {
   });
 });
 
-describe("issueSyncAllCommand", () => {
+describe("taskSyncAllCommand", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     process.exitCode = 0;
     // Reset command state between tests
-    delete (issueSyncAllCommand as any)._optionValues.json;
+    delete (taskSyncAllCommand as any)._optionValues.json;
   });
 
   it("has correct command name 'sync-all'", () => {
-    expect(issueSyncAllCommand.name()).toBe("sync-all");
+    expect(taskSyncAllCommand.name()).toBe("sync-all");
   });
 
   it("has optional '--json' option", () => {
-    const option = issueSyncAllCommand.options.find(
+    const option = taskSyncAllCommand.options.find(
       (opt) => opt.long === "--json"
     );
     expect(option).toBeDefined();
@@ -219,7 +219,7 @@ describe("issueSyncAllCommand", () => {
 
     const consoleLogSpy = vi.spyOn(console, "log").mockImplementation(() => {});
 
-    await issueSyncAllCommand.parseAsync([
+    await taskSyncAllCommand.parseAsync([
       "node",
       "test",
     ]);
@@ -247,7 +247,7 @@ describe("issueSyncAllCommand", () => {
 
     const consoleLogSpy = vi.spyOn(console, "log").mockImplementation(() => {});
 
-    await issueSyncAllCommand.parseAsync([
+    await taskSyncAllCommand.parseAsync([
       "node",
       "test",
       "--json",
@@ -304,7 +304,7 @@ describe("issueSyncAllCommand", () => {
 
     const consoleLogSpy = vi.spyOn(console, "log").mockImplementation(() => {});
 
-    await issueSyncAllCommand.parseAsync([
+    await taskSyncAllCommand.parseAsync([
       "node",
       "test",
     ]);
@@ -324,7 +324,7 @@ describe("issueSyncAllCommand", () => {
 
     const consoleLogSpy = vi.spyOn(console, "log").mockImplementation(() => {});
 
-    await issueSyncAllCommand.parseAsync([
+    await taskSyncAllCommand.parseAsync([
       "node",
       "test",
     ]);
@@ -345,7 +345,7 @@ describe("issueSyncAllCommand", () => {
       .spyOn(console, "error")
       .mockImplementation(() => {});
 
-    await issueSyncAllCommand.parseAsync([
+    await taskSyncAllCommand.parseAsync([
       "node",
       "test",
     ]);

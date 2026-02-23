@@ -1,10 +1,10 @@
 import { Command } from "commander";
 import chalk from "chalk";
 import Table from "cli-table3";
-import { createIssuesFromSpec, type CreateIssuesResult } from "../../services/issue-service.js";
+import { createIssuesFromSpec, type CreateIssuesResult } from "../../services/task-service.js";
 import { handleError } from "../../utils/error-handler.js";
 
-export const issueCreateCommand = new Command("create")
+export const taskCreateCommand = new Command("create")
   .description("Create GitHub issues from a task definition file")
   .argument("<spec-id>", "Specification ID (e.g., spec-000016)")
   .requiredOption("--tasks-file <path>", "Path to task definition file")

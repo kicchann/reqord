@@ -12,7 +12,7 @@ vi.mock("./github-client.js", () => ({
   getIssueDetail: vi.fn(),
 }));
 
-import { syncSpecification, syncAll } from "./issue-sync-service.js";
+import { syncSpecification, syncAll } from "./task-sync-service.js";
 import * as fs from "../repositories/file-system.js";
 import * as githubClient from "./github-client.js";
 

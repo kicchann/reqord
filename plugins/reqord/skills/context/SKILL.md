@@ -65,7 +65,7 @@ user-invokable: false
 
 - **ファイル**: `.reqord/issues/tasks.yaml`
 - Specificationに紐づくGitHub Issueのタスク管理
-- `reqord issue sync` でGitHub Issueから同期
+- `reqord task sync` でGitHub Issueから同期
 
 ---
 
@@ -85,7 +85,7 @@ CLIコマンドはバリデーション・バージョン管理・監査証跡�
 | description.md更新 | `reqord req update --description-file` | ❌ 禁止 |
 | フラグ除去 | `reqord feedback resolve <id> --issue <N>` | ❌ 禁止 |
 | フィードバック操作 | `reqord feedback link/unlink/close/resolve` | ❌ 禁止 |
-| Issue同期 | `reqord issue sync/sync-all` | ❌ 禁止 |
+| Issue同期 | `reqord task sync/sync-all` | ❌ 禁止 |
 | design.md書き込み | Writeツールで直接書き込み | ✅ 許可（CLIコマンドなし） |
 | コンテキスト更新 | `reqord context update` | ❌ 禁止 |
 
@@ -170,9 +170,9 @@ reqord impact analyze <req-id|spec-id> [--json]  # 依存関係・影響範囲�
 ### Issue操作
 
 ```bash
-reqord issue sync                       # GitHub Issue同期・進捗計算
-reqord issue create <req-id>            # Issue生成
-reqord issue validate <issue-number>    # Issue整合性チェック
+reqord task sync                       # GitHub Issue同期・進捗計算
+reqord task create <req-id>            # Issue生成
+reqord task validate <issue-number>    # Issue整合性チェック
 ```
 
 ### バージョン操作

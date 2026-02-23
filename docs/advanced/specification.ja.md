@@ -601,11 +601,11 @@ reqord spec validate spec-001                  # 設計検証
 reqord spec approve spec-001                   # 承認依頼(PR作成)
 
 # Issue管理
-reqord issue create spec-001                   # GitHub Issue生成(AI分解)
-reqord issue create spec-001 --strategy by-layer  # レイヤー別分解
-reqord issue sync spec-001                     # Issue状態同期
-reqord issue sync-all                          # 全Spec同期
-reqord issue validate spec-001                 # メタデータ整合性チェック
+reqord task create spec-001                   # GitHub Issue生成(AI分解)
+reqord task create spec-001 --strategy by-layer  # レイヤー別分解
+reqord task sync spec-001                     # Issue状態同期
+reqord task sync-all                          # 全Spec同期
+reqord task validate spec-001                 # メタデータ整合性チェック
 
 # 検証
 reqord validate gap req-001                    # Gap Analysis

@@ -1,9 +1,9 @@
 import { Command } from "commander";
 import chalk from "chalk";
-import { syncSpecification, syncAll, type SyncResult } from "../../services/issue-sync-service.js";
+import { syncSpecification, syncAll, type SyncResult } from "../../services/task-sync-service.js";
 import { handleError } from "../../utils/error-handler.js";
 
-export const issueSyncCommand = new Command("sync")
+export const taskSyncCommand = new Command("sync")
   .description("Sync GitHub issue status for a specification")
   .argument("<spec-id>", "Specification ID")
   .option("--json", "Output as JSON")
@@ -22,7 +22,7 @@ export const issueSyncCommand = new Command("sync")
     }
   });
 
-export const issueSyncAllCommand = new Command("sync-all")
+export const taskSyncAllCommand = new Command("sync-all")
   .description("Sync GitHub issue status for all specifications")
   .option("--json", "Output as JSON")
   .action(async (options: { json?: boolean }) => {

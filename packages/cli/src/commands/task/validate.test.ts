@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { validateSpecTasks, issueValidateCommand } from "./validate.js";
+import { validateSpecTasks, taskValidateCommand } from "./validate.js";
 import type { TaskEntry } from "@reqord/shared";
 
 function makeTask(overrides: Partial<TaskEntry> = {}): TaskEntry {
@@ -37,7 +37,7 @@ describe("validateSpecTasks", () => {
     expect(result.issues).toHaveLength(1);
     expect(result.issues[0].type).toBe("info");
     expect(result.issues[0].message).toBe(
-      "No progress data. Run `reqord issue sync` to calculate progress"
+      "No progress data. Run `reqord task sync` to calculate progress"
     );
   });
 
@@ -76,20 +76,20 @@ describe("validateSpecTasks", () => {
   });
 });
 
-describe("issueValidateCommand", () => {
+describe("taskValidateCommand", () => {
   it("has correct command name 'validate'", () => {
-    expect(issueValidateCommand.name()).toBe("validate");
+    expect(taskValidateCommand.name()).toBe("validate");
   });
 
   it("has optional argument 'spec-id'", () => {
-    const args = issueValidateCommand.registeredArguments;
+    const args = taskValidateCommand.registeredArguments;
     expect(args).toHaveLength(1);
     expect(args[0].name()).toBe("spec-id");
     expect(args[0].required).toBe(false);
   });
 
   it("has optional '--all' option", () => {
-    const option = issueValidateCommand.options.find(
+    const option = taskValidateCommand.options.find(
       (opt) => opt.long === "--all"
     );
     expect(option).toBeDefined();
@@ -97,7 +97,7 @@ describe("issueValidateCommand", () => {
   });
 
   it("has optional '--json' option", () => {
-    const option = issueValidateCommand.options.find(
+    const option = taskValidateCommand.options.find(
       (opt) => opt.long === "--json"
     );
     expect(option).toBeDefined();

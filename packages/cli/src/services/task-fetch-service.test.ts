@@ -19,7 +19,7 @@ vi.mock("../repositories/file-system.js", () => ({
   getReqordDir: vi.fn(),
 }));
 
-import { fetchIssues } from "./issue-fetch-service.js";
+import { fetchIssues } from "./task-fetch-service.js";
 import * as specRepo from "../repositories/specification.js";
 import * as githubClient from "./github-client.js";
 import * as fs from "../repositories/file-system.js";

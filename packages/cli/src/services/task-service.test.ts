@@ -27,7 +27,7 @@ import {
   createIssuesFromSpec,
   buildIssueBody,
   buildLabels,
-} from "./issue-service.js";
+} from "./task-service.js";
 
 const mockSpecRepo = vi.mocked(specRepo);
 const mockGithubClient = vi.mocked(githubClient);

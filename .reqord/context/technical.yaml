@@ -26,44 +26,41 @@ techStack:
       purpose: 図表描画（依存関係グラフ、アーキテクチャ図）
     - name: Recharts
       purpose: Ganttチャート、進捗グラフ
-  ai:
-    - name: Anthropic SDK
-      purpose: Claude API連携（要件詳細化、設計生成、タスク分解）
   shared:
     - name: Zod
-      purpose: スキーマバリデーション（JSON構造の検証）
+      purpose: スキーマバリデーション（YAML構造の検証）
 developmentEnvironment:
   requiredTools:
     - Node.js 20+
     - Git
-    - npm (workspaces対応)
+    - pnpm (workspaces対応)
   setupCommands:
-    - npm install
-    - npm run build
+    - pnpm install
+    - pnpm build
 commonCommands:
   development:
-    - command: npm run dev
+    - command: pnpm dev
       description: 開発サーバー起動（Web UI）
-    - command: npm run dev:cli
+    - command: pnpm dev:cli
       description: CLI開発モード（ts-node）
   build:
-    - command: npm run build
+    - command: pnpm build
       description: 全パッケージビルド
-    - command: npm run build:cli
+    - command: pnpm --filter @reqord/cli build
       description: CLIパッケージのみビルド
-    - command: npm run build:web
+    - command: pnpm --filter @reqord/web build
       description: Webパッケージのみビルド
   test:
-    - command: npm test
+    - command: pnpm test
       description: 全テスト実行
-    - command: npm run test:watch
+    - command: pnpm test:watch
       description: ウォッチモードでテスト
-    - command: npm run test:coverage
+    - command: pnpm test:coverage
       description: カバレッジ付きテスト
   lint:
-    - command: npm run lint
+    - command: pnpm lint
       description: ESLint実行
-    - command: npm run format
+    - command: pnpm format
       description: Prettier実行
   reqord:
     - command: reqord init
@@ -72,11 +69,9 @@ commonCommands:
       description: ProjectContext作成
     - command: reqord req create <title>
       description: 要件作成
-    - command: reqord req enhance <id>
-      description: AI要件詳細化
     - command: reqord spec create <req-id>
       description: 仕様作成
-    - command: reqord issue create <spec-id>
+    - command: reqord task create <spec-id>
       description: GitHub Issue生成
     - command: reqord status
       description: プロジェクト全体ステータス
@@ -85,7 +80,7 @@ commonCommands:
 deployment:
   cli:
     platform: npm registry
-    command: npm publish
+    command: pnpm publish
     description: CLIツールとしてnpmに公開
   web:
     platform: Vercel

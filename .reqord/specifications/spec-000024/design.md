@@ -47,8 +47,8 @@ Storage:        .reqord/issues/tasks.yaml
 **責務:** 単一/全SpecificationのIssue状態同期を実行し、結果を表示する。
 
 ```
-reqord issue sync <spec-id>       # 個別Specificationの同期
-reqord issue sync-all             # 全Specificationの一括同期
+reqord task sync <spec-id>       # 個別Specificationの同期
+reqord task sync-all             # 全Specificationの一括同期
 ```
 
 | オプション | 説明 |
@@ -73,8 +73,8 @@ Progress: 1/3 (33%) completed
 **責務:** SpecificationとGitHub Issue間のメタデータ整合性を検証する。
 
 ```
-reqord issue validate <spec-id>
-reqord issue validate --all
+reqord task validate <spec-id>
+reqord task validate --all
 ```
 
 | オプション | 説明 |
@@ -278,7 +278,7 @@ function mapGitHubState(ghState: "open" | "closed"): "open" | "in_progress" | "c
 ### 個別同期フロー
 
 ```
-ユーザー → reqord issue sync spec-000016
+ユーザー → reqord task sync spec-000016
   → syncCommand.action("spec-000016")
     → issueSyncService.syncSpecification(cwd, "spec-000016")
       → loadTasksYaml(cwd) → tasks.yaml読み込み
@@ -298,7 +298,7 @@ function mapGitHubState(ghState: "open" | "closed"): "open" | "in_progress" | "c
 ### 一括同期フロー
 
 ```
-ユーザー → reqord issue sync-all
+ユーザー → reqord task sync-all
   → syncAllCommand.action()
     → specRepo.findAll(cwd) → 全Specification取得
     → tasks.yamlからspecIdの一覧を取得
@@ -313,7 +313,7 @@ function mapGitHubState(ghState: "open" | "closed"): "open" | "in_progress" | "c
 ### 検証フロー
 
 ```
-ユーザー → reqord issue validate spec-000016
+ユーザー → reqord task validate spec-000016
   → validateCommand.action("spec-000016")
     → issueSyncService.validateSpecification(cwd, "spec-000016")
       → specRepo.findById(cwd, "spec-000016") → Specification取得

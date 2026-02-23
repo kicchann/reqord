@@ -601,11 +601,11 @@ reqord spec validate spec-001                  # Design validation
 reqord spec approve spec-001                   # Request approval (create PR)
 
 # Issue management
-reqord issue create spec-001                   # Generate GitHub Issues (AI decomposition)
-reqord issue create spec-001 --strategy by-layer  # Decompose by layer
-reqord issue sync spec-001                     # Sync Issue status
-reqord issue sync-all                          # Sync all Specs
-reqord issue validate spec-001                 # Metadata consistency check
+reqord task create spec-001                   # Generate GitHub Issues (AI decomposition)
+reqord task create spec-001 --strategy by-layer  # Decompose by layer
+reqord task sync spec-001                     # Sync Issue status
+reqord task sync-all                          # Sync all Specs
+reqord task validate spec-001                 # Metadata consistency check
 
 # Validation
 reqord validate gap req-001                    # Gap Analysis

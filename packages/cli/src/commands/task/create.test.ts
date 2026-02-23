@@ -1,38 +1,38 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { issueCreateCommand } from "./create.js";
-import type { CreateIssuesResult } from "../../services/issue-service.js";
+import { taskCreateCommand } from "./create.js";
+import type { CreateIssuesResult } from "../../services/task-service.js";
 
 // Mock services BEFORE imports
-vi.mock("../../services/issue-service.js", () => ({
+vi.mock("../../services/task-service.js", () => ({
   createIssuesFromSpec: vi.fn(),
 }));
 
-import { createIssuesFromSpec } from "../../services/issue-service.js";
+import { createIssuesFromSpec } from "../../services/task-service.js";
 
-describe("issueCreateCommand", () => {
+describe("taskCreateCommand", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     process.exitCode = 0;
     // Reset command state between tests
     // We need to preserve default values but clear user-provided values
-    delete (issueCreateCommand as any)._optionValues.dryRun;
-    delete (issueCreateCommand as any)._optionValues.json;
-    (issueCreateCommand as any).args = [];
+    delete (taskCreateCommand as any)._optionValues.dryRun;
+    delete (taskCreateCommand as any)._optionValues.json;
+    (taskCreateCommand as any).args = [];
   });
 
   it("has correct command name 'create'", () => {
-    expect(issueCreateCommand.name()).toBe("create");
+    expect(taskCreateCommand.name()).toBe("create");
   });
 
   it("has required argument 'spec-id'", () => {
-    const args = issueCreateCommand.registeredArguments;
+    const args = taskCreateCommand.registeredArguments;
     expect(args).toHaveLength(1);
     expect(args[0].name()).toBe("spec-id");
     expect(args[0].required).toBe(true);
   });
 
   it("has required option '--tasks-file'", () => {
-    const option = issueCreateCommand.options.find(
+    const option = taskCreateCommand.options.find(
       (opt) => opt.long === "--tasks-file"
     );
     expect(option).toBeDefined();
@@ -40,7 +40,7 @@ describe("issueCreateCommand", () => {
   });
 
   it("has optional '--dry-run' option", () => {
-    const option = issueCreateCommand.options.find(
+    const option = taskCreateCommand.options.find(
       (opt) => opt.long === "--dry-run"
     );
     expect(option).toBeDefined();
@@ -48,7 +48,7 @@ describe("issueCreateCommand", () => {
   });
 
   it("has optional '--json' option", () => {
-    const option = issueCreateCommand.options.find(
+    const option = taskCreateCommand.options.find(
       (opt) => opt.long === "--json"
     );
     expect(option).toBeDefined();
@@ -56,7 +56,7 @@ describe("issueCreateCommand", () => {
   });
 
   it("has optional '--max-issues' option with default '20'", () => {
-    const option = issueCreateCommand.options.find(
+    const option = taskCreateCommand.options.find(
       (opt) => opt.long === "--max-issues"
     );
     expect(option).toBeDefined();
@@ -86,7 +86,7 @@ describe("issueCreateCommand", () => {
 
     const consoleLogSpy = vi.spyOn(console, "log").mockImplementation(() => {});
 
-    await issueCreateCommand.parseAsync([
+    await taskCreateCommand.parseAsync([
       "node",
       "test",
       "spec-000016",
@@ -115,7 +115,7 @@ describe("issueCreateCommand", () => {
 
     const consoleLogSpy = vi.spyOn(console, "log").mockImplementation(() => {});
 
-    await issueCreateCommand.parseAsync([
+    await taskCreateCommand.parseAsync([
       "node",
       "test",
       "spec-000016",
@@ -145,7 +145,7 @@ describe("issueCreateCommand", () => {
 
     const consoleLogSpy = vi.spyOn(console, "log").mockImplementation(() => {});
 
-    await issueCreateCommand.parseAsync([
+    await taskCreateCommand.parseAsync([
       "node",
       "test",
       "spec-000016",
@@ -185,7 +185,7 @@ describe("issueCreateCommand", () => {
 
     const consoleLogSpy = vi.spyOn(console, "log").mockImplementation(() => {});
 
-    await issueCreateCommand.parseAsync([
+    await taskCreateCommand.parseAsync([
       "node",
       "test",
       "spec-000016",
@@ -221,7 +221,7 @@ describe("issueCreateCommand", () => {
 
     const consoleLogSpy = vi.spyOn(console, "log").mockImplementation(() => {});
 
-    await issueCreateCommand.parseAsync([
+    await taskCreateCommand.parseAsync([
       "node",
       "test",
       "spec-000016",
@@ -246,7 +246,7 @@ describe("issueCreateCommand", () => {
       .spyOn(console, "error")
       .mockImplementation(() => {});
 
-    await issueCreateCommand.parseAsync([
+    await taskCreateCommand.parseAsync([
       "node",
       "test",
       "spec-999999",

@@ -2,7 +2,7 @@
 
 ## 1. 設計概要
 
-構造化されたタスク定義ファイル（JSON）からGitHub Issueを作成し、同期・検証する機能を提供する。`reqord issue create <spec-id> --tasks-file <path>` コマンドにより、事前に定義されたタスクリストをGitHub Issueとして一括作成し、`.reqord/issues/tasks.yaml` にタスクエントリとして記録する。構造化Markdownによる本文生成、HTMLコメントタグによるメタデータ（spec-id）埋め込み、`--dry-run` によるプレビューをサポートする。
+構造化されたタスク定義ファイル（JSON）からGitHub Issueを作成し、同期・検証する機能を提供する。`reqord task create <spec-id> --tasks-file <path>` コマンドにより、事前に定義されたタスクリストをGitHub Issueとして一括作成し、`.reqord/issues/tasks.yaml` にタスクエントリとして記録する。構造化Markdownによる本文生成、HTMLコメントタグによるメタデータ（spec-id）埋め込み、`--dry-run` によるプレビューをサポートする。
 
 **スコープ:** Issue作成（`create`）、状態同期（`sync` / `sync-all`）、メタデータ検証（`validate`）を含む。
 
@@ -41,7 +41,7 @@ Storage:        .reqord/issues/tasks.yaml (タスクエントリ)
 **責務:** Issue生成の実行と結果表示。
 
 ```
-reqord issue create <spec-id> --tasks-file <path> [options]
+reqord task create <spec-id> --tasks-file <path> [options]
 ```
 
 | オプション | 説明 |
@@ -411,7 +411,7 @@ body:
 ### Issue生成フロー
 
 ```
-ユーザー → reqord issue create spec-000016 --tasks-file ./tasks.json
+ユーザー → reqord task create spec-000016 --tasks-file ./tasks.json
   → createCommand.action("spec-000016", { tasksFile: "./tasks.json" })
     → issueService.createIssuesFromSpec(cwd, options)
       → specRepo.findById(cwd, "spec-000016") → Specification取得
@@ -441,7 +441,7 @@ body:
 ### dry-runフロー
 
 ```
-ユーザー → reqord issue create spec-000016 --tasks-file ./tasks.json --dry-run
+ユーザー → reqord task create spec-000016 --tasks-file ./tasks.json --dry-run
   → createIssuesFromSpec(..., { dryRun: true })
     → Specification検証 + タスクファイル読み込みは同じ
     → githubClient.createIssue() はスキップ

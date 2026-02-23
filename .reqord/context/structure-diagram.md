@@ -8,7 +8,6 @@ graph TB
         CLI_CMD["commands/"]
         CLI_SVC["services/"]
         CLI_REPO["repositories/"]
-        CLI_AI["ai/"]
         CLI_UTIL["utils/"]
     end
 
@@ -27,10 +26,8 @@ graph TB
 
     CLI_CMD --> CLI_SVC
     CLI_SVC --> CLI_REPO
-    CLI_SVC --> CLI_AI
     CLI_SVC --> CLI_UTIL
     CLI_REPO --> SHARED_TYPES
-    CLI_AI --> SHARED_TYPES
 
     WEB_APP --> WEB_COMP
     WEB_APP --> WEB_HOOKS
@@ -51,53 +48,98 @@ packages/cli/
 │   │   ├── init.ts                 # reqord init
 │   │   ├── context/                # reqord context *
 │   │   │   ├── init.ts
-│   │   │   ├── edit.ts
-│   │   │   └── domain.ts
+│   │   │   ├── show.ts
+│   │   │   └── update.ts
 │   │   ├── req/                    # reqord req *
 │   │   │   ├── create.ts
-│   │   │   ├── enhance.ts
-│   │   │   ├── format.ts
+│   │   │   ├── list.ts
+│   │   │   ├── show.ts
+│   │   │   ├── update.ts
+│   │   │   ├── delete.ts
 │   │   │   ├── approve.ts
-│   │   │   ├── gap-analysis.ts
-│   │   │   └── version.ts
+│   │   │   ├── draft.ts
+│   │   │   ├── history.ts
+│   │   │   ├── implement.ts
+│   │   │   └── validate.ts
 │   │   ├── spec/                   # reqord spec *
 │   │   │   ├── create.ts
-│   │   │   ├── research.ts
+│   │   │   ├── list.ts
+│   │   │   ├── show.ts
+│   │   │   ├── update.ts
 │   │   │   ├── design.ts
-│   │   │   ├── validate.ts
-│   │   │   └── approve.ts
-│   │   ├── issue/                  # reqord issue *
+│   │   │   ├── approve.ts
+│   │   │   ├── draft.ts
+│   │   │   ├── history.ts
+│   │   │   ├── implement.ts
+│   │   │   ├── coverage.ts
+│   │   │   └── validate.ts
+│   │   ├── task/                   # reqord task *
 │   │   │   ├── create.ts
+│   │   │   ├── fetch.ts
 │   │   │   ├── sync.ts
 │   │   │   └── validate.ts
-│   │   └── status.ts              # reqord status
+│   │   ├── feedback/               # reqord feedback *
+│   │   │   ├── create.ts
+│   │   │   ├── list.ts
+│   │   │   ├── show.ts
+│   │   │   ├── close.ts
+│   │   │   ├── link.ts
+│   │   │   ├── unlink.ts
+│   │   │   ├── resolve.ts
+│   │   │   └── sync.ts
+│   │   ├── impact/                 # reqord impact *
+│   │   │   ├── analyze.ts
+│   │   │   └── notify.ts
+│   │   ├── validate/               # reqord validate *
+│   │   │   └── impl.ts
+│   │   ├── version/                # reqord version *
+│   │   │   └── version.ts
+│   │   ├── status.ts              # reqord status
+│   │   └── ui.ts                  # 共通UI
 │   │
 │   ├── services/                   # ビジネスロジック
 │   │   ├── requirement-service.ts
 │   │   ├── specification-service.ts
 │   │   ├── issue-service.ts
+│   │   ├── issue-fetch-service.ts
+│   │   ├── issue-sync-service.ts
 │   │   ├── context-service.ts
 │   │   ├── approval-service.ts
-│   │   └── impact-service.ts
+│   │   ├── impact-service.ts
+│   │   ├── feedback-service.ts
+│   │   ├── feedback-sync-service.ts
+│   │   ├── status-service.ts
+│   │   ├── validation-service.ts
+│   │   ├── spec-validation-service.ts
+│   │   ├── impl-validation-service.ts
+│   │   ├── coverage-service.ts
+│   │   ├── version-service.ts
+│   │   ├── init-service.ts
+│   │   ├── migration-service.ts
+│   │   ├── draft-reversion-service.ts
+│   │   ├── requirement-approval-handler.ts
+│   │   ├── specification-approval-handler.ts
+│   │   ├── spec-approval-helpers.ts
+│   │   ├── github-client.ts
+│   │   └── reqord-comment.ts
 │   │
 │   ├── repositories/               # データアクセス層
-│   │   ├── requirement-repository.ts
-│   │   ├── specification-repository.ts
-│   │   ├── context-repository.ts
-│   │   └── file-repository.ts
-│   │
-│   ├── ai/                         # AI連携
-│   │   ├── client.ts               # Anthropic SDK ラッパー
-│   │   ├── enhance-requirement.ts  # 要件詳細化
-│   │   ├── design-specification.ts # 設計生成
-│   │   ├── decompose-tasks.ts      # タスク分解
-│   │   └── gap-analysis.ts         # Gap Analysis
+│   │   ├── requirement.ts
+│   │   ├── specification.ts
+│   │   ├── project-context.ts
+│   │   ├── feedback.ts
+│   │   ├── file-system.ts
+│   │   ├── git.ts
+│   │   └── github.ts
 │   │
 │   └── utils/                      # ユーティリティ
 │       ├── id-generator.ts         # ID採番 (req-000001, spec-000001)
-│       ├── markdown-parser.ts      # Markdown読み書き
-│       ├── mermaid-generator.ts    # Mermaid図生成
-│       └── github-client.ts        # GitHub API (Octokit)
+│       ├── display.ts              # 表示ユーティリティ
+│       ├── error-handler.ts        # エラーハンドリング
+│       ├── errors.ts               # エラー定義
+│       ├── progress-calculator.ts  # 進捗計算
+│       ├── spec-tag-parser.ts      # スペックタグパーサー
+│       └── templates.ts            # テンプレート
 │
 ├── package.json
 ├── tsconfig.json

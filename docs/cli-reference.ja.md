@@ -132,11 +132,11 @@ ProjectContext + Requirement + Specificationを結合し、外部ツール向け
 
 | コマンド | 説明 | 状態 |
 |---------|------|------|
-| `reqord issue create <spec-id>` | 構造化タスクファイルからGitHub Issueを一括生成 | 実装済み |
-| `reqord issue sync <spec-id>` | Issue状態をSpecification YAMLに同期 | 実装済み |
-| `reqord issue sync-all` | 全SpecificationのIssue状態を同期 | 実装済み |
-| `reqord issue validate <spec-id>` | Issueメタデータの整合性チェック | 実装済み |
-| `reqord issue fetch <spec-id>` | GitHub Issueの情報を取得 | 実装済み |
+| `reqord task create <spec-id>` | 構造化タスクファイルからGitHub Issueを一括生成 | 実装済み |
+| `reqord task sync <spec-id>` | Issue状態をSpecification YAMLに同期 | 実装済み |
+| `reqord task sync-all` | 全SpecificationのIssue状態を同期 | 実装済み |
+| `reqord task validate <spec-id>` | Issueメタデータの整合性チェック | 実装済み |
+| `reqord task fetch <spec-id>` | GitHub Issueの情報を取得 | 実装済み |
 
 - `--tasks-file <path>` でタスク定義ファイルを指定
 - Reqordメタデータをラベル・コメントとして埋め込み

@@ -132,11 +132,11 @@ Shows which sections of a Specification cover each success criterion of the requ
 
 | Command | Description | Status |
 |---------|-------------|--------|
-| `reqord issue create <spec-id>` | Bulk-create GitHub Issues from structured task files | Implemented |
-| `reqord issue sync <spec-id>` | Sync Issue status to Specification YAML | Implemented |
-| `reqord issue sync-all` | Sync Issue status for all Specifications | Implemented |
-| `reqord issue validate <spec-id>` | Check Issue metadata consistency | Implemented |
-| `reqord issue fetch <spec-id>` | Fetch GitHub Issue information | Implemented |
+| `reqord task create <spec-id>` | Bulk-create GitHub Issues from structured task files | Implemented |
+| `reqord task sync <spec-id>` | Sync Issue status to Specification YAML | Implemented |
+| `reqord task sync-all` | Sync Issue status for all Specifications | Implemented |
+| `reqord task validate <spec-id>` | Check Issue metadata consistency | Implemented |
+| `reqord task fetch <spec-id>` | Fetch GitHub Issue information | Implemented |
 
 - `--tasks-file <path>` to specify the task definition file
 - Embeds Reqord metadata as labels and comments
