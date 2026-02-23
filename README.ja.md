@@ -1,8 +1,12 @@
-# Reqord
+<p align="center">
+  <img src="./assets/reqord-lockup-bg.svg" alt="Reqord" width="220" />
+</p>
+
+<h1 align="center">Reqord</h1>
 
 > [English](./README.md)
 
-**ソフトウェア開発のための要件管理システム -- Git-native, AI-ready, Local-first**
+**コードと共にバージョン管理される、AI時代の構造化コンテキスト**
 
 [![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL--3.0-blue.svg)](LICENSE)
 [![Tests](https://img.shields.io/badge/tests-675%20passing-brightgreen.svg)]()
@@ -13,8 +17,9 @@
 
 要件をコードと同じリポジトリで構造化し、作成から承認、実装追跡、フィードバックまでのライフサイクル全体を管理します。YAML + Markdown のハイブリッド形式で保存されるため、人間にもAIにも扱いやすく、`git clone` だけでプロジェクトの全コンテキストが手に入ります。
 
-<!-- スクリーンショット: CLIでの要件作成・バリデーション、Web UIのダッシュボード・依存グラフのスクリーンショットを並べて配置 -->
-<!-- TODO: スクリーンショットを追加 -->
+<p align="center">
+  <img src="./assets/dashboard.png" alt="Reqord ダッシュボード — プロジェクトヘルス、要件・仕様の進捗、警告を一覧表示" width="800" />
+</p>
 
 ---
 
@@ -137,6 +142,10 @@ reqord ui
 ```
 
 プロジェクトヘルスメトリクス、Gantt Chart、仕様詳細ビューなどのダッシュボード機能を備えています。
+
+<p align="center">
+  <img src="./assets/graph-map.png" alt="依存関係グラフ — 要件・仕様・Issue間の関係を可視化" width="800" />
+</p>
 
 ### AI 連携（ProjectContext）
 
