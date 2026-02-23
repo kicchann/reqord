@@ -2,7 +2,9 @@
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "reqord-plugins",
   "version": "1.0.0",
-  "description": "Git-native要件管理ツールReqordの開発支援プラグイン",
+  "metadata": {
+    "description": "Git-native要件管理ツールReqordの開発支援プラグイン"
+  },
   "owner": {
     "name": "kicchann"
   },

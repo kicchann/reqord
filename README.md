@@ -8,7 +8,7 @@
 
 **Structured context for the AI era, version-controlled alongside your code.**
 
-[![Version](https://img.shields.io/badge/version-0.1.0-blue)](https://github.com/kicchann/reqord)
+[![npm](https://img.shields.io/npm/v/@reqord/cli)](https://www.npmjs.com/package/@reqord/cli)
 [![License](https://img.shields.io/badge/license-AGPL--3.0-green)](./LICENSE)
 [![Tests](https://img.shields.io/badge/tests-675%20passing-brightgreen)](./packages)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178c6)](https://www.typescriptlang.org/)
@@ -67,6 +67,21 @@ Requirements move through a defined lifecycle with PR-based approval gates, so n
 
 ```bash
 npm install -g @reqord/cli
+
+# Optional: install the web dashboard
+npm install -g @reqord/web
+```
+
+### Claude Code Plugin
+
+Reqord provides a Claude Code plugin for AI-assisted requirements workflow (design, TDD implementation, review, Git operations).
+
+```bash
+# Add the marketplace
+/plugin marketplace add kicchann/reqord
+
+# Install the plugin
+/plugin install reqord@reqord-plugins
 ```
 
 ### Initialize a project
