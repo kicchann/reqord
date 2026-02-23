@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import type { Requirement, Specification, TaskEntry } from "@reqord/shared";
-import { buildMultiLevelGraphData } from "../../lib/graph-data.js";
+import { buildMultiLevelGraphData } from "../../lib/graph-data";
 
 function makeReq(
   id: string,
