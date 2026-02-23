@@ -8,9 +8,9 @@
 
 **コードと共にバージョン管理される、AI時代の構造化コンテキスト**
 
+[![npm](https://img.shields.io/npm/v/@reqord/cli)](https://www.npmjs.com/package/@reqord/cli)
 [![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL--3.0-blue.svg)](LICENSE)
 [![Tests](https://img.shields.io/badge/tests-675%20passing-brightgreen.svg)]()
-[![Version](https://img.shields.io/badge/version-0.1.0-orange.svg)]()
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue.svg)]()
 
 ---
@@ -73,6 +73,21 @@ draft --> pending_approval --> approved --> implemented --> deprecated
 
 ```bash
 npm install -g @reqord/cli
+
+# オプション: Web ダッシュボードをインストール
+npm install -g @reqord/web
+```
+
+### Claude Code プラグイン
+
+Reqord は Claude Code プラグインを提供しています。設計・TDD実装・レビュー・Git操作をAIと連携して行えます。
+
+```bash
+# マーケットプレイスを追加
+/plugin marketplace add kicchann/reqord
+
+# プラグインをインストール
+/plugin install reqord@reqord-plugins
 ```
 
 ### プロジェクトの初期化
