@@ -463,8 +463,11 @@ feedbacks:
     syncedAt: 2026-02-20T16:08:21.669Z
     status: closed
   - githubIssue: 327
+    type: bug
+    severity: medium
     linkedTo:
-      requirements: []
+      requirements:
+        - req-000026
       createdRequirements: []
       specifications: []
       createdSpecifications: []

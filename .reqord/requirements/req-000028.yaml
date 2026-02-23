@@ -4,21 +4,27 @@ title: Web UIデザイン品質向上（ブランディング・レスポンシ�
 status: draft
 priority: medium
 createdAt: 2026-02-23T04:31:05.008Z
-updatedAt: 2026-02-23T04:32:44.129Z
+updatedAt: 2026-02-23T11:31:29.009Z
 versionHistory: []
 files:
   description: requirements/req-000028/description.md
   supplementary: []
-successCriteria: []
+successCriteria:
+  - プロダクト固有のカラーパレットがTailwind設定に反映されている
+  - Webフォントが導入され見出し・本文で使い分けられている
+  - StatusBadge等のカラー体系がブランドカラーに統一されている
+  - 主要画面がモバイル・タブレットでも適切に表示される
 format:
   type: user-story
   userStory:
-    as: ''
-    iWant: ''
-    soThat: ''
+    as: Reqordユーザー
+    iWant: 洗練されたブランディングとレスポンシブ対応のWeb UIを使いたい
+    soThat: プロダクト固有のビジュアルアイデンティティがあることで、ツールへの信頼感と使いやすさが向上する
 dependencies:
   blockedBy: []
   blocks: []
   relatedTo: []
+estimatedComplexity: medium
+estimatedHours: 16
 origin:
   feedbackIssue: 398
