@@ -1,0 +1,52 @@
+name: Enforce Issue Template
+
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  check-template:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - name: Close issues not using feedback template
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issue = context.payload.issue;
+            const labels = issue.labels.map(l => l.name);
+
+            // Allow issues from feedback template or reqord CLI
+            const allowedLabels = ['feedback', 'reqord-generated'];
+            if (allowedLabels.some(l => labels.includes(l))) {
+              console.log('Issue has allowed label. Skipping.');
+              return;
+            }
+
+            const warningMessage = [
+              '⚠️ **This issue was not created using the required Feedback template.**',
+              '',
+              'All issues in this repository must be created using the [Feedback template](https://github.com/' + context.repo.owner + '/' + context.repo.repo + '/issues/new?template=feedback.yml).',
+              '',
+              'This issue has been automatically closed. Please reopen it using the correct template.',
+              '',
+              'Thank you for your understanding! 🙏',
+            ].join('\n');
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issue.number,
+              body: warningMessage,
+            });
+
+            await github.rest.issues.update({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issue.number,
+              state: 'closed',
+              state_reason: 'not_planned',
+            });
+
+            console.log(`Issue #${issue.number} closed: missing feedback label.`);
