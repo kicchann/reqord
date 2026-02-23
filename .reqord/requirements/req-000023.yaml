@@ -4,7 +4,7 @@ title: Feedback管理 (GitHub Issue連携)
 status: draft
 priority: medium
 createdAt: 2026-02-09T10:00:00Z
-updatedAt: 2026-02-23T00:20:27.642Z
+updatedAt: 2026-02-23T01:36:07.428Z
 versionHistory:
   - version: '4.0'
     status: draft
@@ -48,7 +48,9 @@ successCriteria:
   - reqord feedback close <issue-number> で影響範囲確定後にFeedbackがクローズされ、feedbacks.yamlとGitHub Issueが更新される
   - '@reqord/sharedパッケージにFeedbackIndexのZodスキーマが定義され、feedbacks.yamlバリデーションが実行される'
   - reqord feedback link実行時に--type, --severityオプションでFeedbackのメタデータを設定できる
-  - reqord feedback resolve <req-id> --issue <number> でfeedbacks.yamlのlinkedTo.resolvedがtrueに更新される
+  - >-
+    reqord feedback resolve <req-id> --issue <number>
+    でfeedbacks.yamlのlinkedTo.resolvedの該当配列（requirements/specifications）に対象アーティファクトIDが追加される
   - >-
     reqord feedback sync 実行時、既存エントリの手動設定メタデータ（type, severity, linkedTo）は保持され、 GitHub Issueから取得可能な情報（status,
     syncedAt）のみ更新される（マージ更新）

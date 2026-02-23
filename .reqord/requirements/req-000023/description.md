@@ -349,7 +349,7 @@ reqord feedback close 17
 ```
 
 動作:
-1. 紐付けされたartifactの未解決feedback（feedbacks.yamlのlinkedTo.resolved !== true）をチェックし、あれば警告表示
+1. 紐付けされたartifactの未解決feedback（artifact IDがlinkedTo.requirements/specificationsに含まれるが、対応するlinkedTo.resolved.requirements/specificationsに含まれない）をチェックし、あれば警告表示
 2. feedbacks.yamlの`status`を`closed`に更新
 3. `gh issue close <issue-number> --comment "<影響範囲サマリー>"`でGitHub Issueをクローズ
 
