@@ -1,0 +1,24 @@
+id: req-000028
+version: '1.0'
+title: Web UIデザイン品質向上（ブランディング・レスポンシブ・モーション・個性化）
+status: draft
+priority: medium
+createdAt: 2026-02-23T04:31:05.008Z
+updatedAt: 2026-02-23T04:32:44.129Z
+versionHistory: []
+files:
+  description: requirements/req-000028/description.md
+  supplementary: []
+successCriteria: []
+format:
+  type: user-story
+  userStory:
+    as: ''
+    iWant: ''
+    soThat: ''
+dependencies:
+  blockedBy: []
+  blocks: []
+  relatedTo: []
+origin:
+  feedbackIssue: 398

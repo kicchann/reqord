@@ -392,7 +392,7 @@ feedbacks:
           - req-000013
         specifications: []
     syncedAt: 2026-02-14T00:12:37.183Z
-    status: open
+    status: closed
   - githubIssue: 263
     type: improvement
     severity: medium
@@ -407,9 +407,11 @@ feedbacks:
       resolved:
         requirements:
           - req-000015
+          - req-000005
+          - req-000011
         specifications: []
     syncedAt: 2026-02-14T07:45:41.133Z
-    status: open
+    status: closed
   - githubIssue: 279
     type: requirement-gap
     severity: low
@@ -424,32 +426,42 @@ feedbacks:
         requirements:
           - req-000015
         specifications: []
-    syncedAt: 2026-02-20T16:08:21.669Z
+    syncedAt: 2026-02-23T04:32:38.400Z
     status: open
   - githubIssue: 273
+    type: requirement-gap
+    severity: low
     linkedTo:
-      requirements: []
+      requirements:
+        - req-000013
       createdRequirements: []
       specifications: []
       createdSpecifications: []
     syncedAt: 2026-02-20T16:08:21.669Z
-    status: open
+    status: closed
   - githubIssue: 335
+    type: improvement
+    severity: low
     linkedTo:
-      requirements: []
+      requirements:
+        - req-000016
       createdRequirements: []
       specifications: []
       createdSpecifications: []
     syncedAt: 2026-02-20T16:08:21.669Z
-    status: open
+    status: closed
   - githubIssue: 328
+    type: improvement
+    severity: low
     linkedTo:
       requirements: []
       createdRequirements: []
-      specifications: []
+      specifications:
+        - spec-000011
+        - spec-000015
       createdSpecifications: []
     syncedAt: 2026-02-20T16:08:21.669Z
-    status: open
+    status: closed
   - githubIssue: 327
     linkedTo:
       requirements: []
@@ -457,67 +469,73 @@ feedbacks:
       specifications: []
       createdSpecifications: []
     syncedAt: 2026-02-20T16:08:21.669Z
-    status: open
+    status: closed
   - githubIssue: 398
     type: improvement
     severity: medium
     linkedTo:
       requirements: []
-      createdRequirements: []
+      createdRequirements:
+        - req-000028
       specifications: []
       createdSpecifications: []
     syncedAt: 2026-02-20T16:08:21.669Z
-    status: open
+    status: closed
   - githubIssue: 399
     type: improvement
     severity: low
     linkedTo:
-      requirements: []
+      requirements:
+        - req-000028
       createdRequirements: []
       specifications: []
       createdSpecifications: []
     syncedAt: 2026-02-20T16:08:21.669Z
-    status: open
+    status: closed
   - githubIssue: 400
     type: improvement
     severity: medium
     linkedTo:
-      requirements: []
+      requirements:
+        - req-000028
       createdRequirements: []
       specifications: []
       createdSpecifications: []
     syncedAt: 2026-02-20T16:08:21.669Z
-    status: open
+    status: closed
   - githubIssue: 401
     type: improvement
     severity: medium
     linkedTo:
-      requirements: []
+      requirements:
+        - req-000028
       createdRequirements: []
       specifications: []
       createdSpecifications: []
     syncedAt: 2026-02-20T16:08:21.669Z
-    status: open
+    status: closed
   - githubIssue: 402
     type: improvement
     severity: medium
     linkedTo:
       requirements: []
       createdRequirements: []
-      specifications: []
+      specifications:
+        - spec-000034
       createdSpecifications: []
     syncedAt: 2026-02-20T16:08:21.669Z
-    status: open
+    status: closed
   - githubIssue: 403
     type: requirement-gap
     severity: medium
     linkedTo:
-      requirements: []
+      requirements:
+        - req-000022
       createdRequirements: []
       specifications: []
       createdSpecifications: []
     syncedAt: 2026-02-20T16:08:21.669Z
-    status: open
+    status: closed
   - githubIssue: 410
     type: spec-mismatch
     severity: low
@@ -554,12 +572,13 @@ feedbacks:
     type: improvement
     severity: medium
     linkedTo:
-      requirements: []
+      requirements:
+        - req-000004
       createdRequirements: []
       specifications: []
       createdSpecifications: []
     syncedAt: 2026-02-20T16:08:21.669Z
-    status: open
+    status: closed
   - githubIssue: 432
     type: improvement
     severity: high
@@ -590,4 +609,37 @@ feedbacks:
           - req-000023
         specifications: []
     syncedAt: 2026-02-20T16:08:21.668Z
+    status: closed
+  - githubIssue: 436
+    type: improvement
+    severity: medium
+    linkedTo:
+      requirements:
+        - req-000016
+      createdRequirements: []
+      specifications: []
+      createdSpecifications: []
+    syncedAt: 2026-02-23T04:30:45.887Z
+    status: closed
+  - githubIssue: 461
+    type: requirement-gap
+    severity: low
+    linkedTo:
+      requirements:
+        - req-000001
+      createdRequirements: []
+      specifications: []
+      createdSpecifications: []
+    syncedAt: 2026-02-23T04:30:48.570Z
+    status: closed
+  - githubIssue: 462
+    type: requirement-gap
+    severity: low
+    linkedTo:
+      requirements:
+        - req-000012
+      createdRequirements: []
+      specifications: []
+      createdSpecifications: []
+    syncedAt: 2026-02-23T04:30:51.400Z
     status: closed
