@@ -72,7 +72,7 @@ commonCommands:
     - command: reqord spec create <req-id>
       description: 仕様作成
     - command: reqord task create <spec-id>
-      description: GitHub Issue生成
+      description: GitHub Issueタスク生成
     - command: reqord status
       description: プロジェクト全体ステータス
     - command: reqord preview

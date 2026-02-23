@@ -2,7 +2,7 @@ id: reqord
 name: Reqord
 version: 0.1.0
 language: ja
-updatedAt: 2026-02-06T18:46:32.180Z
+updatedAt: 2026-02-23T10:52:17.256Z
 files:
   product:
     path: context/product.yaml

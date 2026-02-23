@@ -15,12 +15,10 @@ graph TB
 
     subgraph "External"
         GH["GitHub API<br/>(Octokit)"]
-        CLAUDE["Claude API<br/>(Anthropic SDK)"]
         FS["File System<br/>(.reqord/)"]
     end
 
     CLI --> GH
-    CLI --> CLAUDE
     CLI --> FS
     WEB --> FS
 ```
@@ -36,16 +34,16 @@ flowchart LR
     end
 
     subgraph Processing
-        REQ["要件管理<br/>create/enhance/approve"]
+        REQ["要件管理<br/>create/validate/approve"]
         GAP["Gap Analysis<br/>既存コード分析"]
-        SPEC["仕様設計<br/>research/design/validate"]
-        ISSUE["Issue生成<br/>分解/並列分析"]
+        SPEC["仕様設計<br/>design/validate"]
+        TASK["タスク生成<br/>分解/並列分析"]
     end
 
     subgraph Output
         REQFILES[".reqord/requirements/<br/>YAML + Markdown"]
         SPECFILES[".reqord/specifications/<br/>YAML + Markdown + Mermaid"]
-        GHISSUES["GitHub Issues<br/>テンプレート適用済み"]
+        GHTASKS["GitHub Issues<br/>タスクテンプレート適用済み"]
     end
 
     USER --> REQ
@@ -55,10 +53,10 @@ flowchart LR
     REQ --> GAP
     REQ --> SPEC
     GAP --> REQ
-    SPEC --> ISSUE
+    SPEC --> TASK
     REQ --> REQFILES
     SPEC --> SPECFILES
-    ISSUE --> GHISSUES
+    TASK --> GHTASKS
 ```
 
 ## 設計パターン
@@ -77,8 +75,8 @@ CLIコマンドの構造化。Commander.jsと組み合わせ、各コマンド�
 
 ### Factory Pattern
 
-オブジェクト生成の統一。要件・仕様・Issueの新規作成時にID採番、初期値設定、テンプレート適用をFactoryに集約。
+オブジェクト生成の統一。要件・仕様・タスクの新規作成時にID採番、初期値設定、テンプレート適用をFactoryに集約。
 
 ### Observer Pattern
 
-変更の伝播管理。要件変更時の影響範囲分析（仕様→Issue連鎖）をObserverパターンで実装。依存先への自動通知。
+変更の伝播管理。要件変更時の影響範囲分析（仕様→タスク連鎖）をObserverパターンで実装。依存先への自動通知。

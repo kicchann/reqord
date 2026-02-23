@@ -2,11 +2,11 @@
 
 ## AI連携ポイント
 
-Reqordは以下の4つのフェーズでAIを活用する。
+Reqordの構造化データを活用して、AIツール（プラグイン等）が以下の4フェーズを支援する。
 
 ### 1. 要件詳細化（Requirement Enhancement）
 
-ユーザーの簡単なタイトル・説明から、AIが詳細な要件定義を生成する。
+CLIがSMARTバリデーション・構造化テンプレートを提供し、プラグイン（`plugins/reqord/`）がAI支援による詳細化を担当する。
 
 - EARS形式への変換
 - 成功基準（Success Criteria）の定義
@@ -15,7 +15,7 @@ Reqordは以下の4つのフェーズでAIを活用する。
 
 ### 2. Gap Analysis
 
-既存コードベースと新要件の差分をAIが分析する。
+既存コードベースと新要件の差分を分析する。
 
 - 既存実装のカバレッジ評価（full / partial / no coverage）
 - 不足機能の特定
@@ -23,7 +23,7 @@ Reqordは以下の4つのフェーズでAIを活用する。
 
 ### 3. 設計生成（Specification Design）
 
-要件とProjectContextから、AIが技術設計書を生成する。
+要件とProjectContextから技術設計書を生成する。CLIが構造化テンプレート・バリデーションを提供し、プラグインがAI支援による設計生成を担当する。
 
 - アーキテクチャ図（Mermaid形式）
 - コンポーネント設計とインターフェース定義
@@ -32,12 +32,12 @@ Reqordは以下の4つのフェーズでAIを活用する。
 
 ### 4. タスク分解（Task Decomposition）
 
-仕様からAIが実装タスクに分解する。
+仕様から実装タスクに分解する。プラグインがAI支援によるタスク分解を担当する。
 
 - レイヤー別 / 機能別 / 要件別の分解戦略
 - 並列実行分析（Parallel Group: P0, P1, P2）
 - クリティカルパスの特定
-- GitHub Issue テンプレートの適用
+- GitHub Issue タスクテンプレートの適用
 
 ## コンテキスト構成の優先順位
 
@@ -54,9 +54,7 @@ AIへのコンテキスト提供は以下の優先順位で行う。
 
 ## APIキー管理
 
-- ユーザー提供のAPIキーを使用（Reqord側でキーを保持しない）
-- 環境変数 `ANTHROPIC_API_KEY` または `reqord config set api-key` で設定
-- キーは `.reqord/` には保存しない（`.env` またはOS keychain）
+ReqordのCLI自体はAI APIを直接呼び出さない。AI連携はプラグイン（`plugins/reqord/`）やClaude Code等の外部AIツールが担当する。APIキーの管理は各ツール側の責務である。
 
 ## トークン最適化
 
@@ -67,11 +65,10 @@ AIへのコンテキスト提供は以下の優先順位で行う。
 
 ## Claude Code連携
 
-Reqordは Claude Code のツールエコシステムとの統合を前提とする。
+Reqordは Claude Code のプラグインエコシステムと統合済みである。
 
-- **Commands**: `.claude/commands/reqord/` に配置し、Claude Code のスラッシュコマンドとして利用可能
-- **Skills**: `.reqord/skills/` に配置し、AI出力品質を向上させるドメイン知識を提供
-- **Subagents**: `.reqord/subagents/` に配置し、専門エージェントとして要件詳細化・設計生成等を実行
-- **Rules**: `.reqord/settings/rules/` に配置し、品質基準を自動適用
+- **Skills**: `plugins/reqord/skills/` に配置し、AI出力品質を向上させるドメイン知識を提供（context, design, feedback, refine, status, dev, git, verify）
+- **Agents**: `plugins/reqord/agents/` に配置し、専門エージェントとして要件調査・設計・TDD実装・レビューを実行（explorer, architect, implementer, reviewer）
+- **Plugin設定**: `plugins/reqord/.claude-plugin/` にプラグインメタデータを格納
 
-将来的にはこれらをpluginとしてパッケージ化し、他プロジェクトへの導入を容易にする。
+プラグインは `claude --plugin-dir ./plugins/reqord` で読み込み、他プロジェクトへの導入も容易。
