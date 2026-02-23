@@ -2,10 +2,10 @@ id: spec-000028
 requirementId: req-000023
 title: Feedback操作CLI
 requirementVersion: '4.0'
-version: '3.1'
+version: '3.2'
 status: draft
 createdAt: 2026-02-09T05:48:42.351Z
-updatedAt: 2026-02-22T23:44:21.468Z
+updatedAt: 2026-02-23T00:20:34.020Z
 versionHistory:
   - version: '3.0'
     status: draft
@@ -15,6 +15,10 @@ versionHistory:
     status: draft
     changedAt: 2026-02-20T23:19:05.657Z
     summary: '#432 .reqord/issues/ 再構造化に伴うドキュメント更新'
+  - version: '3.2'
+    status: draft
+    changedAt: 2026-02-23T00:20:34.020Z
+    summary: flags→feedbacks.yaml/linkedTo/resolved経由に文言変更
 files:
   design: specifications/spec-000028/design.md
   supplementary: []

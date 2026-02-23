@@ -43,12 +43,12 @@
 - ノードクリックで詳細画面に遷移
 - ステータスに応じたノード色
 
-### Flags表示（Feedback #169）
+### 未解決Feedback表示（Feedback #169）
 
-Requirement/Specificationの詳細画面にflagsセクションを追加:
-- feedback-reviewフラグの一覧表示（type, reason, severity, 関連Issue番号）
-- フラグがある場合は詳細画面上部に警告バッジを表示
-- フラグの有無でフィルタリング可能
+Requirement/Specificationの詳細画面に未解決feedbackセクションを追加:
+- feedbacks.yaml経由で未解決feedback（linkedTo.resolved !== true）の一覧表示（type, severity, 関連Issue番号）
+- 未解決feedbackがある場合は詳細画面上部に警告バッジを表示
+- 未解決feedbackの有無でフィルタリング可能
 
 ### Feedback一覧表示（Feedback #170）
 

@@ -2,10 +2,10 @@ id: spec-000019
 requirementId: req-000019
 title: ステータス表示コマンド
 requirementVersion: '2.0'
-version: '1.1'
+version: '1.2'
 status: draft
 createdAt: 2026-02-08T14:08:08.151Z
-updatedAt: 2026-02-22T23:44:11.740Z
+updatedAt: 2026-02-23T00:20:35.646Z
 versionHistory:
   - version: '1.0'
     status: draft
@@ -15,6 +15,10 @@ versionHistory:
     status: draft
     changedAt: 2026-02-20T23:19:02.305Z
     summary: '#432 .reqord/issues/ 再構造化に伴うドキュメント更新'
+  - version: '1.2'
+    status: draft
+    changedAt: 2026-02-23T00:20:35.646Z
+    summary: flags→feedbacks.yaml/linkedTo/resolved経由に文言変更
 files:
   design: specifications/spec-000019/design.md
   supplementary: []

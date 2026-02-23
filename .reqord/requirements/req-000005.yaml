@@ -1,10 +1,10 @@
 id: req-000005
-version: '5.0'
+version: '5.1'
 title: Requirement/Specificationバージョン管理
 status: draft
 priority: medium
 createdAt: 2026-02-07T10:00:00Z
-updatedAt: 2026-02-22T23:43:25.971Z
+updatedAt: 2026-02-23T00:20:37.880Z
 versionHistory:
   - version: 1.0.0
     status: implemented
@@ -28,6 +28,10 @@ versionHistory:
     status: implemented
     changedAt: 2026-02-20T14:13:19.911Z
     summary: 'Remove gitCommit field from versionHistory (feedback #411)'
+  - version: '5.1'
+    status: draft
+    changedAt: 2026-02-23T00:20:37.880Z
+    summary: flags→feedbacks.yaml経由に文言変更
 files:
   description: requirements/req-000005/description.md
   supplementary: []

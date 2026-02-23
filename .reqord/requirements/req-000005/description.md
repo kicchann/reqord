@@ -40,15 +40,14 @@ the system shall NOT increment the version.
 | `reqord req draft` | **しない** | 変更なし | ステータス遷移のみ |
 | `reqord req approve`（draft → approved） | **しない** | 1.0 (draft) → 1.0 (approved) | ステータス遷移のみ |
 | `reqord req implemented`（approved → implemented） | **しない** | 1.0 (approved) → 1.0 (implemented) | ステータス遷移のみ |
-| flagの追加・削除 | **しない** | 変更なし | メタ情報の変更 |
 
 ### 状態遷移
 
 ```
 draft ──approve──→ approved ──implement──→ implemented
   ↑                    │                       │
-  ├── draft (flag解決) ←┘                       │
-  └── draft (flag解決) ←───────────────────────┘
+  ├── draft (未解決feedback対応) ←┘              │
+  └── draft (未解決feedback対応) ←───────────────┘
 ```
 
 > 注: `approved`は廃止方針（#208）。PRマージ自体が承認行為となる。

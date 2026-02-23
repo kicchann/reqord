@@ -1,10 +1,10 @@
 id: req-000015
-version: '5.0'
+version: '5.1'
 title: Specification承認フロー
 status: draft
 priority: medium
 createdAt: 2026-02-07T12:00:00Z
-updatedAt: 2026-02-22T23:43:36.078Z
+updatedAt: 2026-02-23T00:20:36.677Z
 versionHistory:
   - version: 2.0.0
     status: approved
@@ -24,11 +24,15 @@ versionHistory:
     status: draft
     changedAt: 2026-02-13T00:00:00.000Z
     summary: Reverted to draft for revision based on feedback (#208,
+  - version: '5.1'
+    status: draft
+    changedAt: 2026-02-23T00:20:36.677Z
+    summary: flags→feedbacks.yaml経由に文言変更
 files:
   description: requirements/req-000015/description.md
   supplementary: []
 successCriteria:
-  - reqord spec draft <id> でflag付きのspecをdraft状態に戻せる
+  - reqord spec draft <id> で未解決feedback紐付けありのspecをdraft状態に戻せる
   - reqord spec approve <id> でGitブランチが作成され、承認依頼PRが自動生成される
   - approve実行時にstatusをapprovedに設定し、PRマージで承認完了
   - PR本文にreqordメタデータコメントタグが埋め込まれる

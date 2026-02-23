@@ -41,10 +41,10 @@ packages/shared/
 - `EarsFormat` / `UserStoryFormat` / `FreeFormFormat` - 要件記述形式
 - `ProjectContext` - プロジェクトコンテキスト全体
 - `Specification` - 仕様書
-- `Flag` - feedback-review | security-review | breaking-change 等のフラグ型
 - `TasksIndex` - issues/tasks.yaml のタスク一覧インデックス型（issue管理情報の分離先）
+- `FeedbackIndex` - issues/feedbacks.yaml のフィードバック一覧インデックス型
 
-> **注記**: Specification型からimplementationフィールドが削除され、issue管理情報は `.reqord/issues/tasks.yaml` に分離された。
+> **注記**: Specification型からimplementationフィールドが削除され、issue管理情報は `.reqord/issues/tasks.yaml` に分離された。flagsフィールドはreq/specスキーマから削除され、未解決feedbackの管理はfeedbacks.yamlのlinkedTo.resolvedで行う。
 
 ## ステータス遷移ルール（計画中, Feedback #16）
 

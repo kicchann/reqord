@@ -2,10 +2,10 @@ id: spec-000027
 requirementId: req-000023
 title: Feedbackスキーマ・Repository・GitHub同期基盤
 requirementVersion: '4.0'
-version: '3.1'
+version: '3.2'
 status: draft
 createdAt: 2026-02-09T05:48:38.643Z
-updatedAt: 2026-02-22T23:44:16.642Z
+updatedAt: 2026-02-23T00:14:46.625Z
 versionHistory:
   - version: '3.0'
     status: draft
@@ -15,6 +15,10 @@ versionHistory:
     status: draft
     changedAt: 2026-02-20T23:19:05.101Z
     summary: '#432 .reqord/issues/ 再構造化に伴うドキュメント更新'
+  - version: '3.2'
+    status: draft
+    changedAt: 2026-02-23T00:14:46.625Z
+    summary: flags→feedbacks.yaml経由に文言変更
 files:
   design: specifications/spec-000027/design.md
   supplementary: []

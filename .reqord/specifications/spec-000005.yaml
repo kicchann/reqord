@@ -2,10 +2,10 @@ id: spec-000005
 requirementId: req-000005
 title: Requirement/Specificationバージョン管理
 requirementVersion: '4.0'
-version: '4.0'
+version: '4.1'
 status: draft
 createdAt: 2026-02-08T14:08:06.961Z
-updatedAt: 2026-02-22T23:44:01.637Z
+updatedAt: 2026-02-23T00:14:45.905Z
 versionHistory:
   - version: 1.0.0
     status: implemented
@@ -29,6 +29,10 @@ versionHistory:
     status: implemented
     changedAt: 2026-02-20T15:15:39.066Z
     summary: 'Remove gitCommit field from VersionHistoryEntrySchema (feedback #411, req-000005 v5.0)'
+  - version: '4.1'
+    status: draft
+    changedAt: 2026-02-23T00:14:45.905Z
+    summary: flags→feedbacks.yaml経由に文言変更
 files:
   design: specifications/spec-000005/design.md
   supplementary: []
