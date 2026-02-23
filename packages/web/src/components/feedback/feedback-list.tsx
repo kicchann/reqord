@@ -21,6 +21,9 @@ export function FeedbackList({ feedbacks }: { feedbacks: FeedbackEntry[] }) {
               <span className="font-mono text-sm text-blue-600" data-testid="feedback-issue">
                 #{feedback.githubIssue}
               </span>
+              {feedback.title && (
+                <span className="truncate text-sm text-gray-700">{feedback.title}</span>
+              )}
               <FeedbackBadge
                 type={feedback.type}
                 severity={feedback.severity}

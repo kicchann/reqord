@@ -47,6 +47,7 @@ export function FeedbackTable({
         <thead className="bg-gray-50">
           <tr>
             <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">#</th>
+            <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Title</th>
             <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Type</th>
             <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Severity</th>
             <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Status</th>
@@ -61,6 +62,9 @@ export function FeedbackTable({
                 <span className="font-mono text-sm text-blue-600" data-testid="feedback-issue">
                   #{fb.githubIssue}
                 </span>
+              </td>
+              <td className="max-w-xs truncate px-4 py-3 text-sm text-gray-900">
+                {fb.title ?? "-"}
               </td>
               <td className="whitespace-nowrap px-4 py-3">
                 {fb.type && (
