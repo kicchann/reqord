@@ -13,7 +13,7 @@ packages/cli/src/
   │       ├── sync.ts                     (新規: syncコマンド)
   │       └── validate.ts                 (新規: validateコマンド)
   ├── services/
-  │   └── issue-sync-service.ts           (新規: 同期ビジネスロジック)
+  │   └── task-sync-service.ts            (新規: 同期ビジネスロジック)
   ├── repositories/
   │   ├── specification.ts                (既存: Specification永続化)
   │   └── github.ts                       (新規または既存: GitHub API呼び出し)
@@ -28,9 +28,9 @@ packages/shared/src/
 ### レイヤー構成
 
 ```
-Command Layer:  commands/issue/sync.ts, commands/issue/validate.ts
+Command Layer:  commands/task/sync.ts, commands/task/validate.ts
                     ↓
-Service Layer:  services/issue-sync-service.ts
+Service Layer:  services/task-sync-service.ts
                     ↓
 Repository:     repositories/specification.ts (既存)
                 repositories/github.ts        (GitHub API)
@@ -42,7 +42,7 @@ Storage:        .reqord/issues/tasks.yaml
 
 ## 3. コンポーネント設計
 
-### 3.1 syncコマンド (`commands/issue/sync.ts` - 新規)
+### 3.1 syncコマンド (`commands/task/sync.ts` - 新規)
 
 **責務:** 単一/全SpecificationのIssue状態同期を実行し、結果を表示する。
 
@@ -68,7 +68,7 @@ Syncing spec-000016...
 Progress: 1/3 (33%) completed
 ```
 
-### 3.2 validateコマンド (`commands/issue/validate.ts` - 新規)
+### 3.2 validateコマンド (`commands/task/validate.ts` - 新規)
 
 **責務:** SpecificationとGitHub Issue間のメタデータ整合性を検証する。
 
@@ -95,7 +95,7 @@ reqord task validate --all
 | 重複Issue | 同一タスクに対する重複Issueがないか | warning |
 | Issueオープン状態 | 全Issueクローズ済みならprogress=100%か | info |
 
-### 3.3 IssueSyncService (`services/issue-sync-service.ts` - 新規)
+### 3.3 TaskSyncService (`services/task-sync-service.ts` - 新規)
 
 **責務:** Issue同期のビジネスロジック。
 
@@ -280,7 +280,7 @@ function mapGitHubState(ghState: "open" | "closed"): "open" | "in_progress" | "c
 ```
 ユーザー → reqord task sync spec-000016
   → syncCommand.action("spec-000016")
-    → issueSyncService.syncSpecification(cwd, "spec-000016")
+    → taskSyncService.syncSpecification(cwd, "spec-000016")
       → loadTasksYaml(cwd) → tasks.yaml読み込み
         → specId === "spec-000016" のタスクをフィルタ → [#42, #43, #44]
       → 各Issueについて:
@@ -315,7 +315,7 @@ function mapGitHubState(ghState: "open" | "closed"): "open" | "in_progress" | "c
 ```
 ユーザー → reqord task validate spec-000016
   → validateCommand.action("spec-000016")
-    → issueSyncService.validateSpecification(cwd, "spec-000016")
+    → taskSyncService.validateSpecification(cwd, "spec-000016")
       → specRepo.findById(cwd, "spec-000016") → Specification取得
       → 各Issueについて:
         → githubRepo.getIssue(cwd, issue.number) → Issue存在確認
@@ -338,13 +338,13 @@ function mapGitHubState(ghState: "open" | "closed"): "open" | "in_progress" | "c
 
 ### ユニットテスト
 
-- **issueSyncService.syncSpecification**:
+- **taskSyncService.syncSpecification**:
   - 正常系: 3件のIssueのうち1件がclosed → progress 33%
   - 全件closed: progress 100%
   - 全件open: progress 0%
   - tasks.yamlに該当タスクなし: エラーメッセージ
   - GitHub API応答エラー: SyncErrorとして記録
-- **issueSyncService.validateSpecification**:
+- **taskSyncService.validateSpecification**:
   - 全チェック正常: ValidationResult.errors = []
   - Issue不存在: error severity
   - ラベル不一致（reqord-generated欠落）: warning severity

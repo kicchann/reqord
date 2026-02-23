@@ -167,12 +167,14 @@ reqord context update              # コンテキスト更新
 reqord impact analyze <req-id|spec-id> [--json]  # 依存関係・影響範囲分析
 ```
 
-### Issue操作
+### Task操作
 
 ```bash
-reqord task sync                       # GitHub Issue同期・進捗計算
-reqord task create <req-id>            # Issue生成
-reqord task validate <issue-number>    # Issue整合性チェック
+reqord task create <spec-id>            # GitHub Issue生成（タスク分解）
+reqord task fetch [spec-id]             # GitHub Issue情報取得
+reqord task sync <spec-id>              # GitHub Issue同期・進捗計算
+reqord task sync-all                    # 全Specificationの同期
+reqord task validate [spec-id] [--all]  # メタデータ整合性チェック
 ```
 
 ### バージョン操作

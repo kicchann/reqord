@@ -11,9 +11,9 @@
 ## 2. アーキテクチャ
 
 ```
-Command Layer:  commands/issue/create.ts      (新規)
+Command Layer:  commands/task/create.ts      (新規)
                     ↓
-Service Layer:  services/issue-service.ts      (新規)
+Service Layer:  services/task-service.ts      (新規)
                     ↓
 Repository:     repositories/specification.ts  (既存)
                 repositories/github.ts         (既存 - GitHub PR作成あり)
@@ -36,7 +36,7 @@ Storage:        .reqord/issues/tasks.yaml (タスクエントリ)
 
 ## 3. コンポーネント設計
 
-### 3.1 createコマンド (`commands/issue/create.ts` - 新規)
+### 3.1 createコマンド (`commands/task/create.ts` - 新規)
 
 **責務:** Issue生成の実行と結果表示。
 
@@ -58,7 +58,7 @@ reqord task create <spec-id> --tasks-file <path> [options]
 import { Command } from "commander";
 import chalk from "chalk";
 import { handleError } from "../../utils/error-handler.js";
-import * as issueService from "../../services/issue-service.js";
+import * as taskService from "../../services/task-service.js";
 
 export function registerCreateCommand(program: Command) {
   program
@@ -72,7 +72,7 @@ export function registerCreateCommand(program: Command) {
     .action(async (specId, options) => {
       try {
         const cwd = process.cwd();
-        const result = await issueService.createIssuesFromSpec(cwd, {
+        const result = await taskService.createIssuesFromSpec(cwd, {
           specId,
           tasksFile: options.tasksFile,
           dryRun: options.dryRun,
@@ -92,7 +92,7 @@ export function registerCreateCommand(program: Command) {
 }
 ```
 
-### 3.2 IssueService (`services/issue-service.ts` - 新規)
+### 3.2 TaskService (`services/task-service.ts` - 新規)
 
 **責務:** タスク定義ファイルの読み込み・検証、GitHub Issue作成、tasks.yaml記録の調整。
 
@@ -413,7 +413,7 @@ body:
 ```
 ユーザー → reqord task create spec-000016 --tasks-file ./tasks.json
   → createCommand.action("spec-000016", { tasksFile: "./tasks.json" })
-    → issueService.createIssuesFromSpec(cwd, options)
+    → taskService.createIssuesFromSpec(cwd, options)
       → specRepo.findById(cwd, "spec-000016") → Specification取得
         → status === "approved" を検証
       → loadTasksFile(cwd, "./tasks.json")
@@ -456,16 +456,16 @@ body:
 
 ### ユニットテスト
 
-- **issue-service.createIssuesFromSpec**:
+- **task-service.createIssuesFromSpec**:
   - Specification未承認時のエラー
   - tasks-file読み込み失敗時のエラー
   - maxIssues超過時のエラー
   - dry-runモードでGitHub API呼び出しなし
   - issue生成後のtasks.yaml記録検証
-- **issue-service.buildIssueBody**:
+- **task-service.buildIssueBody**:
   - HTMLコメントタグ埋め込み検証
   - Markdown形式の本文生成（説明・見積もり・優先度・依存タスク）
-- **issue-service.buildLabels**:
+- **task-service.buildLabels**:
   - `reqord-generated` + 優先度ラベルの生成
 - **github-client.createIssue**:
   - spawn + stdin パターンの動作（モック化）

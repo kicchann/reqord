@@ -100,9 +100,9 @@ packages/cli/
 │   ├── services/                   # ビジネスロジック
 │   │   ├── requirement-service.ts
 │   │   ├── specification-service.ts
-│   │   ├── issue-service.ts
-│   │   ├── issue-fetch-service.ts
-│   │   ├── issue-sync-service.ts
+│   │   ├── task-service.ts
+│   │   ├── task-fetch-service.ts
+│   │   ├── task-sync-service.ts
 │   │   ├── context-service.ts
 │   │   ├── approval-service.ts
 │   │   ├── impact-service.ts
