@@ -31,7 +31,7 @@ export const uiCommand = new Command("ui")
             chalk.red("\n  @reqord/web is not installed.\n")
           );
           console.log(
-            `  Install it with: ${chalk.cyan("npm install -D @reqord/web")}\n`
+            `  Install it with: ${chalk.cyan("npm install @reqord/web")} (or pnpm add / yarn add)\n`
           );
           process.exitCode = 1;
           return;
