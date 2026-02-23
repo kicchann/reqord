@@ -1,5 +1,5 @@
 monorepo:
-  tool: npm-workspaces
+  tool: pnpm workspaces
   packages:
     - name: '@reqord/cli'
       path: packages/cli

@@ -152,23 +152,28 @@ packages/cli/
 packages/shared/
 ├── src/
 │   ├── index.ts                    # 公開API
-│   ├── types/                      # 型定義
-│   │   ├── context.ts              # ProjectContext
+│   ├── schemas/                    # Zodスキーマ・型定義
+│   │   ├── common.ts              # 共通型 (Status, Priority等)
 │   │   ├── requirement.ts          # Requirement
 │   │   ├── specification.ts        # Specification
-│   │   ├── issue.ts                # Issue metadata
-│   │   └── common.ts              # 共通型 (Status, Priority等)
+│   │   ├── task.ts                 # Task (GitHub Issue)
+│   │   ├── feedback.ts             # Feedback
+│   │   ├── project-context.ts      # ProjectContext
+│   │   └── validation.ts           # バリデーション結果型
 │   │
-│   ├── validators/                 # バリデーション
-│   │   ├── context-validator.ts
-│   │   ├── requirement-validator.ts
-│   │   ├── specification-validator.ts
-│   │   └── ears-validator.ts       # EARS形式検証
+│   ├── validation/                 # バリデーションロジック
+│   │   ├── smart-scoring.ts        # SMARTスコアリング
+│   │   └── ambiguous-phrases.ts    # 曖昧表現検出
 │   │
-│   └── constants/                  # 定数
-│       ├── statuses.ts             # ステータス定義
-│       ├── priorities.ts           # 優先度定義
-│       └── templates.ts            # テンプレートパス
+│   ├── rules/                      # ビジネスルール
+│   │   ├── consistency.ts          # 整合性ルール
+│   │   └── status-transitions.ts   # ステータス遷移ルール
+│   │
+│   ├── constants/                  # 定数
+│   │   └── paths.ts               # パス定義
+│   │
+│   └── utils/                      # ユーティリティ
+│       └── zod-error-formatter.ts  # Zodエラーフォーマッター
 │
 ├── package.json
 └── tsconfig.json
