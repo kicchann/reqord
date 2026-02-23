@@ -1,13 +1,8 @@
-import { describe, it, expect } from "vitest";
 import type { TaskEntry } from "@reqord/shared";
-import {
-  transformToGanttData,
-  DEFAULT_HOURS,
-} from "../../lib/gantt-data.js";
+import { describe, expect, it } from "vitest";
+import { DEFAULT_HOURS, transformToGanttData } from "../../lib/gantt-data";
 
-function makeTask(
-  overrides: Partial<TaskEntry> = {},
-): TaskEntry {
+function makeTask(overrides: Partial<TaskEntry> = {}): TaskEntry {
   return {
     number: 1,
     title: "Test task",
@@ -189,9 +184,9 @@ describe("transformToGanttData", () => {
       const result = transformToGanttData("spec-000001", tasks);
 
       const allTasks = result.groups.flatMap((g) => g.tasks);
-      expect(allTasks.every((task) => task.estimatedHours === DEFAULT_HOURS)).toBe(
-        true,
-      );
+      expect(
+        allTasks.every((task) => task.estimatedHours === DEFAULT_HOURS),
+      ).toBe(true);
     });
 
     it("uses task estimatedHours when provided", () => {
