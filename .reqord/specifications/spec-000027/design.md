@@ -208,7 +208,7 @@ export async function upsertFeedback(
 **インターフェース**:
 
 ```typescript
-import { exec } from "node:child_process";
+import { exec, spawn } from "node:child_process";
 import { promisify } from "node:util";
 
 const execAsync = promisify(exec);
@@ -390,6 +390,18 @@ export async function syncToGitHub(cwd: string): Promise<number> {
     if (newBody !== issue.body) {
       await updateIssueBody(feedback.githubIssue, newBody);
       updatedCount++;
+    }
+
+    // ラベル同期: feedbacks.yamlのtypeに基づきGitHub Issueのラベルを更新
+    if (feedback.type) {
+      const expectedLabels = ["feedback", feedback.type];
+      const currentLabels = issue.labels ?? [];
+      const missingLabels = expectedLabels.filter(
+        (l) => !currentLabels.includes(l)
+      );
+      if (missingLabels.length > 0) {
+        await addLabelsToIssue(feedback.githubIssue, missingLabels);
+      }
     }
   }
 

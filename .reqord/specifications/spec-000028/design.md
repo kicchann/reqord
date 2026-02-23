@@ -79,9 +79,10 @@ Feedback一覧表示・詳細表示・紐付け・クローズの4つのCLIコ�
 ```typescript
 import type { FeedbackEntry, FeedbackType, FeedbackSeverity } from "@reqord/shared";
 import { loadIndex, saveIndex } from "../repositories/feedback";
-import { getIssue, closeIssue, updateIssueBody, type GitHubIssue } from "./github-client";
+import { getIssue, closeIssue, createIssue, updateIssueBody, type GitHubIssue } from "./github-client";
 import { findByIdOrThrow as findRequirementByIdOrThrow } from "../repositories/requirement";
-import { createRequirement } from "./requirement-service";
+import { findByIdOrThrow as findSpecificationByIdOrThrow } from "../repositories/specification";
+import { createRequirement, saveRequirement } from "./requirement-service";
 import { generateNextId } from "../utils/id-generator";
 import { upsertReqordComment } from "./reqord-comment";
 
@@ -469,7 +470,7 @@ function feedbackTypeToLabel(type: FeedbackType): string {
   const map: Record<FeedbackType, string> = {
     "requirement-gap": "requirement-gap (要件の不足)",
     "spec-mismatch": "spec-mismatch (仕様と実装の不一致)",
-    "bug": "implementation-bug (実装のバグ)",
+    "bug": "bug (実装のバグ)",
     "improvement": "improvement (改善提案)",
     "security": "security (セキュリティ)",
   };
@@ -513,7 +514,7 @@ export async function createFeedbackIssue(
   const issueNumber = await createIssue({
     title,
     body,
-    labels: ["feedback", "reqord-generated", ...(options.type ? [options.type] : [])],
+    labels: ["feedback", "reqord", ...(options.type ? [options.type] : [])],
   });
 
   // feedbacks.yamlに新規エントリ追加
