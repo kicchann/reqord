@@ -3,9 +3,9 @@ requirementId: req-000023
 title: Feedback操作CLI
 requirementVersion: '4.0'
 version: '3.2'
-status: approved
+status: implemented
 createdAt: 2026-02-09T05:48:42.351Z
-updatedAt: 2026-02-23T02:18:43.716Z
+updatedAt: 2026-02-23T12:37:49.135Z
 versionHistory:
   - version: '3.0'
     status: draft

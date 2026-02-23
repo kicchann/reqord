@@ -1,10 +1,10 @@
 id: req-000009
 version: '2.0'
 title: CLIメッセージ統一
-status: approved
+status: implemented
 priority: medium
 createdAt: 2026-02-06T16:34:48.127Z
-updatedAt: 2026-02-20T12:22:32.414Z
+updatedAt: 2026-02-23T12:37:16.363Z
 versionHistory:
   - version: 1.0.0
     status: implemented

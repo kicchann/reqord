@@ -3,9 +3,9 @@ requirementId: req-000009
 title: CLIメッセージ統一
 requirementVersion: '2.0'
 version: '2.0'
-status: approved
+status: implemented
 createdAt: 2026-02-08T14:08:07.300Z
-updatedAt: 2026-02-20T13:05:22.114Z
+updatedAt: 2026-02-23T12:37:32.986Z
 versionHistory:
   - version: 1.0.0
     status: implemented

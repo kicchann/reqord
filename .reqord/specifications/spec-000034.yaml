@@ -3,9 +3,9 @@ requirementId: req-000022
 title: Feedback表示・Feedback一覧UI
 requirementVersion: '2.0'
 version: '1.2'
-status: approved
+status: implemented
 createdAt: 2026-02-18T06:51:34.846Z
-updatedAt: 2026-02-23T02:18:49.170Z
+updatedAt: 2026-02-23T12:37:47.673Z
 versionHistory:
   - version: '1.0'
     status: draft

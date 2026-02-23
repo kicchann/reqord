@@ -1,10 +1,10 @@
 id: req-000013
 version: '1.2'
 title: Specification CRUD
-status: approved
+status: implemented
 priority: high
 createdAt: 2026-02-07T12:00:00Z
-updatedAt: 2026-02-21T12:59:56.247Z
+updatedAt: 2026-02-23T12:37:17.905Z
 versionHistory:
   - version: '1.1'
     status: draft

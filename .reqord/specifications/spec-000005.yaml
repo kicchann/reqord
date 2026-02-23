@@ -3,9 +3,9 @@ requirementId: req-000005
 title: Requirement/Specificationバージョン管理
 requirementVersion: '4.0'
 version: '4.1'
-status: approved
+status: implemented
 createdAt: 2026-02-08T14:08:06.961Z
-updatedAt: 2026-02-23T02:18:22.497Z
+updatedAt: 2026-02-23T12:37:32.289Z
 versionHistory:
   - version: 1.0.0
     status: implemented

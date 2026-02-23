@@ -3,9 +3,9 @@ requirementId: req-000023
 title: Feedbackスキーマ・Repository・GitHub同期基盤
 requirementVersion: '4.2'
 version: '3.2'
-status: approved
+status: implemented
 createdAt: 2026-02-09T05:48:38.643Z
-updatedAt: 2026-02-23T02:18:38.658Z
+updatedAt: 2026-02-23T12:37:48.380Z
 versionHistory:
   - version: '3.0'
     status: draft

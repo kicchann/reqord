@@ -1,10 +1,10 @@
 id: req-000001
 version: '1.1'
 title: CLI初期化コマンド
-status: approved
+status: implemented
 priority: high
 createdAt: 2026-02-07T10:00:00Z
-updatedAt: 2026-02-21T12:59:22.527Z
+updatedAt: 2026-02-23T12:37:13.954Z
 versionHistory:
   - version: '1.0'
     status: draft

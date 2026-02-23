@@ -3,9 +3,9 @@ requirementId: req-000012
 title: 影響範囲分析
 requirementVersion: '3.1'
 version: '1.1'
-status: approved
+status: implemented
 createdAt: 2026-02-08T14:08:07.554Z
-updatedAt: 2026-02-21T13:28:19.635Z
+updatedAt: 2026-02-23T12:37:33.690Z
 versionHistory:
   - version: '1.0'
     status: draft
