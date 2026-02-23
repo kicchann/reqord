@@ -1,8 +1,28 @@
 {
   "name": "@reqord/web",
   "version": "0.1.0",
-  "private": true,
+  "description": "Web dashboard for Reqord",
+  "license": "AGPL-3.0-or-later",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kicchann/reqord.git",
+    "directory": "packages/web"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "keywords": ["reqord", "requirements", "dashboard", "next.js"],
+  "publishConfig": {
+    "access": "public"
+  },
   "type": "module",
+  "files": [
+    "src",
+    "next.config.ts",
+    "postcss.config.mjs",
+    "tsconfig.json",
+    "next-env.d.ts"
+  ],
   "scripts": {
     "dev": "next dev --port 3456",
     "build": "next build",
