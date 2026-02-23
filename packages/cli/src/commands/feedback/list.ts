@@ -30,7 +30,7 @@ export const feedbackListCommand = new Command("list")
       }
 
       const table = new Table({
-        head: ["Issue", "Status", "Type", "Severity", "Requirements", "Specs"],
+        head: ["Issue", "Title", "Status", "Type", "Severity", "Requirements", "Specs"],
         style: { head: ["cyan"] },
       });
 
@@ -38,6 +38,7 @@ export const feedbackListCommand = new Command("list")
         const statusColor = FEEDBACK_STATUS_COLORS[f.status] ?? identityColor;
         table.push([
           `#${f.githubIssue}`,
+          f.title ?? "-",
           statusColor(f.status),
           f.type ?? "-",
           f.severity ?? "-",

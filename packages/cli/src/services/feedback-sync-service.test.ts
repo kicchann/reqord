@@ -40,6 +40,7 @@ function makeGitHubIssue(overrides: Partial<GitHubIssue> = {}): GitHubIssue {
 function makeFeedbackEntry(overrides: Partial<FeedbackEntry> = {}): FeedbackEntry {
   return {
     githubIssue: 17,
+    title: "Test feedback",
     type: "bug",
     linkedTo: {
       requirements: [],
@@ -64,6 +65,17 @@ beforeEach(() => {
 // --- parseGitHubIssue (output-based) ---
 
 describe("parseGitHubIssue", () => {
+  it("GitHub issue titleを抽出する", () => {
+    const issue = makeGitHubIssue({
+      title: "Bug: something is broken",
+      body: "",
+    });
+
+    const result = parseGitHubIssue(issue);
+
+    expect(result.title).toBe("Bug: something is broken");
+  });
+
   it("HTMLコメントからtypeを抽出する", () => {
     const issue = makeGitHubIssue({
       body: '<!-- reqord:feedback {"type":"bug","linkedTo":{"requirements":[],"createdRequirements":[],"specifications":[],"createdSpecifications":[]}} -->',
@@ -161,6 +173,15 @@ describe("parseGitHubIssue", () => {
 // --- mergeFeedback (output-based, v2.0.0) ---
 
 describe("mergeFeedback", () => {
+  it("titleは常にfromGitHubから更新する", () => {
+    const existing = makeFeedbackEntry({ title: "Old title" });
+    const fromGitHub = makeFeedbackEntry({ title: "Updated title" });
+
+    const result = mergeFeedback(existing, fromGitHub);
+
+    expect(result.title).toBe("Updated title");
+  });
+
   it("type/severityはexistingを優先する", () => {
     const existing = makeFeedbackEntry({
       type: "improvement",

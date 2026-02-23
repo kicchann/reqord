@@ -126,6 +126,31 @@ describe("FeedbackTable", () => {
     expect(screen.queryByTestId("feedback-severity-badge")).toBeNull();
   });
 
+  it("titleがある場合はtitleが表示される", () => {
+    const fb: FeedbackEntry = { ...baseFeedback, title: "Login button broken" };
+    render(
+      <FeedbackTable
+        feedbacks={[fb]}
+        requirementTitles={reqTitles}
+        specificationTitles={specTitles}
+      />,
+    );
+
+    expect(screen.getByTestId("feedback-title")).toHaveTextContent("Login button broken");
+  });
+
+  it("titleがundefinedの場合は'-'が表示される", () => {
+    render(
+      <FeedbackTable
+        feedbacks={[baseFeedback]}
+        requirementTitles={reqTitles}
+        specificationTitles={specTitles}
+      />,
+    );
+
+    expect(screen.getByTestId("feedback-title")).toHaveTextContent("-");
+  });
+
   it("関連Req/Specリンクが表示される", () => {
     render(
       <FeedbackTable

@@ -32,6 +32,7 @@ const FeedbackLinkedToSchema = z.object({
 
 export const FeedbackEntrySchema = z.object({
   githubIssue: z.number(),
+  title: z.string().min(1).optional(),
   type: FeedbackTypeSchema.optional(),
   severity: FeedbackSeveritySchema.optional(),
   linkedTo: FeedbackLinkedToSchema,

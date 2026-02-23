@@ -35,6 +35,7 @@ export function mergeFeedback(
 ): FeedbackEntry {
   return {
     githubIssue: existing.githubIssue,
+    title: fromGitHub.title,
     type: existing.type ?? fromGitHub.type,
     severity: existing.severity ?? fromGitHub.severity,
     linkedTo: existing.linkedTo,
@@ -67,6 +68,7 @@ export function parseGitHubIssue(issue: GitHubIssue): FeedbackEntry {
 
   return {
     githubIssue: issue.number,
+    title: issue.title,
     type: comment?.type,
     severity: comment?.severity,
     linkedTo: comment?.linkedTo ?? {
