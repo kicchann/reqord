@@ -3,6 +3,8 @@ name: Claude Code Review
 on:
   pull_request:
     types: [opened]
+    branches-ignore:
+      - "reqord/**"
     paths:
       - "plugins/**"
       - ".reqord/**"
