@@ -470,7 +470,7 @@ function feedbackTypeToLabel(type: FeedbackType): string {
   const map: Record<FeedbackType, string> = {
     "requirement-gap": "requirement-gap (要件の不足)",
     "spec-mismatch": "spec-mismatch (仕様と実装の不一致)",
-    "bug": "bug (実装のバグ)",
+    "bug": "implementation-bug (実装のバグ)",
     "improvement": "improvement (改善提案)",
     "security": "security (セキュリティ)",
   };
@@ -514,7 +514,7 @@ export async function createFeedbackIssue(
   const issueNumber = await createIssue({
     title,
     body,
-    labels: ["feedback", "reqord", ...(options.type ? [options.type] : [])],
+    labels: ["feedback", "reqord-generated", ...(options.type ? [options.type] : [])],
   });
 
   // feedbacks.yamlに新規エントリ追加
