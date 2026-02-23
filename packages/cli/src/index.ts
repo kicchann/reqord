@@ -27,7 +27,7 @@ import { historyCommand as specHistoryCommand } from "./commands/spec/history.js
 import { specValidateCommand } from "./commands/spec/validate.js";
 import { coverageCommand } from "./commands/spec/coverage.js";
 import { feedbackCommand } from "./commands/feedback/index.js";
-import { issueCommand } from "./commands/issue/index.js";
+import { taskCommand } from "./commands/task/index.js";
 import { migrateToYamlCommand } from "./commands/migrate-to-yaml.js";
 import { impactCommand } from "./commands/impact/index.js";
 import { versionCommand } from "./commands/version/version.js";
@@ -105,11 +105,11 @@ feedbackCommand.hook("preAction", async () => {
 
 program.addCommand(feedbackCommand);
 
-issueCommand.hook("preAction", async () => {
+taskCommand.hook("preAction", async () => {
   await ensureReqordInitialized(process.cwd());
 });
 
-program.addCommand(issueCommand);
+program.addCommand(taskCommand);
 
 program.addCommand(migrateToYamlCommand);
 

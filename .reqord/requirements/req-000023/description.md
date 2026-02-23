@@ -85,7 +85,7 @@ reqord feedback link 15 --spec spec-000001 --type spec-mismatch
 reqord feedback link 14 --spec spec-000005 --type bug
 # → Specificationにリンク（対応すべき仕様を明示）
 
-# 実装タスクIssueを作成（gh CLIまたはreqord issue create）
+# 実装タスクIssueを作成（gh CLIまたはreqord task create）
 gh issue create --title "Web UIにSpecification表示機能を追加" --label "spec:000005"
 
 reqord feedback close 14

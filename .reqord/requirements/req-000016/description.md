@@ -13,7 +13,7 @@
 
 ## CLIコマンド仕様
 
-### reqord issue create \<spec-id\> --tasks-file \<path\>
+### reqord task create \<spec-id\> --tasks-file \<path\>
 
 1. 対象Specificationが `approved` 状態であることを検証
 2. タスク定義ファイル（JSON）を読み込み:
@@ -49,17 +49,17 @@
 - `--dry-run` : Issue作成せずプレビュー
 - `--json` : 作成結果を構造化出力
 
-### reqord issue sync \<spec-id\>
+### reqord task sync \<spec-id\>
 
 - GitHub APIで各Issueの最新状態を取得
 - `.reqord/issues/tasks.yaml` の各タスクエントリのstatusを更新
 
-### reqord issue sync-all
+### reqord task sync-all
 
 - 全Specificationに対して `sync` を実行
 - `--quiet` で変更があったもののみ表示
 
-### reqord issue validate \<spec-id\>
+### reqord task validate \<spec-id\>
 
 - メタデータ整合性チェック:
   - 全Issueが実在するか（GitHub API照合）

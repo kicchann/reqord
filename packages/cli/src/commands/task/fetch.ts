@@ -1,10 +1,10 @@
 import { Command } from "commander";
 import chalk from "chalk";
 import Table from "cli-table3";
-import { fetchIssues, type FetchResult } from "../../services/issue-fetch-service.js";
+import { fetchIssues, type FetchResult } from "../../services/task-fetch-service.js";
 import { handleError } from "../../utils/error-handler.js";
 
-export const issueFetchCommand = new Command("fetch")
+export const taskFetchCommand = new Command("fetch")
   .description("Fetch GitHub issues and update spec implementation data")
   .argument("[spec-id]", "Specification ID to fetch (e.g., spec-000022). Omit for all specs")
   .option("--dry-run", "Preview without writing to spec files")

@@ -1,35 +1,35 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import type { FetchResult } from "../../services/issue-fetch-service.js";
+import type { FetchResult } from "../../services/task-fetch-service.js";
 
-vi.mock("../../services/issue-fetch-service.js", () => ({
+vi.mock("../../services/task-fetch-service.js", () => ({
   fetchIssues: vi.fn(),
 }));
 
-import { issueFetchCommand } from "./fetch.js";
-import { fetchIssues } from "../../services/issue-fetch-service.js";
+import { taskFetchCommand } from "./fetch.js";
+import { fetchIssues } from "../../services/task-fetch-service.js";
 
-describe("issueFetchCommand", () => {
+describe("taskFetchCommand", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     process.exitCode = 0;
-    delete (issueFetchCommand as any)._optionValues.dryRun;
-    delete (issueFetchCommand as any)._optionValues.json;
-    (issueFetchCommand as any).args = [];
+    delete (taskFetchCommand as any)._optionValues.dryRun;
+    delete (taskFetchCommand as any)._optionValues.json;
+    (taskFetchCommand as any).args = [];
   });
 
   it("has correct command name 'fetch'", () => {
-    expect(issueFetchCommand.name()).toBe("fetch");
+    expect(taskFetchCommand.name()).toBe("fetch");
   });
 
   it("has optional argument 'spec-id'", () => {
-    const args = issueFetchCommand.registeredArguments;
+    const args = taskFetchCommand.registeredArguments;
     expect(args).toHaveLength(1);
     expect(args[0].name()).toBe("spec-id");
     expect(args[0].required).toBe(false);
   });
 
   it("has optional '--dry-run' option", () => {
-    const option = issueFetchCommand.options.find(
+    const option = taskFetchCommand.options.find(
       (opt) => opt.long === "--dry-run",
     );
     expect(option).toBeDefined();
@@ -37,7 +37,7 @@ describe("issueFetchCommand", () => {
   });
 
   it("has optional '--json' option", () => {
-    const option = issueFetchCommand.options.find(
+    const option = taskFetchCommand.options.find(
       (opt) => opt.long === "--json",
     );
     expect(option).toBeDefined();
@@ -55,7 +55,7 @@ describe("issueFetchCommand", () => {
 
     const consoleLogSpy = vi.spyOn(console, "log").mockImplementation(() => {});
 
-    await issueFetchCommand.parseAsync(["node", "test"]);
+    await taskFetchCommand.parseAsync(["node", "test"]);
 
     expect(fetchIssues).toHaveBeenCalledWith(process.cwd(), {
       specId: undefined,
@@ -76,7 +76,7 @@ describe("issueFetchCommand", () => {
 
     const consoleLogSpy = vi.spyOn(console, "log").mockImplementation(() => {});
 
-    await issueFetchCommand.parseAsync(["node", "test", "spec-000022"]);
+    await taskFetchCommand.parseAsync(["node", "test", "spec-000022"]);
 
     expect(fetchIssues).toHaveBeenCalledWith(process.cwd(), {
       specId: "spec-000022",
@@ -97,7 +97,7 @@ describe("issueFetchCommand", () => {
 
     const consoleLogSpy = vi.spyOn(console, "log").mockImplementation(() => {});
 
-    await issueFetchCommand.parseAsync(["node", "test", "--dry-run"]);
+    await taskFetchCommand.parseAsync(["node", "test", "--dry-run"]);
 
     expect(fetchIssues).toHaveBeenCalledWith(process.cwd(), {
       specId: undefined,
@@ -126,7 +126,7 @@ describe("issueFetchCommand", () => {
 
     const consoleLogSpy = vi.spyOn(console, "log").mockImplementation(() => {});
 
-    await issueFetchCommand.parseAsync(["node", "test", "--json"]);
+    await taskFetchCommand.parseAsync(["node", "test", "--json"]);
 
     expect(consoleLogSpy).toHaveBeenCalledWith(
       JSON.stringify(mockResult, null, 2),
@@ -154,7 +154,7 @@ describe("issueFetchCommand", () => {
 
     const consoleLogSpy = vi.spyOn(console, "log").mockImplementation(() => {});
 
-    await issueFetchCommand.parseAsync(["node", "test"]);
+    await taskFetchCommand.parseAsync(["node", "test"]);
 
     expect(consoleLogSpy).toHaveBeenCalledWith(
       expect.stringContaining("Fetched 5 issues, 2 with reqord tags"),
@@ -172,7 +172,7 @@ describe("issueFetchCommand", () => {
       .spyOn(console, "error")
       .mockImplementation(() => {});
 
-    await issueFetchCommand.parseAsync(["node", "test"]);
+    await taskFetchCommand.parseAsync(["node", "test"]);
 
     expect(consoleErrorSpy).toHaveBeenCalledWith(
       expect.stringContaining("GitHub API failed"),

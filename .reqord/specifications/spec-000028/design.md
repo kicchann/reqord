@@ -510,7 +510,7 @@ export async function createFeedbackIssue(
     : `[Feedback] ${options.title}`;
 
   // GitHub Issue作成（feedbackラベル + reqord-generatedラベル付き）
-  // reqord-generated: reqord issue createと同様、自動生成タスクであることを示すラベル
+  // reqord-generated: reqord task createと同様、自動生成タスクであることを示すラベル
   const issueNumber = await createIssue({
     title,
     body,

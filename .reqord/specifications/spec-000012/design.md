@@ -218,7 +218,7 @@ function traverseDependencyGraph(
 GitHub Issueの発見は2段階で行う:
 
 **1. ローカル（高速・APIコール不要）:**
-`.reqord/issues/tasks.yaml` から該当Specificationに紐づくIssue情報（number, title, url, status）を取得する。`reqord issue create` 時にtasks.yamlに保存されたデータを利用する。
+`.reqord/issues/tasks.yaml` から該当Specificationに紐づくIssue情報（number, title, url, status）を取得する。`reqord task create` 時にtasks.yamlに保存されたデータを利用する。
 
 ```typescript
 // tasks.yaml からSpecificationに紐づくIssue一覧を取得
@@ -227,7 +227,7 @@ const issues = tasks.map(t => ({ number: t.issueNumber, title: t.title, url: t.u
 ```
 
 **2. GitHub検索（notifyコマンドでのステータス確認用）:**
-`reqord issue create` が GitHub Issue body に埋め込む `<!-- reqord:specification {...} -->` HTMLコメントタグを利用。既存の `spec-tag-parser.ts` の `parseSpecTag()` でパースし、`specificationId` で紐づけを確認する。
+`reqord task create` が GitHub Issue body に埋め込む `<!-- reqord:specification {...} -->` HTMLコメントタグを利用。既存の `spec-tag-parser.ts` の `parseSpecTag()` でパースし、`specificationId` で紐づけを確認する。
 
 ```typescript
 // notifyコマンドでは実際のIssueステータスをGitHubから取得
