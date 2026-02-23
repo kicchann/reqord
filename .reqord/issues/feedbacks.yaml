@@ -1,5 +1,6 @@
 feedbacks:
   - githubIssue: 21
+    title: '[Feedback] requirement→specification→issueのグラフ表示が欲しい'
     type: improvement
     severity: low
     linkedTo:
@@ -15,6 +16,7 @@ feedbacks:
     syncedAt: 2026-02-11T07:21:23.639Z
     status: closed
   - githubIssue: 23
+    title: '[Feedback] feedback index.jsonのZodスキーマバリデーションが未定義'
     type: requirement-gap
     severity: low
     linkedTo:
@@ -30,6 +32,7 @@ feedbacks:
     syncedAt: 2026-02-11T07:21:23.634Z
     status: closed
   - githubIssue: 30
+    title: '[Feedback] spec指定によるissueテンプレート自動生成機能'
     type: improvement
     severity: low
     linkedTo:
@@ -45,6 +48,7 @@ feedbacks:
     syncedAt: 2026-02-11T07:21:23.631Z
     status: closed
   - githubIssue: 22
+    title: '[Feedback] flagsフィールドの実装'
     type: spec-mismatch
     linkedTo:
       requirements:
@@ -59,6 +63,7 @@ feedbacks:
     syncedAt: 2026-02-09T07:40:21.228Z
     status: closed
   - githubIssue: 19
+    title: '[Feedback] reqord initでISSUE_TEMPLATEも生成する'
     type: improvement
     severity: low
     linkedTo:
@@ -70,6 +75,7 @@ feedbacks:
     syncedAt: 2026-02-11T07:21:23.642Z
     status: closed
   - githubIssue: 161
+    title: '[Feedback] reqord req approveが直感的にわかりづらい'
     type: bug
     severity: medium
     linkedTo:
@@ -85,6 +91,7 @@ feedbacks:
     syncedAt: 2026-02-11T07:21:23.599Z
     status: closed
   - githubIssue: 159
+    title: '[Feedback] json→yamlへの移行'
     type: improvement
     severity: medium
     linkedTo:
@@ -100,6 +107,7 @@ feedbacks:
     syncedAt: 2026-02-11T07:21:23.602Z
     status: closed
   - githubIssue: 157
+    title: '[Feedback] specificationにタイトルを追加'
     type: improvement
     severity: medium
     linkedTo:
@@ -115,6 +123,7 @@ feedbacks:
     syncedAt: 2026-02-11T07:21:23.617Z
     status: closed
   - githubIssue: 111
+    title: '[Feedback] 承認PRにコメントタグを埋め込み、マージ時の自動ステータス更新を可能にする'
     type: improvement
     severity: low
     linkedTo:
@@ -130,6 +139,7 @@ feedbacks:
     syncedAt: 2026-02-11T07:21:23.620Z
     status: closed
   - githubIssue: 110
+    title: '[Feedback] PRテンプレートが未整備'
     type: improvement
     severity: low
     linkedTo:
@@ -145,6 +155,7 @@ feedbacks:
     syncedAt: 2026-02-11T07:21:23.623Z
     status: closed
   - githubIssue: 109
+    title: '[Feedback] ステータス変更でバージョンが不必要にインクリメントされる'
     type: bug
     severity: medium
     linkedTo:
@@ -156,6 +167,7 @@ feedbacks:
     syncedAt: 2026-02-11T07:21:23.627Z
     status: closed
   - githubIssue: 167
+    title: '[Feedback] reqord feedback syncが既存メタデータを上書きする'
     type: bug
     severity: medium
     linkedTo:
@@ -167,6 +179,7 @@ feedbacks:
     syncedAt: 2026-02-11T07:21:23.589Z
     status: closed
   - githubIssue: 170
+    title: '[Feedback] github issueにストックされているfeedbackをuiで確認できるようにしてほしい。'
     type: improvement
     severity: low
     linkedTo:
@@ -183,6 +196,7 @@ feedbacks:
     syncedAt: 2026-02-11T07:42:10.948Z
     status: closed
   - githubIssue: 169
+    title: '[Feedback] requirement, specificationに追加されたflagsがUIで見ることができない'
     type: improvement
     severity: low
     linkedTo:
@@ -198,6 +212,7 @@ feedbacks:
     syncedAt: 2026-02-11T07:42:10.958Z
     status: closed
   - githubIssue: 221
+    title: '[Feedback] Requirement implemented時のSpec/Issue整合性チェック警告'
     type: requirement-gap
     severity: medium
     linkedTo:
@@ -213,6 +228,7 @@ feedbacks:
     syncedAt: 2026-02-13T15:40:05.017Z
     status: closed
   - githubIssue: 220
+    title: '[Feedback] specificationにrequirementのIdだけじゃなく、versionも持たせたい'
     type: requirement-gap
     severity: medium
     linkedTo:
@@ -228,6 +244,7 @@ feedbacks:
     syncedAt: 2026-02-13T15:40:05.017Z
     status: closed
   - githubIssue: 209
+    title: '[Feedback] req/specライフサイクルのステータス遷移をCLIで完結させたい'
     type: requirement-gap
     severity: medium
     linkedTo:
@@ -245,6 +262,7 @@ feedbacks:
     syncedAt: 2026-02-12T21:57:49.467Z
     status: closed
   - githubIssue: 208
+    title: '[Feedback] 承認フローの簡素化: pending_approval廃止してPRマージ=approved'
     type: bug
     severity: medium
     linkedTo:
@@ -261,6 +279,7 @@ feedbacks:
     syncedAt: 2026-02-12T21:57:49.473Z
     status: closed
   - githubIssue: 196
+    title: '[Feedback] init-service.ts にユニットテストがない'
     type: improvement
     severity: low
     linkedTo:
@@ -272,6 +291,7 @@ feedbacks:
     syncedAt: 2026-02-12T21:57:49.479Z
     status: closed
   - githubIssue: 172
+    title: '[Feedback] 承認依頼PRをマージしたときに、スクリプトで自動的にapprovedに変換できるようにしてほしい'
     type: spec-mismatch
     severity: medium
     linkedTo:
@@ -283,6 +303,7 @@ feedbacks:
     syncedAt: 2026-02-12T21:57:49.486Z
     status: closed
   - githubIssue: 247
+    title: '[Feedback] Simplify versioning: Use integer versions instead of semantic versioning'
     type: improvement
     severity: low
     linkedTo:
@@ -298,6 +319,7 @@ feedbacks:
     syncedAt: 2026-02-13T15:40:05.017Z
     status: closed
   - githubIssue: 226
+    title: '[Feedback] feedback issueをCLIから作成できるコマンドがない'
     type: requirement-gap
     severity: medium
     linkedTo:
@@ -313,6 +335,7 @@ feedbacks:
     syncedAt: 2026-02-13T15:40:05.017Z
     status: closed
   - githubIssue: 225
+    title: '[Feedback] feedback close 時に残存 flag の警告表示がない'
     type: improvement
     severity: low
     linkedTo:
@@ -328,6 +351,7 @@ feedbacks:
     syncedAt: 2026-02-13T15:40:05.017Z
     status: closed
   - githubIssue: 224
+    title: '[Feedback] feedback unlink コマンドがない（誤リンク時に直接編集が必要）'
     type: requirement-gap
     severity: medium
     linkedTo:
@@ -343,6 +367,7 @@ feedbacks:
     syncedAt: 2026-02-13T15:40:05.017Z
     status: closed
   - githubIssue: 223
+    title: '[Feedback] feedback resolve コマンドがない（flag 解消に直接編集が必要）'
     type: requirement-gap
     severity: medium
     linkedTo:
@@ -358,6 +383,7 @@ feedbacks:
     syncedAt: 2026-02-13T15:40:05.017Z
     status: closed
   - githubIssue: 248
+    title: '[Feedback] feedback sync がCLOSEDなissueを取り込まない'
     type: bug
     severity: medium
     linkedTo:
@@ -369,6 +395,7 @@ feedbacks:
     syncedAt: 2026-02-13T15:40:05.017Z
     status: closed
   - githubIssue: 17
+    title: '[Feedback] AI補助機能のreqord CLI/SDKからClaude Codeエコシステムへの分離'
     type: improvement
     severity: high
     linkedTo:
@@ -394,6 +421,7 @@ feedbacks:
     syncedAt: 2026-02-14T00:12:37.183Z
     status: closed
   - githubIssue: 263
+    title: '[Feedback] reqord version コマンドを追加してバージョニングを明示化'
     type: improvement
     severity: medium
     linkedTo:
@@ -413,6 +441,7 @@ feedbacks:
     syncedAt: 2026-02-14T07:45:41.133Z
     status: closed
   - githubIssue: 279
+    title: '[Feedback] draft差し戻し時のPR運用ルール（影響範囲をまとめて1PRで管理）'
     type: requirement-gap
     severity: low
     linkedTo:
@@ -429,6 +458,7 @@ feedbacks:
     syncedAt: 2026-02-23T04:32:38.400Z
     status: open
   - githubIssue: 273
+    title: '[Feedback] reqord spec deprecatedコマンドの欠如'
     type: requirement-gap
     severity: low
     linkedTo:
@@ -440,6 +470,7 @@ feedbacks:
     syncedAt: 2026-02-20T16:08:21.669Z
     status: closed
   - githubIssue: 335
+    title: '[Feedback] reqord issue create: spec prefix自動付与の改善'
     type: improvement
     severity: low
     linkedTo:
@@ -451,6 +482,7 @@ feedbacks:
     syncedAt: 2026-02-20T16:08:21.669Z
     status: closed
   - githubIssue: 328
+    title: '[Feedback] reqord CLIが作成するPRにreqordラベルが付与されない'
     type: improvement
     severity: low
     linkedTo:
@@ -463,6 +495,7 @@ feedbacks:
     syncedAt: 2026-02-20T16:08:21.669Z
     status: closed
   - githubIssue: 327
+    title: '[Feedback] draft差し戻し時にversionHistoryへ追記されない'
     type: bug
     severity: medium
     linkedTo:
@@ -474,6 +507,7 @@ feedbacks:
     syncedAt: 2026-02-20T16:08:21.669Z
     status: closed
   - githubIssue: 398
+    title: '[Feedback] フォント・カラーのブランディング統一'
     type: improvement
     severity: medium
     linkedTo:
@@ -485,6 +519,7 @@ feedbacks:
     syncedAt: 2026-02-20T16:08:21.669Z
     status: closed
   - githubIssue: 399
+    title: '[Feedback] アニメーション・モーションの追加'
     type: improvement
     severity: low
     linkedTo:
@@ -496,6 +531,7 @@ feedbacks:
     syncedAt: 2026-02-20T16:08:21.669Z
     status: closed
   - githubIssue: 400
+    title: '[Feedback] モバイルレスポンシブ対応の改善'
     type: improvement
     severity: medium
     linkedTo:
@@ -507,6 +543,7 @@ feedbacks:
     syncedAt: 2026-02-20T16:08:21.669Z
     status: closed
   - githubIssue: 401
+    title: '[Feedback] Cookie-cutterパターンの排除・個性的なデザイン'
     type: improvement
     severity: medium
     linkedTo:
@@ -518,6 +555,7 @@ feedbacks:
     syncedAt: 2026-02-20T16:08:21.669Z
     status: closed
   - githubIssue: 402
+    title: '[Feedback] Feedbackページにタイトル・ソート機能がない'
     type: improvement
     severity: medium
     linkedTo:
@@ -529,6 +567,7 @@ feedbacks:
     syncedAt: 2026-02-20T16:08:21.669Z
     status: closed
   - githubIssue: 403
+    title: '[Feedback] Requirement/Spec詳細ページにfeedback flag表示がない'
     type: requirement-gap
     severity: medium
     linkedTo:
@@ -540,6 +579,7 @@ feedbacks:
     syncedAt: 2026-02-20T16:08:21.669Z
     status: closed
   - githubIssue: 410
+    title: '[Feedback] 要件承認PRのbodyに不要なCLIコマンド指示が含まれている'
     type: spec-mismatch
     severity: low
     linkedTo:
@@ -557,6 +597,7 @@ feedbacks:
     syncedAt: 2026-02-20T13:40:59.325Z
     status: closed
   - githubIssue: 411
+    title: '[Feedback] versionHistoryからgitCommitフィールドを削除する'
     type: improvement
     severity: low
     linkedTo:
@@ -572,6 +613,7 @@ feedbacks:
     syncedAt: 2026-02-20T13:40:59.325Z
     status: closed
   - githubIssue: 420
+    title: '[Feedback] Schema validationを常に監視する仕組みの導入'
     type: improvement
     severity: medium
     linkedTo:
@@ -583,6 +625,7 @@ feedbacks:
     syncedAt: 2026-02-20T16:08:21.669Z
     status: closed
   - githubIssue: 432
+    title: '[Improvement] Specificationからimplementationフィールドを分離し、.reqord/issues/に正規化'
     type: improvement
     severity: high
     linkedTo:
@@ -614,6 +657,7 @@ feedbacks:
     syncedAt: 2026-02-20T16:08:21.668Z
     status: closed
   - githubIssue: 436
+    title: '[Feedback] tasks.yaml のCLI操作コマンドが不足している'
     type: improvement
     severity: medium
     linkedTo:
@@ -625,6 +669,7 @@ feedbacks:
     syncedAt: 2026-02-23T04:30:45.887Z
     status: closed
   - githubIssue: 461
+    title: '[Feedback] req-000001: description.md に記載の settings/rules/ が successCriteria に含まれていない'
     type: requirement-gap
     severity: low
     linkedTo:
@@ -636,6 +681,7 @@ feedbacks:
     syncedAt: 2026-02-23T04:30:48.570Z
     status: closed
   - githubIssue: 462
+    title: '[Feedback] req-000012: description.md の --dry-run オプション・レビューリクエスト機能が successCriteria に未反映'
     type: requirement-gap
     severity: low
     linkedTo:
