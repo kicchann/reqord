@@ -1,12 +1,9 @@
 import { Command } from "commander";
 import { spawn } from "child_process";
 import path from "path";
-import { fileURLToPath } from "url";
+import { createRequire } from "node:module";
 import chalk from "chalk";
 import { handleError } from "../utils/error-handler.js";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 export const uiCommand = new Command("ui")
   .description("Start the Web UI server")
@@ -23,8 +20,22 @@ export const uiCommand = new Command("ui")
       }
 
       try {
-        // Find the web package directory (relative to CLI dist/commands/)
-        const webDir = path.resolve(__dirname, "../../../web");
+        // Resolve @reqord/web package directory via require.resolve
+        const require = createRequire(import.meta.url);
+        let webDir: string;
+        try {
+          const webPkgPath = require.resolve("@reqord/web/package.json");
+          webDir = path.dirname(webPkgPath);
+        } catch {
+          console.error(
+            chalk.red("\n  @reqord/web is not installed.\n")
+          );
+          console.log(
+            `  Install it with: ${chalk.cyan("npm install @reqord/web")} (or pnpm add / yarn add)\n`
+          );
+          process.exitCode = 1;
+          return;
+        }
 
         console.log(chalk.cyan(`\nStarting reqord Web UI...\n`));
         console.log(`  URL:  ${chalk.bold(`http://localhost:${port}`)}`);

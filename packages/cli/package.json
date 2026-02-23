@@ -1,6 +1,20 @@
 {
   "name": "@reqord/cli",
   "version": "0.1.0",
+  "description": "Git-native requirements management CLI",
+  "license": "AGPL-3.0-or-later",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kicchann/reqord.git",
+    "directory": "packages/cli"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "keywords": ["reqord", "requirements", "cli", "git", "ai", "traceability"],
+  "publishConfig": {
+    "access": "public"
+  },
   "type": "module",
   "bin": {
     "reqord": "./dist/index.js"
@@ -19,6 +33,14 @@
     "cli-table3": "^0.6.5",
     "commander": "^12.0.0",
     "js-yaml": "^4.1.1"
+  },
+  "peerDependencies": {
+    "@reqord/web": "workspace:^"
+  },
+  "peerDependenciesMeta": {
+    "@reqord/web": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@types/js-yaml": "^4.0.9",

@@ -1,8 +1,12 @@
-# Reqord
+<p align="center">
+  <img src="./assets/reqord-lockup-bg.svg" alt="Reqord" width="220" />
+</p>
+
+<h1 align="center">Reqord</h1>
 
 > [日本語](./README.ja.md)
 
-**Git-native requirements management for traceable, AI-ready software development.**
+**Structured context for the AI era, version-controlled alongside your code.**
 
 [![Version](https://img.shields.io/badge/version-0.1.0-blue)](https://github.com/kicchann/reqord)
 [![License](https://img.shields.io/badge/license-AGPL--3.0-green)](./LICENSE)
@@ -13,7 +17,9 @@
 
 Reqord stores requirements as structured data (YAML + Markdown) inside your Git repository, giving every requirement a clear lifecycle from draft to implementation. No SaaS, no backend -- just `git clone` and your entire requirements history is there, version-controlled alongside your code, ready for humans and AI tools alike.
 
-<!-- Screenshot: Dashboard overview showing project health metrics, requirement status breakdown, and an interactive dependency graph -->
+<p align="center">
+  <img src="./assets/dashboard.png" alt="Reqord Dashboard — Project health score, requirement/specification progress, and warnings at a glance" width="800" />
+</p>
 
 ---
 
@@ -135,7 +141,9 @@ Launch the built-in web dashboard to visualize project health, dependency graphs
 reqord ui
 ```
 
-<!-- Screenshot: Dependency graph visualization showing requirement-to-specification-to-issue relationships -->
+<p align="center">
+  <img src="./assets/graph-map.png" alt="Dependency graph — requirement-to-specification-to-issue relationships" width="800" />
+</p>
 
 ### AI Integration via ProjectContext
 
