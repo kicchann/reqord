@@ -282,7 +282,7 @@ reqord feedback close 17
 2. `gh issue close <issue-number> --comment "<影響範囲サマリー>"`でGitHub Issueをクローズ
 3. 紐付けされたartifactの未解決feedbackは**残す**（解決はRequirement側の対応完了時に行う）
 
-**注意**: feedbackの解決はFeedbackのクローズとは独立。Requirementの改訂やSpecificationの更新が完了した時点で、`reqord feedback resolve` によりfeedbacks.yamlのlinkedTo.resolvedをtrueに更新する。v4.0でクローズ時に未解決feedback警告が追加された（下記「v4.0改善」セクション参照）。
+**注意**: feedbackの解決はFeedbackのクローズとは独立。Requirementの改訂やSpecificationの更新が完了した時点で、`reqord feedback resolve` によりfeedbacks.yamlのlinkedTo.resolvedに対象IDを追加する。v4.0でクローズ時に未解決feedback警告が追加された（下記「v4.0改善」セクション参照）。
 
 ### reqord feedback unlink \<issue-number\>
 
@@ -372,7 +372,9 @@ feedbacks:
         - req-000021
       createdRequirements: []
       specifications: []
-      resolved: false
+      resolved:
+        requirements: []
+        specifications: []
     syncedAt: "2026-02-09T10:00:00Z"
     status: closed
   - githubIssue: 13
@@ -383,7 +385,11 @@ feedbacks:
       createdRequirements:
         - req-000023
       specifications: []
-      resolved: true
+      resolved:
+        requirements: []
+        createdRequirements:
+          - req-000023
+        specifications: []
     syncedAt: "2026-02-09T10:30:00Z"
     status: closed
 ```
@@ -405,21 +411,21 @@ feedbacks.yamlのlinkedToで紐付けと解決状態を一元管理する:
 | データ | 責務 | ライフサイクル |
 |--------|------|---------------|
 | `issues/feedbacks.yaml` | feedback issue → req/specの紐付け記録と解決状態管理（**トレーサビリティのSource of Truth**） | 永続。削除しない |
-| `linkedTo.resolved` | 「対応完了かどうか」を示すフラグ | resolveコマンドでtrueに更新 |
+| `linkedTo.resolved` | 解決済みのreq/spec IDを記録するオブジェクト（`{ requirements: [], specifications: [] }`） | resolveコマンドで対象IDを追加 |
 
 #### feedbackの解決ライフサイクル
 
 ```
-feedback link → feedbacks.yamlにlinkedToを追加（resolved: false）
+feedback link → feedbacks.yamlにlinkedToを追加（resolved: { requirements: [], specifications: [] }）
     ↓
 linkedToの内容をreq/specに反映（version up、成功基準追加など）
     ↓
-feedback resolve → feedbacks.yamlのlinkedTo.resolvedをtrueに更新
+feedback resolve → feedbacks.yamlのlinkedTo.resolvedに対象IDを追加
 ```
 
 #### 未解決feedbackの判定
 
-- feedbacks.yamlでreq/specに紐付けられたfeedbackのうち、`linkedTo.resolved !== true` のものが未解決
+- feedbacks.yamlでreq/specに紐付けられたfeedbackのうち、`linkedTo.resolved.requirements` / `linkedTo.resolved.specifications` に含まれないIDがあるものが未解決
 - 未解決feedbackがあるreq/specへの承認操作時に警告を表示
 
 ## 技術的制約
