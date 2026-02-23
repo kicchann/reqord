@@ -35,7 +35,7 @@
     "js-yaml": "^4.1.1"
   },
   "peerDependencies": {
-    "@reqord/web": "^0.1.0"
+    "@reqord/web": "workspace:^"
   },
   "peerDependenciesMeta": {
     "@reqord/web": {
