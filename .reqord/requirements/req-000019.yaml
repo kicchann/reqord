@@ -1,10 +1,10 @@
 id: req-000019
-version: '2.1'
+version: '2.2'
 title: ステータス表示コマンド
 status: draft
 priority: medium
 createdAt: 2026-02-07T12:00:00Z
-updatedAt: 2026-02-22T23:43:41.395Z
+updatedAt: 2026-02-23T00:20:35.366Z
 versionHistory:
   - version: '2.0'
     status: draft
@@ -26,6 +26,10 @@ versionHistory:
     status: draft
     changedAt: 2026-02-20T23:18:57.077Z
     summary: '#432 .reqord/issues/ 再構造化に伴うドキュメント更新'
+  - version: '2.2'
+    status: draft
+    changedAt: 2026-02-23T00:20:35.366Z
+    summary: flags→feedbacks.yaml経由に文言変更
 files:
   description: requirements/req-000019/description.md
   supplementary: []
@@ -37,7 +41,7 @@ successCriteria:
   - 'Requirement/Specification間のステータス整合性チェックが実行され、不整合が警告表示される（@reqord/shared checkConsistencyルールを使用。Feedback #16）'
   - '整合性チェックルール(1): 全関連SpecがimplementedだがReqがapproved → 警告'
   - '整合性チェックルール(2): Reqがdeprecatedだが関連Specがactive → 警告'
-  - '整合性チェックルール(3): feedback-reviewフラグあり → 情報表示'
+  - '整合性チェックルール(3): 未解決feedback紐付けあり → 情報表示'
   - '--jsonオプションで構造化出力される'
 format:
   type: user-story

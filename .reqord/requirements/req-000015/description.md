@@ -2,7 +2,7 @@
 
 ## 概要
 
-Specificationのライフサイクル（draft → approved → implemented）をCLIで完結させるための、GitHub PRベースの承認ワークフロー。Requirement承認フロー（req-000011）と同じパターンを踏襲し、仕様フェーズでの承認を実現する。flag付きのspecをdraftに戻す操作も含む。
+Specificationのライフサイクル（draft → approved → implemented）をCLIで完結させるための、GitHub PRベースの承認ワークフロー。Requirement承認フロー（req-000011）と同じパターンを踏襲し、仕様フェーズでの承認を実現する。未解決feedbackが紐付けされたspecをdraftに戻す操作も含む。
 
 ## ユーザーストーリー
 
@@ -14,21 +14,21 @@ Specificationのライフサイクル（draft → approved → implemented）を
 ```
 draft ──approve(PR作成)──→ PRマージ ──→ approved ──implement──→ implemented
   ↑                                        │
-  └──────────── draft (flag解決) ←── flagged ←┘
+  └──────── draft (未解決feedback対応) ←─────┘
 ```
 
-> `approved`は廃止。PRマージ自体が承認行為となる（#208）。
+> `pending_approved`は廃止。PRマージ自体が承認行為となる（#208）。
 
 ## CLIコマンド仕様
 
 ### reqord spec draft \<id\>
 
-flag付き、またはapproved/implementedのspecをdraft状態に戻し、再編集を可能にする。
+未解決feedbackが紐付けされた、またはapproved/implementedのspecをdraft状態に戻し、再編集を可能にする。
 
 1. 対象Specificationのstatusが `draft` 以外であることを検証
 2. `status` を `draft` に更新（**バージョンはインクリメントしない**）
 3. `versionHistory` にエントリを追加
-4. flagsがある場合、draft化の理由として記録
+4. 未解決feedbackがある場合、draft化の理由として記録
 5. approved/implementedからの差し戻し時、影響範囲を表示する
 
 > バージョン変更が必要な場合は `reqord version` コマンドを使用する（req-000005参照）。
@@ -95,12 +95,12 @@ reqord spec implement spec-000011
 
 ### タグ仕様
 
-| フィールド | 説明 | 例 |
-|-----------|------|-----|
-| type | 対象種別 | `requirement` / `specification` |
-| id | 対象ID | `spec-000011` |
-| action | 操作 | `approve` |
-| version | 対象バージョン | `5.0.0` |
+| フィールド | 説明           | 例                              |
+| ---------- | -------------- | ------------------------------- |
+| type       | 対象種別       | `requirement` / `specification` |
+| id         | 対象ID         | `spec-000011`                   |
+| action     | 操作           | `approve`                       |
+| version    | 対象バージョン | `5.0.0`                         |
 
 ### 活用方法
 
@@ -130,9 +130,9 @@ reqord spec implement spec-000011
 
 ## フィードバック反映履歴
 
-| Issue | 反映内容 |
-|-------|---------|
-| #208 | approved廃止。approveでstatusをapprovedに設定し、PRマージで完了 |
-| #209 | `reqord spec draft`と`reqord spec implement`をスコープに含める |
-| #263 | バージョニングとステータス遷移を完全分離（req-000005 v4.0に準拠） |
-| #279 | draft差し戻し時のPR運用ルール（影響範囲をまとめてPRで管理） |
+| Issue | 反映内容                                                                |
+| ----- | ----------------------------------------------------------------------- |
+| #208  | pending_approved廃止。approveでstatusをapprovedに設定し、PRマージで完了 |
+| #209  | `reqord spec draft`と`reqord spec implement`をスコープに含める          |
+| #263  | バージョニングとステータス遷移を完全分離（req-000005 v4.0に準拠）       |
+| #279  | draft差し戻し時のPR運用ルール（影響範囲をまとめてPRで管理）             |

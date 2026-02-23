@@ -10,7 +10,7 @@ GitHub Issueと`.reqord/issues/feedbacks.yaml`の双方向同期機構を提供�
 
 ### v2.0.0 追加スコープ
 
-- **linkedTo.resolved スキーマ**: フラグ解決状態のアーティファクト単位追跡（SC-11対応）
+- **linkedTo.resolved スキーマ**: feedback解決状態のアーティファクト単位追跡（SC-11対応）
 - **linkedTo.createdSpecifications**: feedbackから作成されたspecの記録
 - **syncマージ更新**: sync時の手動メタデータ保持（SC-12対応）
 - **パフォーマンス改善**: Issue毎のファイルI/O → 一括load/save
@@ -85,7 +85,7 @@ export const FeedbackSeveritySchema = z.enum([
 export const FeedbackStatusSchema = z.enum(["open", "closed"]);
 
 // linkedTo.resolved構造（v2.0.0追加）
-// フラグ解決済みのアーティファクトを追跡
+// feedback解決済みのアーティファクトを追跡
 // 各配列はlinkedTo.requirements/specificationsのサブセット
 const FeedbackResolvedSchema = z.object({
   requirements: z.array(z.string()),
@@ -613,14 +613,14 @@ linkedTo:
   specifications: ["spec-000005"]
   createdSpecifications: []              # v2.0.0追加
   resolved:                              # v2.0.0追加
-    requirements: ["req-000006"]         # flag解決済みのreq
-    specifications: []                   # flag解決済みのspec
+    requirements: ["req-000006"]         # feedback解決済みのreq
+    specifications: []                   # feedback解決済みのspec
 ```
 
 - `resolved`はoptional（既存データとの後方互換性）
 - `createdSpecifications`は`default([])`（既存データとの後方互換性）
 - `resolved`の各配列は`linkedTo.requirements`/`specifications`のサブセット
-- `createdRequirements`/`createdSpecifications`はflag対象外のため`resolved`不要
+- `createdRequirements`/`createdSpecifications`はfeedback解決追跡の対象外のため`resolved`不要
 
 ### 6.6 syncのマージ更新方針（v2.0.0）
 

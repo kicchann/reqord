@@ -4,7 +4,7 @@
 
 `reqord status` コマンドにより、プロジェクト全体の進捗ダッシュボードを提供する。Requirements・Specifications・GitHub Issuesの各カテゴリのステータス集計とASCIIプログレスバーで視覚的に進捗を表示する。`reqord status <req-id>` で要件単位の詳細ステータス（関連Specification・Gap Analysis結果）、`reqord status <spec-id>` で仕様単位の詳細（カバレッジ・Issue進捗）を表示する。`--json`、`--quiet`（警告のみ表示、CI向け）、`--check`（整合性チェックのみ実行）オプションをサポートする。
 
-Requirement/Specification間のステータス整合性チェックは `@reqord/shared` の `checkConsistency()` ルールを使用し、不整合を警告表示する（Feedback #16）。また、`feedback-review` フラグを持つRequirement/Specificationについて情報表示を行う。
+Requirement/Specification間のステータス整合性チェックは `@reqord/shared` の `checkConsistency()` ルールを使用し、不整合を警告表示する（Feedback #16）。また、未解決のfeedbackがあるRequirement/Specificationについて情報表示を行う（feedbacks.yamlのlinkedTo/resolvedから導出）。
 
 ## 2. アーキテクチャ
 
@@ -16,6 +16,7 @@ Service Layer:  services/status-service.ts        (新規)
 Repository:     repositories/requirement.ts       (既存)
                 repositories/specification.ts     (既存)
                 repositories/project-context.ts   (既存)
+                repositories/feedback.ts          (既存: loadIndexで未解決feedback検索)
                     ↓
 Shared:         @reqord/shared
                   schemas/requirement.ts          (既存: gapAnalysisフィールド参照)
@@ -24,9 +25,10 @@ Shared:         @reqord/shared
                     ↓
 Storage:        .reqord/requirements/req-NNNNNN.yaml
                 .reqord/specifications/spec-NNNNNN.yaml
+                .reqord/issues/feedbacks.yaml
 ```
 
-集計ロジックをstatus-serviceに集約し、表示フォーマットはコマンド層に委譲する。リポジトリ層の既存findAll/findByIdメソッドを活用し、新規のリポジトリ追加は不要。
+集計ロジックをstatus-serviceに集約し、表示フォーマットはコマンド層に委譲する。リポジトリ層の既存findAll/findByIdメソッドを活用し、新規のリポジトリ追加は不要。未解決feedbackの検索にはfeedbackリポジトリのloadIndexを使用する。
 
 ## 3. コンポーネント設計
 
@@ -83,7 +85,7 @@ Issues:
   - req-000020: deprecatedですが、関連Specificationがactiveです
 
 ℹ 情報:
-  - req-000015: フィードバックレビュー待ち: セキュリティ関連の指摘（関連Issue: #42, #43）
+  - req-000015: Unresolved feedback: #42 (improvement, high)
 ```
 
 ### 3.3 StatusService (`services/status-service.ts` - 新規)
@@ -204,12 +206,16 @@ export interface SpecificationDetailStatus {
 
 ```typescript
 import { checkConsistency } from "@reqord/shared";
+import * as feedbackRepo from "../repositories/feedback";
 
-function detectWarnings(
+async function detectWarnings(
+  cwd: string,
   requirements: Requirement[],
   specifications: Specification[],
-): Warning[] {
+): Promise<Warning[]> {
   const warnings: Warning[] = [];
+  const feedbackIndex = await feedbackRepo.loadIndex(cwd);
+  const allFeedbacks = feedbackIndex.feedbacks;
 
   for (const req of requirements) {
     // Gap Analysisが未実行
@@ -264,13 +270,18 @@ function detectWarnings(
       });
     }
 
-    // --- feedback-reviewフラグ情報表示 --- (Feedback #16)
-    const feedbackFlags = req.flags?.filter(f => f.type === "feedback-review") ?? [];
-    for (const flag of feedbackFlags) {
+    // --- 未解決feedback情報表示 --- (Feedback #16)
+    // feedbacks.yamlのlinkedTo.requirementsに含まれ、かつlinkedTo.resolved.requirementsに含まれないfeedbackを検索
+    const reqFeedbacks = allFeedbacks.filter((f) => {
+      const linked = f.linkedTo.requirements.includes(req.id);
+      const resolved = f.linkedTo.resolved?.requirements?.includes(req.id) ?? false;
+      return linked && !resolved;
+    });
+    for (const fb of reqFeedbacks) {
       warnings.push({
         id: req.id,
         type: "feedback-review",
-        message: `フィードバックレビュー待ち: ${flag.reason}（関連Issue: ${flag.relatedIssues.map(n => `#${n}`).join(", ")}）`,
+        message: `Unresolved feedback: #${fb.githubIssue} (${fb.type ?? "unclassified"}, ${fb.severity ?? "medium"})`,
         severity: "info",
       });
     }
@@ -287,13 +298,17 @@ function detectWarnings(
       });
     }
 
-    // --- Specificationのfeedback-reviewフラグ情報表示 --- (Feedback #16)
-    const specFeedbackFlags = spec.flags?.filter(f => f.type === "feedback-review") ?? [];
-    for (const flag of specFeedbackFlags) {
+    // --- Specificationの未解決feedback情報表示 --- (Feedback #16)
+    const specFeedbacks = allFeedbacks.filter((f) => {
+      const linked = f.linkedTo.specifications.includes(spec.id);
+      const resolved = f.linkedTo.resolved?.specifications?.includes(spec.id) ?? false;
+      return linked && !resolved;
+    });
+    for (const fb of specFeedbacks) {
       warnings.push({
         id: spec.id,
         type: "feedback-review",
-        message: `フィードバックレビュー待ち: ${flag.reason}（関連Issue: ${flag.relatedIssues.map(n => `#${n}`).join(", ")}）`,
+        message: `Unresolved feedback: #${fb.githubIssue} (${fb.type ?? "unclassified"}, ${fb.severity ?? "medium"})`,
         severity: "info",
       });
     }
@@ -325,6 +340,7 @@ function renderProgressBar(percentage: number, width: number = 20): string {
     → statusService.getProjectStatus(cwd)
       → reqRepo.findAll(cwd) → 全要件取得
       → specRepo.findAll(cwd) → 全仕様取得
+      → feedbackRepo.loadIndex(cwd) → 全feedbackデータ取得
       → Requirements集計:
         → byStatus: { draft: 3, approved: 6, implemented: 1 }
         → approvedPercentage: 60%
@@ -334,7 +350,8 @@ function renderProgressBar(percentage: number, width: number = 20): string {
       → Issues集計（tasks.yamlから各specに紐づくIssueを取得）:
         → total: 20, closed: 16, closedPercentage: 80%
       → 警告検出:
-        → detectWarnings(requirements, specifications)
+        → detectWarnings(cwd, requirements, specifications)
+          → feedbacks.yamlから未解決feedbackを検索（linkedTo − resolved）
       → ProjectStatus構築
   → ASCIIダッシュボード表示
 ```
@@ -359,7 +376,7 @@ function renderProgressBar(percentage: number, width: number = 20): string {
 ```
 ユーザー → reqord status --quiet
   → statusService.getProjectStatus(cwd)
-  → detectWarnings(requirements, specifications)
+  → detectWarnings(cwd, requirements, specifications)
   → 警告のみ出力（プログレスバー等の通常表示を抑制）
 ```
 
@@ -368,7 +385,7 @@ function renderProgressBar(percentage: number, width: number = 20): string {
 ```
 ユーザー → reqord status --check
   → statusService.getProjectStatus(cwd)
-  → detectWarnings(requirements, specifications)
+  → detectWarnings(cwd, requirements, specifications)
   → 整合性チェックのみ実行
   → 終了コード: 0=問題なし, 1=警告あり
 ```
@@ -391,10 +408,11 @@ function renderProgressBar(percentage: number, width: number = 20): string {
     - 全関連SpecがimplementedだがReqがapproved → `all-specs-implemented` 警告
     - Reqがdeprecatedだが関連Specがdraft/approved → `deprecated-with-active-specs` 警告
     - Specが0件の場合: 整合性警告なし
-  - feedback-reviewフラグ検出:
-    - Requirementにfeedback-reviewフラグ → `feedback-review` info表示
-    - Specificationにfeedback-reviewフラグ → `feedback-review` info表示
-    - フラグなし: 情報表示なし
+  - 未解決feedback検出（feedbacks.yamlのlinkedTo/resolved経由）:
+    - RequirementにlinkedToされ、resolvedに含まれないfeedback → `feedback-review` info表示
+    - SpecificationにlinkedToされ、resolvedに含まれないfeedback → `feedback-review` info表示
+    - resolvedに含まれるfeedback: 情報表示なし
+    - linkedToに含まれないfeedback: 情報表示なし
     - severity: "info"であること（"warning"ではない）
 - **renderProgressBar**: 0%, 50%, 100%での正しいバー生成
 - **routeStatus**: req-NNNNNN/spec-NNNNNNの正しいルーティング、不正ID時のエラー
@@ -428,7 +446,12 @@ function renderProgressBar(percentage: number, width: number = 20): string {
 **決定:** `detectWarnings` 内で `@reqord/shared` の `checkConsistency()` を呼び出し、その結果をWarning型にマッピングする
 **理由:** 整合性チェックロジックを `@reqord/shared` に集約することで、CLI（status-service）とWeb（dashboard-data）の両方で同一ルールを再利用可能にする。`checkConsistency` は純粋関数であり、Requirement + Specification[] を受け取って `ConsistencyWarning[]` を返すため、呼び出し元を選ばない。
 
-### feedback-reviewフラグの情報表示レベル
+### 未解決feedbackの情報表示レベル
 
-**決定:** `feedback-review` フラグの表示は `severity: "info"` とし、警告（warning）とは区別して表示する
-**理由:** フィードバックレビューは「対応が必要な問題」ではなく「レビュー待ちの情報」であり、他の警告（整合性エラー、未承認依存等）とは性質が異なる。info レベルとすることで、ユーザーが緊急度を正しく判断できる。表示時にはアイコン（`ℹ`）と色分けで警告（`⚠`）と区別する。
+**決定:** 未解決feedbackの表示は `severity: "info"` とし、警告（warning）とは区別して表示する
+**理由:** 未解決feedbackは「対応が必要な問題」ではなく「レビュー待ちの情報」であり、他の警告（整合性エラー、未承認依存等）とは性質が異なる。info レベルとすることで、ユーザーが緊急度を正しく判断できる。表示時にはアイコン（`ℹ`）と色分けで警告（`⚠`）と区別する。
+
+### detectWarningsのasync化
+
+**決定:** `detectWarnings` を非同期関数（async）に変更し、feedbacks.yamlの読み込みを内部で行う
+**理由:** 未解決feedbackの検索にはfeedbacks.yamlの読み込みが必要であり、これはファイルI/O操作のため非同期である。detectWarningsの呼び出し元（getProjectStatus等）も既にasyncのため、影響は限定的。

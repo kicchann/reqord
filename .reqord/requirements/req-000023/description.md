@@ -2,11 +2,13 @@
 
 ## 概要
 
-GitHub Issueをベースとしたフィードバック管理機能。feedbackラベル付きGitHub Issueと`.reqord/issues/feedbacks.yaml`の同期をコアコンセプトとし、要件/仕様との紐付け・フラグ管理を提供する。GitHub Issueを真実の情報源（Single Source of Truth）とし、reqordはメタデータの同期・紐付け・トラッキングに集中する。
+GitHub Issueをベースとしたフィードバック管理機能。feedbackラベル付きGitHub Issueと`.reqord/issues/feedbacks.yaml`の同期をコアコンセプトとし、要件/仕様との紐付け管理を提供する。GitHub Issueを真実の情報源（Single Source of Truth）とし、reqordはメタデータの同期・紐付け・トラッキングに集中する。
 
 > **v1.1.0変更点**: sync中心設計へ再構成。structureコマンドを廃止し、syncコマンドを追加。メタデータ設定はlinkコマンドに統合。Zodスキーマバリデーション成功基準を追加。
 
-> **v4.0変更点**: feedback運用の完全化。unlinkコマンド追加（linkの逆操作）、createコマンド追加（GitHub Issue作成）、close時の残存flag警告追加。
+> **v4.0変更点**: feedback運用の完全化。unlinkコマンド追加（linkの逆操作）、createコマンド追加（GitHub Issue作成）、close時の未解決feedback警告追加。
+
+> **v5.0変更点**: flagsフィールドをreq/specスキーマから削除。feedbacks.yamlのlinkedTo/linkedTo.resolvedで未解決feedbackを管理する方式に変更。
 
 設計方針は docs/guide-feedback.md を参照。
 
@@ -47,7 +49,7 @@ Feedback closed（reqord feedback close）
 
 ```bash
 reqord feedback link 17 --req req-000006 --type improvement --severity high
-# → flag付与 → Requirement revision upで対応
+# → feedbacks.yamlのlinkedToにreq-000006を追加 → Requirement revision upで対応
 ```
 
 例: Feedback #17（AI補助機能の分離） → req-000006等を改訂
@@ -126,7 +128,7 @@ reqord feedback close 14
 | GitHub Issueとfeedbacks.yamlの同期 | reqord CLI（本要件） |
 | Feedbackの一覧・詳細表示 | reqord CLI（本要件） |
 | Requirement/Specificationとの紐付け | reqord CLI（本要件） |
-| flagsの追加・除去 | reqord CLI（本要件） |
+| 未解決feedbackの検知（feedbacks.yaml経由） | reqord CLI（本要件） |
 | FeedbackIndexのZodスキーマバリデーション | @reqord/shared |
 | AI駆動のFeedback分析（種別推定・関連要件推定） | Claude Code エコシステム |
 | AI駆動の影響範囲分析 | Claude Code エコシステム |
@@ -220,16 +222,14 @@ Feedbackをアーティファクトに紐付ける。type/severityも同時に�
 ```bash
 reqord feedback link 17 --req req-000006 --type improvement --severity high
 # → Linked Feedback #17 to req-000006
-# → Added feedback-review flag to req-000006
+# → Updated feedbacks.yaml linkedTo
 # → Updated GitHub Issue body (HTML comment)
-# → Updated .reqord/issues/feedbacks.yaml
 ```
 
 動作:
 1. feedbacks.yamlの`linkedTo.requirements`に追加
-2. 対象Requirementに`feedback-review`フラグを追加
-3. GitHub Issue bodyにHTMLコメントを挿入/更新
-4. feedbacks.yamlに`type`, `severity`を記録
+2. GitHub Issue bodyにHTMLコメントを挿入/更新
+3. feedbacks.yamlに`type`, `severity`を記録
 
 #### パターンB: 新規Requirement作成（--created-req）
 
@@ -258,7 +258,6 @@ reqord feedback link 15 --spec spec-000001 --type spec-mismatch
 動作:
 1. feedbacks.yamlの`linkedTo.specifications`に追加
 2. GitHub Issue bodyにHTMLコメントを挿入/更新
-3. Requirementへのflagは付与しない（Spec更新で対応するため）
 
 オプション:
 - `--req <id>` : 既存Requirementへ紐付け（パターンA）
@@ -275,15 +274,15 @@ reqord feedback link 15 --spec spec-000001 --type spec-mismatch
 reqord feedback close 17
 # → Closed Feedback #17 on GitHub
 # → Updated .reqord/issues/feedbacks.yaml (status: closed)
-# → Flags remain on: req-000006 (feedback-review), req-000020 (feedback-review)
+# → Unresolved feedbacks remain on: req-000006 (issue #17), req-000020 (issue #17)
 ```
 
 動作:
 1. feedbacks.yamlの`status`を`closed`に更新
 2. `gh issue close <issue-number> --comment "<影響範囲サマリー>"`でGitHub Issueをクローズ
-3. Requirementのflagsは**残す**（flagの除去はRequirement側の対応完了時に行う）
+3. 紐付けされたartifactの未解決feedbackは**残す**（解決はRequirement側の対応完了時に行う）
 
-**注意**: flagsの除去はFeedbackのクローズとは独立。Requirementの改訂やSpecificationの更新が完了した時点で、`reqord feedback resolve` により個別に除去する。v4.0でクローズ時に残存flag警告が追加された（上記「v4.0改善」セクション参照）。
+**注意**: feedbackの解決はFeedbackのクローズとは独立。Requirementの改訂やSpecificationの更新が完了した時点で、`reqord feedback resolve` によりfeedbacks.yamlのlinkedTo.resolvedをtrueに更新する。v4.0でクローズ時に未解決feedback警告が追加された（下記「v4.0改善」セクション参照）。
 
 ### reqord feedback unlink \<issue-number\>
 
@@ -292,7 +291,6 @@ Feedbackとアーティファクトの紐付けを解除する（linkの逆操�
 ```bash
 reqord feedback unlink 224 --req req-000023
 # → Unlinked Feedback #224 from req-000023
-# → Removed feedback-review flag from req-000023
 # → Updated .reqord/issues/feedbacks.yaml
 
 reqord feedback unlink 224 --spec spec-000028
@@ -302,8 +300,7 @@ reqord feedback unlink 224 --spec spec-000028
 
 動作:
 1. feedbacks.yamlの`linkedTo.requirements`または`linkedTo.specifications`から削除
-2. `--req`の場合、対象Requirementの`feedback-review`フラグを削除
-3. GitHub Issue bodyのHTMLコメントを更新
+2. GitHub Issue bodyのHTMLコメントを更新
 
 オプション:
 - `--req <id>` : Requirementとの紐付けを解除
@@ -316,7 +313,7 @@ ISSUE_TEMPLATE/05-feedback.yml に準拠したfeedbackラベル付きGitHub Issu
 ```bash
 reqord feedback create \
   --title "closeコマンドに警告がない" \
-  --description "feedback close実行時に残存flagがあっても警告なしでクローズされる" \
+  --description "feedback close実行時に未解決feedbackがあっても警告なしでクローズされる" \
   --type improvement \
   --severity low
 # → Created GitHub Issue #228 "[Feedback] closeコマンドに警告がない"
@@ -340,19 +337,19 @@ reqord feedback create \
 
 ### reqord feedback close \<issue-number\>（v4.0改善）
 
-影響範囲確定後にFeedbackをクローズする。v4.0で残存flag警告を追加。
+影響範囲確定後にFeedbackをクローズする。v4.0で未解決feedback警告を追加。
 
 ```bash
 reqord feedback close 17
-# → ⚠ Warning: Linked artifacts have remaining feedback-review flags:
-# →   - req-000006: feedback-review (issue #17)
-# →   - req-000020: feedback-review (issue #17)
+# → ⚠ Warning: Linked artifacts have unresolved feedbacks:
+# →   - req-000006: unresolved feedback (issue #17)
+# →   - req-000020: unresolved feedback (issue #17)
 # → Closed Feedback #17 on GitHub
 # → Updated .reqord/issues/feedbacks.yaml (status: closed)
 ```
 
 動作:
-1. 紐付けされたartifactの残存feedback-reviewフラグをチェックし、あれば警告表示
+1. 紐付けされたartifactの未解決feedback（feedbacks.yamlのlinkedTo.resolved !== true）をチェックし、あれば警告表示
 2. feedbacks.yamlの`status`を`closed`に更新
 3. `gh issue close <issue-number> --comment "<影響範囲サマリー>"`でGitHub Issueをクローズ
 
@@ -375,6 +372,7 @@ feedbacks:
         - req-000021
       createdRequirements: []
       specifications: []
+      resolved: false
     syncedAt: "2026-02-09T10:00:00Z"
     status: closed
   - githubIssue: 13
@@ -385,6 +383,7 @@ feedbacks:
       createdRequirements:
         - req-000023
       specifications: []
+      resolved: true
     syncedAt: "2026-02-09T10:30:00Z"
     status: closed
 ```
@@ -397,45 +396,31 @@ feedbacks:
 - `spec-mismatch` : 仕様と実装の不一致
 - `security` : セキュリティ関連
 
-### Requirementのflagsとの連携
+### feedbacks.yamlによるFeedback解決管理
 
-#### 設計原則: flagは一時的なマーカーである
+#### 設計原則: feedbacks.yamlがトレーサビリティのSource of Truth
 
-flagとfeedbacks.yamlはそれぞれ異なる責務を持つ:
+feedbacks.yamlのlinkedToで紐付けと解決状態を一元管理する:
 
 | データ | 責務 | ライフサイクル |
 |--------|------|---------------|
-| `issues/feedbacks.yaml` | feedback issue → req/specの紐付け記録（**トレーサビリティのSource of Truth**） | 永続。削除しない |
-| `requirement.flags[]` | 「未対応のフィードバックがある」ことを示すアクションマーカー | 一時的。対応完了後に削除 |
+| `issues/feedbacks.yaml` | feedback issue → req/specの紐付け記録と解決状態管理（**トレーサビリティのSource of Truth**） | 永続。削除しない |
+| `linkedTo.resolved` | 「対応完了かどうか」を示すフラグ | resolveコマンドでtrueに更新 |
 
-flagにstatusは持たせない（feedbacks.yamlとの二重管理を避けるため）。flagの有無自体が「未対応/対応済み」を表す。
-
-#### flagのライフサイクル
+#### feedbackの解決ライフサイクル
 
 ```
-feedback link → flagをreq/specに追加（未対応マーカー）
+feedback link → feedbacks.yamlにlinkedToを追加（resolved: false）
     ↓
-flagの内容をreq/specに反映（version up、成功基準追加など）
+linkedToの内容をreq/specに反映（version up、成功基準追加など）
     ↓
-feedback resolve → flagを削除 + feedbacks.yamlのstatusをresolvedに更新
+feedback resolve → feedbacks.yamlのlinkedTo.resolvedをtrueに更新
 ```
 
-#### version up可否の判定
+#### 未解決feedbackの判定
 
-- `flags.length === 0` → 対応完了。version upしてよい
-- `flags.length > 0` → 未対応のフィードバックがある。対応してからversion upすべき
-
-#### flagのデータ構造
-
-Feedback紐付け時にRequirement/Specificationに追加されるフラグ:
-
-```yaml
-- type: feedback-review
-  reason: "Feedbackの内容サマリー"
-  createdAt: "2026-02-09T10:00:00Z"
-  relatedIssues: [17]
-  severity: high
-```
+- feedbacks.yamlでreq/specに紐付けられたfeedbackのうち、`linkedTo.resolved !== true` のものが未解決
+- 未解決feedbackがあるreq/specへの承認操作時に警告を表示
 
 ## 技術的制約
 

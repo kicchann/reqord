@@ -102,7 +102,6 @@ export const SpecificationSchema = z.object({
     design: z.string(),
     supplementary: z.array(z.string()).default([]),
   }),
-  flags: z.array(FlagSchema).default([]),              // FlagSchema from requirement.ts
 });
 ```
 

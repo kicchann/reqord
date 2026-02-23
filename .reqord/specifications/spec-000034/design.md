@@ -1,8 +1,8 @@
-# Flags表示・Feedback一覧UI - 技術設計書
+# Feedback表示・Feedback一覧UI - 技術設計書
 
 ## 1. 設計概要
 
-Requirement/Specificationの詳細画面にflagsセクションを追加し、`feedback-review`・`security-review`・`breaking-change`フラグの存在をユーザーに可視化する（Feedback #169）。また、`.reqord/issues/feedbacks.yaml`に格納されたFeedbackデータをWeb UIで一覧・詳細表示し、関連Requirement/Specificationとのリンクを確認できるFeedback一覧ページを新設する（Feedback #170）。
+Requirement/Specificationの詳細画面に未解決Feedbackセクションを追加し、feedbacks.yamlのlinkedTo/resolvedから導出した未解決フィードバックの存在をユーザーに可視化する（Feedback #169）。また、`.reqord/issues/feedbacks.yaml`に格納されたFeedbackデータをWeb UIで一覧・詳細表示し、関連Requirement/Specificationとのリンクを確認できるFeedback一覧ページを新設する（Feedback #170）。
 
 本specは既存のダッシュボード（spec-000022）・Gantt（spec-000025）・依存グラフ（spec-000026）・ドリルダウン（spec-000029）とは独立した機能であり、UI表示に必要なデータ層（FeedbackRepository）を新規追加し、既存の詳細ページコンポーネントを拡張する。
 
@@ -16,23 +16,22 @@ packages/web/src/
   │   │   └── loading.tsx                      (新規: ローディングUI)
   │   ├── requirements/
   │   │   └── [id]/
-  │   │       └── page.tsx                     (既存: flags表示のためデータ追加不要 - reqオブジェクトにflags含む)
+  │   │       └── page.tsx                     (既存: 未解決feedback表示のためfeedbackデータ取得追加)
   │   └── specifications/
   │       └── [id]/
-  │           └── page.tsx                     (既存: flags表示のためデータ追加不要 - specオブジェクトにflags含む)
+  │           └── page.tsx                     (既存: 未解決feedback表示のためfeedbackデータ取得追加)
   ├── components/
-  │   ├── flags/                               (新規ディレクトリ)
-  │   │   ├── flag-list.tsx                    (フラグ一覧セクション)
-  │   │   └── flag-badge.tsx                   (フラグ種別バッジ)
   │   ├── feedback/                            (新規ディレクトリ)
+  │   │   ├── feedback-list.tsx                (未解決フィードバック一覧セクション)
+  │   │   ├── feedback-badge.tsx               (フィードバック種別・重要度バッジ)
   │   │   ├── feedback-client-view.tsx         (フィルタ状態管理 - Client Component境界)
   │   │   ├── feedback-table.tsx               (一覧テーブル)
   │   │   ├── feedback-filters.tsx             (フィルタUI)
   │   │   └── feedback-linked-items.tsx        (関連Req/Specリンク表示)
   │   ├── requirement/
-  │   │   └── requirement-detail.tsx           (既存: 拡張 - FlagList追加)
+  │   │   └── requirement-detail.tsx           (既存: 拡張 - FeedbackList追加)
   │   ├── specification/
-  │   │   └── spec-detail.tsx                  (既存: 拡張 - FlagList追加)
+  │   │   └── spec-detail.tsx                  (既存: 拡張 - FeedbackList追加)
   │   └── ui/
   │       └── nav.tsx                          (既存: Feedbackリンク追加)
   └── lib/
@@ -52,73 +51,69 @@ packages/web/src/
 
 ブラウザ → /requirements/[id] (GET)
   → RequirementDetailPage (Server Component)
-    → getRequirementById(id) → Requirement (flags含む)
-    → <RequirementDetail> → <FlagList flags={requirement.flags} />
+    → getRequirementById(id) → Requirement
+    → findUnresolvedByArtifactId(id) → FeedbackEntry[]（未解決feedbackを取得）
+    → <RequirementDetail> → <FeedbackList feedbacks={unresolvedFeedbacks} />
 
 ブラウザ → /specifications/[id] (GET)
   → SpecificationDetailPage (Server Component)
-    → getSpecificationById(id) → Specification (flags含む)
-    → <SpecDetail> → <FlagList flags={specification.flags} />
+    → getSpecificationById(id) → Specification
+    → findUnresolvedByArtifactId(id) → FeedbackEntry[]（未解決feedbackを取得）
+    → <SpecDetail> → <FeedbackList feedbacks={unresolvedFeedbacks} />
 ```
 
 ## 3. コンポーネント設計
 
-### 3.1 FlagList (`components/flags/flag-list.tsx` - 新規)
+### 3.1 FeedbackList (`components/feedback/feedback-list.tsx` - 新規)
 
-**責務:** Requirement/Specificationの詳細画面でflagsを一覧表示する共通コンポーネント。
+**責務:** Requirement/Specificationの詳細画面で未解決feedbackを一覧表示する共通コンポーネント。feedbacks.yamlのlinkedTo/resolvedから導出した未解決フィードバックを表示する。
 
 ```typescript
-interface FlagListProps {
-  flags: Flag[];
+interface FeedbackListProps {
+  feedbacks: FeedbackEntry[];
 }
 ```
 
-- flagsが空の場合は何も表示しない（セクション自体を非表示）
-- 各フラグをカード形式で表示:
-  - FlagBadge（タイプ別アイコン・色）
-  - reason テキスト
-  - createdAt 日時
-  - フラグ固有フィールド:
-    - `feedback-review`: severity バッジ + relatedIssues のGitHubリンク
-    - `security-review`: 警告アイコン
-    - `breaking-change`: affectedVersions のリスト
+- feedbacksが空の場合は何も表示しない（セクション自体を非表示）
+- 各フィードバックをカード形式で表示:
+  - FeedbackBadge（タイプ別色・重要度バッジ）
+  - GitHub Issue番号（リンク）
+  - syncedAt 日時
 
 **表示例:**
 ```
-⚠ Flags (2件)
+Unresolved Feedback (2件)
 ┌─────────────────────────────────────────────────────┐
-│ 🔍 feedback-review  [high]                          │
-│ セキュリティ関連の指摘                                │
-│ 関連Issue: #42, #43                                  │
-│ 2026-02-15T10:00:00Z                                │
+│ #42  [Improvement] [high]                           │
+│ 2026-02-15                                          │
 ├─────────────────────────────────────────────────────┤
-│ ⚡ breaking-change                                   │
-│ APIインターフェース変更                               │
-│ 影響バージョン: 0.1.0, 0.2.0                         │
-│ 2026-02-14T08:00:00Z                                │
+│ #43  [Bug] [medium]                                 │
+│ 2026-02-14                                          │
 └─────────────────────────────────────────────────────┘
 ```
 
-### 3.2 FlagBadge (`components/flags/flag-badge.tsx` - 新規)
+### 3.2 FeedbackBadge (`components/feedback/feedback-badge.tsx` - 新規)
 
-**責務:** フラグ種別に応じたバッジ表示。
+**責務:** フィードバック種別・重要度に応じたバッジ表示。
 
 ```typescript
-interface FlagBadgeProps {
-  type: "feedback-review" | "security-review" | "breaking-change";
-  severity?: "critical" | "high" | "medium" | "low";
+interface FeedbackBadgeProps {
+  type?: string;
+  severity?: string;
 }
 ```
 
-**色マッピング:**
+**タイプ別バッジ色:**
 
 | タイプ | 背景色 | テキスト |
 |--------|--------|----------|
-| feedback-review | `bg-amber-100 text-amber-800` | Feedback Review |
-| security-review | `bg-red-100 text-red-800` | Security Review |
-| breaking-change | `bg-purple-100 text-purple-800` | Breaking Change |
+| bug | `bg-red-100 text-red-800` | Bug |
+| improvement | `bg-blue-100 text-blue-800` | Improvement |
+| requirement-gap | `bg-amber-100 text-amber-800` | Requirement Gap |
+| spec-mismatch | `bg-purple-100 text-purple-800` | Spec Mismatch |
+| security | `bg-red-100 text-red-800` | Security |
 
-**severityバッジ（feedback-review時のみ）:**
+**severityバッジ:**
 
 | severity | スタイル |
 |----------|----------|
@@ -129,23 +124,23 @@ interface FlagBadgeProps {
 
 ### 3.3 RequirementDetail 拡張 (`components/requirement/requirement-detail.tsx` - 既存拡張)
 
-**変更内容:** Dependenciesセクションの前（Success Criteriaの後）にFlagListを追加。
+**変更内容:** Dependenciesセクションの前（Success Criteriaの後）にFeedbackListを追加。未解決feedbackはfeedbacks.yamlのlinkedTo/resolvedから導出。
 
 ```typescript
-// 既存のSuccess Criteriaセクションの後に追加
-{requirement.flags.length > 0 && (
-  <FlagList flags={requirement.flags} />
+// 未解決feedbackをServer Component側で取得し、propsとして渡す
+{unresolvedFeedbacks.length > 0 && (
+  <FeedbackList feedbacks={unresolvedFeedbacks} />
 )}
 ```
 
 ### 3.4 SpecDetail 拡張 (`components/specification/spec-detail.tsx` - 既存拡張)
 
-**変更内容:** MetaGridの後、タブの前にFlagListを追加。
+**変更内容:** MetaGridの後、タブの前にFeedbackListを追加。
 
 ```typescript
-// 既存のMetaGridの後、SpecTabsの前に追加
-{specification.flags.length > 0 && (
-  <FlagList flags={specification.flags} />
+// 未解決feedbackをServer Component側で取得し、propsとして渡す
+{unresolvedFeedbacks.length > 0 && (
+  <FeedbackList feedbacks={unresolvedFeedbacks} />
 )}
 ```
 
@@ -170,16 +165,6 @@ interface FeedbackTableProps {
 - Issue番号はGitHub URLへのリンク（`https://github.com/{owner}/{repo}/issues/{number}`）
 - タイプ・重要度・ステータスはバッジ表示
 - 関連Req/Specは `FeedbackLinkedItems` コンポーネントで表示
-
-**タイプ別バッジ色:**
-
-| タイプ | スタイル |
-|--------|----------|
-| bug | `bg-red-100 text-red-800` |
-| improvement | `bg-blue-100 text-blue-800` |
-| requirement-gap | `bg-yellow-100 text-yellow-800` |
-| spec-mismatch | `bg-orange-100 text-orange-800` |
-| security | `bg-red-200 text-red-900` |
 
 ### 3.6 FeedbackFilters (`components/feedback/feedback-filters.tsx` - 新規)
 
@@ -304,6 +289,7 @@ export function FeedbackClientView({
 ```typescript
 export interface FeedbackRepository {
   findAll(): Promise<FeedbackEntry[]>;
+  findUnresolvedByArtifactId(artifactId: string): Promise<FeedbackEntry[]>;
 }
 ```
 
@@ -322,20 +308,36 @@ export class LocalFeedbackRepository implements FeedbackRepository {
     if (!parsed.success) return [];
     return parsed.data.feedbacks;
   }
+
+  async findUnresolvedByArtifactId(artifactId: string): Promise<FeedbackEntry[]> {
+    const all = await this.findAll();
+    const isReq = artifactId.startsWith("req-");
+    return all.filter((f) => {
+      const linked = isReq
+        ? f.linkedTo.requirements.includes(artifactId)
+        : f.linkedTo.specifications.includes(artifactId);
+      const resolved = isReq
+        ? (f.linkedTo.resolved?.requirements?.includes(artifactId) ?? false)
+        : (f.linkedTo.resolved?.specifications?.includes(artifactId) ?? false);
+      return linked && !resolved;
+    });
+  }
 }
 ```
 
 - `readYAML` を使用してfeedbacks.yamlを読み取り
 - Zodスキーマ（`FeedbackIndexSchema`）でバリデーション
 - パース失敗時は空配列を返す（堅牢性重視）
+- `findUnresolvedByArtifactId()`: linkedToに含まれるがresolvedに含まれないfeedbackを返す
 
 #### feedback-data.ts (`lib/feedback-data.ts` - 新規)
 
 ```typescript
 export async function getAllFeedbacks(): Promise<FeedbackEntry[]>;
+export async function findUnresolvedByArtifactId(artifactId: string): Promise<FeedbackEntry[]>;
 ```
 
-- LocalFeedbackRepositoryのfindAll()をラップ
+- LocalFeedbackRepositoryのfindAll() / findUnresolvedByArtifactId() をラップ
 - 既存のdata.ts / specification-data.ts と同じパターン
 
 #### reqord-root.ts 拡張 (`lib/reqord-root.ts` - 既存拡張)
@@ -360,27 +362,29 @@ const navItems = [
 
 ## 4. データフロー
 
-### Flags表示フロー（Requirement詳細）
+### 未解決Feedback表示フロー（Requirement詳細）
 
 ```
 ブラウザ → /requirements/req-000016 (GET)
   → RequirementDetailPage (Server Component)
-    → getRequirementById("req-000016") → Requirement（flags含む）
-  → <RequirementDetail requirement={...}>
-    → requirement.flags.length > 0 の場合:
-      → <FlagList flags={requirement.flags} />
-        → flags.map(flag => <FlagBadge type={flag.type} /> + details)
+    → getRequirementById("req-000016") → Requirement
+    → findUnresolvedByArtifactId("req-000016") → FeedbackEntry[]
+  → <RequirementDetail requirement={...} unresolvedFeedbacks={...}>
+    → unresolvedFeedbacks.length > 0 の場合:
+      → <FeedbackList feedbacks={unresolvedFeedbacks} />
+        → feedbacks.map(fb => <FeedbackBadge type={fb.type} severity={fb.severity} /> + details)
 ```
 
-### Flags表示フロー（Specification詳細）
+### 未解決Feedback表示フロー（Specification詳細）
 
 ```
 ブラウザ → /specifications/spec-000016 (GET)
   → SpecificationDetailPage (Server Component)
-    → getSpecificationById("spec-000016") → Specification（flags含む）
-  → <SpecDetail specification={...}>
-    → specification.flags.length > 0 の場合:
-      → <FlagList flags={specification.flags} />
+    → getSpecificationById("spec-000016") → Specification
+    → findUnresolvedByArtifactId("spec-000016") → FeedbackEntry[]
+  → <SpecDetail specification={...} unresolvedFeedbacks={...}>
+    → unresolvedFeedbacks.length > 0 の場合:
+      → <FeedbackList feedbacks={unresolvedFeedbacks} />
 ```
 
 ### Feedback一覧表示フロー
@@ -411,11 +415,11 @@ const navItems = [
 ```
 ブラウザ → Feedback一覧 → 関連Reqリンククリック
   → /requirements/{id} → RequirementDetailPage
-    → Flagsセクションが表示される（フィードバックとの循環参照）
+    → 未解決Feedbackセクションが表示される（フィードバックとの循環参照）
 
 ブラウザ → Feedback一覧 → 関連Specリンククリック
   → /specifications/{id} → SpecificationDetailPage
-    → Flagsセクションが表示される
+    → 未解決Feedbackセクションが表示される
 ```
 
 ## 5. テスト方針
@@ -426,6 +430,10 @@ const navItems = [
   - feedbacks.yamlが存在する場合: FeedbackEntry配列が返されること
   - feedbacks.yamlが存在しない場合: 空配列が返されること
   - 不正なYAML: 空配列が返されること（エラーにならない）
+- **LocalFeedbackRepository.findUnresolvedByArtifactId**:
+  - linkedToに含まれresolvedに含まれないfeedbackが返されること
+  - resolvedに含まれるfeedbackは返されないこと
+  - linkedToに含まれないfeedbackは返されないこと
 - **FeedbackFilters ロジック**:
   - type指定: 該当typeのみフィルタされること
   - severity指定: 該当severityのみフィルタされること
@@ -434,13 +442,11 @@ const navItems = [
 
 ### コンポーネントテスト
 
-- **FlagList**:
-  - flags空配列: 何も表示されないこと
-  - feedback-reviewフラグ: severity バッジとrelatedIssuesリンクが表示されること
-  - security-reviewフラグ: 警告スタイルが適用されること
-  - breaking-changeフラグ: affectedVersionsが表示されること
-  - 複数フラグ: 全件表示されること
-- **FlagBadge**:
+- **FeedbackList**:
+  - feedbacks空配列: 何も表示されないこと
+  - 未解決feedbackがある場合: Issue番号・タイプ・重要度バッジが表示されること
+  - 複数件: 全件表示されること
+- **FeedbackBadge**:
   - 各typeに対応する色クラスが適用されること
   - severity propsがある場合のみseverityバッジが表示されること
 - **FeedbackTable**:
@@ -456,18 +462,18 @@ const navItems = [
 
 ### 統合テスト
 
-- RequirementDetailページ: flagsがある場合にFlagListが表示されること
-- SpecDetailページ: flagsがある場合にFlagListが表示されること
+- RequirementDetailページ: 未解決feedbackがある場合にFeedbackListが表示されること
+- SpecDetailページ: 未解決feedbackがある場合にFeedbackListが表示されること
 - Feedbackページ: feedbacks.yamlからデータが読み込まれテーブル表示されること
 - フィルタ操作: タイプ・ステータスフィルタが正しく動作すること
 - ナビゲーション: Feedbackリンクが表示されること
 
 ## 6. 技術的決定事項
 
-### Flags表示を共通コンポーネント（FlagList）として実装
+### 未解決Feedback表示を共通コンポーネント（FeedbackList）として実装
 
-**決定:** RequirementDetailとSpecDetailで共通のFlagListコンポーネントを使用する
-**理由:** RequirementとSpecificationは同じ`Flag`型（`@reqord/shared`で定義）のflags配列を持つため、表示ロジックを共通化する。`components/flags/` ディレクトリに配置し、requirement/specificationのどちらからも独立した位置付けとする。
+**決定:** RequirementDetailとSpecDetailで共通のFeedbackListコンポーネントを使用する
+**理由:** 未解決feedbackの表示ロジックは共通であり、feedbacks.yamlのlinkedTo/resolvedから導出するクエリも同一パターンのため、表示コンポーネントを共通化する。`components/feedback/` ディレクトリに配置し、requirement/specificationのどちらからも独立した位置付けとする。
 
 ### Feedback一覧を独立ページとして実装
 
@@ -476,7 +482,7 @@ const navItems = [
 
 ### FeedbackRepositoryの読み取り専用設計
 
-**決定:** FeedbackRepositoryは`findAll()`のみとし、書き込みメソッドは提供しない
+**決定:** FeedbackRepositoryは`findAll()`と`findUnresolvedByArtifactId()`のみとし、書き込みメソッドは提供しない
 **理由:** FeedbackデータはCLI（`reqord feedback sync`）でGitHub Issueから同期されるものであり、Web UIからの直接編集は設計範囲外。Web UIは表示のみを担当し、データの変更はCLI経由で行う。
 
 ### フィルタ状態のクライアントサイド管理

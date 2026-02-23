@@ -1,10 +1,10 @@
 id: req-000011
-version: '5.0'
+version: '5.1'
 title: Requirement承認フロー (GitHub PR連携)
 status: draft
 priority: high
 createdAt: 2026-02-07T12:00:00Z
-updatedAt: 2026-02-22T23:43:31.098Z
+updatedAt: 2026-02-23T00:20:37.286Z
 versionHistory:
   - version: 2.0.0
     status: approved
@@ -24,11 +24,15 @@ versionHistory:
     status: draft
     changedAt: 2026-02-13T00:00:00.000Z
     summary: Reverted to draft for revision based on feedback (#109,
+  - version: '5.1'
+    status: draft
+    changedAt: 2026-02-23T00:20:37.286Z
+    summary: flags→feedbacks.yaml経由に文言変更
 files:
   description: requirements/req-000011/description.md
   supplementary: []
 successCriteria:
-  - reqord req draft <id> でflag付きのreq/specをdraft状態に戻せる
+  - reqord req draft <id> で未解決feedback紐付けありのreq/specをdraft状態に戻せる
   - reqord req approve <id> でGitブランチが作成され、承認依頼PRが自動生成される
   - PR本文にreqordメタデータコメントタグが埋め込まれる
   - CODEOWNERSで指定されたレビュアーがPRに自動アサインされる

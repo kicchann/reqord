@@ -24,23 +24,25 @@ Reqord Status - MyProject
   Issues: 12/15 Completed
 
   Warnings:
-    - req-005: 全関連Specが implemented だがReqが approved のまま
-    - req-008: deprecated だが関連Spec(spec-012)が draft のまま
-    - req-006: feedback-review flag あり (#17)
+    - req-000005: 全関連Specが implemented だがReqが approved のまま
+    - req-000008: deprecated だが関連Spec(spec-012)が draft のまま
+    - req-000006: 未解決feedback紐付けあり (#17)
 ```
 
 ### reqord status \<req-id\>
 
 Requirement個別の詳細ステータス:
+
 - 基本情報（title, status, priority, version）
 - 依存関係サマリー
 - 関連Specificationの状態
-- flagsの一覧
+- 未解決feedbackの一覧（feedbacks.yaml経由）
 - **整合性チェック結果**
 
 ### reqord status \<spec-id\>
 
 Specification個別の詳細ステータス:
+
 - 基本情報（title, status, requirementId）
 - 親Requirementとの整合性チェック
 - Issue進捗（完了/進行中/ブロック）
@@ -49,11 +51,11 @@ Specification個別の詳細ステータス:
 
 @reqord/shared `checkConsistency` で定義されたルールに基づき、以下の不整合を検出・警告する。CLIの`status-service.ts` `detectWarnings`から`checkConsistency`を呼び出して統合する:
 
-| 条件 | 警告レベル | メッセージ |
-|------|-----------|----------|
-| 全関連Specが `implemented` だがReqが `approved` | warning | Reqを `implemented` に更新を検討 |
-| Reqが `deprecated` だが関連Specが active | warning | 関連Specの廃止を検討 |
-| Reqに `feedback-review` flagあり | info | Feedback対応の確認 |
+| 条件                                                | 警告レベル | メッセージ                       |
+| --------------------------------------------------- | ---------- | -------------------------------- |
+| 全関連Specが `implemented` だがReqが `approved`     | warning    | Reqを `implemented` に更新を検討 |
+| Reqが `deprecated` だが関連Specが active            | warning    | 関連Specの廃止を検討             |
+| Reqに未解決feedback紐付けあり（feedbacks.yaml経由） | info       | Feedback対応の確認               |
 
 **自動ステータス変更は行わない。** 警告表示のみでユーザーの判断に委ねる（human-in-the-loop）。
 

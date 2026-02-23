@@ -116,7 +116,7 @@ const incrementMinor = (version: string): string => {
 | approved/implementedでの軽微な修正 | **する（.Y）** | 1.0 → 1.1 | draftに戻さずマイナーバージョンのみ更新 |
 | `reqord req approve`（draft → approved） | **しない** | 1.0 (draft) → 1.0 (approved) | ステータス遷移のみ |
 | `reqord req implemented`（approved → implemented） | **しない** | 1.0 (approved) → 1.0 (implemented) | ステータス遷移のみ |
-| flagの追加・削除 | **しない** | - | メタ情報の変更 |
+| feedbacks.yamlのlinkedTo変更 | **しない** | - | メタ情報の変更 |
 
 ### 3.3 RequirementService 拡張
 
@@ -129,8 +129,8 @@ const incrementMinor = (version: string): string => {
 ```
 draft ──approve──→ approved ──implement──→ implemented
   ↑                    │                       │
-  ├── draft (flag解決) ←┘                       │
-  └── draft (flag解決) ←───────────────────────┘
+  ├── draft (feedback対応) ←┘                       │
+  └── draft (feedback対応) ←───────────────────────┘
 ```
 
 > `approved` は廃止（#208）。PRマージ自体が承認行為となる。
@@ -139,8 +139,8 @@ draft ──approve──→ approved ──implement──→ implemented
 許可される遷移:
 - `draft` → `approved`
 - `approved` → `implemented`
-- `approved` → `draft`（flag対応による差し戻し。draftに戻る際にバージョン見直し）
-- `implemented` → `draft`（flag対応による差し戻し。draftに戻る際にバージョン見直し）
+- `approved` → `draft`（feedback対応による差し戻し。draftに戻る際にバージョン見直し）
+- `implemented` → `draft`（feedback対応による差し戻し。draftに戻る際にバージョン見直し）
 
 状態遷移コマンド:
 - `reqord req draft <id>` / `reqord spec draft <id>`
