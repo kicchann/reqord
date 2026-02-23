@@ -5,8 +5,8 @@ import {
   REQORD_DIR,
   ISSUES_DIR,
 } from "@reqord/shared";
-import * as fs from "./file-system.js";
-import { getReqordRoot } from "./reqord-root.js";
+import * as fs from "./file-system";
+import { getReqordRoot } from "./reqord-root";
 
 export function getTasksFilePath(): string {
   return fs.joinPath(getReqordRoot(), REQORD_DIR, ISSUES_DIR, "tasks.yaml");

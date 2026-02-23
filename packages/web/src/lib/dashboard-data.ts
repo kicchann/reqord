@@ -1,8 +1,8 @@
 import type { Requirement, Specification, TaskEntry } from "@reqord/shared";
-import { getAllRequirements } from "./data.js";
-import { getAllSpecifications } from "./specification-data.js";
-import { loadTasksYaml } from "./tasks-data.js";
-import { getAllFeedbacks } from "./feedback-data.js";
+import { getAllRequirements } from "./data";
+import { getAllSpecifications } from "./specification-data";
+import { loadTasksYaml } from "./tasks-data";
+import { getAllFeedbacks } from "./feedback-data";
 
 export type Warning = {
   type:
