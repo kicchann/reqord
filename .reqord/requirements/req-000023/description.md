@@ -8,7 +8,7 @@ GitHub Issueをベースとしたフィードバック管理機能。feedbackラ
 
 > **v4.0変更点**: feedback運用の完全化。unlinkコマンド追加（linkの逆操作）、createコマンド追加（GitHub Issue作成）、close時の未解決feedback警告追加。
 
-> **v5.0変更点**: flagsフィールドをreq/specスキーマから削除。feedbacks.yamlのlinkedTo/linkedTo.resolvedで未解決feedbackを管理する方式に変更。
+> **v4.2変更点**: flagsフィールドをreq/specスキーマから削除。feedbacks.yamlのlinkedTo/linkedTo.resolvedで未解決feedbackを管理する方式に変更。
 
 設計方針は docs/guide-feedback.md を参照。
 
