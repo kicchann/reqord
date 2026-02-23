@@ -17,12 +17,12 @@ export function FeedbackList({ feedbacks }: { feedbacks: FeedbackEntry[] }) {
             className="rounded-md border border-gray-100 bg-gray-50 p-3"
             data-testid="feedback-item"
           >
-            <div className="flex items-center gap-2">
-              <span className="font-mono text-sm text-blue-600" data-testid="feedback-issue">
+            <div className="flex min-w-0 items-center gap-2">
+              <span className="shrink-0 font-mono text-sm text-blue-600" data-testid="feedback-issue">
                 #{feedback.githubIssue}
               </span>
               {feedback.title && (
-                <span className="truncate text-sm text-gray-700">{feedback.title}</span>
+                <span className="truncate text-sm text-gray-700" data-testid="feedback-title">{feedback.title}</span>
               )}
               <FeedbackBadge
                 type={feedback.type}

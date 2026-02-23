@@ -63,8 +63,10 @@ export function FeedbackTable({
                   #{fb.githubIssue}
                 </span>
               </td>
-              <td className="max-w-xs truncate px-4 py-3 text-sm text-gray-900">
-                {fb.title ?? "-"}
+              <td className="px-4 py-3">
+                <div className="max-w-xs truncate text-sm text-gray-900" data-testid="feedback-title">
+                  {fb.title ?? "-"}
+                </div>
               </td>
               <td className="whitespace-nowrap px-4 py-3">
                 {fb.type && (

@@ -65,6 +65,21 @@ describe("FeedbackEntrySchema", () => {
     expect(result.title).toBe("Bug: login fails");
   });
 
+  it("titleが空文字の場合は拒否する", () => {
+    const entry = {
+      githubIssue: 202,
+      title: "",
+      linkedTo: {
+        requirements: [],
+        createdRequirements: [],
+        specifications: [],
+      },
+      syncedAt: "2026-02-09T12:00:00Z",
+      status: "open" as const,
+    };
+    expect(() => FeedbackEntrySchema.parse(entry)).toThrow();
+  });
+
   it("titleフィールドが省略された場合も受け入れる（後方互換性）", () => {
     const entry = {
       githubIssue: 201,
