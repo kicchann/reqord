@@ -79,9 +79,10 @@ Feedback一覧表示・詳細表示・紐付け・クローズの4つのCLIコ�
 ```typescript
 import type { FeedbackEntry, FeedbackType, FeedbackSeverity } from "@reqord/shared";
 import { loadIndex, saveIndex } from "../repositories/feedback";
-import { getIssue, closeIssue, updateIssueBody, type GitHubIssue } from "./github-client";
+import { getIssue, closeIssue, createIssue, updateIssueBody, type GitHubIssue } from "./github-client";
 import { findByIdOrThrow as findRequirementByIdOrThrow } from "../repositories/requirement";
-import { createRequirement } from "./requirement-service";
+import { findByIdOrThrow as findSpecificationByIdOrThrow } from "../repositories/specification";
+import { createRequirement, saveRequirement } from "./requirement-service";
 import { generateNextId } from "../utils/id-generator";
 import { upsertReqordComment } from "./reqord-comment";
 

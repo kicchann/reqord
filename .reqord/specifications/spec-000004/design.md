@@ -16,7 +16,10 @@
   │   │   ├── requirement.ts            (RequirementSchema)
   │   │   ├── project-context.ts        (ProjectContextSchema)
   │   │   ├── specification.ts          (SpecificationSchema)
-  │   │   └── validation.ts             (ValidationResultSchema)
+  │   │   ├── validation.ts             (ValidationResultSchema)
+  │   │   └── feedback.ts              (FeedbackIndex, FeedbackEntry等)
+  │   ├── utils/
+  │   │   └── zod-error-formatter.ts   (Zodエラーフォーマッタ)
   │   ├── constants/
   │   │   ├── index.ts                  (constants re-export)
   │   │   └── paths.ts                  (ディレクトリパス定数)
@@ -52,7 +55,7 @@ cli と web は shared に依存するが、shared は他パッケージに依�
 | `PrioritySchema` | `"low" \| "medium" \| "high"` | 要件の優先度 |
 | `ComplexitySchema` | `"small" \| "medium" \| "large" \| "xlarge"` | 実装複雑度 |
 | `FormatTypeSchema` | `"user-story" \| "ears" \| "free-form"` | 要件記述形式 |
-| `VersionHistoryEntrySchema` | `{ version, status, gitCommit, approvedAt, approvedBy }` | バージョン履歴エントリ |
+| `VersionHistoryEntrySchema` | `{ version, status, changedAt, summary, approvedAt?, approvedBy? }` | バージョン履歴エントリ |
 
 ### 3.2 RequirementSchema (`schemas/requirement.ts`)
 
@@ -130,7 +133,7 @@ export const TasksIndexSchema = z.object({
 
 **責務:** 日本語の曖昧表現リスト提供。
 
-- 「適切に」「なるべく」「できるだけ」等の42表現
+- 「適切に」「なるべく」「できるだけ」等の37表現
 - `getAmbiguousPhrases(language)`: 言語コードに応じたリスト返却（現時点はjaのみ）
 
 ### 3.10 ステータス遷移ルール

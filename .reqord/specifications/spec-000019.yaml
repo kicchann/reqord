@@ -1,7 +1,7 @@
 id: spec-000019
 requirementId: req-000019
 title: ステータス表示コマンド
-requirementVersion: '2.0'
+requirementVersion: '2.2'
 version: '1.2'
 status: approved
 createdAt: 2026-02-08T14:08:08.151Z

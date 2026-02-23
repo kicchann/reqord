@@ -239,3 +239,4 @@ draft ──approve──→ approved ──implement──→ implemented
 | v1.0.0 | 2026-02-08 | 初版（Requirementバージョン管理） |
 | v2.0.0 | 2026-02-13 | #109: ステータス変更でバージョンを上げない方針に変更。#208: approved廃止。#209: --major/--minor/--patchオプション明記 |
 | v4.0 | 2026-02-21 | #411: versionHistoryからgitCommitフィールドを削除。git log -Sで導出する方針に変更 |
+| v4.1 | 2026-02-23 | 据え置き項目対応: VersionHistoryEntry定義の実装反映、曖昧表現数修正、コンポーネント追記 |

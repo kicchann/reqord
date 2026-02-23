@@ -31,9 +31,9 @@ Requirementに基づくSpecification（仕様）の作成・管理機能。設�
 - YAML + design.md の内容を整形表示
 - supplementaryファイル一覧表示
 
-### reqord spec edit \<id\> --file \<filename\>
+### reqord spec design \<id\>
 
-- 指定ファイル（design, research等）の表示・更新
+- design.mdの表示・更新
 - ファイル管理のみ（データの表示・ファイルパス解決・更新日時記録）
 - コンテンツ生成はスコープ外（Claude Code `/reqord:design` が担当）
 

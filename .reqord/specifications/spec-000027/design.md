@@ -208,10 +208,7 @@ export async function upsertFeedback(
 **インターフェース**:
 
 ```typescript
-import { exec } from "node:child_process";
-import { promisify } from "node:util";
-
-const execAsync = promisify(exec);
+import { spawn } from "node:child_process";
 
 export interface GitHubIssue {
   number: number;
@@ -223,17 +220,34 @@ export interface GitHubIssue {
 }
 
 export async function listFeedbackIssues(): Promise<GitHubIssue[]> {
-  const { stdout } = await execAsync(
-    'gh issue list --label feedback --json number,title,state,labels,createdAt,body --limit 1000'
-  );
-  return JSON.parse(stdout);
+  return new Promise((resolve, reject) => {
+    const proc = spawn("gh", [
+      "issue", "list", "--label", "feedback",
+      "--json", "number,title,state,labels,createdAt,body",
+      "--limit", "1000",
+    ], { stdio: ["ignore", "pipe", "pipe"] });
+    let stdout = "";
+    proc.stdout.on("data", (data) => { stdout += data; });
+    proc.on("close", (code) => {
+      if (code === 0) resolve(JSON.parse(stdout));
+      else reject(new Error(`gh issue list failed with exit code ${code}`));
+    });
+  });
 }
 
 export async function getIssue(issueNumber: number): Promise<GitHubIssue> {
-  const { stdout } = await execAsync(
-    `gh issue view ${issueNumber} --json number,title,state,labels,createdAt,body`
-  );
-  return JSON.parse(stdout);
+  return new Promise((resolve, reject) => {
+    const proc = spawn("gh", [
+      "issue", "view", String(issueNumber),
+      "--json", "number,title,state,labels,createdAt,body",
+    ], { stdio: ["ignore", "pipe", "pipe"] });
+    let stdout = "";
+    proc.stdout.on("data", (data) => { stdout += data; });
+    proc.on("close", (code) => {
+      if (code === 0) resolve(JSON.parse(stdout));
+      else reject(new Error(`gh issue view failed with exit code ${code}`));
+    });
+  });
 }
 
 export async function updateIssueBody(

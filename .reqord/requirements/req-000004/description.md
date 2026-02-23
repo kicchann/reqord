@@ -46,10 +46,9 @@ packages/shared/
 
 > **注記**: Specification型からimplementationフィールドが削除され、issue管理情報は `.reqord/issues/tasks.yaml` に分離された。flagsフィールドはreq/specスキーマから削除され、未解決feedbackの管理はfeedbacks.yamlのlinkedTo.resolvedで行う。
 
-## ステータス遷移ルール（計画中, Feedback #16）
+## ステータス遷移ルール（Feedback #16）
 
-> **実装状況**: 未実装。遷移チェックはCLI各コマンドにハードコードで散在しており、
-> @reqord/shared への集約が未完了。
+> **実装状況**: `rules/status-transitions.ts`（遷移ルール）と `rules/consistency.ts`（整合性チェック）として実装済み。
 
 ### Requirement
 
