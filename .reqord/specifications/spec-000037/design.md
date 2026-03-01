@@ -36,7 +36,7 @@ packages/cli/src/
 
 ### 3.1 approval-service の修正
 
-既存シグネチャ `(cwd, target: ApprovalTarget, handler: ApprovalHandler, options?: ApprovalOptions): Promise<ApprovalResult>` に設定参照を追加する。
+既存シグネチャに `settings: ProjectSettings` を引数として追加する。設定のロードはコマンド層（`commands/req/approve.ts` 等）で1回だけ行い、サービス層には引数として渡す（spec-000036と同じパターン）。
 
 ```typescript
 // packages/cli/src/services/approval-service.ts
@@ -45,10 +45,9 @@ export async function startApproval(
   cwd: string,
   target: ApprovalTarget,
   handler: ApprovalHandler,
+  settings: ProjectSettings,
   options?: ApprovalOptions,
 ): Promise<ApprovalResult> {
-  const settings = await loadProjectSettings(cwd);
-
   if (settings.statusTransitionPr.draftToApproved) {
     // 既存フロー: ブランチ作成 → ステータス更新 → コミット → プッシュ → PR作成
   } else {
@@ -63,17 +62,17 @@ export async function startApproval(
 
 ### 3.2 draft-reversion-service の修正
 
+既存シグネチャ `(cwd, id, options?)` に `settings` を引数として追加する。
+
 ```typescript
 // packages/cli/src/services/draft-reversion-service.ts
 
 export async function revertToDraft(
   cwd: string,
-  entityType: "requirement" | "specification",
   id: string,
-  options: RevertOptions,
-): Promise<RevertResult> {
-  const settings = await loadProjectSettings(cwd);
-
+  settings: ProjectSettings,
+  options?: DraftReversionOptions,
+): Promise<DraftReversionResult> {
   if (settings.statusTransitionPr.toDraft) {
     // 既存フロー: ブランチ作成 → ステータス更新 → コミット → プッシュ → PR作成
   } else {
@@ -86,10 +85,39 @@ export async function revertToDraft(
 
 現在 `req implement` / `spec implement` はPRなしで直接更新している。`approvedToImplemented: true` の場合にPR作成フローを追加する。
 
+`startApproval` のブランチ作成→コミット→プッシュ→PR作成フローを共通ヘルパーとして抽出し、implement からも利用する。
+
 ```typescript
-// approval-service のロジックを再利用可能な形に抽出し、
-// implement コマンドからも利用できるようにする
+// packages/cli/src/services/status-transition-service.ts (新規: 共通ヘルパー)
+
+export interface StatusTransitionTarget {
+  id: string;
+  version: string;
+  files: string[];
+}
+
+export interface StatusTransitionCallbacks {
+  updateStatus: (cwd: string) => Promise<string>;
+  buildBranchName: (target: StatusTransitionTarget, settings: ProjectSettings) => string;
+  buildPrTitle: (target: StatusTransitionTarget) => string;
+  buildPrBody: (target: StatusTransitionTarget) => string;
+}
+
+/**
+ * PR経由のステータス遷移と直接コミットの共通フロー。
+ * usePr=true: ブランチ作成→ステータス更新→コミット→プッシュ→PR作成
+ * usePr=false: 現在のブランチ上でステータス更新→コミット
+ */
+export async function executeStatusTransition(
+  cwd: string,
+  target: StatusTransitionTarget,
+  callbacks: StatusTransitionCallbacks,
+  usePr: boolean,
+  settings: ProjectSettings,
+): Promise<{ branchName?: string; prNumber?: number; prUrl?: string }>;
 ```
+
+`startApproval` と `revertToDraft` はこのヘルパーを内部で呼ぶ形にリファクタリングする。implement コマンドからも同じヘルパーを利用する。
 
 ## 4. テスト方針
 

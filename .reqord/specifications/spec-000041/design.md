@@ -59,15 +59,18 @@ export function shouldRevertToDraft(
 
 ### 3.2 requirement-service の修正
 
+設定のロードはコマンド層で1回だけ行い、`updateRequirement` には引数として渡す（spec-000036, 037と同じパターン）。`UpdateOptions` に `settings?: ProjectSettings` を追加する。
+
 ```typescript
 // packages/cli/src/services/requirement-service.ts
 // updateRequirement 内の auto-revert 箇所
 
-const settings = await loadProjectSettings(cwd);
+// options.settings はコマンド層からloadProjectSettings()の結果が渡される
+const autoRevertMode = options.settings?.autoRevert.onContentChange ?? "always";
 const shouldRevert = versionService.shouldRevertToDraft(
   before.status as Status,
   hasContentChanges,
-  settings.autoRevert.onContentChange,
+  autoRevertMode,
   options.versionBump,  // "patch" | "major"（UpdateOptionsから取得）
 );
 ```

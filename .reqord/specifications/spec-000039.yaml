@@ -1,11 +1,11 @@
 id: spec-000039
 requirementId: req-000029
 title: フィードバックバリデーション設定
-requirementVersion: '1.0'
+requirementVersion: '1.2'
 version: '1.1'
 status: draft
 createdAt: 2026-03-01T20:09:36.778Z
-updatedAt: 2026-03-01T23:22:30.842Z
+updatedAt: 2026-03-01T23:49:58.189Z
 versionHistory:
   - version: '1.1'
     status: draft

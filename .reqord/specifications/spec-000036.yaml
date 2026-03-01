@@ -1,11 +1,11 @@
 id: spec-000036
 requirementId: req-000029
 title: 承認前チェック項目のカスタマイズ
-requirementVersion: '1.0'
+requirementVersion: '1.2'
 version: '1.2'
 status: draft
 createdAt: 2026-03-01T20:09:34.254Z
-updatedAt: 2026-03-01T23:30:56.391Z
+updatedAt: 2026-03-01T23:49:56.505Z
 versionHistory:
   - version: '1.1'
     status: draft
