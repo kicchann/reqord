@@ -1,0 +1,16 @@
+id: spec-000040
+requirementId: req-000029
+title: 整合性チェック設定
+requirementVersion: '1.0'
+version: '1.1'
+status: draft
+createdAt: 2026-03-01T20:09:37.579Z
+updatedAt: 2026-03-01T23:22:32.229Z
+versionHistory:
+  - version: '1.1'
+    status: draft
+    changedAt: 2026-03-01T23:22:32.229Z
+    summary: 'design.md修正: 既存ImplementConsistencyWarning型を活用、依存先チェックをスコープ外と明記'
+files:
+  design: specifications/spec-000040/design.md
+  supplementary: []

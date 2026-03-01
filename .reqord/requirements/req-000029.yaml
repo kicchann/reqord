@@ -1,0 +1,43 @@
+id: req-000029
+version: '1.2'
+title: プロジェクト設定ファイル（setting.yaml）によるワークフローカスタマイズ
+status: draft
+priority: medium
+createdAt: 2026-03-01T19:28:44.596Z
+updatedAt: 2026-03-01T22:44:42.609Z
+versionHistory:
+  - version: '1.1'
+    status: draft
+    changedAt: 2026-03-01T22:32:24.004Z
+    summary: 'SC追加: 自動draft戻し制御、フィールド名reversion→toDraftに修正'
+  - version: '1.2'
+    status: draft
+    changedAt: 2026-03-01T22:44:42.609Z
+    summary: invariantsセクション追加、セクション番号整理
+files:
+  description: requirements/req-000029/description.md
+  supplementary: []
+successCriteria:
+  - .reqord/settings/setting.yaml で承認前チェック項目（design.md/description.md/カスタムファイル）の有効・無効を制御できる
+  - ステータス遷移（draftToApproved, approvedToImplemented, toDraft）ごとにPR要否を設定できる
+  - toApproved/toImplemented/toDraftブランチのプレフィックスをカスタマイズできる
+  - 未解決フィードバック存在時の動作（警告/ブロック）とseverity閾値を設定できる
+  - req implement時のspec未実装チェックを警告/エラーで切り替えられる
+  - approved/implemented状態での内容変更時の自動draft戻しを制御できる（always/major-only/never）
+  - >-
+    不変条件（versioning/cyclicDependencyCheck/statusTransitionRules/schemaValidation）がinvariantsセクションで宣言され、falseを設定するとバリデーションエラーになる
+  - setting.yamlが存在しない場合や部分定義の場合はデフォルト値とマージして動作する（後方互換性）
+  - Zodスキーマが@reqord/sharedに定義され、バリデーションが行われる
+format:
+  type: user-story
+  userStory:
+    as: プロジェクト管理者
+    iWant: 設定ファイルでワークフローの挙動をカスタマイズしたい
+    soThat: プロジェクトの規模や運用方針に応じて承認プロセスやバリデーションの厳格さを調整できる
+dependencies:
+  blockedBy: []
+  blocks: []
+  relatedTo:
+    - req-000001
+estimatedComplexity: large
+estimatedHours: 40
