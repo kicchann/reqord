@@ -10,7 +10,7 @@
 
 [![npm](https://img.shields.io/npm/v/@reqord/cli)](https://www.npmjs.com/package/@reqord/cli)
 [![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL--3.0-blue.svg)](LICENSE)
-[![Tests](https://img.shields.io/badge/tests-675%20passing-brightgreen.svg)]()
+[![Tests](https://img.shields.io/badge/tests-1237%20passing-brightgreen.svg)]()
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue.svg)]()
 
 ---
@@ -240,17 +240,19 @@ Reqord は3つのパッケージで構成されたモノレポです:
 
 ## ロードマップ
 
-Reqord は現在 v0.1.0（プレリリース）です。要件 CRUD、SMART バリデーション、仕様管理、フィードバック同期、Web UI の基本機能が動作します。
+Reqord は現在 v0.2.0 です。v0.1.0 以降に追加された機能:
+
+- **PR ベース承認フロー** -- `reqord req approve` / `reqord spec approve` による GitHub PR 連携の承認コマンド
+- **影響範囲分析** -- `reqord impact analyze` / `reqord impact notify` による変更伝播の追跡
+- **タスク生成** -- `reqord task create` / `reqord task sync` による仕様から GitHub Issue への分解
+- **ステータスダッシュボード** -- `reqord status` によるプロジェクト全体の進捗表示
+- **プロジェクト設定** -- `setting.yaml` によるプロジェクト単位の CLI 設定管理
 
 今後の方向性:
 
-- **承認フロー自動化** -- `reqord req approve` / `reqord spec approve` による PR ベースの承認コマンド
-- **GitHub Issue 生成** -- 仕様からの実装タスク自動生成
-- **影響範囲分析** -- 要件変更時の依存関係を自動分析
-- **ステータスダッシュボード** -- `reqord status` によるプロジェクト全体の進捗表示
-- **コンテキスト統合出力** -- 外部ツール向けの `reqord context export`
+- **Web UI の機能強化** -- Gantt Chart、依存関係の高度な可視化、仕様編集
 
-詳細は [CLI コマンド一覧](./docs/cli-reference.ja.md) の未実装コマンドを参照してください。
+詳細は [CLI コマンド一覧](./docs/cli-reference.ja.md) を参照してください。
 
 ---
 

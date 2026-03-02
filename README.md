@@ -10,7 +10,7 @@
 
 [![npm](https://img.shields.io/npm/v/@reqord/cli)](https://www.npmjs.com/package/@reqord/cli)
 [![License](https://img.shields.io/badge/license-AGPL--3.0-green)](./LICENSE)
-[![Tests](https://img.shields.io/badge/tests-675%20passing-brightgreen)](./packages)
+[![Tests](https://img.shields.io/badge/tests-1237%20passing-brightgreen)](./packages)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178c6)](https://www.typescriptlang.org/)
 
 ---
@@ -221,15 +221,19 @@ See [docs/README.md](./docs/README.md) for the full documentation index.
 
 ## Roadmap
 
-Reqord is at v0.1.0 (pre-release). Current priorities for upcoming releases:
+Reqord is at v0.2.0. Features shipped since v0.1.0:
 
-- **PR-based approval workflow** -- `reqord req approve` and `reqord spec approve` commands with GitHub PR integration
-- **Impact analysis** -- trace how changes to one requirement affect specifications and issues
-- **GitHub Issue generation** -- decompose specifications into implementation tasks automatically
-- **Status dashboard** -- `reqord status` command for project-wide progress overview
+- **PR-based approval workflow** -- `reqord req approve` / `reqord spec approve` with GitHub PR integration
+- **Impact analysis** -- `reqord impact analyze` / `reqord impact notify` for tracing change propagation
+- **Task generation** -- `reqord task create` / `reqord task sync` for decomposing specs into GitHub Issues
+- **Status dashboard** -- `reqord status` for project-wide progress overview
+- **Project Settings** -- `setting.yaml` for per-project CLI configuration
+
+Upcoming:
+
 - **Web UI enhancements** -- Gantt charts, richer dependency visualization, specification editing
 
-See the [CLI Reference](./docs/cli-reference.md) for the full list of planned commands and their current implementation status.
+See the [CLI Reference](./docs/cli-reference.md) for the full list of commands and their current implementation status.
 
 ## Contributing
 
