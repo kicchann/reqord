@@ -8,7 +8,7 @@ export {
   RULES_DIR,
   ASSETS_DIR,
   DOMAIN_DIR,
-  ISSUE_TEMPLATES_DIR,
+
   FEEDBACK_DIR,
   ISSUES_DIR,
 } from "./paths.js";

@@ -13,6 +13,7 @@ vi.mock("../repositories/file-system.js", () => ({
 vi.mock("../utils/templates.js", () => ({
   DEFAULT_REQUIREMENT_DESCRIPTION_TEMPLATE: "# Template",
   DEFAULT_REQUIREMENT_QUALITY_RULES: "# Rules",
+  DEFAULT_PROJECT_SETTINGS_TEMPLATE: "# Settings",
 }));
 
 import { initProject } from "./init-service.js";
@@ -42,7 +43,7 @@ describe("initProject", () => {
     expect(mkdirCalls).toContainEqual("/cwd/.reqord/context/domain");
     expect(mkdirCalls).toContainEqual("/cwd/.reqord/requirements");
     expect(mkdirCalls).toContainEqual("/cwd/.reqord/specifications");
-    expect(mkdirCalls).toContainEqual("/cwd/.reqord/settings/templates/issue-templates");
+    expect(mkdirCalls).toContainEqual("/cwd/.reqord/settings/templates");
     expect(mkdirCalls).toContainEqual("/cwd/.reqord/settings/rules");
     expect(mkdirCalls).toContainEqual("/cwd/.reqord/assets");
     expect(mkdirCalls).toContainEqual("/cwd/.reqord/issues");
@@ -66,6 +67,12 @@ describe("initProject", () => {
     );
     expect(rulesWrite).toBeDefined();
     expect(rulesWrite![1]).toBe("# Rules");
+
+    const settingsWrite = writeCalls.find(
+      ([path]) => path.includes("setting.yaml"),
+    );
+    expect(settingsWrite).toBeDefined();
+    expect(settingsWrite![1]).toBe("# Settings");
   });
 
   it(".gitkeep が specifications と assets と issues に書き込まれる", async () => {
@@ -88,8 +95,8 @@ describe("initProject", () => {
 
     const result = await initProject("/cwd");
 
-    // 7 dirs + template + rules + 3 gitkeeps = 12
-    expect(result.created).toHaveLength(12);
+    // 7 dirs + template + rules + settings + 3 gitkeeps = 13
+    expect(result.created).toHaveLength(13);
     expect(result.created.some((p) => p.includes("requirement-description.md"))).toBe(true);
     expect(result.created.some((p) => p.includes("requirement-quality.md"))).toBe(true);
     expect(result.created.filter((p) => p.endsWith(".gitkeep"))).toHaveLength(3);

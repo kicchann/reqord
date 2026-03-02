@@ -110,6 +110,41 @@ export const DEFAULT_SPECIFICATION_DESIGN_TEMPLATE = `# {{id}} - {{title}}
 - {{テスト観点2}}
 `;
 
+export const DEFAULT_PROJECT_SETTINGS_TEMPLATE = `# Reqord Project Settings
+# See: https://github.com/kicchann/reqord
+
+# Approval prerequisites
+approvalPrerequisites:
+  designMdCheck: true        # Check design.md before spec approval
+  descriptionMdCheck: false  # Check description.md before req approval
+  customFiles: []            # Additional files to check
+
+# Status transition PR settings
+statusTransitionPr:
+  draftToApproved: true       # Require PR for draft → approved
+  approvedToImplemented: false # Require PR for approved → implemented
+  toDraft: true               # Require PR for revert to draft
+
+# Branch naming prefixes
+branchNaming:
+  toApprovedPrefix: reqord
+  toImplementedPrefix: reqord
+  toDraftPrefix: reqord
+
+# Feedback validation
+feedbackValidation:
+  blockOnUnresolved: false     # Block approval on unresolved feedback
+  severityThreshold: critical  # Minimum severity to block (low/medium/high/critical)
+
+# Auto revert to draft on content change
+autoRevert:
+  onContentChange: always      # always / major-only / never
+
+# Consistency check
+consistencyCheck:
+  specNotImplementedLevel: warning  # warning / error
+`;
+
 export async function loadProjectTemplate(
   cwd: string,
   templateName: string,

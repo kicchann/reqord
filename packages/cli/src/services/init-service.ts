@@ -7,13 +7,14 @@ import {
   RULES_DIR,
   ASSETS_DIR,
   DOMAIN_DIR,
-  ISSUE_TEMPLATES_DIR,
+
   ISSUES_DIR,
 } from "@reqord/shared";
 import * as fs from "../repositories/file-system.js";
 import {
   DEFAULT_REQUIREMENT_DESCRIPTION_TEMPLATE,
   DEFAULT_REQUIREMENT_QUALITY_RULES,
+  DEFAULT_PROJECT_SETTINGS_TEMPLATE,
 } from "../utils/templates.js";
 
 export interface InitResult {
@@ -34,7 +35,7 @@ export async function initProject(cwd: string): Promise<InitResult> {
     fs.joinPath(reqordRoot, CONTEXT_DIR, DOMAIN_DIR),
     fs.joinPath(reqordRoot, REQUIREMENTS_DIR),
     fs.joinPath(reqordRoot, SPECIFICATIONS_DIR),
-    fs.joinPath(reqordRoot, SETTINGS_DIR, TEMPLATES_DIR, ISSUE_TEMPLATES_DIR),
+    fs.joinPath(reqordRoot, SETTINGS_DIR, TEMPLATES_DIR),
     fs.joinPath(reqordRoot, SETTINGS_DIR, RULES_DIR),
     fs.joinPath(reqordRoot, ASSETS_DIR),
     fs.joinPath(reqordRoot, ISSUES_DIR),
@@ -64,6 +65,15 @@ export async function initProject(cwd: string): Promise<InitResult> {
   );
   await fs.writeText(rulesPath, DEFAULT_REQUIREMENT_QUALITY_RULES);
   created.push(rulesPath);
+
+  // Write default project settings
+  const settingsPath = fs.joinPath(
+    reqordRoot,
+    SETTINGS_DIR,
+    "setting.yaml",
+  );
+  await fs.writeText(settingsPath, DEFAULT_PROJECT_SETTINGS_TEMPLATE);
+  created.push(settingsPath);
 
   // Write .gitkeep for empty dirs
   const gitkeepDirs = [
