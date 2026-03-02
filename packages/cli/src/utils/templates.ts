@@ -113,6 +113,13 @@ export const DEFAULT_SPECIFICATION_DESIGN_TEMPLATE = `# {{id}} - {{title}}
 export const DEFAULT_PROJECT_SETTINGS_TEMPLATE = `# Reqord Project Settings
 # See: https://github.com/kicchann/reqord
 
+# Invariants (always enforced, cannot be disabled)
+invariants:
+  versioning: true             # Version tracking for all entities
+  cyclicDependencyCheck: true  # Prevent cyclic dependencies
+  statusTransitionRules: true  # Enforce valid status transitions
+  schemaValidation: true       # Validate data against schemas
+
 # Approval prerequisites
 approvalPrerequisites:
   designMdCheck: true        # Check design.md before spec approval
