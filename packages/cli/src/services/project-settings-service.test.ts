@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
 vi.mock("../repositories/project-settings.js", () => ({
   readRawProjectSettings: vi.fn(),
@@ -11,6 +11,10 @@ const mockRepo = vi.mocked(projectSettingsRepo);
 
 beforeEach(() => {
   vi.clearAllMocks();
+});
+
+afterEach(() => {
+  vi.restoreAllMocks();
 });
 
 describe("loadProjectSettings", () => {
@@ -49,20 +53,19 @@ describe("loadProjectSettings", () => {
   });
 
   it("リポジトリがエラーを投げる場合はconsole.warnを呼びデフォルト設定を返す", async () => {
-    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    vi.spyOn(console, "warn").mockImplementation(() => {});
     mockRepo.readRawProjectSettings.mockRejectedValue(new Error("YAML syntax error"));
 
     const result = await loadProjectSettings("/cwd");
 
     expect(result.invariants.versioning).toBe(true); // デフォルト
-    expect(warnSpy).toHaveBeenCalledWith(
+    expect(console.warn).toHaveBeenCalledWith(
       expect.stringContaining("Could not read setting.yaml"),
     );
-    warnSpy.mockRestore();
   });
 
   it("バリデーション失敗の場合はconsole.warnを呼びデフォルト設定を返す", async () => {
-    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    vi.spyOn(console, "warn").mockImplementation(() => {});
     mockRepo.readRawProjectSettings.mockResolvedValue({
       invariants: { versioning: false }, // z.literal(true)違反
     });
@@ -70,10 +73,9 @@ describe("loadProjectSettings", () => {
     const result = await loadProjectSettings("/cwd");
 
     expect(result.invariants.versioning).toBe(true); // デフォルト
-    expect(warnSpy).toHaveBeenCalledWith(
+    expect(console.warn).toHaveBeenCalledWith(
       expect.stringContaining("Invalid setting.yaml"),
     );
-    warnSpy.mockRestore();
   });
 });
 

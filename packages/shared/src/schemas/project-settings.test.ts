@@ -40,8 +40,8 @@ describe("ProjectSettingsSchema", () => {
       expect(result.approvalPrerequisites.customFiles).toEqual([]);
     });
 
-    it("invariants未指定の場合は全項目がtrueで補完される", () => {
-      const result = ProjectSettingsSchema.parse({});
+    it("invariantsに空オブジェクトを渡すと全項目がtrueで補完される", () => {
+      const result = ProjectSettingsSchema.parse({ invariants: {} });
       expect(result.invariants.versioning).toBe(true);
       expect(result.invariants.cyclicDependencyCheck).toBe(true);
       expect(result.invariants.statusTransitionRules).toBe(true);

@@ -1,9 +1,9 @@
-import { ProjectSettingsSchema } from "@reqord/shared";
+import { ProjectSettingsSchema, formatZodError } from "@reqord/shared";
 import type { ProjectSettings } from "@reqord/shared";
 import * as projectSettingsRepo from "../repositories/project-settings.js";
 
 export async function loadProjectSettings(cwd: string): Promise<ProjectSettings> {
-  let raw: unknown = {};
+  let raw: unknown;
   try {
     raw = await projectSettingsRepo.readRawProjectSettings(cwd);
   } catch (error) {
@@ -15,7 +15,7 @@ export async function loadProjectSettings(cwd: string): Promise<ProjectSettings>
   const result = ProjectSettingsSchema.safeParse(raw);
   if (!result.success) {
     console.warn(
-      `[reqord] Invalid setting.yaml: ${result.error.message}. Using default settings.`,
+      `[reqord] Invalid setting.yaml:\n${formatZodError(result.error)}\nUsing default settings.`,
     );
     return getDefaultProjectSettings();
   }
