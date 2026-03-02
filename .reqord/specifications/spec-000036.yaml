@@ -1,0 +1,20 @@
+id: spec-000036
+requirementId: req-000029
+title: 承認前チェック項目のカスタマイズ
+requirementVersion: '1.2'
+version: '1.2'
+status: draft
+createdAt: 2026-03-01T20:09:34.254Z
+updatedAt: 2026-03-01T23:49:56.505Z
+versionHistory:
+  - version: '1.1'
+    status: draft
+    changedAt: 2026-03-01T23:22:26.343Z
+    summary: 'design.md修正: checkSpecApprovalPrerequisitesシグネチャを実コードに合わせて修正、checkReqApprovalPrerequisites新設方針に変更'
+  - version: '1.2'
+    status: draft
+    changedAt: 2026-03-01T23:30:56.391Z
+    summary: 実装順序ステップ4をcheckReqApprovalPrerequisites新設方針に修正
+files:
+  design: specifications/spec-000036/design.md
+  supplementary: []

@@ -1,0 +1,16 @@
+id: spec-000038
+requirementId: req-000029
+title: ブランチ命名規則のカスタマイズ
+requirementVersion: '1.2'
+version: '1.1'
+status: draft
+createdAt: 2026-03-01T20:09:35.953Z
+updatedAt: 2026-03-01T23:49:57.639Z
+versionHistory:
+  - version: '1.1'
+    status: draft
+    changedAt: 2026-03-01T23:22:29.031Z
+    summary: 'design.md修正: 空文字列バリデーション(z.string().min(1))の設計をテスト方針に追記'
+files:
+  design: specifications/spec-000038/design.md
+  supplementary: []
