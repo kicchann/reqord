@@ -3,9 +3,9 @@ requirementId: req-000029
 title: フィードバックバリデーション設定
 requirementVersion: '1.2'
 version: '1.1'
-status: approved
+status: implemented
 createdAt: 2026-03-01T20:09:36.778Z
-updatedAt: 2026-03-02T02:21:39.850Z
+updatedAt: 2026-03-02T12:30:05.587Z
 versionHistory:
   - version: '1.1'
     status: draft

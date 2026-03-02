@@ -3,9 +3,9 @@ requirementId: req-000029
 title: 承認前チェック項目のカスタマイズ
 requirementVersion: '1.2'
 version: '1.2'
-status: approved
+status: implemented
 createdAt: 2026-03-01T20:09:34.254Z
-updatedAt: 2026-03-02T02:21:24.696Z
+updatedAt: 2026-03-02T12:30:02.688Z
 versionHistory:
   - version: '1.1'
     status: draft

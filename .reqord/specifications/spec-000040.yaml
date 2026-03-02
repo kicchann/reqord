@@ -3,9 +3,9 @@ requirementId: req-000029
 title: 整合性チェック設定
 requirementVersion: '1.2'
 version: '1.1'
-status: approved
+status: implemented
 createdAt: 2026-03-01T20:09:37.579Z
-updatedAt: 2026-03-02T02:21:45.031Z
+updatedAt: 2026-03-02T12:30:06.466Z
 versionHistory:
   - version: '1.1'
     status: draft
