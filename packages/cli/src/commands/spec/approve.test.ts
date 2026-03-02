@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import type { Requirement, Specification } from "@reqord/shared";
+import type { Requirement, Specification, ProjectSettings } from "@reqord/shared";
 import { specApproveCommand } from "./approve.js";
 
 // Mock services BEFORE imports
@@ -36,6 +36,10 @@ vi.mock("../../repositories/feedback.js", () => ({
   findUnresolvedByArtifactId: vi.fn(),
 }));
 
+vi.mock("../../services/project-settings-service.js", () => ({
+  loadProjectSettings: vi.fn(),
+}));
+
 import {
   showSpecification,
   checkSpecApprovalPrerequisites,
@@ -50,6 +54,43 @@ import {
   buildSpecApprovalPrBody,
 } from "../../services/spec-approval-helpers.js";
 import { findUnresolvedByArtifactId } from "../../repositories/feedback.js";
+import { loadProjectSettings } from "../../services/project-settings-service.js";
+
+function makeDefaultSettings(): ProjectSettings {
+  return {
+    invariants: {
+      versioning: true,
+      cyclicDependencyCheck: true,
+      statusTransitionRules: true,
+      schemaValidation: true,
+    },
+    approvalPrerequisites: {
+      designMdCheck: true,
+      descriptionMdCheck: false,
+      customFiles: [],
+    },
+    statusTransitionPr: {
+      draftToApproved: true,
+      approvedToImplemented: false,
+      toDraft: true,
+    },
+    branchNaming: {
+      toApprovedPrefix: "reqord",
+      toImplementedPrefix: "reqord",
+      toDraftPrefix: "reqord",
+    },
+    feedbackValidation: {
+      blockOnUnresolved: false,
+      severityThreshold: "critical",
+    },
+    autoRevert: {
+      onContentChange: "always",
+    },
+    consistencyCheck: {
+      specNotImplementedLevel: "warning",
+    },
+  };
+}
 
 function makeRequirement(overrides: Partial<Requirement> = {}): Requirement {
   return {
@@ -97,6 +138,8 @@ describe("specApproveCommand", () => {
     specApproveCommand.setOptionValue("dryRun", undefined);
     // Default: no unresolved feedbacks
     vi.mocked(findUnresolvedByArtifactId).mockResolvedValue([]);
+    // Default: load project settings
+    vi.mocked(loadProjectSettings).mockResolvedValue(makeDefaultSettings());
   });
 
   it("正常系: 前提条件OKでPR作成", async () => {
@@ -130,8 +173,15 @@ describe("specApproveCommand", () => {
 
     await specApproveCommand.parseAsync(["node", "test", "spec-000001"]);
 
-    // Prerequisites checked
-    expect(checkSpecApprovalPrerequisites).toHaveBeenCalledWith(process.cwd(), "spec-000001");
+    // Project settings loaded
+    expect(loadProjectSettings).toHaveBeenCalledWith(process.cwd());
+
+    // Prerequisites checked with settings
+    expect(checkSpecApprovalPrerequisites).toHaveBeenCalledWith(
+      process.cwd(),
+      "spec-000001",
+      expect.any(Object),
+    );
 
     // Spec and requirement loaded
     expect(showSpecification).toHaveBeenCalledWith(process.cwd(), "spec-000001");
@@ -155,6 +205,7 @@ describe("specApproveCommand", () => {
         ],
       },
       expect.any(Object), // custom handler
+      expect.objectContaining({ statusTransitionPr: expect.any(Object) }),
       { dryRun: undefined }
     );
 
@@ -209,7 +260,7 @@ describe("specApproveCommand", () => {
   });
 
   it("Specificationが存在しない場合のエラー", async () => {
-    vi.mocked(checkSpecApprovalPrerequisites).mockRejectedValue(
+    vi.mocked(loadProjectSettings).mockRejectedValue(
       new Error("Specification spec-999999 not found.")
     );
 
@@ -259,6 +310,7 @@ describe("specApproveCommand", () => {
       process.cwd(),
       expect.any(Object),
       expect.any(Object),
+      expect.objectContaining({ statusTransitionPr: expect.any(Object) }),
       { dryRun: true }
     );
 
@@ -408,6 +460,48 @@ describe("specApproveCommand", () => {
 
     expect(consoleLogSpy).not.toHaveBeenCalledWith(
       expect.stringContaining("Warning")
+    );
+
+    consoleLogSpy.mockRestore();
+  });
+
+  it("settingsのdesignMdCheck=falseでも承認チェックにsettingsが渡される", async () => {
+    const customSettings = makeDefaultSettings();
+    customSettings.approvalPrerequisites.designMdCheck = false;
+    vi.mocked(loadProjectSettings).mockResolvedValue(customSettings);
+
+    const specification = makeSpecification();
+    const requirement = makeRequirement();
+
+    vi.mocked(checkSpecApprovalPrerequisites).mockResolvedValue({
+      ok: true,
+      errors: [],
+    });
+    vi.mocked(showSpecification).mockResolvedValue({
+      specification,
+      design: null,
+    });
+    vi.mocked(showRequirement).mockResolvedValue({
+      requirement,
+      description: null,
+    });
+    vi.mocked(extractDesignSummary).mockReturnValue("");
+    vi.mocked(buildSpecApprovalPrBody).mockReturnValue("PR Body");
+    vi.mocked(startApproval).mockResolvedValue({
+      branchName: "reqord/spec-000001-approve-v1.0",
+      prNumber: 1,
+      prUrl: "https://github.com/owner/repo/pull/1",
+    });
+
+    const consoleLogSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+
+    await specApproveCommand.parseAsync(["node", "test", "spec-000001"]);
+
+    // Settings passed to checkSpecApprovalPrerequisites
+    expect(checkSpecApprovalPrerequisites).toHaveBeenCalledWith(
+      process.cwd(),
+      "spec-000001",
+      customSettings,
     );
 
     consoleLogSpy.mockRestore();

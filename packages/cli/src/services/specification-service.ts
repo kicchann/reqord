@@ -1,4 +1,4 @@
-import type { Specification, Status } from "@reqord/shared";
+import type { Specification, Status, ProjectSettings } from "@reqord/shared";
 import { SPECIFICATIONS_DIR } from "@reqord/shared";
 import * as specRepo from "../repositories/specification.js";
 import * as reqRepo from "../repositories/requirement.js";
@@ -148,6 +148,7 @@ export interface PrerequisiteResult {
 export async function checkSpecApprovalPrerequisites(
   cwd: string,
   specId: string,
+  settings: ProjectSettings,
 ): Promise<PrerequisiteResult> {
   const spec = await specRepo.findByIdOrThrow(cwd, specId);
   const errors: string[] = [];
@@ -165,14 +166,24 @@ export async function checkSpecApprovalPrerequisites(
     errors.push(`Related requirement ${spec.requirementId} is not approved (current: ${req.status})`);
   }
 
-  // 3. design.md content check
-  const design = await specRepo.loadFile(cwd, specId, "design.md");
-  if (design == null) {
-    errors.push("design.md does not exist or could not be read. Create design.md and write the design content.");
-  } else if (design.trim().length === 0) {
-    errors.push("design.md is empty. Please write the design content.");
-  } else if (design.includes("{{")) {
-    errors.push("design.md still contains template placeholders. Please edit and write the design content.");
+  // 3. design.md content check (controlled by settings)
+  if (settings.approvalPrerequisites.designMdCheck) {
+    const design = await specRepo.loadFile(cwd, specId, "design.md");
+    if (design == null) {
+      errors.push("design.md does not exist or could not be read. Create design.md and write the design content.");
+    } else if (design.trim().length === 0) {
+      errors.push("design.md is empty. Please write the design content.");
+    } else if (design.includes("{{")) {
+      errors.push("design.md still contains template placeholders. Please edit and write the design content.");
+    }
+  }
+
+  // 4. Custom files check
+  for (const fileName of settings.approvalPrerequisites.customFiles) {
+    const content = await specRepo.loadFile(cwd, specId, fileName);
+    if (content == null) {
+      errors.push(`Required file "${fileName}" does not exist in the specification directory.`);
+    }
   }
 
   return { ok: errors.length === 0, errors };

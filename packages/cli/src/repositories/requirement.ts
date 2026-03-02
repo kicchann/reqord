@@ -57,6 +57,20 @@ export async function loadDescription(cwd: string, id: string): Promise<string |
   return fs.readText(descPath);
 }
 
+export async function loadFile(
+  cwd: string,
+  id: string,
+  filename: string,
+): Promise<string | null> {
+  const filePath = fs.joinPath(getRequirementsDir(cwd), id, filename);
+
+  if (!(await fs.exists(filePath))) {
+    return null;
+  }
+
+  return fs.readText(filePath);
+}
+
 export async function deleteById(cwd: string, id: string): Promise<void> {
   const reqDir = getRequirementsDir(cwd);
   const yamlPath = fs.joinPath(reqDir, `${id}.yaml`);

@@ -1,3 +1,4 @@
+import type { ProjectSettings } from "@reqord/shared";
 import {
   REQORD_DIR,
   REQUIREMENTS_DIR,
@@ -22,8 +23,9 @@ export interface DraftReversionOptions {
   dryRun?: boolean;
 }
 
-function buildBranchName(id: string): string {
-  return `reqord/${id}-revert-to-draft`;
+function buildBranchName(id: string, settings?: ProjectSettings): string {
+  const prefix = settings?.branchNaming?.toDraftPrefix ?? "reqord";
+  return `${prefix}/${id}-revert-to-draft`;
 }
 
 function buildPrTitle(id: string, title: string): string {
@@ -111,6 +113,7 @@ async function analyzeSpecImpact(
 export async function revertToDraft(
   cwd: string,
   id: string,
+  settings: ProjectSettings,
   options?: DraftReversionOptions,
 ): Promise<DraftReversionResult> {
   // 1. Load entity and check precondition
@@ -133,56 +136,73 @@ export async function revertToDraft(
     return { previousStatus, impactedRequirements };
   }
 
-  // 4. Save original branch
-  const originalBranch = await gitRepo.getCurrentBranch(cwd);
-  const branchName = buildBranchName(id);
   const filePath = `${REQORD_DIR}/${dir}/${id}.yaml`;
 
-  try {
-    // 5. Create and switch to reversion branch
-    await gitRepo.createBranch(cwd, branchName);
-    await gitRepo.checkout(cwd, branchName);
-
-    // 6. Update status to draft (no version bump)
+  async function performStatusUpdate(): Promise<void> {
     if (id.startsWith("spec-")) {
       await updateSpecification(cwd, id, { status: "draft" });
     } else {
       await updateRequirement(cwd, id, { status: "draft" });
     }
+  }
 
-    // 7. Stage, commit, push
+  if (settings.statusTransitionPr.toDraft) {
+    // PR flow: save original branch, create reversion branch, update status, commit, push, PR
+    const originalBranch = await gitRepo.getCurrentBranch(cwd);
+    const branchName = buildBranchName(id, settings);
+
+    try {
+      // Create and switch to reversion branch
+      await gitRepo.createBranch(cwd, branchName);
+      await gitRepo.checkout(cwd, branchName);
+
+      // Update status on the PR branch
+      await performStatusUpdate();
+
+      // Stage, commit, push
+      await gitRepo.add(cwd, [filePath]);
+      await gitRepo.commit(cwd, `chore(reqord): revert ${id} to draft`);
+      await gitRepo.push(cwd, branchName);
+
+      // Create PR
+      const prTitle = buildPrTitle(id, entity.title);
+      const prBody = buildPrBody(
+        id,
+        entity.title,
+        entity.version,
+        previousStatus,
+        impactedRequirements,
+        entityType,
+      );
+
+      const prInfo = await githubRepo.createPullRequest({
+        title: prTitle,
+        body: prBody,
+        head: branchName,
+      });
+
+      return {
+        previousStatus,
+        impactedRequirements,
+        prNumber: prInfo.number,
+        prUrl: prInfo.url,
+      };
+    } finally {
+      try {
+        await gitRepo.checkout(cwd, originalBranch);
+      } catch {
+        console.warn(`Warning: Failed to restore original branch "${originalBranch}".`);
+      }
+    }
+  } else {
+    // Direct commit flow: update status and commit on current branch, no PR
+    await performStatusUpdate();
     await gitRepo.add(cwd, [filePath]);
-    await gitRepo.commit(cwd, `chore(reqord): revert ${id} to draft`);
-    await gitRepo.push(cwd, branchName);
-
-    // 8. Create PR
-    const prTitle = buildPrTitle(id, entity.title);
-    const prBody = buildPrBody(
-      id,
-      entity.title,
-      entity.version,
-      previousStatus,
-      impactedRequirements,
-      entityType,
-    );
-
-    const prInfo = await githubRepo.createPullRequest({
-      title: prTitle,
-      body: prBody,
-      head: branchName,
-    });
+    await gitRepo.commit(cwd, `chore(reqord): revert ${id} to draft (direct commit)`);
 
     return {
       previousStatus,
       impactedRequirements,
-      prNumber: prInfo.number,
-      prUrl: prInfo.url,
     };
-  } finally {
-    try {
-      await gitRepo.checkout(cwd, originalBranch);
-    } catch {
-      console.warn(`Warning: Failed to restore original branch "${originalBranch}".`);
-    }
   }
 }

@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import type { Requirement } from "@reqord/shared";
-import { updateRequirement } from "./requirement-service.js";
+import type { Requirement, ProjectSettings } from "@reqord/shared";
+import { updateRequirement, checkReqApprovalPrerequisites } from "./requirement-service.js";
 
 // Mock dependencies BEFORE imports
 vi.mock("../repositories/requirement.js", () => ({
@@ -8,6 +8,10 @@ vi.mock("../repositories/requirement.js", () => ({
   findByIdOrThrow: vi.fn(),
   save: vi.fn(),
   saveDescription: vi.fn(),
+  loadDescription: vi.fn(),
+  loadFile: vi.fn(),
+  deleteById: vi.fn(),
+  findAll: vi.fn(),
 }));
 
 vi.mock("./version-service.js", () => ({
@@ -24,6 +28,43 @@ vi.mock("./version-service.js", () => ({
 
 import * as reqRepo from "../repositories/requirement.js";
 import * as versionService from "./version-service.js";
+
+function makeSettings(overrides: Partial<ProjectSettings["approvalPrerequisites"]> = {}): ProjectSettings {
+  return {
+    invariants: {
+      versioning: true,
+      cyclicDependencyCheck: true,
+      statusTransitionRules: true,
+      schemaValidation: true,
+    },
+    approvalPrerequisites: {
+      designMdCheck: true,
+      descriptionMdCheck: false,
+      customFiles: [],
+      ...overrides,
+    },
+    statusTransitionPr: {
+      draftToApproved: true,
+      approvedToImplemented: false,
+      toDraft: true,
+    },
+    branchNaming: {
+      toApprovedPrefix: "reqord",
+      toImplementedPrefix: "reqord",
+      toDraftPrefix: "reqord",
+    },
+    feedbackValidation: {
+      blockOnUnresolved: false,
+      severityThreshold: "critical",
+    },
+    autoRevert: {
+      onContentChange: "always",
+    },
+    consistencyCheck: {
+      specNotImplementedLevel: "warning",
+    },
+  };
+}
 
 function makeRequirement(overrides: Partial<Requirement> = {}): Requirement {
   return {
@@ -115,7 +156,7 @@ describe("updateRequirement - 自動リバートロジック", () => {
       title: "新しいタイトル",
     });
 
-    expect(versionService.shouldRevertToDraft).toHaveBeenCalledWith("approved", true);
+    expect(versionService.shouldRevertToDraft).toHaveBeenCalledWith("approved", true, "always", undefined);
     expect(result.after.status).toBe("draft");
   });
 
@@ -128,7 +169,7 @@ describe("updateRequirement - 自動リバートロジック", () => {
       title: "新しいタイトル",
     });
 
-    expect(versionService.shouldRevertToDraft).toHaveBeenCalledWith("draft", true);
+    expect(versionService.shouldRevertToDraft).toHaveBeenCalledWith("draft", true, "always", undefined);
     expect(result.after.status).toBe("draft");
   });
 
@@ -426,7 +467,227 @@ describe("updateRequirement - description変更", () => {
       descriptionContent: "変更された説明文",
     });
 
-    expect(versionService.shouldRevertToDraft).toHaveBeenCalledWith("approved", true);
+    expect(versionService.shouldRevertToDraft).toHaveBeenCalledWith("approved", true, "always", undefined);
     expect(result.after.status).toBe("draft");
+  });
+});
+
+describe("updateRequirement - 自動リバートロジック（settings連携）", () => {
+  beforeEach(() => {
+    vi.resetAllMocks();
+    vi.mocked(versionService.isValidTransition).mockReturnValue(true);
+    vi.mocked(versionService.shouldRevertToDraft).mockReturnValue(false);
+    vi.mocked(versionService.determineNextVersion).mockReturnValue("1.0");
+    vi.mocked(reqRepo.save).mockResolvedValue(undefined);
+  });
+
+  it("settings.autoRevert.onContentChange=major-onlyとversionBump=patchが渡される", async () => {
+    const before = makeRequirement({ status: "approved", version: "1.0" });
+    vi.mocked(reqRepo.findByIdOrThrow).mockResolvedValue(before);
+
+    await updateRequirement("/test/cwd", "req-000001", {
+      title: "新しいタイトル",
+      versionBump: "patch",
+      settings: {
+        invariants: { versioning: true as const, cyclicDependencyCheck: true as const, statusTransitionRules: true as const, schemaValidation: true as const },
+        approvalPrerequisites: { designMdCheck: true, descriptionMdCheck: false, customFiles: [] as string[] },
+        statusTransitionPr: { draftToApproved: true, approvedToImplemented: false, toDraft: true },
+        branchNaming: { toApprovedPrefix: "reqord", toImplementedPrefix: "reqord", toDraftPrefix: "reqord" },
+        feedbackValidation: { blockOnUnresolved: false, severityThreshold: "critical" as const },
+        autoRevert: { onContentChange: "major-only" as const },
+        consistencyCheck: { specNotImplementedLevel: "warning" as const },
+      },
+    });
+
+    expect(versionService.shouldRevertToDraft).toHaveBeenCalledWith(
+      "approved",
+      true,
+      "major-only",
+      "patch",
+    );
+  });
+
+  it("settings.autoRevert.onContentChange=neverの場合shouldRevertToDraftにneverが渡される", async () => {
+    const before = makeRequirement({ status: "approved", version: "1.0" });
+    vi.mocked(reqRepo.findByIdOrThrow).mockResolvedValue(before);
+
+    await updateRequirement("/test/cwd", "req-000001", {
+      title: "新しいタイトル",
+      settings: {
+        invariants: { versioning: true as const, cyclicDependencyCheck: true as const, statusTransitionRules: true as const, schemaValidation: true as const },
+        approvalPrerequisites: { designMdCheck: true, descriptionMdCheck: false, customFiles: [] as string[] },
+        statusTransitionPr: { draftToApproved: true, approvedToImplemented: false, toDraft: true },
+        branchNaming: { toApprovedPrefix: "reqord", toImplementedPrefix: "reqord", toDraftPrefix: "reqord" },
+        feedbackValidation: { blockOnUnresolved: false, severityThreshold: "critical" as const },
+        autoRevert: { onContentChange: "never" as const },
+        consistencyCheck: { specNotImplementedLevel: "warning" as const },
+      },
+    });
+
+    expect(versionService.shouldRevertToDraft).toHaveBeenCalledWith(
+      "approved",
+      true,
+      "never",
+      undefined,
+    );
+  });
+
+  it("settings未指定の場合はalwaysがデフォルトとして使われる", async () => {
+    const before = makeRequirement({ status: "approved", version: "1.0" });
+    vi.mocked(reqRepo.findByIdOrThrow).mockResolvedValue(before);
+
+    await updateRequirement("/test/cwd", "req-000001", {
+      title: "新しいタイトル",
+    });
+
+    expect(versionService.shouldRevertToDraft).toHaveBeenCalledWith(
+      "approved",
+      true,
+      "always",
+      undefined,
+    );
+  });
+
+  it("settings.autoRevert.onContentChange=major-only+versionBump=majorでdraftに戻る", async () => {
+    const before = makeRequirement({ status: "approved", version: "1.0" });
+    vi.mocked(reqRepo.findByIdOrThrow).mockResolvedValue(before);
+    vi.mocked(versionService.shouldRevertToDraft).mockReturnValue(true);
+    vi.mocked(versionService.applyVersionBump).mockReturnValue("2.0");
+    vi.mocked(versionService.generateChangeSummary).mockReturnValue("Title updated");
+    vi.mocked(versionService.createHistoryEntry).mockReturnValue({
+      version: "2.0",
+      status: "draft",
+      changedAt: "2026-01-02T00:00:00Z",
+      summary: "Title updated",
+    });
+
+    const result = await updateRequirement("/test/cwd", "req-000001", {
+      title: "新しいタイトル",
+      versionBump: "major",
+      settings: {
+        invariants: { versioning: true as const, cyclicDependencyCheck: true as const, statusTransitionRules: true as const, schemaValidation: true as const },
+        approvalPrerequisites: { designMdCheck: true, descriptionMdCheck: false, customFiles: [] as string[] },
+        statusTransitionPr: { draftToApproved: true, approvedToImplemented: false, toDraft: true },
+        branchNaming: { toApprovedPrefix: "reqord", toImplementedPrefix: "reqord", toDraftPrefix: "reqord" },
+        feedbackValidation: { blockOnUnresolved: false, severityThreshold: "critical" as const },
+        autoRevert: { onContentChange: "major-only" as const },
+        consistencyCheck: { specNotImplementedLevel: "warning" as const },
+      },
+    });
+
+    expect(result.after.status).toBe("draft");
+  });
+});
+
+describe("checkReqApprovalPrerequisites", () => {
+  beforeEach(() => {
+    vi.resetAllMocks();
+  });
+
+  it("[descriptionMdCheck=false] description.mdが存在しなくても承認チェックが通る", async () => {
+    const settings = makeSettings({ descriptionMdCheck: false, customFiles: [] });
+    const result = await checkReqApprovalPrerequisites("/test/cwd", "req-000001", settings);
+
+    expect(result.ok).toBe(true);
+    expect(result.errors).toHaveLength(0);
+    expect(reqRepo.loadDescription).not.toHaveBeenCalled();
+  });
+
+  it("[descriptionMdCheck=false] description.mdが空でも承認チェックが通る", async () => {
+    const settings = makeSettings({ descriptionMdCheck: false, customFiles: [] });
+    const result = await checkReqApprovalPrerequisites("/test/cwd", "req-000001", settings);
+
+    expect(result.ok).toBe(true);
+    expect(result.errors).toHaveLength(0);
+  });
+
+  it("[descriptionMdCheck=false] description.mdがテンプレートのままでも承認チェックが通る", async () => {
+    const settings = makeSettings({ descriptionMdCheck: false, customFiles: [] });
+    const result = await checkReqApprovalPrerequisites("/test/cwd", "req-000001", settings);
+
+    expect(result.ok).toBe(true);
+    expect(result.errors).toHaveLength(0);
+  });
+
+  it("[descriptionMdCheck=true] description.mdが存在しない場合はエラー", async () => {
+    vi.mocked(reqRepo.loadDescription).mockResolvedValue(null);
+
+    const settings = makeSettings({ descriptionMdCheck: true, customFiles: [] });
+    const result = await checkReqApprovalPrerequisites("/test/cwd", "req-000001", settings);
+
+    expect(result.ok).toBe(false);
+    expect(result.errors).toHaveLength(1);
+    expect(result.errors[0]).toContain("description.md does not exist");
+  });
+
+  it("[descriptionMdCheck=true] description.mdが空の場合はエラー", async () => {
+    vi.mocked(reqRepo.loadDescription).mockResolvedValue("   ");
+
+    const settings = makeSettings({ descriptionMdCheck: true, customFiles: [] });
+    const result = await checkReqApprovalPrerequisites("/test/cwd", "req-000001", settings);
+
+    expect(result.ok).toBe(false);
+    expect(result.errors).toHaveLength(1);
+    expect(result.errors[0]).toContain("description.md is empty");
+  });
+
+  it("[descriptionMdCheck=true] description.mdがテンプレートのままの場合はエラー", async () => {
+    vi.mocked(reqRepo.loadDescription).mockResolvedValue("# {{title}}\n\nWrite here.");
+
+    const settings = makeSettings({ descriptionMdCheck: true, customFiles: [] });
+    const result = await checkReqApprovalPrerequisites("/test/cwd", "req-000001", settings);
+
+    expect(result.ok).toBe(false);
+    expect(result.errors).toHaveLength(1);
+    expect(result.errors[0]).toContain("template placeholders");
+  });
+
+  it("[descriptionMdCheck=true] description.mdが有効なコンテンツであれば成功", async () => {
+    vi.mocked(reqRepo.loadDescription).mockResolvedValue("# 要件説明\n\nここに詳細を記載する。");
+
+    const settings = makeSettings({ descriptionMdCheck: true, customFiles: [] });
+    const result = await checkReqApprovalPrerequisites("/test/cwd", "req-000001", settings);
+
+    expect(result.ok).toBe(true);
+    expect(result.errors).toHaveLength(0);
+  });
+
+  it("[customFiles] 指定ファイルがreq-ディレクトリ内に存在する場合は成功", async () => {
+    vi.mocked(reqRepo.loadFile).mockResolvedValue("file content");
+
+    const settings = makeSettings({ descriptionMdCheck: false, customFiles: ["acceptance-criteria.md"] });
+    const result = await checkReqApprovalPrerequisites("/test/cwd", "req-000001", settings);
+
+    expect(result.ok).toBe(true);
+    expect(result.errors).toHaveLength(0);
+    expect(reqRepo.loadFile).toHaveBeenCalledWith("/test/cwd", "req-000001", "acceptance-criteria.md");
+  });
+
+  it("[customFiles] 指定ファイルがreq-ディレクトリ内に存在しない場合はエラー", async () => {
+    vi.mocked(reqRepo.loadFile).mockResolvedValue(null);
+
+    const settings = makeSettings({ descriptionMdCheck: false, customFiles: ["acceptance-criteria.md"] });
+    const result = await checkReqApprovalPrerequisites("/test/cwd", "req-000001", settings);
+
+    expect(result.ok).toBe(false);
+    expect(result.errors).toHaveLength(1);
+    expect(result.errors[0]).toContain('"acceptance-criteria.md"');
+    expect(result.errors[0]).toContain("does not exist in the requirement directory");
+  });
+
+  it("[customFiles] 複数ファイル指定で一部存在しない場合はエラー", async () => {
+    vi.mocked(reqRepo.loadFile)
+      .mockResolvedValueOnce("content") // first file exists
+      .mockResolvedValueOnce(null);     // second file missing
+
+    const settings = makeSettings({
+      descriptionMdCheck: false,
+      customFiles: ["acceptance-criteria.md", "test-plan.md"],
+    });
+    const result = await checkReqApprovalPrerequisites("/test/cwd", "req-000001", settings);
+
+    expect(result.ok).toBe(false);
+    expect(result.errors).toHaveLength(1);
+    expect(result.errors[0]).toContain('"test-plan.md"');
   });
 });

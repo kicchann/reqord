@@ -5,6 +5,7 @@ import {
   updateRequirement,
   type UpdateOptions,
 } from "../../services/requirement-service.js";
+import { loadProjectSettings } from "../../services/project-settings-service.js";
 import * as fs from "../../repositories/file-system.js";
 import { handleError } from "../../utils/error-handler.js";
 import { AppError, ErrorCode } from "../../utils/errors.js";
@@ -101,6 +102,9 @@ export const updateCommand = new Command("update")
         // Version bump override
         if (options.major) updateOpts.versionBump = "major";
         if (options.patch) updateOpts.versionBump = "patch";
+
+        // Load project settings for auto-revert control
+        updateOpts.settings = await loadProjectSettings(cwd);
 
         const { before, after, descriptionUpdated } = await updateRequirement(cwd, id, updateOpts);
 

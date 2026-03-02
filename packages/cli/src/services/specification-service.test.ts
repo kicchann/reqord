@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import type { Requirement, Specification } from "@reqord/shared";
+import type { Requirement, Specification, ProjectSettings } from "@reqord/shared";
 
 // Mock repositories (shared dependencies)
 vi.mock("../repositories/specification.js", () => ({
@@ -79,6 +79,43 @@ function makeSpecification(overrides: Partial<Specification> = {}): Specificatio
       supplementary: [],
     },
     ...overrides,
+  };
+}
+
+function makeSettings(overrides: Partial<ProjectSettings["approvalPrerequisites"]> = {}): ProjectSettings {
+  return {
+    invariants: {
+      versioning: true,
+      cyclicDependencyCheck: true,
+      statusTransitionRules: true,
+      schemaValidation: true,
+    },
+    approvalPrerequisites: {
+      designMdCheck: true,
+      descriptionMdCheck: false,
+      customFiles: [],
+      ...overrides,
+    },
+    statusTransitionPr: {
+      draftToApproved: true,
+      approvedToImplemented: false,
+      toDraft: true,
+    },
+    branchNaming: {
+      toApprovedPrefix: "reqord",
+      toImplementedPrefix: "reqord",
+      toDraftPrefix: "reqord",
+    },
+    feedbackValidation: {
+      blockOnUnresolved: false,
+      severityThreshold: "critical",
+    },
+    autoRevert: {
+      onContentChange: "always",
+    },
+    consistencyCheck: {
+      specNotImplementedLevel: "warning",
+    },
   };
 }
 
@@ -321,7 +358,7 @@ describe("checkSpecApprovalPrerequisites", () => {
     mockReqRepo.findById.mockResolvedValue(req);
     mockSpecRepo.loadFile.mockResolvedValue("# Design content");
 
-    const result = await checkSpecApprovalPrerequisites("/cwd", "spec-000001");
+    const result = await checkSpecApprovalPrerequisites("/cwd", "spec-000001", makeSettings());
 
     expect(result.ok).toBe(true);
     expect(result.errors).toHaveLength(0);
@@ -334,7 +371,7 @@ describe("checkSpecApprovalPrerequisites", () => {
     mockReqRepo.findById.mockResolvedValue(req);
     mockSpecRepo.loadFile.mockResolvedValue("# Design");
 
-    const result = await checkSpecApprovalPrerequisites("/cwd", "spec-000001");
+    const result = await checkSpecApprovalPrerequisites("/cwd", "spec-000001", makeSettings());
 
     expect(result.ok).toBe(false);
     expect(result.errors).toContain(`Specification status is not "draft" (current: approved)`);
@@ -347,7 +384,7 @@ describe("checkSpecApprovalPrerequisites", () => {
     mockReqRepo.findById.mockResolvedValue(req);
     mockSpecRepo.loadFile.mockResolvedValue("# Design");
 
-    const result = await checkSpecApprovalPrerequisites("/cwd", "spec-000001");
+    const result = await checkSpecApprovalPrerequisites("/cwd", "spec-000001", makeSettings());
 
     expect(result.ok).toBe(true);
   });
@@ -359,7 +396,7 @@ describe("checkSpecApprovalPrerequisites", () => {
     mockReqRepo.findById.mockResolvedValue(req);
     mockSpecRepo.loadFile.mockResolvedValue("# Design");
 
-    const result = await checkSpecApprovalPrerequisites("/cwd", "spec-000001");
+    const result = await checkSpecApprovalPrerequisites("/cwd", "spec-000001", makeSettings());
 
     expect(result.ok).toBe(true);
   });
@@ -371,7 +408,7 @@ describe("checkSpecApprovalPrerequisites", () => {
     mockReqRepo.findById.mockResolvedValue(req);
     mockSpecRepo.loadFile.mockResolvedValue("# Design");
 
-    const result = await checkSpecApprovalPrerequisites("/cwd", "spec-000001");
+    const result = await checkSpecApprovalPrerequisites("/cwd", "spec-000001", makeSettings());
 
     expect(result.ok).toBe(false);
     expect(result.errors).toContain("Related requirement req-000001 is not approved (current: draft)");
@@ -384,7 +421,7 @@ describe("checkSpecApprovalPrerequisites", () => {
     mockReqRepo.findById.mockResolvedValue(req);
     mockSpecRepo.loadFile.mockResolvedValue("# {{id}} - Design");
 
-    const result = await checkSpecApprovalPrerequisites("/cwd", "spec-000001");
+    const result = await checkSpecApprovalPrerequisites("/cwd", "spec-000001", makeSettings());
 
     expect(result.ok).toBe(false);
     expect(result.errors).toContain("design.md still contains template placeholders. Please edit and write the design content.");
@@ -397,7 +434,7 @@ describe("checkSpecApprovalPrerequisites", () => {
     mockReqRepo.findById.mockResolvedValue(req);
     mockSpecRepo.loadFile.mockResolvedValue(null);
 
-    const result = await checkSpecApprovalPrerequisites("/cwd", "spec-000001");
+    const result = await checkSpecApprovalPrerequisites("/cwd", "spec-000001", makeSettings());
 
     expect(result.ok).toBe(false);
     expect(result.errors).toContain("design.md does not exist or could not be read. Create design.md and write the design content.");
@@ -410,7 +447,7 @@ describe("checkSpecApprovalPrerequisites", () => {
     mockReqRepo.findById.mockResolvedValue(req);
     mockSpecRepo.loadFile.mockResolvedValue("   \n  ");
 
-    const result = await checkSpecApprovalPrerequisites("/cwd", "spec-000001");
+    const result = await checkSpecApprovalPrerequisites("/cwd", "spec-000001", makeSettings());
 
     expect(result.ok).toBe(false);
     expect(result.errors).toContain("design.md is empty. Please write the design content.");
@@ -422,7 +459,7 @@ describe("checkSpecApprovalPrerequisites", () => {
     mockReqRepo.findById.mockResolvedValue(null);
     mockSpecRepo.loadFile.mockResolvedValue("# Design");
 
-    const result = await checkSpecApprovalPrerequisites("/cwd", "spec-000001");
+    const result = await checkSpecApprovalPrerequisites("/cwd", "spec-000001", makeSettings());
 
     expect(result.ok).toBe(false);
     expect(result.errors).toContain("Related requirement req-000001 not found");
@@ -432,8 +469,111 @@ describe("checkSpecApprovalPrerequisites", () => {
     mockSpecRepo.findByIdOrThrow.mockRejectedValue(new Error("Specification not found"));
 
     await expect(
-      checkSpecApprovalPrerequisites("/cwd", "spec-999999")
+      checkSpecApprovalPrerequisites("/cwd", "spec-999999", makeSettings())
     ).rejects.toThrow("Specification not found");
+  });
+
+  // --- settings.approvalPrerequisites.designMdCheck: false ---
+
+  it("[designMdCheck=false] design.mdが存在しなくても承認チェックが通る", async () => {
+    const spec = makeSpecification({ status: "draft" });
+    const req = makeRequirement({ status: "approved" });
+    mockSpecRepo.findByIdOrThrow.mockResolvedValue(spec);
+    mockReqRepo.findById.mockResolvedValue(req);
+    mockSpecRepo.loadFile.mockResolvedValue(null); // design.md不在
+
+    const result = await checkSpecApprovalPrerequisites("/cwd", "spec-000001", makeSettings({ designMdCheck: false }));
+
+    expect(result.ok).toBe(true);
+    expect(result.errors).toHaveLength(0);
+  });
+
+  it("[designMdCheck=false] design.mdが空でも承認チェックが通る", async () => {
+    const spec = makeSpecification({ status: "draft" });
+    const req = makeRequirement({ status: "approved" });
+    mockSpecRepo.findByIdOrThrow.mockResolvedValue(spec);
+    mockReqRepo.findById.mockResolvedValue(req);
+    mockSpecRepo.loadFile.mockResolvedValue("");
+
+    const result = await checkSpecApprovalPrerequisites("/cwd", "spec-000001", makeSettings({ designMdCheck: false }));
+
+    expect(result.ok).toBe(true);
+    expect(result.errors).toHaveLength(0);
+  });
+
+  it("[designMdCheck=false] design.mdがテンプレートのままでも承認チェックが通る", async () => {
+    const spec = makeSpecification({ status: "draft" });
+    const req = makeRequirement({ status: "approved" });
+    mockSpecRepo.findByIdOrThrow.mockResolvedValue(spec);
+    mockReqRepo.findById.mockResolvedValue(req);
+    mockSpecRepo.loadFile.mockResolvedValue("# {{id}} - Design");
+
+    const result = await checkSpecApprovalPrerequisites("/cwd", "spec-000001", makeSettings({ designMdCheck: false }));
+
+    expect(result.ok).toBe(true);
+    expect(result.errors).toHaveLength(0);
+  });
+
+  // --- settings.approvalPrerequisites.customFiles ---
+
+  it("[customFiles] 指定ファイルがspec-ディレクトリ内に存在する場合は成功", async () => {
+    const spec = makeSpecification({ status: "draft" });
+    const req = makeRequirement({ status: "approved" });
+    mockSpecRepo.findByIdOrThrow.mockResolvedValue(spec);
+    mockReqRepo.findById.mockResolvedValue(req);
+    // design.md and custom file both exist
+    mockSpecRepo.loadFile
+      .mockResolvedValueOnce("# Design content") // design.md
+      .mockResolvedValueOnce("custom content");   // custom file
+
+    const result = await checkSpecApprovalPrerequisites(
+      "/cwd",
+      "spec-000001",
+      makeSettings({ customFiles: ["checklist.md"] }),
+    );
+
+    expect(result.ok).toBe(true);
+    expect(result.errors).toHaveLength(0);
+  });
+
+  it("[customFiles] 指定ファイルがspec-ディレクトリ内に存在しない場合はエラー", async () => {
+    const spec = makeSpecification({ status: "draft" });
+    const req = makeRequirement({ status: "approved" });
+    mockSpecRepo.findByIdOrThrow.mockResolvedValue(spec);
+    mockReqRepo.findById.mockResolvedValue(req);
+    mockSpecRepo.loadFile
+      .mockResolvedValueOnce("# Design content") // design.md
+      .mockResolvedValueOnce(null);              // custom file not found
+
+    const result = await checkSpecApprovalPrerequisites(
+      "/cwd",
+      "spec-000001",
+      makeSettings({ customFiles: ["checklist.md"] }),
+    );
+
+    expect(result.ok).toBe(false);
+    expect(result.errors).toContain('Required file "checklist.md" does not exist in the specification directory.');
+  });
+
+  it("[customFiles] 複数ファイル指定で一部存在しない場合はエラー", async () => {
+    const spec = makeSpecification({ status: "draft" });
+    const req = makeRequirement({ status: "approved" });
+    mockSpecRepo.findByIdOrThrow.mockResolvedValue(spec);
+    mockReqRepo.findById.mockResolvedValue(req);
+    mockSpecRepo.loadFile
+      .mockResolvedValueOnce("# Design content") // design.md
+      .mockResolvedValueOnce("content")          // first custom file exists
+      .mockResolvedValueOnce(null);              // second custom file not found
+
+    const result = await checkSpecApprovalPrerequisites(
+      "/cwd",
+      "spec-000001",
+      makeSettings({ customFiles: ["checklist.md", "adr.md"] }),
+    );
+
+    expect(result.ok).toBe(false);
+    expect(result.errors).toContain('Required file "adr.md" does not exist in the specification directory.');
+    expect(result.errors).not.toContain('Required file "checklist.md" does not exist in the specification directory.');
   });
 });
 

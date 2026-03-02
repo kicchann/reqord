@@ -283,20 +283,73 @@ describe("isValidTransition", () => {
 });
 
 describe("shouldRevertToDraft", () => {
-  it("approved+内容変更でtrueを返す", () => {
+  // --- デフォルト動作（always）: 既存の動作と同一 ---
+  it("approved+内容変更でtrueを返す（デフォルト: always）", () => {
     expect(shouldRevertToDraft("approved", true)).toBe(true);
   });
 
-  it("implemented+内容変更でtrueを返す", () => {
+  it("implemented+内容変更でtrueを返す（デフォルト: always）", () => {
     expect(shouldRevertToDraft("implemented", true)).toBe(true);
   });
 
-  it("draft+内容変更でfalseを返す", () => {
+  it("draft+内容変更でfalseを返す（デフォルト: always）", () => {
     expect(shouldRevertToDraft("draft", true)).toBe(false);
   });
 
-  it("approved+内容変更なしでfalseを返す", () => {
+  it("approved+内容変更なしでfalseを返す（デフォルト: always）", () => {
     expect(shouldRevertToDraft("approved", false)).toBe(false);
+  });
+
+  // --- autoRevertMode: "always" ---
+  it('always: approved+内容変更+patchバンプでtrueを返す', () => {
+    expect(shouldRevertToDraft("approved", true, "always", "patch")).toBe(true);
+  });
+
+  it('always: approved+内容変更+majorバンプでtrueを返す', () => {
+    expect(shouldRevertToDraft("approved", true, "always", "major")).toBe(true);
+  });
+
+  // --- autoRevertMode: "major-only" ---
+  it('major-only: approved+内容変更+patchバンプでfalseを返す（ステータス維持）', () => {
+    expect(shouldRevertToDraft("approved", true, "major-only", "patch")).toBe(false);
+  });
+
+  it('major-only: approved+内容変更+majorバンプでtrueを返す', () => {
+    expect(shouldRevertToDraft("approved", true, "major-only", "major")).toBe(true);
+  });
+
+  it('major-only: implemented+内容変更+patchバンプでfalseを返す（ステータス維持）', () => {
+    expect(shouldRevertToDraft("implemented", true, "major-only", "patch")).toBe(false);
+  });
+
+  it('major-only: implemented+内容変更+majorバンプでtrueを返す', () => {
+    expect(shouldRevertToDraft("implemented", true, "major-only", "major")).toBe(true);
+  });
+
+  it('major-only: bumpTypeが未指定の場合はfalseを返す（patch相当）', () => {
+    expect(shouldRevertToDraft("approved", true, "major-only", undefined)).toBe(false);
+  });
+
+  // --- autoRevertMode: "never" ---
+  it('never: approved+内容変更+patchバンプでfalseを返す', () => {
+    expect(shouldRevertToDraft("approved", true, "never", "patch")).toBe(false);
+  });
+
+  it('never: approved+内容変更+majorバンプでfalseを返す', () => {
+    expect(shouldRevertToDraft("approved", true, "never", "major")).toBe(false);
+  });
+
+  it('never: implemented+内容変更でfalseを返す', () => {
+    expect(shouldRevertToDraft("implemented", true, "never")).toBe(false);
+  });
+
+  // --- draft状態は全設定でrevertしない ---
+  it('draft状態はalwaysでもrevertしない', () => {
+    expect(shouldRevertToDraft("draft", true, "always", "major")).toBe(false);
+  });
+
+  it('draft状態はmajor-onlyでもrevertしない', () => {
+    expect(shouldRevertToDraft("draft", true, "major-only", "major")).toBe(false);
   });
 });
 

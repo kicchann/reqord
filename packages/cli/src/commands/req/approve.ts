@@ -1,7 +1,10 @@
 import { Command } from "commander";
 import chalk from "chalk";
 import { REQORD_DIR, REQUIREMENTS_DIR } from "@reqord/shared";
-import { showRequirement } from "../../services/requirement-service.js";
+import {
+  showRequirement,
+  checkReqApprovalPrerequisites,
+} from "../../services/requirement-service.js";
 import {
   startApproval,
   type ApprovalTarget,
@@ -9,6 +12,9 @@ import {
 import { requirementHandler, buildReqApprovalPrBody } from "../../services/requirement-approval-handler.js";
 import { handleError } from "../../utils/error-handler.js";
 import { findUnresolvedByArtifactId } from "../../repositories/feedback.js";
+import { loadProjectSettings } from "../../services/project-settings-service.js";
+import { shouldBlockApproval } from "../../services/feedback-validation.js";
+import { AppError, ErrorCode } from "../../utils/errors.js";
 
 export const approveCommand = new Command("approve")
   .description("Create an approval request PR for a requirement (approval is confirmed when the PR is merged)")
@@ -18,25 +24,61 @@ export const approveCommand = new Command("approve")
     const cwd = process.cwd();
 
     try {
+      // 1. Load project settings
+      const settings = await loadProjectSettings(cwd);
+
+      // 2. Load requirement
       const { requirement } = await showRequirement(cwd, id);
 
-      // Feedback warning before approval
+      // 3. Check prerequisites
+      const prereqs = await checkReqApprovalPrerequisites(cwd, id, settings);
+      if (!prereqs.ok) {
+        for (const error of prereqs.errors) {
+          console.error(chalk.red(`Error: ${error}`));
+        }
+        console.error(chalk.yellow(`Please resolve the issues first.`));
+        process.exitCode = 1;
+        return;
+      }
+
+      // Feedback warning (or block) before approval
       const unresolvedFeedbacks = await findUnresolvedByArtifactId(cwd, id);
       if (unresolvedFeedbacks.length > 0) {
-        console.log(
-          chalk.yellow(
-            `⚠ Warning: ${requirement.id} has ${unresolvedFeedbacks.length} unresolved feedback(s):`,
-          ),
-        );
-        for (const fb of unresolvedFeedbacks) {
-          console.log(
-            chalk.yellow(
-              `  - #${fb.githubIssue} (${fb.type ?? "unclassified"}, severity: ${fb.severity ?? "medium"})`,
+        const { blocked, blockingFeedbacks } = shouldBlockApproval(unresolvedFeedbacks, settings);
+
+        if (blocked) {
+          console.error(
+            chalk.red(
+              `Error: ${requirement.id} has ${blockingFeedbacks.length} unresolved feedback(s) that meet or exceed the severity threshold (${settings.feedbackValidation.severityThreshold}):`,
             ),
           );
+          for (const fb of blockingFeedbacks) {
+            console.error(
+              chalk.red(
+                `  - #${fb.githubIssue} (${fb.type ?? "unclassified"}, severity: ${fb.severity ?? "low"})`,
+              ),
+            );
+          }
+          throw new AppError(
+            `Approval blocked: ${blockingFeedbacks.length} unresolved feedback(s) at or above severity threshold "${settings.feedbackValidation.severityThreshold}". Resolve them or set feedbackValidation.blockOnUnresolved to false in setting.yaml.`,
+            ErrorCode.VALIDATION_ERROR,
+          );
+        } else {
+          console.log(
+            chalk.yellow(
+              `⚠ Warning: ${requirement.id} has ${unresolvedFeedbacks.length} unresolved feedback(s):`,
+            ),
+          );
+          for (const fb of unresolvedFeedbacks) {
+            console.log(
+              chalk.yellow(
+                `  - #${fb.githubIssue} (${fb.type ?? "unclassified"}, severity: ${fb.severity ?? "medium"})`,
+              ),
+            );
+          }
+          console.log(chalk.yellow("Proceeding with approval..."));
+          console.log();
         }
-        console.log(chalk.yellow("Proceeding with approval..."));
-        console.log();
       }
 
       const target: ApprovalTarget = {
@@ -61,7 +103,7 @@ export const approveCommand = new Command("approve")
           }),
       };
 
-      const result = await startApproval(cwd, target, customHandler, {
+      const result = await startApproval(cwd, target, customHandler, settings, {
         dryRun: options.dryRun,
       });
 
