@@ -203,7 +203,7 @@ describe("approveCommand", () => {
   });
 
   it("エラー: 存在しないRequirementでエラー表示", async () => {
-    vi.mocked(loadProjectSettings).mockRejectedValue(
+    vi.mocked(showRequirement).mockRejectedValue(
       new Error("Requirement req-999999 not found.")
     );
 

@@ -180,6 +180,10 @@ export async function checkSpecApprovalPrerequisites(
 
   // 4. Custom files check
   for (const fileName of settings.approvalPrerequisites.customFiles) {
+    if (fileName.includes("..") || fileName.startsWith("/")) {
+      errors.push(`Invalid file name "${fileName}": path traversal is not allowed.`);
+      continue;
+    }
     const content = await specRepo.loadFile(cwd, specId, fileName);
     if (content == null) {
       errors.push(`Required file "${fileName}" does not exist in the specification directory.`);

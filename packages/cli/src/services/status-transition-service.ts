@@ -66,7 +66,7 @@ async function executeWithPr(
 
     // Stage and commit
     await gitRepo.add(cwd, target.files);
-    await gitRepo.commit(cwd, callbacks.buildCommitMessage(target));
+    await gitRepo.commit(cwd, callbacks.buildCommitMessage(updatedTarget));
     await gitRepo.push(cwd, branchName);
 
     // Build PR and create

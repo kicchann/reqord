@@ -31,6 +31,9 @@ export const implementCommand = new Command("implement")
       const cwd = process.cwd();
 
       try {
+        // 1. Load project settings
+        const settings = await loadProjectSettings(cwd);
+
         // Validate requirement exists
         const { requirement } = await showRequirement(cwd, id);
 
@@ -53,7 +56,6 @@ export const implementCommand = new Command("implement")
         }
 
         // Consistency check: warn or block if specs are not implemented or issues are open
-        const settings = await loadProjectSettings(cwd);
         const consistencyResult = await checkImplementConsistency(cwd, id);
         if (consistencyResult.warnings.length > 0) {
           const specWarnings = consistencyResult.warnings.filter(w => w.type === "spec-not-implemented");
@@ -66,7 +68,7 @@ export const implementCommand = new Command("implement")
               }
             }
             throw new AppError(
-              "未実装のspecificationがあります",
+              "Some specifications are not yet implemented",
               ErrorCode.VALIDATION_ERROR,
             );
           } else if (!options.json) {
@@ -92,8 +94,8 @@ export const implementCommand = new Command("implement")
               const { after } = await updateRequirement(cwdArg, id, updateOpts);
               return after.version;
             },
-            buildBranchName: (t, _s) =>
-              `${_s.branchNaming.toImplementedPrefix}/${t.id}-implement-v${t.version}`,
+            buildBranchName: (t, s) =>
+              `${s.branchNaming.toImplementedPrefix}/${t.id}-implement-v${t.version}`,
             buildPrTitle: (t) => `[Reqord] Implement ${t.id}`,
             buildPrBody: (t) =>
               `## Requirement Implementation\n\n| Field | Value |\n|-----------|------|\n| ID | ${t.id} |\n| Version | ${t.version} |\n\n### Changes\nstatus: approved → implemented`,

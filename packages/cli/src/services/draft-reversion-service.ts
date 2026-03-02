@@ -23,8 +23,8 @@ export interface DraftReversionOptions {
   dryRun?: boolean;
 }
 
-function buildBranchName(id: string, settings?: ProjectSettings): string {
-  const prefix = settings?.branchNaming?.toDraftPrefix ?? "reqord";
+function buildBranchName(id: string, settings: ProjectSettings): string {
+  const prefix = settings.branchNaming.toDraftPrefix;
   return `${prefix}/${id}-revert-to-draft`;
 }
 
@@ -86,7 +86,7 @@ async function loadEntity(
   const { type } = getEntityInfo(id);
   if (type === "specification") {
     const spec = await specRepo.findByIdOrThrow(cwd, id);
-    return { status: spec.status, title: id, version: spec.version };
+    return { status: spec.status, title: spec.title ?? id, version: spec.version };
   }
   const req = await reqRepo.findByIdOrThrow(cwd, id);
   return { status: req.status, title: req.title, version: req.version };

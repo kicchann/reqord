@@ -260,6 +260,10 @@ export async function checkReqApprovalPrerequisites(
 
   // 2. Custom files check (req-directory)
   for (const fileName of settings.approvalPrerequisites.customFiles) {
+    if (fileName.includes("..") || fileName.startsWith("/")) {
+      errors.push(`Invalid file name "${fileName}": path traversal is not allowed.`);
+      continue;
+    }
     const content = await reqRepo.loadFile(cwd, reqId, fileName);
     if (content == null) {
       errors.push(`Required file "${fileName}" does not exist in the requirement directory.`);

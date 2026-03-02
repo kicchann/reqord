@@ -32,8 +32,8 @@ export interface ApprovalOptions {
   dryRun?: boolean;
 }
 
-function buildBranchName(target: ApprovalTarget, settings?: ProjectSettings): string {
-  const prefix = settings?.branchNaming?.toApprovedPrefix ?? "reqord";
+function buildBranchName(target: ApprovalTarget, settings: ProjectSettings): string {
+  const prefix = settings.branchNaming.toApprovedPrefix;
   return `${prefix}/${target.id}-approve-v${target.version}`;
 }
 
@@ -56,12 +56,15 @@ export async function startApproval(
   // 2. Dry-run mode
   if (options?.dryRun) {
     const prTitle = handler.buildPrTitle(target);
-    console.log(`[dry-run] Create branch: ${branchName}`);
-    console.log(`[dry-run] Status change: draft → approved`);
-    console.log(`[dry-run] Create PR: ${prTitle}`);
-    return settings.statusTransitionPr.draftToApproved
-      ? { branchName, prNumber: 0, prUrl: "" }
-      : {};
+    if (settings.statusTransitionPr.draftToApproved) {
+      console.log(`[dry-run] Create branch: ${branchName}`);
+      console.log(`[dry-run] Status change: draft → approved`);
+      console.log(`[dry-run] Create PR: ${prTitle}`);
+      return { branchName, prNumber: 0, prUrl: "" };
+    } else {
+      console.log(`[dry-run] Status change: draft → approved (direct commit)`);
+      return {};
+    }
   }
 
   // 3. Re-validate

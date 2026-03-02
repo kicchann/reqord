@@ -369,7 +369,7 @@ describe("req implement command", () => {
     await implementCommand.parseAsync(["node", "test", "req-000001"]);
 
     expect(consoleErrorSpy).toHaveBeenCalledWith(
-      expect.stringContaining("未実装のspecification"),
+      expect.stringContaining("Some specifications are not yet implemented"),
     );
     expect(process.exitCode).toBe(1);
     expect(mockUpdateRequirement).not.toHaveBeenCalled();

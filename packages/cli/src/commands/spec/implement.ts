@@ -29,6 +29,9 @@ export const implementCommand = new Command("implement")
       const cwd = process.cwd();
 
       try {
+        // 1. Load project settings
+        const settings = await loadProjectSettings(cwd);
+
         // Show current specification
         const { specification } = await showSpecification(cwd, id);
 
@@ -39,8 +42,6 @@ export const implementCommand = new Command("implement")
             ErrorCode.VALIDATION_ERROR,
           );
         }
-
-        const settings = await loadProjectSettings(cwd);
 
         if (settings.statusTransitionPr.approvedToImplemented) {
           // PR flow via executeStatusTransition

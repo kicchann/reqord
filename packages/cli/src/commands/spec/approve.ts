@@ -81,7 +81,7 @@ export const specApproveCommand = new Command("approve")
           for (const fb of unresolvedFeedbacks) {
             console.log(
               chalk.yellow(
-                `  - #${fb.githubIssue} (${fb.type ?? "unclassified"}, severity: ${fb.severity ?? "medium"})`,
+                `  - #${fb.githubIssue} (${fb.type ?? "unclassified"}, severity: ${fb.severity ?? "low"})`,
               ),
             );
           }
@@ -133,10 +133,14 @@ export const specApproveCommand = new Command("approve")
         return;
       }
 
-      console.log(chalk.green(`Approval PR created: ${id}`));
-      console.log(`Approval will be confirmed when the PR is merged`);
-      console.log(`  Branch: ${result.branchName}`);
-      console.log(`  PR: ${result.prUrl}`);
+      if (result.prUrl) {
+        console.log(chalk.green(`Approval PR created: ${id}`));
+        console.log(`Approval will be confirmed when the PR is merged`);
+        console.log(`  Branch: ${result.branchName}`);
+        console.log(`  PR: ${result.prUrl}`);
+      } else {
+        console.log(chalk.green(`Approved: ${id} (direct commit)`));
+      }
     } catch (error) {
       handleError(error);
     }
