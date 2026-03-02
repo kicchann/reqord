@@ -3,9 +3,9 @@ requirementId: req-000029
 title: 自動draft戻し制御
 requirementVersion: '1.2'
 version: '1.2'
-status: draft
+status: approved
 createdAt: 2026-03-01T22:32:56.844Z
-updatedAt: 2026-03-02T00:02:26.518Z
+updatedAt: 2026-03-02T02:21:49.849Z
 versionHistory:
   - version: '1.1'
     status: draft
