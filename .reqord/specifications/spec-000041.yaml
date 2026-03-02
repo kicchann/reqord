@@ -1,11 +1,11 @@
 id: spec-000041
 requirementId: req-000029
 title: 自動draft戻し制御
-requirementVersion: '1.1'
+requirementVersion: '1.2'
 version: '1.2'
 status: draft
 createdAt: 2026-03-01T22:32:56.844Z
-updatedAt: 2026-03-01T23:50:05.070Z
+updatedAt: 2026-03-02T00:02:26.518Z
 versionHistory:
   - version: '1.1'
     status: draft
