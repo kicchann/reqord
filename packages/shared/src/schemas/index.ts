@@ -70,3 +70,22 @@ export {
   type TaskEntry,
   type TasksIndex,
 } from "./task.js";
+
+export {
+  InvariantsSchema,
+  ApprovalPrerequisitesSchema,
+  StatusTransitionPrSchema,
+  BranchNamingSchema,
+  FeedbackValidationSchema,
+  AutoRevertSchema,
+  ConsistencyCheckSchema,
+  ProjectSettingsSchema,
+  type ProjectSettings,
+  type ApprovalPrerequisites,
+  type StatusTransitionPr,
+  type BranchNaming,
+  type FeedbackValidation,
+  type AutoRevert,
+  type Invariants,
+  type ConsistencyCheck,
+} from "./project-settings.js";
