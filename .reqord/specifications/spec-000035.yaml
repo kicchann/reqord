@@ -3,9 +3,9 @@ requirementId: req-000029
 title: 設定スキーマ定義とロード基盤（setting.yaml）
 requirementVersion: '1.2'
 version: '1.3'
-status: draft
+status: approved
 createdAt: 2026-03-01T20:09:28.465Z
-updatedAt: 2026-03-01T23:22:24.521Z
+updatedAt: 2026-03-02T02:21:15.847Z
 versionHistory:
   - version: '1.1'
     status: draft
