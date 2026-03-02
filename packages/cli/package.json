@@ -1,6 +1,6 @@
 {
   "name": "@reqord/cli",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Git-native requirements management CLI",
   "license": "AGPL-3.0-or-later",
   "repository": {
