@@ -1,10 +1,10 @@
 id: req-000029
 version: '1.2'
 title: プロジェクト設定ファイル（setting.yaml）によるワークフローカスタマイズ
-status: draft
+status: approved
 priority: medium
 createdAt: 2026-03-01T19:28:44.596Z
-updatedAt: 2026-03-01T22:44:42.609Z
+updatedAt: 2026-03-02T00:16:54.796Z
 versionHistory:
   - version: '1.1'
     status: draft
