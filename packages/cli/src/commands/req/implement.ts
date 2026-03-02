@@ -1,5 +1,6 @@
 import { Command } from "commander";
 import chalk from "chalk";
+import { REQORD_DIR, REQUIREMENTS_DIR } from "@reqord/shared";
 import {
   updateRequirement,
   showRequirement,
@@ -9,6 +10,12 @@ import { listSpecifications } from "../../services/specification-service.js";
 import { checkImplementConsistency } from "../../services/impl-validation-service.js";
 import { handleError } from "../../utils/error-handler.js";
 import { AppError, ErrorCode } from "../../utils/errors.js";
+import { loadProjectSettings } from "../../services/project-settings-service.js";
+import {
+  executeStatusTransition,
+  type StatusTransitionTarget,
+  type StatusTransitionCallbacks,
+} from "../../services/status-transition-service.js";
 
 export const implementCommand = new Command("implement")
   .description("Mark a requirement as implemented")
@@ -24,6 +31,9 @@ export const implementCommand = new Command("implement")
       const cwd = process.cwd();
 
       try {
+        // 1. Load project settings
+        const settings = await loadProjectSettings(cwd);
+
         // Validate requirement exists
         const { requirement } = await showRequirement(cwd, id);
 
@@ -45,35 +55,92 @@ export const implementCommand = new Command("implement")
           console.log();
         }
 
-        // Consistency check: warn if specs are not implemented or issues are open
+        // Consistency check: warn or block if specs are not implemented or issues are open
         const consistencyResult = await checkImplementConsistency(cwd, id);
-        if (consistencyResult.warnings.length > 0 && !options.json) {
-          console.warn(chalk.yellow("\n⚠ Consistency check warnings:"));
-          for (const w of consistencyResult.warnings) {
-            console.warn(chalk.yellow(`  - ${w.message}`));
+        if (consistencyResult.warnings.length > 0) {
+          const specWarnings = consistencyResult.warnings.filter(w => w.type === "spec-not-implemented");
+
+          if (settings.consistencyCheck.specNotImplementedLevel === "error" && specWarnings.length > 0) {
+            if (!options.json) {
+              console.error(chalk.red("\n✗ Consistency check errors:"));
+              for (const w of specWarnings) {
+                console.error(chalk.red(`  - ${w.message}`));
+              }
+            }
+            throw new AppError(
+              "Some specifications are not yet implemented",
+              ErrorCode.VALIDATION_ERROR,
+            );
+          } else if (!options.json) {
+            console.warn(chalk.yellow("\n⚠ Consistency check warnings:"));
+            for (const w of consistencyResult.warnings) {
+              console.warn(chalk.yellow(`  - ${w.message}`));
+            }
+            console.warn("");
           }
-          console.warn("");
         }
 
-        const updateOpts: UpdateOptions = {
-          status: "implemented",
-        };
+        if (settings.statusTransitionPr.approvedToImplemented) {
+          // PR flow via executeStatusTransition
+          const target: StatusTransitionTarget = {
+            id: requirement.id,
+            version: requirement.version,
+            files: [`${REQORD_DIR}/${REQUIREMENTS_DIR}/${requirement.id}.yaml`],
+          };
 
-        const { before, after } = await updateRequirement(cwd, id, updateOpts);
+          const callbacks: StatusTransitionCallbacks = {
+            updateStatus: async (cwdArg: string) => {
+              const updateOpts: UpdateOptions = { status: "implemented" };
+              const { after } = await updateRequirement(cwdArg, id, updateOpts);
+              return after.version;
+            },
+            buildBranchName: (t, s) =>
+              `${s.branchNaming.toImplementedPrefix}/${t.id}-implement-v${t.version}`,
+            buildPrTitle: (t) => `[Reqord] Implement ${t.id}`,
+            buildPrBody: (t) =>
+              `## Requirement Implementation\n\n| Field | Value |\n|-----------|------|\n| ID | ${t.id} |\n| Version | ${t.version} |\n\n### Changes\nstatus: approved → implemented`,
+            buildCommitMessage: (t) =>
+              `chore(reqord): mark ${t.id} as implemented`,
+          };
 
-        if (options.json) {
-          console.log(JSON.stringify(after, null, 2));
-          return;
-        }
+          const result = await executeStatusTransition(
+            cwd,
+            target,
+            callbacks,
+            true,
+            settings,
+          );
 
-        console.log(chalk.green(`Marked requirement as implemented: ${id}`));
-        console.log(`  status: ${before.status} → ${after.status}`);
-        if (before.version !== after.version) {
-          console.log(`  version: ${before.version} → ${after.version}`);
-        }
-        if (after.versionHistory.length > before.versionHistory.length) {
-          const latestEntry = after.versionHistory[after.versionHistory.length - 1];
-          console.log(`  history: ${latestEntry.summary}`);
+          if (options.json) {
+            console.log(JSON.stringify({ id, status: "implemented", prUrl: result.prUrl, prNumber: result.prNumber }, null, 2));
+          } else {
+            console.log(chalk.green(`Marked requirement as implemented: ${id}`));
+            if (result.prUrl) {
+              console.log(`  PR: ${result.prUrl}`);
+            }
+          }
+        } else {
+          // Direct update (default behavior)
+          const updateOpts: UpdateOptions = {
+            status: "implemented",
+          };
+
+          const { before, after } = await updateRequirement(cwd, id, updateOpts);
+
+          if (options.json) {
+            console.log(JSON.stringify(after, null, 2));
+            return;
+          }
+
+          console.log(chalk.green(`Marked requirement as implemented: ${id}`));
+          console.log(`  status: ${before.status} → ${after.status}`);
+          if (before.version !== after.version) {
+            console.log(`  version: ${before.version} → ${after.version}`);
+          }
+          if (after.versionHistory.length > before.versionHistory.length) {
+            const latestEntry = after.versionHistory[after.versionHistory.length - 1];
+            console.log(`  history: ${latestEntry.summary}`);
+          }
         }
       } catch (error) {
         handleError(error, { json: options.json });

@@ -8,6 +8,7 @@ import {
 import { revertToDraft } from "../../services/draft-reversion-service.js";
 import { handleError } from "../../utils/error-handler.js";
 import { findUnresolvedByArtifactId } from "../../repositories/feedback.js";
+import { loadProjectSettings } from "../../services/project-settings-service.js";
 
 export const draftCommand = new Command("draft")
   .description("Revert a specification to draft status")
@@ -61,7 +62,8 @@ export const draftCommand = new Command("draft")
 
         // approved/implemented → draft: use DraftReversionService (PR flow)
         if (specification.status === "approved" || specification.status === "implemented") {
-          const result = await revertToDraft(cwd, id, { dryRun: options.dryRun });
+          const settings = await loadProjectSettings(cwd);
+          const result = await revertToDraft(cwd, id, settings, { dryRun: options.dryRun });
 
           if (options.json) {
             console.log(JSON.stringify(result, null, 2));

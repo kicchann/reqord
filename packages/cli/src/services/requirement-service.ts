@@ -1,4 +1,4 @@
-import type { Requirement, Priority, FormatType, Status } from "@reqord/shared";
+import type { Requirement, Priority, FormatType, Status, ProjectSettings } from "@reqord/shared";
 import { REQUIREMENTS_DIR, RequirementSchema, formatZodError } from "@reqord/shared";
 import * as reqRepo from "../repositories/requirement.js";
 import { generateNextId } from "../utils/id-generator.js";
@@ -107,6 +107,7 @@ export interface UpdateOptions {
   patchData?: Record<string, unknown>;
   descriptionContent?: string;
   versionBump?: "major" | "patch";
+  settings?: ProjectSettings;
 }
 
 export interface UpdateResult {
@@ -161,9 +162,12 @@ export async function updateRequirement(
   const statusExplicitlyChanged =
     options.status !== undefined || (options.patchData != null && "status" in options.patchData);
   if (!statusExplicitlyChanged) {
+    const autoRevertMode = options.settings?.autoRevert.onContentChange ?? "always";
     const shouldRevert = versionService.shouldRevertToDraft(
       before.status as Status,
       hasContentChanges,
+      autoRevertMode,
+      options.versionBump,
     );
     if (shouldRevert) {
       merged.status = "draft";
@@ -226,6 +230,47 @@ export async function updateRequirement(
   }
 
   return { before, after, descriptionUpdated, versionChanged };
+}
+
+// --- Approval Prerequisites ---
+
+export interface PrerequisiteResult {
+  ok: boolean;
+  errors: string[];
+}
+
+export async function checkReqApprovalPrerequisites(
+  cwd: string,
+  reqId: string,
+  settings: ProjectSettings,
+): Promise<PrerequisiteResult> {
+  const errors: string[] = [];
+
+  // 1. description.md content check (controlled by settings)
+  if (settings.approvalPrerequisites.descriptionMdCheck) {
+    const description = await reqRepo.loadDescription(cwd, reqId);
+    if (description == null) {
+      errors.push("description.md does not exist or could not be read. Create description.md and write the description content.");
+    } else if (description.trim().length === 0) {
+      errors.push("description.md is empty. Please write the description content.");
+    } else if (description.includes("{{")) {
+      errors.push("description.md still contains template placeholders. Please edit and write the description content.");
+    }
+  }
+
+  // 2. Custom files check (req-directory)
+  for (const fileName of settings.approvalPrerequisites.customFiles) {
+    if (fileName.includes("..") || fileName.startsWith("/")) {
+      errors.push(`Invalid file name "${fileName}": path traversal is not allowed.`);
+      continue;
+    }
+    const content = await reqRepo.loadFile(cwd, reqId, fileName);
+    if (content == null) {
+      errors.push(`Required file "${fileName}" does not exist in the requirement directory.`);
+    }
+  }
+
+  return { ok: errors.length === 0, errors };
 }
 
 // --- Delete ---

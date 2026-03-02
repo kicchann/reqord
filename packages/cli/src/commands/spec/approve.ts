@@ -19,6 +19,9 @@ import {
 } from "../../services/spec-approval-helpers.js";
 import { handleError } from "../../utils/error-handler.js";
 import { findUnresolvedByArtifactId } from "../../repositories/feedback.js";
+import { loadProjectSettings } from "../../services/project-settings-service.js";
+import { shouldBlockApproval } from "../../services/feedback-validation.js";
+import { AppError, ErrorCode } from "../../utils/errors.js";
 
 export const specApproveCommand = new Command("approve")
   .description("Create an approval request PR for a specification (approval is confirmed when the PR is merged)")
@@ -28,11 +31,14 @@ export const specApproveCommand = new Command("approve")
     const cwd = process.cwd();
 
     try {
-      // 1. Load spec and check for existing approval PR first
+      // 1. Load project settings
+      const settings = await loadProjectSettings(cwd);
+
+      // 2. Load spec and check for existing approval PR first
       const { specification, design } = await showSpecification(cwd, id);
 
-      // 2. Check prerequisites
-      const prereqs = await checkSpecApprovalPrerequisites(cwd, id);
+      // 3. Check prerequisites
+      const prereqs = await checkSpecApprovalPrerequisites(cwd, id, settings);
       if (!prereqs.ok) {
         for (const error of prereqs.errors) {
           console.error(chalk.red(`Error: ${error}`));
@@ -44,26 +50,47 @@ export const specApproveCommand = new Command("approve")
 
       const { requirement } = await showRequirement(cwd, specification.requirementId);
 
-      // Feedback warning before approval
+      // Feedback warning (or block) before approval
       const unresolvedFeedbacks = await findUnresolvedByArtifactId(cwd, id);
       if (unresolvedFeedbacks.length > 0) {
-        console.log(
-          chalk.yellow(
-            `⚠ Warning: ${specification.id} has ${unresolvedFeedbacks.length} unresolved feedback(s):`,
-          ),
-        );
-        for (const fb of unresolvedFeedbacks) {
-          console.log(
-            chalk.yellow(
-              `  - #${fb.githubIssue} (${fb.type ?? "unclassified"}, severity: ${fb.severity ?? "medium"})`,
+        const { blocked, blockingFeedbacks } = shouldBlockApproval(unresolvedFeedbacks, settings);
+
+        if (blocked) {
+          console.error(
+            chalk.red(
+              `Error: ${specification.id} has ${blockingFeedbacks.length} unresolved feedback(s) that meet or exceed the severity threshold (${settings.feedbackValidation.severityThreshold}):`,
             ),
           );
+          for (const fb of blockingFeedbacks) {
+            console.error(
+              chalk.red(
+                `  - #${fb.githubIssue} (${fb.type ?? "unclassified"}, severity: ${fb.severity ?? "low"})`,
+              ),
+            );
+          }
+          throw new AppError(
+            `Approval blocked: ${blockingFeedbacks.length} unresolved feedback(s) at or above severity threshold "${settings.feedbackValidation.severityThreshold}". Resolve them or set feedbackValidation.blockOnUnresolved to false in setting.yaml.`,
+            ErrorCode.VALIDATION_ERROR,
+          );
+        } else {
+          console.log(
+            chalk.yellow(
+              `⚠ Warning: ${specification.id} has ${unresolvedFeedbacks.length} unresolved feedback(s):`,
+            ),
+          );
+          for (const fb of unresolvedFeedbacks) {
+            console.log(
+              chalk.yellow(
+                `  - #${fb.githubIssue} (${fb.type ?? "unclassified"}, severity: ${fb.severity ?? "low"})`,
+              ),
+            );
+          }
+          console.log(chalk.yellow("Proceeding with approval..."));
+          console.log();
         }
-        console.log(chalk.yellow("Proceeding with approval..."));
-        console.log();
       }
 
-      // 3. Build custom handler with actual design content
+      // 4. Build custom handler with actual design content
       const designContent = design ?? "";
       const designSummary = extractDesignSummary(designContent);
       const testPlan = extractDesignSection(designContent, "Test Plan")
@@ -84,7 +111,7 @@ export const specApproveCommand = new Command("approve")
           }),
       };
 
-      // 4. Build target
+      // 5. Build target
       const target: ApprovalTarget = {
         type: "specification",
         id: specification.id,
@@ -97,8 +124,8 @@ export const specApproveCommand = new Command("approve")
         ],
       };
 
-      // 5. Start approval
-      const result = await startApproval(cwd, target, customHandler, {
+      // 6. Start approval
+      const result = await startApproval(cwd, target, customHandler, settings, {
         dryRun: options.dryRun,
       });
 
@@ -106,10 +133,14 @@ export const specApproveCommand = new Command("approve")
         return;
       }
 
-      console.log(chalk.green(`Approval PR created: ${id}`));
-      console.log(`Approval will be confirmed when the PR is merged`);
-      console.log(`  Branch: ${result.branchName}`);
-      console.log(`  PR: ${result.prUrl}`);
+      if (result.prUrl) {
+        console.log(chalk.green(`Approval PR created: ${id}`));
+        console.log(`Approval will be confirmed when the PR is merged`);
+        console.log(`  Branch: ${result.branchName}`);
+        console.log(`  PR: ${result.prUrl}`);
+      } else {
+        console.log(chalk.green(`Approved: ${id} (direct commit)`));
+      }
     } catch (error) {
       handleError(error);
     }

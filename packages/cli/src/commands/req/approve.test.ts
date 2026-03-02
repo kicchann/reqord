@@ -1,10 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import type { Requirement } from "@reqord/shared";
+import type { Requirement, ProjectSettings } from "@reqord/shared";
 import { approveCommand } from "./approve.js";
 
 // Mock services BEFORE imports
 vi.mock("../../services/requirement-service.js", () => ({
   showRequirement: vi.fn(),
+  checkReqApprovalPrerequisites: vi.fn(),
 }));
 
 vi.mock("../../services/approval-service.js", () => ({
@@ -25,13 +26,53 @@ vi.mock("../../repositories/feedback.js", () => ({
   findUnresolvedByArtifactId: vi.fn(),
 }));
 
-import { showRequirement } from "../../services/requirement-service.js";
+vi.mock("../../services/project-settings-service.js", () => ({
+  loadProjectSettings: vi.fn(),
+}));
+
+import { showRequirement, checkReqApprovalPrerequisites } from "../../services/requirement-service.js";
 import {
   startApproval,
   type ApprovalResult,
 } from "../../services/approval-service.js";
 import { findUnresolvedByArtifactId } from "../../repositories/feedback.js";
+import { loadProjectSettings } from "../../services/project-settings-service.js";
 
+function makeDefaultSettings(): ProjectSettings {
+  return {
+    invariants: {
+      versioning: true,
+      cyclicDependencyCheck: true,
+      statusTransitionRules: true,
+      schemaValidation: true,
+    },
+    approvalPrerequisites: {
+      designMdCheck: true,
+      descriptionMdCheck: false,
+      customFiles: [],
+    },
+    statusTransitionPr: {
+      draftToApproved: true,
+      approvedToImplemented: false,
+      toDraft: true,
+    },
+    branchNaming: {
+      toApprovedPrefix: "reqord",
+      toImplementedPrefix: "reqord",
+      toDraftPrefix: "reqord",
+    },
+    feedbackValidation: {
+      blockOnUnresolved: false,
+      severityThreshold: "critical",
+    },
+    autoRevert: {
+      onContentChange: "always",
+    },
+    consistencyCheck: {
+      specNotImplementedLevel: "warning",
+    },
+  };
+}
 
 function makeRequirement(overrides: Partial<Requirement> = {}): Requirement {
   return {
@@ -63,6 +104,10 @@ describe("approveCommand", () => {
     approveCommand.setOptionValue("dryRun", undefined);
     // Default: no unresolved feedbacks
     vi.mocked(findUnresolvedByArtifactId).mockResolvedValue([]);
+    // Default: load project settings
+    vi.mocked(loadProjectSettings).mockResolvedValue(makeDefaultSettings());
+    // Default: prerequisites OK
+    vi.mocked(checkReqApprovalPrerequisites).mockResolvedValue({ ok: true, errors: [] });
   });
 
   it("正常系: approveコマンド実行", async () => {
@@ -83,6 +128,16 @@ describe("approveCommand", () => {
 
     await approveCommand.parseAsync(["node", "test", "req-000001"]);
 
+    // Project settings loaded
+    expect(loadProjectSettings).toHaveBeenCalledWith(process.cwd());
+
+    // Prerequisites checked with settings
+    expect(checkReqApprovalPrerequisites).toHaveBeenCalledWith(
+      process.cwd(),
+      "req-000001",
+      expect.any(Object),
+    );
+
     // Verify showRequirement called
     expect(showRequirement).toHaveBeenCalledWith(process.cwd(), "req-000001");
 
@@ -98,6 +153,7 @@ describe("approveCommand", () => {
         files: [".reqord/requirements/req-000001.yaml"],
       },
       expect.objectContaining({ revalidate: expect.any(Function), buildPrBody: expect.any(Function) }),
+      expect.objectContaining({ statusTransitionPr: expect.any(Object) }),
       { dryRun: undefined }
     );
 
@@ -116,6 +172,34 @@ describe("approveCommand", () => {
     );
 
     consoleLogSpy.mockRestore();
+  });
+
+  it("前提条件NGでエラー表示して終了", async () => {
+    vi.mocked(checkReqApprovalPrerequisites).mockResolvedValue({
+      ok: false,
+      errors: [
+        "description.md still contains template placeholders. Please edit and write the description content.",
+      ],
+    });
+
+    const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    await approveCommand.parseAsync(["node", "test", "req-000001"]);
+
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      expect.stringContaining("description.md still contains template placeholders")
+    );
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      expect.stringContaining("Please resolve the issues first")
+    );
+
+    // Exit code set
+    expect(process.exitCode).toBe(1);
+
+    // startApproval NOT called
+    expect(startApproval).not.toHaveBeenCalled();
+
+    consoleErrorSpy.mockRestore();
   });
 
   it("エラー: 存在しないRequirementでエラー表示", async () => {
@@ -178,8 +262,9 @@ describe("approveCommand", () => {
       files: [".reqord/requirements/req-000042.yaml"],
     });
     expect(callArgs[2]).toEqual(expect.objectContaining({ revalidate: expect.any(Function) }));
+    expect(callArgs[3]).toEqual(expect.objectContaining({ statusTransitionPr: expect.any(Object) }));
     // Check dryRun is falsy (undefined or false)
-    expect(callArgs[3]?.dryRun).toBeFalsy();
+    expect(callArgs[4]?.dryRun).toBeFalsy();
 
     consoleLogSpy.mockRestore();
   });
@@ -207,6 +292,7 @@ describe("approveCommand", () => {
       process.cwd(),
       expect.any(Object),
       expect.objectContaining({ revalidate: expect.any(Function), buildPrBody: expect.any(Function) }),
+      expect.objectContaining({ statusTransitionPr: expect.any(Object) }),
       { dryRun: true }
     );
 
@@ -286,6 +372,36 @@ describe("approveCommand", () => {
 
     expect(consoleLogSpy).not.toHaveBeenCalledWith(
       expect.stringContaining("Warning")
+    );
+
+    consoleLogSpy.mockRestore();
+  });
+
+  it("settingsのdescriptionMdCheck=trueでも承認チェックにsettingsが渡される", async () => {
+    const customSettings = makeDefaultSettings();
+    customSettings.approvalPrerequisites.descriptionMdCheck = true;
+    vi.mocked(loadProjectSettings).mockResolvedValue(customSettings);
+
+    const requirement = makeRequirement();
+    vi.mocked(showRequirement).mockResolvedValue({
+      requirement,
+      description: null,
+    });
+    vi.mocked(startApproval).mockResolvedValue({
+      branchName: "reqord/req-000001-approve-v1.0",
+      prNumber: 1,
+      prUrl: "https://github.com/owner/repo/pull/1",
+    });
+
+    const consoleLogSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+
+    await approveCommand.parseAsync(["node", "test", "req-000001"]);
+
+    // Settings passed to checkReqApprovalPrerequisites
+    expect(checkReqApprovalPrerequisites).toHaveBeenCalledWith(
+      process.cwd(),
+      "req-000001",
+      customSettings,
     );
 
     consoleLogSpy.mockRestore();

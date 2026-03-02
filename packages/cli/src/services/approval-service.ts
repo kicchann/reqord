@@ -1,3 +1,4 @@
+import type { ProjectSettings } from "@reqord/shared";
 import * as gitRepo from "../repositories/git.js";
 import * as githubRepo from "../repositories/github.js";
 
@@ -22,23 +23,25 @@ export interface ApprovalHandler {
 }
 
 export interface ApprovalResult {
-  branchName: string;
-  prNumber: number;
-  prUrl: string;
+  branchName?: string;
+  prNumber?: number;
+  prUrl?: string;
 }
 
 export interface ApprovalOptions {
   dryRun?: boolean;
 }
 
-function buildBranchName(target: ApprovalTarget): string {
-  return `reqord/${target.id}-approve-v${target.version}`;
+function buildBranchName(target: ApprovalTarget, settings: ProjectSettings): string {
+  const prefix = settings.branchNaming.toApprovedPrefix;
+  return `${prefix}/${target.id}-approve-v${target.version}`;
 }
 
 export async function startApproval(
   cwd: string,
   target: ApprovalTarget,
   handler: ApprovalHandler,
+  settings: ProjectSettings,
   options?: ApprovalOptions,
 ): Promise<ApprovalResult> {
   // 1. Precondition check
@@ -48,58 +51,72 @@ export async function startApproval(
     );
   }
 
-  const branchName = buildBranchName(target);
+  const branchName = buildBranchName(target, settings);
 
   // 2. Dry-run mode
   if (options?.dryRun) {
     const prTitle = handler.buildPrTitle(target);
-    console.log(`[dry-run] Create branch: ${branchName}`);
-    console.log(`[dry-run] Status change: draft → approved`);
-    console.log(`[dry-run] Create PR: ${prTitle}`);
-    return { branchName, prNumber: 0, prUrl: "" };
+    if (settings.statusTransitionPr.draftToApproved) {
+      console.log(`[dry-run] Create branch: ${branchName}`);
+      console.log(`[dry-run] Status change: draft → approved`);
+      console.log(`[dry-run] Create PR: ${prTitle}`);
+      return { branchName, prNumber: 0, prUrl: "" };
+    } else {
+      console.log(`[dry-run] Status change: draft → approved (direct commit)`);
+      return {};
+    }
   }
 
   // 3. Re-validate
   await handler.revalidate(cwd, target);
 
-  // 4. Save original branch
-  const originalBranch = await gitRepo.getCurrentBranch(cwd);
+  if (settings.statusTransitionPr.draftToApproved) {
+    // PR flow: branch → update → commit → push → PR
+    const originalBranch = await gitRepo.getCurrentBranch(cwd);
 
-  try {
-    // 5. Create and switch to approval branch
-    await gitRepo.createBranch(cwd, branchName);
-    await gitRepo.checkout(cwd, branchName);
-
-    // 6. Update status via handler
-    const newVersion = await handler.updateStatus(cwd, target);
-
-    // 7. Stage and commit
-    await gitRepo.add(cwd, target.files);
-    await gitRepo.commit(cwd, `chore(reqord): request approval for ${target.id}`);
-    await gitRepo.push(cwd, branchName);
-
-    // 8. Build PR title/body AFTER updateStatus to use newVersion
-    const updatedTarget = { ...target, version: newVersion };
-    const prTitle = handler.buildPrTitle(updatedTarget);
-    const prBody = handler.buildPrBody(updatedTarget);
-
-    // 9. Create PR
-    const prInfo = await githubRepo.createPullRequest({
-      title: prTitle,
-      body: prBody,
-      head: branchName,
-    });
-
-    return {
-      branchName,
-      prNumber: prInfo.number,
-      prUrl: prInfo.url,
-    };
-  } finally {
     try {
-      await gitRepo.checkout(cwd, originalBranch);
-    } catch {
-      // Best-effort restore
+      // 4. Create and switch to approval branch
+      await gitRepo.createBranch(cwd, branchName);
+      await gitRepo.checkout(cwd, branchName);
+
+      // 5. Update status via handler
+      const newVersion = await handler.updateStatus(cwd, target);
+
+      // 6. Stage and commit
+      await gitRepo.add(cwd, target.files);
+      await gitRepo.commit(cwd, `chore(reqord): request approval for ${target.id}`);
+      await gitRepo.push(cwd, branchName);
+
+      // 7. Build PR title/body AFTER updateStatus to use newVersion
+      const updatedTarget = { ...target, version: newVersion };
+      const prTitle = handler.buildPrTitle(updatedTarget);
+      const prBody = handler.buildPrBody(updatedTarget);
+
+      // 8. Create PR
+      const prInfo = await githubRepo.createPullRequest({
+        title: prTitle,
+        body: prBody,
+        head: branchName,
+      });
+
+      return {
+        branchName,
+        prNumber: prInfo.number,
+        prUrl: prInfo.url,
+      };
+    } finally {
+      try {
+        await gitRepo.checkout(cwd, originalBranch);
+      } catch {
+        // Best-effort restore
+      }
     }
+  } else {
+    // Direct commit flow: update status on current branch
+    await handler.updateStatus(cwd, target);
+    await gitRepo.add(cwd, target.files);
+    await gitRepo.commit(cwd, `chore(reqord): approve ${target.id} (direct commit)`);
+
+    return {};
   }
 }

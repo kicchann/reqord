@@ -39,6 +39,14 @@ vi.mock("../../services/draft-reversion-service.js", () => ({
   revertToDraft: vi.fn(),
 }));
 
+vi.mock("../../repositories/feedback.js", () => ({
+  findUnresolvedByArtifactId: vi.fn(),
+}));
+
+vi.mock("../../services/project-settings-service.js", () => ({
+  loadProjectSettings: vi.fn(),
+}));
+
 import {
   showSpecification,
   checkSpecApprovalPrerequisites,
@@ -54,6 +62,8 @@ import {
   buildSpecApprovalPrBody,
 } from "../../services/spec-approval-helpers.js";
 import { revertToDraft } from "../../services/draft-reversion-service.js";
+import { findUnresolvedByArtifactId } from "../../repositories/feedback.js";
+import { loadProjectSettings } from "../../services/project-settings-service.js";
 
 function makeRequirement(overrides: Partial<Requirement> = {}): Requirement {
   return {
@@ -107,6 +117,18 @@ describe("Specification承認フロー統合テスト", () => {
     implementCommand.setOptionValue("json", undefined);
     draftCommand.setOptionValue("dryRun", undefined);
     draftCommand.setOptionValue("json", undefined);
+    // Default: no unresolved feedbacks
+    vi.mocked(findUnresolvedByArtifactId).mockResolvedValue([]);
+    // Default: load project settings (returns default settings)
+    vi.mocked(loadProjectSettings).mockResolvedValue({
+      invariants: { versioning: true, cyclicDependencyCheck: true, statusTransitionRules: true, schemaValidation: true },
+      approvalPrerequisites: { designMdCheck: true, descriptionMdCheck: false, customFiles: [] },
+      statusTransitionPr: { draftToApproved: true, approvedToImplemented: false, toDraft: true },
+      branchNaming: { toApprovedPrefix: "reqord", toImplementedPrefix: "reqord", toDraftPrefix: "reqord" },
+      feedbackValidation: { blockOnUnresolved: false, severityThreshold: "critical" },
+      autoRevert: { onContentChange: "always" },
+      consistencyCheck: { specNotImplementedLevel: "warning" },
+    });
   });
 
   describe("承認フロー正常系", () => {
@@ -140,8 +162,8 @@ describe("Specification承認フロー統合テスト", () => {
       // Act
       await specApproveCommand.parseAsync(["node", "test", "spec-000001"]);
 
-      // Assert: Prerequisites checked
-      expect(checkSpecApprovalPrerequisites).toHaveBeenCalledWith(process.cwd(), "spec-000001");
+      // Assert: Prerequisites checked (with settings)
+      expect(checkSpecApprovalPrerequisites).toHaveBeenCalledWith(process.cwd(), "spec-000001", expect.any(Object));
 
       // Assert: startApproval called with specification target
       expect(startApproval).toHaveBeenCalledWith(
@@ -152,6 +174,7 @@ describe("Specification承認フロー統合テスト", () => {
           version: "1.0",
         }),
         expect.any(Object),
+        expect.objectContaining({ statusTransitionPr: expect.any(Object) }),
         { dryRun: undefined },
       );
 
@@ -202,6 +225,7 @@ describe("Specification承認フロー統合テスト", () => {
         process.cwd(),
         expect.any(Object),
         expect.any(Object),
+        expect.objectContaining({ statusTransitionPr: expect.any(Object) }),
         { dryRun: true },
       );
 
@@ -261,6 +285,7 @@ describe("Specification承認フロー統合テスト", () => {
       expect(revertToDraft).toHaveBeenCalledWith(
         process.cwd(),
         "spec-000001",
+        expect.objectContaining({ statusTransitionPr: expect.any(Object) }),
         { dryRun: undefined },
       );
 

@@ -16,9 +16,14 @@ vi.mock("../../repositories/feedback.js", () => ({
   findUnresolvedByArtifactId: vi.fn(),
 }));
 
+vi.mock("../../services/project-settings-service.js", () => ({
+  loadProjectSettings: vi.fn(),
+}));
+
 import { updateSpecification, showSpecification } from "../../services/specification-service.js";
 import { revertToDraft } from "../../services/draft-reversion-service.js";
 import { findUnresolvedByArtifactId } from "../../repositories/feedback.js";
+import { loadProjectSettings } from "../../services/project-settings-service.js";
 
 const mockUpdateSpecification = vi.mocked(updateSpecification);
 const mockShowSpecification = vi.mocked(showSpecification);
@@ -54,6 +59,16 @@ describe("spec draft command", () => {
     draftCommand.setOptionValue("json", undefined);
     // Default: no unresolved feedbacks
     vi.mocked(findUnresolvedByArtifactId).mockResolvedValue([]);
+    // Default: load project settings
+    vi.mocked(loadProjectSettings).mockResolvedValue({
+      invariants: { versioning: true, cyclicDependencyCheck: true, statusTransitionRules: true, schemaValidation: true },
+      approvalPrerequisites: { designMdCheck: true, descriptionMdCheck: false, customFiles: [] },
+      statusTransitionPr: { draftToApproved: true, approvedToImplemented: false, toDraft: true },
+      branchNaming: { toApprovedPrefix: "reqord", toImplementedPrefix: "reqord", toDraftPrefix: "reqord" },
+      feedbackValidation: { blockOnUnresolved: false, severityThreshold: "critical" },
+      autoRevert: { onContentChange: "always" },
+      consistencyCheck: { specNotImplementedLevel: "warning" },
+    });
   });
 
   describe("approved/implemented → draft (PR flow)", () => {
@@ -72,6 +87,7 @@ describe("spec draft command", () => {
       expect(mockRevertToDraft).toHaveBeenCalledWith(
         process.cwd(),
         "spec-000001",
+        expect.objectContaining({ statusTransitionPr: expect.any(Object) }),
         { dryRun: undefined },
       );
       expect(mockUpdateSpecification).not.toHaveBeenCalled();
@@ -108,6 +124,7 @@ describe("spec draft command", () => {
       expect(mockRevertToDraft).toHaveBeenCalledWith(
         process.cwd(),
         "spec-000001",
+        expect.objectContaining({ statusTransitionPr: expect.any(Object) }),
         { dryRun: true },
       );
     });

@@ -127,12 +127,33 @@ export function isValidTransition(from: Status, to: Status): boolean {
 
 /**
  * Determine if requirement should revert to draft due to content changes
+ *
+ * @param currentStatus - Current status of the requirement
+ * @param hasContentChanges - Whether content has changed
+ * @param autoRevertMode - Auto-revert mode from project settings (default: "always")
+ * @param bumpType - Version bump type, used for "major-only" mode
  */
 export function shouldRevertToDraft(
   currentStatus: Status,
   hasContentChanges: boolean,
+  autoRevertMode: "always" | "major-only" | "never" = "always",
+  bumpType?: "patch" | "major",
 ): boolean {
-  return (currentStatus === "approved" || currentStatus === "implemented") && hasContentChanges;
+  if (currentStatus !== "approved" && currentStatus !== "implemented") {
+    return false;
+  }
+  if (!hasContentChanges) {
+    return false;
+  }
+
+  switch (autoRevertMode) {
+    case "always":
+      return true;
+    case "major-only":
+      return bumpType === "major";
+    case "never":
+      return false;
+  }
 }
 
 /**

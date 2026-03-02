@@ -16,14 +16,32 @@ vi.mock("../../services/impl-validation-service.js", () => ({
   checkImplementConsistency: vi.fn(),
 }));
 
+vi.mock("../../services/project-settings-service.js", () => ({
+  loadProjectSettings: vi.fn(),
+}));
+
 import { updateRequirement, showRequirement } from "../../services/requirement-service.js";
 import { listSpecifications } from "../../services/specification-service.js";
 import { checkImplementConsistency } from "../../services/impl-validation-service.js";
+import { loadProjectSettings } from "../../services/project-settings-service.js";
 
 const mockUpdateRequirement = vi.mocked(updateRequirement);
+const mockLoadProjectSettings = vi.mocked(loadProjectSettings);
 const mockShowRequirement = vi.mocked(showRequirement);
 const mockListSpecifications = vi.mocked(listSpecifications);
 const mockCheckConsistency = vi.mocked(checkImplementConsistency);
+
+function makeDefaultSettings() {
+  return {
+    invariants: { versioning: true as const, cyclicDependencyCheck: true as const, statusTransitionRules: true as const, schemaValidation: true as const },
+    approvalPrerequisites: { designMdCheck: true, descriptionMdCheck: false, customFiles: [] as string[] },
+    statusTransitionPr: { draftToApproved: true, approvedToImplemented: false, toDraft: true },
+    branchNaming: { toApprovedPrefix: "reqord", toImplementedPrefix: "reqord", toDraftPrefix: "reqord" },
+    feedbackValidation: { blockOnUnresolved: false, severityThreshold: "critical" as const },
+    autoRevert: { onContentChange: "always" as const },
+    consistencyCheck: { specNotImplementedLevel: "warning" as const },
+  };
+}
 
 function makeRequirement(overrides: Partial<Requirement> = {}): Requirement {
   return {
@@ -79,6 +97,8 @@ describe("req implement command", () => {
     implementCommand.setOptionValue("json", undefined);
     // Default: no consistency warnings
     mockCheckConsistency.mockResolvedValue({ warnings: [] });
+    // Default: warning level settings
+    mockLoadProjectSettings.mockResolvedValue(makeDefaultSettings());
   });
 
   it("approved → implementedへの遷移", async () => {
@@ -299,6 +319,129 @@ describe("req implement command", () => {
     );
     // Still proceeds to implement
     expect(mockUpdateRequirement).toHaveBeenCalled();
+  });
+
+  // spec-000040: specNotImplementedLevel tests
+  it("specNotImplementedLevel=warning: spec未実装でも警告のみで実装完了（デフォルト動作）", async () => {
+    const before = makeRequirement({ status: "approved" });
+    const after = makeRequirement({ status: "implemented" });
+
+    mockShowRequirement.mockResolvedValue({ requirement: before, description: null });
+    mockListSpecifications.mockResolvedValue([]);
+    mockUpdateRequirement.mockResolvedValue({ before, after, descriptionUpdated: false });
+    mockCheckConsistency.mockResolvedValue({
+      warnings: [
+        {
+          type: "spec-not-implemented",
+          message: "spec-000001 status is approved (not implemented)",
+          details: { id: "spec-000001", currentStatus: "approved" },
+        },
+      ],
+    });
+
+    await implementCommand.parseAsync(["node", "test", "req-000001"]);
+
+    expect(consoleWarnSpy).toHaveBeenCalledWith(
+      expect.stringContaining("Consistency check warnings"),
+    );
+    expect(mockUpdateRequirement).toHaveBeenCalled();
+  });
+
+  it("specNotImplementedLevel=error: spec未実装時にエラーで処理をブロック", async () => {
+    const before = makeRequirement({ status: "approved" });
+
+    mockShowRequirement.mockResolvedValue({ requirement: before, description: null });
+    mockListSpecifications.mockResolvedValue([]);
+    mockLoadProjectSettings.mockResolvedValue({
+      ...makeDefaultSettings(),
+      consistencyCheck: { specNotImplementedLevel: "error" as const },
+    });
+    mockCheckConsistency.mockResolvedValue({
+      warnings: [
+        {
+          type: "spec-not-implemented",
+          message: "spec-000001 status is approved (not implemented)",
+          details: { id: "spec-000001", currentStatus: "approved" },
+        },
+      ],
+    });
+
+    await implementCommand.parseAsync(["node", "test", "req-000001"]);
+
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      expect.stringContaining("Some specifications are not yet implemented"),
+    );
+    expect(process.exitCode).toBe(1);
+    expect(mockUpdateRequirement).not.toHaveBeenCalled();
+  });
+
+  it("specNotImplementedLevel=error: 全spec実装済みなら正常に実装完了", async () => {
+    const before = makeRequirement({ status: "approved" });
+    const after = makeRequirement({ status: "implemented" });
+
+    mockShowRequirement.mockResolvedValue({ requirement: before, description: null });
+    mockListSpecifications.mockResolvedValue([]);
+    mockUpdateRequirement.mockResolvedValue({ before, after, descriptionUpdated: false });
+    mockLoadProjectSettings.mockResolvedValue({
+      ...makeDefaultSettings(),
+      consistencyCheck: { specNotImplementedLevel: "error" as const },
+    });
+    mockCheckConsistency.mockResolvedValue({ warnings: [] });
+
+    await implementCommand.parseAsync(["node", "test", "req-000001"]);
+
+    expect(mockUpdateRequirement).toHaveBeenCalled();
+    expect(consoleLogSpy).toHaveBeenCalledWith(
+      expect.stringContaining("Marked requirement as implemented"),
+    );
+  });
+
+  it("specNotImplementedLevel=error: specが0件なら警告もエラーもなく正常処理", async () => {
+    const before = makeRequirement({ status: "approved" });
+    const after = makeRequirement({ status: "implemented" });
+
+    mockShowRequirement.mockResolvedValue({ requirement: before, description: null });
+    mockListSpecifications.mockResolvedValue([]);
+    mockUpdateRequirement.mockResolvedValue({ before, after, descriptionUpdated: false });
+    mockLoadProjectSettings.mockResolvedValue({
+      ...makeDefaultSettings(),
+      consistencyCheck: { specNotImplementedLevel: "error" as const },
+    });
+    mockCheckConsistency.mockResolvedValue({ warnings: [] });
+
+    await implementCommand.parseAsync(["node", "test", "req-000001"]);
+
+    expect(mockUpdateRequirement).toHaveBeenCalled();
+  });
+
+  it("specNotImplementedLevel=error: issue-not-closedは影響を受けず常に警告のみで通過", async () => {
+    const before = makeRequirement({ status: "approved" });
+    const after = makeRequirement({ status: "implemented" });
+
+    mockShowRequirement.mockResolvedValue({ requirement: before, description: null });
+    mockListSpecifications.mockResolvedValue([]);
+    mockUpdateRequirement.mockResolvedValue({ before, after, descriptionUpdated: false });
+    mockLoadProjectSettings.mockResolvedValue({
+      ...makeDefaultSettings(),
+      consistencyCheck: { specNotImplementedLevel: "error" as const },
+    });
+    mockCheckConsistency.mockResolvedValue({
+      warnings: [
+        {
+          type: "issue-not-closed",
+          message: "#44 (Service implementation) is open",
+          details: { id: "44", currentStatus: "open" },
+        },
+      ],
+    });
+
+    await implementCommand.parseAsync(["node", "test", "req-000001"]);
+
+    // issue-not-closed is not blocked by specNotImplementedLevel
+    expect(mockUpdateRequirement).toHaveBeenCalled();
+    expect(consoleWarnSpy).toHaveBeenCalledWith(
+      expect.stringContaining("Consistency check warnings"),
+    );
   });
 
   it("整合性チェック警告があってもimplemented遷移完了", async () => {

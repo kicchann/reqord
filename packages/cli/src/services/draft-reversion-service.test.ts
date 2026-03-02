@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import type { Requirement, Specification } from "@reqord/shared";
+import type { Requirement, Specification, ProjectSettings } from "@reqord/shared";
 
 // Mock repositories
 vi.mock("../repositories/git.js", () => ({
@@ -45,6 +45,43 @@ import { updateRequirement } from "./requirement-service.js";
 import { updateSpecification } from "./specification-service.js";
 import { analyzeImpact } from "./impact-service.js";
 import { revertToDraft } from "./draft-reversion-service.js";
+
+function makeSettings(overrides: Partial<ProjectSettings["statusTransitionPr"]> = {}): ProjectSettings {
+  return {
+    invariants: {
+      versioning: true,
+      cyclicDependencyCheck: true,
+      statusTransitionRules: true,
+      schemaValidation: true,
+    },
+    approvalPrerequisites: {
+      designMdCheck: true,
+      descriptionMdCheck: false,
+      customFiles: [],
+    },
+    statusTransitionPr: {
+      draftToApproved: true,
+      approvedToImplemented: false,
+      toDraft: true,
+      ...overrides,
+    },
+    branchNaming: {
+      toApprovedPrefix: "reqord",
+      toImplementedPrefix: "reqord",
+      toDraftPrefix: "reqord",
+    },
+    feedbackValidation: {
+      blockOnUnresolved: false,
+      severityThreshold: "critical",
+    },
+    autoRevert: {
+      onContentChange: "always",
+    },
+    consistencyCheck: {
+      specNotImplementedLevel: "warning",
+    },
+  };
+}
 
 function makeRequirement(overrides: Partial<Requirement> = {}): Requirement {
   return {
@@ -119,8 +156,9 @@ describe("DraftReversionService", () => {
         after: afterReq,
         descriptionUpdated: false,
       });
+      const settings = makeSettings();
 
-      const result = await revertToDraft(process.cwd(), "req-000001");
+      const result = await revertToDraft(process.cwd(), "req-000001", settings);
 
       expect(result.previousStatus).toBe("approved");
       expect(result.prNumber).toBe(42);
@@ -137,8 +175,9 @@ describe("DraftReversionService", () => {
         after: afterReq,
         descriptionUpdated: false,
       });
+      const settings = makeSettings();
 
-      const result = await revertToDraft(process.cwd(), "req-000001");
+      const result = await revertToDraft(process.cwd(), "req-000001", settings);
 
       expect(result.previousStatus).toBe("implemented");
       expect(result.prNumber).toBe(42);
@@ -147,8 +186,9 @@ describe("DraftReversionService", () => {
     it("draft状態のreqに対するエラー", async () => {
       const req = makeRequirement({ status: "draft" });
       vi.mocked(reqRepo.findByIdOrThrow).mockResolvedValue(req);
+      const settings = makeSettings();
 
-      await expect(revertToDraft(process.cwd(), "req-000001")).rejects.toThrow(
+      await expect(revertToDraft(process.cwd(), "req-000001", settings)).rejects.toThrow(
         "Cannot revert to draft: req-000001 is already in draft status.",
       );
     });
@@ -169,8 +209,9 @@ describe("DraftReversionService", () => {
         after: afterReq,
         descriptionUpdated: false,
       });
+      const settings = makeSettings();
 
-      const result = await revertToDraft(process.cwd(), "req-000001");
+      const result = await revertToDraft(process.cwd(), "req-000001", settings);
 
       expect(result.impactedRequirements).toEqual(["req-000002"]);
     });
@@ -185,8 +226,9 @@ describe("DraftReversionService", () => {
         after: afterReq,
         descriptionUpdated: false,
       });
+      const settings = makeSettings();
 
-      await revertToDraft(process.cwd(), "req-000001");
+      await revertToDraft(process.cwd(), "req-000001", settings);
 
       expect(gitRepo.createBranch).toHaveBeenCalledWith(
         process.cwd(),
@@ -210,8 +252,9 @@ describe("DraftReversionService", () => {
         after: afterReq,
         descriptionUpdated: false,
       });
+      const settings = makeSettings();
 
-      await revertToDraft(process.cwd(), "req-000001");
+      await revertToDraft(process.cwd(), "req-000001", settings);
 
       expect(githubRepo.createPullRequest).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -235,8 +278,9 @@ describe("DraftReversionService", () => {
         after: afterReq,
         descriptionUpdated: false,
       });
+      const settings = makeSettings();
 
-      const result = await revertToDraft(process.cwd(), "req-000001");
+      const result = await revertToDraft(process.cwd(), "req-000001", settings);
 
       expect(result.impactedRequirements).toEqual([]);
       expect(result.prNumber).toBe(42);
@@ -252,8 +296,9 @@ describe("DraftReversionService", () => {
         after: afterReq,
         descriptionUpdated: false,
       });
+      const settings = makeSettings();
 
-      await revertToDraft(process.cwd(), "req-000001");
+      await revertToDraft(process.cwd(), "req-000001", settings);
 
       // updateRequirement should be called with only status, no versionBump
       expect(updateRequirement).toHaveBeenCalledWith(
@@ -274,8 +319,9 @@ describe("DraftReversionService", () => {
         after: afterReq,
         descriptionUpdated: false,
       });
+      const settings = makeSettings();
 
-      await revertToDraft(process.cwd(), "req-000001");
+      await revertToDraft(process.cwd(), "req-000001", settings);
 
       // Last checkout should be back to original branch
       const checkoutCalls = vi.mocked(gitRepo.checkout).mock.calls;
@@ -295,8 +341,9 @@ describe("DraftReversionService", () => {
         before: spec,
         after: afterSpec,
       });
+      const settings = makeSettings();
 
-      const result = await revertToDraft(process.cwd(), "spec-000001");
+      const result = await revertToDraft(process.cwd(), "spec-000001", settings);
 
       expect(result.previousStatus).toBe("approved");
       expect(result.prNumber).toBe(42);
@@ -313,8 +360,9 @@ describe("DraftReversionService", () => {
         before: spec,
         after: afterSpec,
       });
+      const settings = makeSettings();
 
-      await revertToDraft(process.cwd(), "spec-000001");
+      await revertToDraft(process.cwd(), "spec-000001", settings);
 
       expect(updateSpecification).toHaveBeenCalledWith(
         process.cwd(),
@@ -350,8 +398,9 @@ describe("DraftReversionService", () => {
         before: spec,
         after: afterSpec,
       });
+      const settings = makeSettings();
 
-      const result = await revertToDraft(process.cwd(), "spec-000001");
+      const result = await revertToDraft(process.cwd(), "spec-000001", settings);
 
       expect(result.impactedRequirements).toEqual(["req-000002"]);
       // analyzeImpact should be called twice: once for spec, once for parent req
@@ -370,8 +419,9 @@ describe("DraftReversionService", () => {
         before: spec,
         after: afterSpec,
       });
+      const settings = makeSettings();
 
-      await revertToDraft(process.cwd(), "spec-000001");
+      await revertToDraft(process.cwd(), "spec-000001", settings);
 
       const callArgs = vi.mocked(githubRepo.createPullRequest).mock.calls[0][0];
       expect(callArgs.body).toContain("Specification Reversion to Draft");
@@ -389,8 +439,9 @@ describe("DraftReversionService", () => {
         before: spec,
         after: afterSpec,
       });
+      const settings = makeSettings();
 
-      await revertToDraft(process.cwd(), "spec-000001");
+      await revertToDraft(process.cwd(), "spec-000001", settings);
 
       expect(gitRepo.createBranch).toHaveBeenCalledWith(
         process.cwd(),
@@ -404,8 +455,9 @@ describe("DraftReversionService", () => {
       const req = makeRequirement({ status: "approved" });
       vi.mocked(reqRepo.findByIdOrThrow).mockResolvedValue(req);
       vi.mocked(analyzeImpact).mockResolvedValue(makeImpactAnalysis());
+      const settings = makeSettings();
 
-      const result = await revertToDraft(process.cwd(), "req-000001", { dryRun: true });
+      const result = await revertToDraft(process.cwd(), "req-000001", settings, { dryRun: true });
 
       expect(gitRepo.createBranch).not.toHaveBeenCalled();
       expect(gitRepo.checkout).not.toHaveBeenCalled();
@@ -426,8 +478,9 @@ describe("DraftReversionService", () => {
           ],
         }),
       );
+      const settings = makeSettings();
 
-      const result = await revertToDraft(process.cwd(), "req-000001", { dryRun: true });
+      const result = await revertToDraft(process.cwd(), "req-000001", settings, { dryRun: true });
 
       expect(result.impactedRequirements).toEqual(["req-000002"]);
       expect(result.previousStatus).toBe("approved");
@@ -437,13 +490,158 @@ describe("DraftReversionService", () => {
       const req = makeRequirement({ status: "approved" });
       vi.mocked(reqRepo.findByIdOrThrow).mockResolvedValue(req);
       vi.mocked(analyzeImpact).mockResolvedValue(makeImpactAnalysis());
+      const settings = makeSettings();
 
       const consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {});
 
-      await revertToDraft(process.cwd(), "req-000001", { dryRun: true });
+      await revertToDraft(process.cwd(), "req-000001", settings, { dryRun: true });
 
       expect(consoleSpy).not.toHaveBeenCalled();
       consoleSpy.mockRestore();
+    });
+  });
+
+  describe("toDraft: false（PRスキップ）", () => {
+    it("toDraft=false の場合、ブランチ作成・プッシュ・PR作成をスキップする", async () => {
+      const req = makeRequirement({ status: "approved" });
+      const afterReq = makeRequirement({ status: "draft" });
+      vi.mocked(reqRepo.findByIdOrThrow).mockResolvedValue(req);
+      vi.mocked(analyzeImpact).mockResolvedValue(makeImpactAnalysis());
+      vi.mocked(updateRequirement).mockResolvedValue({
+        before: req,
+        after: afterReq,
+        descriptionUpdated: false,
+      });
+      const settings = makeSettings({ toDraft: false });
+
+      const result = await revertToDraft(process.cwd(), "req-000001", settings);
+
+      // Status update is called
+      expect(updateRequirement).toHaveBeenCalledWith(
+        process.cwd(),
+        "req-000001",
+        { status: "draft" },
+      );
+
+      // git add and commit are called on current branch
+      expect(gitRepo.add).toHaveBeenCalled();
+      expect(gitRepo.commit).toHaveBeenCalledWith(
+        process.cwd(),
+        "chore(reqord): revert req-000001 to draft (direct commit)"
+      );
+
+      // branch creation, push, PR creation are skipped
+      expect(gitRepo.createBranch).not.toHaveBeenCalled();
+      expect(gitRepo.push).not.toHaveBeenCalled();
+      expect(githubRepo.createPullRequest).not.toHaveBeenCalled();
+
+      // Result has no PR info
+      expect(result.prNumber).toBeUndefined();
+      expect(result.prUrl).toBeUndefined();
+      expect(result.previousStatus).toBe("approved");
+    });
+
+    it("toDraft=false の場合、元のブランチへの復帰もしない", async () => {
+      const req = makeRequirement({ status: "approved" });
+      const afterReq = makeRequirement({ status: "draft" });
+      vi.mocked(reqRepo.findByIdOrThrow).mockResolvedValue(req);
+      vi.mocked(analyzeImpact).mockResolvedValue(makeImpactAnalysis());
+      vi.mocked(updateRequirement).mockResolvedValue({
+        before: req,
+        after: afterReq,
+        descriptionUpdated: false,
+      });
+      const settings = makeSettings({ toDraft: false });
+
+      await revertToDraft(process.cwd(), "req-000001", settings);
+
+      // getCurrentBranch is not called (no branch management needed)
+      expect(gitRepo.getCurrentBranch).not.toHaveBeenCalled();
+      expect(gitRepo.checkout).not.toHaveBeenCalled();
+    });
+
+    it("toDraft=false の場合も impactedRequirements が返される", async () => {
+      const req = makeRequirement({ status: "approved" });
+      const afterReq = makeRequirement({ status: "draft" });
+      vi.mocked(reqRepo.findByIdOrThrow).mockResolvedValue(req);
+      vi.mocked(analyzeImpact).mockResolvedValue(
+        makeImpactAnalysis({
+          directImpacts: [
+            { id: "req-000002", relation: "blocks", depth: 1, path: ["req-000001"], title: "依存" },
+          ],
+        }),
+      );
+      vi.mocked(updateRequirement).mockResolvedValue({
+        before: req,
+        after: afterReq,
+        descriptionUpdated: false,
+      });
+      const settings = makeSettings({ toDraft: false });
+
+      const result = await revertToDraft(process.cwd(), "req-000001", settings);
+
+      expect(result.impactedRequirements).toEqual(["req-000002"]);
+    });
+
+    it("toDraft=false かつ dry-run の場合、何もしない", async () => {
+      const req = makeRequirement({ status: "approved" });
+      vi.mocked(reqRepo.findByIdOrThrow).mockResolvedValue(req);
+      vi.mocked(analyzeImpact).mockResolvedValue(makeImpactAnalysis());
+      const settings = makeSettings({ toDraft: false });
+
+      const result = await revertToDraft(process.cwd(), "req-000001", settings, { dryRun: true });
+
+      expect(updateRequirement).not.toHaveBeenCalled();
+      expect(gitRepo.add).not.toHaveBeenCalled();
+      expect(gitRepo.commit).not.toHaveBeenCalled();
+      expect(result.prNumber).toBeUndefined();
+    });
+  });
+
+  describe("ブランチ命名規則カスタマイズ (spec-000038)", () => {
+    it("デフォルト設定ではブランチ名が reqord/{id}-revert-to-draft になること", async () => {
+      const req = makeRequirement({ status: "approved" });
+      vi.mocked(reqRepo.findByIdOrThrow).mockResolvedValue(req);
+      const settings = makeSettings();
+
+      await revertToDraft(process.cwd(), "req-000001", settings);
+
+      expect(gitRepo.createBranch).toHaveBeenCalledWith(
+        process.cwd(),
+        "reqord/req-000001-revert-to-draft",
+      );
+    });
+
+    it("カスタムプレフィックスでブランチ名が {toDraftPrefix}/{id}-revert-to-draft になること", async () => {
+      const req = makeRequirement({ status: "approved" });
+      vi.mocked(reqRepo.findByIdOrThrow).mockResolvedValue(req);
+      const settings = {
+        ...makeSettings(),
+        branchNaming: { ...makeSettings().branchNaming, toDraftPrefix: "revert" },
+      };
+
+      await revertToDraft(process.cwd(), "req-000001", settings);
+
+      expect(gitRepo.createBranch).toHaveBeenCalledWith(
+        process.cwd(),
+        "revert/req-000001-revert-to-draft",
+      );
+    });
+
+    it("specificationにもカスタムプレフィックスが適用されること", async () => {
+      const spec = makeSpecification({ status: "approved" });
+      vi.mocked(specRepo.findByIdOrThrow).mockResolvedValue(spec);
+      const settings = {
+        ...makeSettings(),
+        branchNaming: { ...makeSettings().branchNaming, toDraftPrefix: "my-revert" },
+      };
+
+      await revertToDraft(process.cwd(), "spec-000001", settings);
+
+      expect(gitRepo.createBranch).toHaveBeenCalledWith(
+        process.cwd(),
+        "my-revert/spec-000001-revert-to-draft",
+      );
     });
   });
 });
