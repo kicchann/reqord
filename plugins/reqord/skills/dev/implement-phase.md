@@ -4,11 +4,11 @@ SKILL.md の Step 5 で参照されるTDD実装の詳細手順。
 
 ---
 
-## reqord-implementerエージェントへの委譲
+## 実装エージェントへの委譲
 
 ### プロンプト構成
 
-以下の情報をまとめてreqord-implementer（tdd-implementer）エージェントに渡す:
+以下の情報をまとめてtdd-implementerエージェント（または同等の実装エージェント）に渡す:
 
 ```
 ## 目的

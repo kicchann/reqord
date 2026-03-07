@@ -42,7 +42,6 @@ claude --plugin-dir ./plugins/reqord
 |------------|------|
 | `reqord-explorer` | 要件・仕様を踏まえたコード調査 |
 | `reqord-architect` | 要件・仕様に基づく設計 |
-| `reqord-implementer` | 仕様に基づくTDD実装 |
 | `reqord-reviewer` | 要件・仕様に基づくコードレビュー |
 
 ## 前提条件

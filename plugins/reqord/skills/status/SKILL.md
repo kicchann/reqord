@@ -124,39 +124,33 @@ Step 1で取得したfeedback一覧から、openかつlinkedToが設定されて
 
 ---
 
-## Step 6: 次のアクション提案
+## Step 6: 準備状況サマリー
 
-### 6.1 着手推奨specの選定
+### 6.1 準備状況テーブル
 
-フィルタがapprovedの場合、以下の優先順位で着手推奨specを選定する:
+フィルタがapprovedの場合、各specの準備状況を分類して表示する:
 
-1. **priority: high** かつ **design.md記述済み** → すぐに実装着手可能
-2. **priority: high** かつ **design.mdテンプレート** → まずdesign.md作成が必要
-3. **priority: medium** かつ **design.md記述済み** → 次の候補
-4. **feedback-review flagあり** → フィードバック対応が先
+```
+### 準備状況
+
+| Status | Spec IDs | 説明 |
+|--------|----------|------|
+| Ready | spec-000003 (high/small) | design.md記述済み、ブロッカーなし |
+| Needs design | spec-000005 (medium/medium) | design.mdがテンプレートのまま |
+| Blocked | spec-000008 (high/medium) | blockedBy: spec-000003 |
+| Feedback pending | spec-000007 (low/large) | feedback-review flagあり |
+```
 
 ### 6.2 依存関係チェック
 
-推奨specに紐づくrequirementのdependencies（blockedBy）を確認し、ブロッカーがある場合は報告する。
+各specに紐づくrequirementのdependencies（blockedBy）を確認し、ブロッカーがある場合はテーブルに反映する。
 
-### 6.3 アクション提案
-
-状況に応じた次のアクションを提案する:
+### 6.3 利用可能なコマンド
 
 ```
-### 推奨アクション
-
-1. **spec-000003** (high/small, design.md記述済み) → `/reqord:dev spec-000003` で実装開始
-2. **spec-000005** (medium/medium, テンプレート) → `/reqord:design spec-000005` でdesign.md作成
-3. **#208 feedback** → `/reqord:feedback 208` でフィードバック対応
-```
-
-### 6.4 ワークフロー案内
-
-```
-次のステップ:
-- 実装開始: /reqord:dev <spec-id>
-- 設計書作成: /reqord:design <spec-id>
-- フィードバック対応: /reqord:feedback [issue-number]
-- ブランチ作成: /reqord:git branch <spec-id>
+利用可能なコマンド:
+- /reqord:dev <spec-id>       — 実装開始
+- /reqord:design <spec-id>    — 設計書作成
+- /reqord:feedback [issue-number] — フィードバック対応
+- /reqord:git branch <spec-id>    — ブランチ作成
 ```

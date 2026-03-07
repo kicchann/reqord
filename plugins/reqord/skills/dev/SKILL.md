@@ -154,7 +154,7 @@ AskUserQuestionで確認:
 
 ## Step 5: TDD実装
 
-`reqord-implementer`エージェント（tdd-implementerのreqord版）に実装を委譲する。
+tdd-implementerエージェント（または同等の実装エージェント）に実装を委譲する。
 
 詳細手順は implement-phase.md を参照。
 
