@@ -33,6 +33,7 @@ export function Button({
 }: ButtonProps) {
   return (
     <button
+      type="button"
       className={`inline-flex items-center justify-center rounded-md font-medium transition-colors focus-visible:outline-none disabled:opacity-50 ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
       {...props}
     >

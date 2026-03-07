@@ -91,6 +91,8 @@ export function RequirementTable({ requirements }: { requirements: Requirement[]
     return (
       <th
         key={column}
+        scope="col"
+        aria-sort={isActive ? (sortDir === "asc" ? "ascending" : "descending") : undefined}
         className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
       >
         <button
@@ -99,10 +101,9 @@ export function RequirementTable({ requirements }: { requirements: Requirement[]
           className={`inline-flex items-center gap-1 transition-colors ${
             isActive ? "text-warm-900 font-semibold" : "hover:text-gray-900"
           }`}
-          aria-sort={isActive ? (sortDir === "asc" ? "ascending" : "descending") : undefined}
         >
           {label}
-          <span className={`text-[10px] ${isActive ? "opacity-100" : "opacity-30"}`}>
+          <span aria-hidden="true" className={`text-[10px] ${isActive ? "opacity-100" : "opacity-30"}`}>
             {isActive && sortDir === "desc" ? "▼" : "▲"}
           </span>
         </button>

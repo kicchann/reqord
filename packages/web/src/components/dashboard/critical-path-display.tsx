@@ -10,9 +10,10 @@ type CriticalPathDisplayProps = {
 const INITIAL_DISPLAY_COUNT = 10;
 
 const PRIORITY_BADGE_CLASSES: Record<string, string> = {
-  high: "bg-red-100 text-red-800",
-  medium: "bg-orange-100 text-orange-800",
-  low: "bg-gray-100 text-gray-800",
+  P0: "bg-red-100 text-red-800",
+  P1: "bg-red-100 text-red-800",
+  P2: "bg-orange-100 text-orange-800",
+  P3: "bg-gray-100 text-gray-800",
 };
 
 export function CriticalPathDisplay({ items }: CriticalPathDisplayProps) {
@@ -57,7 +58,7 @@ export function CriticalPathDisplay({ items }: CriticalPathDisplayProps) {
               className={`flex items-center gap-3 rounded-md border border-gray-200 px-3 py-2 ${textClass}`}
             >
               <a
-                href={`https://github.com/kicchann/reqord/issues/${item.issueNumber}`}
+                href={item.url}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-sm font-medium text-blue-600 hover:underline"

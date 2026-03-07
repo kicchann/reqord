@@ -146,17 +146,17 @@ describe("CriticalPathDisplay", () => {
     expect(link).toBeInTheDocument();
     expect(link).toHaveAttribute(
       "href",
-      "https://github.com/kicchann/reqord/issues/42"
+      "https://github.com/repo/issues/42"
     );
   });
 
-  it("applies red badge to high priority (P1) items", () => {
+  it("applies red badge to P1 priority items", () => {
     const items: CriticalPathItem[] = [
       {
         issueNumber: 100,
         title: "High priority task",
         url: "https://github.com/repo/issues/100",
-        priority: "high",
+        priority: "P1",
         status: "open",
         estimatedHours: 8,
         specId: "spec-000001",
@@ -165,17 +165,17 @@ describe("CriticalPathDisplay", () => {
 
     render(<CriticalPathDisplay items={items} />);
 
-    const badge = screen.getByText("high");
+    const badge = screen.getByText("P1");
     expect(badge).toHaveClass("bg-red-100");
   });
 
-  it("applies orange badge to medium priority (P2) items", () => {
+  it("applies orange badge to P2 priority items", () => {
     const items: CriticalPathItem[] = [
       {
         issueNumber: 101,
         title: "Medium priority task",
         url: "https://github.com/repo/issues/101",
-        priority: "medium",
+        priority: "P2",
         status: "open",
         estimatedHours: 8,
         specId: "spec-000002",
@@ -184,7 +184,7 @@ describe("CriticalPathDisplay", () => {
 
     render(<CriticalPathDisplay items={items} />);
 
-    const badge = screen.getByText("medium");
+    const badge = screen.getByText("P2");
     expect(badge).toHaveClass("bg-orange-100");
   });
 });

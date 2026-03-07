@@ -45,28 +45,28 @@ describe("RequirementTable - ソートヘッダのアクセシビリティ", () 
     expect(sortButtons.length).toBeGreaterThanOrEqual(5);
   });
 
-  it("アクティブなソートボタンにaria-sort='ascending'が設定される", () => {
+  it("アクティブなソート列のthにaria-sort='ascending'が設定される", () => {
     render(<RequirementTable requirements={requirements} />);
 
-    // ID列はデフォルトでアクティブ（asc）
-    const idButton = screen.getByRole("button", { name: /id/i });
-    expect(idButton).toHaveAttribute("aria-sort", "ascending");
+    const idHeader = screen.getByRole("columnheader", { name: /id/i });
+    expect(idHeader).toHaveAttribute("aria-sort", "ascending");
   });
 
-  it("ソートボタンクリックで降順になるとaria-sort='descending'になる", () => {
+  it("ソートボタンクリックで降順になるとthのaria-sort='descending'になる", () => {
     render(<RequirementTable requirements={requirements} />);
 
     const idButton = screen.getByRole("button", { name: /id/i });
     fireEvent.click(idButton);
 
-    expect(idButton).toHaveAttribute("aria-sort", "descending");
+    const idHeader = screen.getByRole("columnheader", { name: /id/i });
+    expect(idHeader).toHaveAttribute("aria-sort", "descending");
   });
 
-  it("非アクティブなソートボタンにaria-sort属性がない", () => {
+  it("非アクティブな列のthにaria-sort属性がない", () => {
     render(<RequirementTable requirements={requirements} />);
 
-    const titleButton = screen.getByRole("button", { name: /title/i });
-    expect(titleButton).not.toHaveAttribute("aria-sort");
+    const titleHeader = screen.getByRole("columnheader", { name: /title/i });
+    expect(titleHeader).not.toHaveAttribute("aria-sort");
   });
 
   it("Enterキーでソートが実行できる", () => {
@@ -76,7 +76,8 @@ describe("RequirementTable - ソートヘッダのアクセシビリティ", () 
     fireEvent.keyDown(titleButton, { key: "Enter", code: "Enter" });
     fireEvent.click(titleButton);
 
-    expect(titleButton).toHaveAttribute("aria-sort", "ascending");
+    const titleHeader = screen.getByRole("columnheader", { name: /title/i });
+    expect(titleHeader).toHaveAttribute("aria-sort", "ascending");
   });
 });
 
