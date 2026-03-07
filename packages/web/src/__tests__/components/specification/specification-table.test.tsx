@@ -20,7 +20,7 @@ const makeSpec = (id: string, overrides: Partial<Specification> = {}): Specifica
   version: "1.0",
   updatedAt: "2026-01-01T00:00:00Z",
   createdAt: "2026-01-01T00:00:00Z",
-  flags: [],
+  files: { design: "design.md", supplementary: [] },
   versionHistory: [],
   ...overrides,
 });

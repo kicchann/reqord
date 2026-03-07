@@ -19,7 +19,6 @@ export function Nav() {
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center gap-8">
             <Link href="/dashboard" className="flex items-center">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/reqord-logo.svg" alt="Reqord" className="h-10" />
             </Link>
             <div className="flex gap-1">
