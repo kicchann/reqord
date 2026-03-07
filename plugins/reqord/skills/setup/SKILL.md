@@ -1,6 +1,6 @@
 ---
 name: setup
-description: Reqordプラグインの環境セットアップと前提条件チェック。初回利用時に実行し、必要なツールの可用性を確認する。Verify environment prerequisites for the Reqord plugin - CLI tools, GitHub authentication, and project initialization. Run on first use or when troubleshooting.
+description: Reqordプラグインの環境セットアップと前提条件チェック。CLIツール・GitHub認証・プロジェクト初期化状態を確認し、証憑を記録する。
 argument-hint: "[--check] (省略時はフルセットアップ、--checkは確認のみ)"
 ---
 
@@ -188,16 +188,6 @@ reqord context show --json
 | structure.yaml | ⚠ 未作成 |
 | domain/*.md | - (任意) |
 
-### 利用可能なスキル
-| スキル | Status | 備考 |
-|--------|--------|------|
-| /reqord:status | ✅ | |
-| /reqord:design | ✅ | |
-| /reqord:dev | ✅ | |
-| /reqord:git | ✅ | |
-| /reqord:verify | ✅ | |
-| /reqord:feedback | ⚠ | gh CLI認証が必要 |
-| /reqord:refine | ✅ | |
 ```
 
 ---
@@ -244,13 +234,6 @@ project:
 
 ```
 ✅ セットアップが完了しました。証憑を .reqord/settings/plugin-config.yaml に記録しました。
-
-次のステップ:
-- 進捗確認: /reqord:status
-- 設計書作成: /reqord:design <spec-id>
-- 機能開発: /reqord:dev <spec-id>
-
-全スキル一覧: README.md を参照
 ```
 
 ---

@@ -1,14 +1,19 @@
 ---
 name: status
-description: Reqordの要件・仕様の実装進捗ダッシュボードを表示する。Show requirement and specification implementation progress dashboard. Use when checking project status, finding next tasks, or reviewing progress.
+description: Reqordの要件・仕様の実装進捗ダッシュボードを表示する。ステータス別集計、design.md準備状況、未解決フィードバックを一覧表示する。
 argument-hint: "[approved|implemented|all] (デフォルト: approved)"
+---
+
+## Scope
+
+- **Do**: reqordデータを集計し、進捗状況・準備状況を事実として表示する
+- **Don't**: 着手順序の推奨や実装判断。判断はユーザーに委ねる
+
 ---
 
 # Reqord進捗ダッシュボード
 
 フィルタ: $ARGUMENTS（デフォルト: approved = 実装待ち）
-
-要件・仕様の実装進捗を一覧表示し、次に着手すべきspecを特定する。
 
 ---
 
@@ -57,15 +62,11 @@ reqord feedback list --state open --json
 
 $ARGUMENTSに基づいて詳細表示する対象を決定する。
 
-### フィルタ判定
-
-| $ARGUMENTS      | 表示対象                  | 説明                           |
-| --------------- | ------------------------- | ------------------------------ |
-| 空 / `approved` | status=approved のspec    | 実装待ち（次に着手すべきもの） |
-| `implemented`   | status=implemented のspec | 実装済み（確認用）             |
-| `all`           | 全spec                    | 全件表示                       |
-
-### 詳細テーブル
+| $ARGUMENTS | 表示対象 | 説明 |
+|------------|----------|------|
+| 空 / `approved` | status=approved のspec | 実装待ち |
+| `implemented` | status=implemented のspec | 実装済み |
+| `all` | 全spec | 全件表示 |
 
 フィルタ対象のspecについて、以下のテーブルを表示する:
 
@@ -77,33 +78,13 @@ $ARGUMENTSに基づいて詳細表示する対象を決定する。
 | spec-000007 | req-000007 | Web画面 | low | large | 253行 | feedback-review |
 ```
 
----
-
-## Step 4: design.md行数の取得
-
-各specのdesign.mdを確認し、行数とテンプレート判定を行う。
-
-### 確認手順
-
-各specディレクトリの `design.md` をReadツールで読み取り、行数を数える。
-
-### テンプレート判定
-
-以下のいずれかに該当する場合は「テンプレート」と判定:
-
-- 内容に「Specification Design Template」のみが含まれている
-- 内容に「Phase 3で実装予定」のみが含まれている
-- 行数が10行以下
-
-テンプレートのままの場合、design.md列に「テンプレート」と表示する（行数の代わりに）。
+design.md列: 各specのdesign.mdを読み取り行数を表示。「Specification Design Template」のみ、「Phase 3で実装予定」のみ、または10行以下の場合は「テンプレート」と表示。
 
 ---
 
-## Step 5: 未解決Feedback Flagの表示
+## Step 4: 未解決Feedback Flagの表示
 
 Step 1で取得したfeedback一覧から、openかつlinkedToが設定されているものを抽出する。
-
-### Flag表示
 
 未解決flagがある場合:
 
@@ -116,17 +97,9 @@ Step 1で取得したfeedback一覧から、openかつlinkedToが設定されて
 | #209 | requirement-gap | medium | req-000011 | 一括操作機能が未定義 |
 ```
 
-未解決flagがない場合:
-
-```
-未解決のfeedback flagはありません。
-```
-
 ---
 
-## Step 6: 準備状況サマリー
-
-### 6.1 準備状況テーブル
+## Step 5: 準備状況サマリー
 
 フィルタがapprovedの場合、各specの準備状況を分類して表示する:
 
@@ -141,16 +114,4 @@ Step 1で取得したfeedback一覧から、openかつlinkedToが設定されて
 | Feedback pending | spec-000007 (low/large) | feedback-review flagあり |
 ```
 
-### 6.2 依存関係チェック
-
-各specに紐づくrequirementのdependencies（blockedBy）を確認し、ブロッカーがある場合はテーブルに反映する。
-
-### 6.3 利用可能なコマンド
-
-```
-利用可能なコマンド:
-- /reqord:dev <spec-id>       — 実装開始
-- /reqord:design <spec-id>    — 設計書作成
-- /reqord:feedback [issue-number] — フィードバック対応
-- /reqord:git branch <spec-id>    — ブランチ作成
-```
+依存関係チェック: 各specに紐づくrequirementのdependencies（blockedBy）を確認し、ブロッカーがある場合はテーブルに反映する。
