@@ -2,14 +2,16 @@
 @plugin "@tailwindcss/typography";
 
 @theme {
-  --color-brand-50: #EEF2FF;
-  --color-brand-100: #E0E7FF;
-  --color-brand-200: #C7D2FE;
-  --color-brand-500: #6366F1;
-  --color-brand-600: #4F46E5;
-  --color-brand-700: #4338CA;
-  --color-brand-800: #3730A3;
-  --color-brand-900: #312E81;
+  --color-brand-50: #FEF2F2;
+  --color-brand-100: #FEE2E2;
+  --color-brand-200: #FECACA;
+  --color-brand-500: #EF4444;
+  --color-brand-600: #DC2626;
+  --color-brand-700: #B91C1C;
+  --color-brand-800: #991B1B;
+  --color-brand-900: #7F1D1D;
+  --color-warm-50: #FAF8F5;
+  --color-warm-100: #F5F2ED;
 }
 
 /* ページ遷移アニメーション */

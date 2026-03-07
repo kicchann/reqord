@@ -30,8 +30,8 @@ const EDGE_STYLES = {
     animated: false,
   },
   implements: {
-    style: { stroke: "#6366f1", strokeWidth: 2, strokeDasharray: "5,5" },
-    markerEnd: { type: "arrowclosed" as const, color: "#6366f1" },
+    style: { stroke: "#dc2626", strokeWidth: 2, strokeDasharray: "5,5" },
+    markerEnd: { type: "arrowclosed" as const, color: "#dc2626" },
     animated: false,
   },
   tracks: {

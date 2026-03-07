@@ -55,10 +55,10 @@ describe("ProjectHealth", () => {
     expect(screen.getByText("/ 100")).toBeInTheDocument();
   });
 
-  it("renders as hero card with indigo gradient background", () => {
+  it("renders as hero card with brand gradient background", () => {
     render(<ProjectHealth score={75} />);
 
-    const container = screen.getByTestId("health-score").closest("div[class*='from-indigo']");
+    const container = screen.getByTestId("health-score").closest("div[class*='from-brand']");
     expect(container).not.toBeNull();
   });
 

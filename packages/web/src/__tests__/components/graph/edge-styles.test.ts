@@ -9,9 +9,9 @@ describe("EDGE_STYLES", () => {
     });
   });
 
-  it("implements has stroke #6366f1 (brand indigo), strokeWidth 2, and strokeDasharray '5,5'", () => {
+  it("implements has stroke #dc2626 (brand red), strokeWidth 2, and strokeDasharray '5,5'", () => {
     expect(EDGE_STYLES.implements).toEqual({
-      stroke: "#6366f1",
+      stroke: "#dc2626",
       strokeWidth: 2,
       strokeDasharray: "5,5",
     });

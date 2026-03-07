@@ -4,7 +4,7 @@ export const EDGE_STYLES = {
     strokeWidth: 2,
   },
   implements: {
-    stroke: "#6366f1",
+    stroke: "#dc2626",
     strokeWidth: 2,
     strokeDasharray: "5,5",
   },

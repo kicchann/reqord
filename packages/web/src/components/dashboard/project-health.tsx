@@ -15,8 +15,8 @@ export function ProjectHealth({ score }: ProjectHealthProps) {
   }
 
   return (
-    <div className="rounded-2xl bg-gradient-to-br from-indigo-600 to-indigo-700 p-8 text-white shadow-lg">
-      <h2 className="text-sm font-medium uppercase tracking-wider text-indigo-200">
+    <div className="rounded-2xl bg-gradient-to-br from-brand-600 to-brand-700 p-8 text-white shadow-lg">
+      <h2 className="text-sm font-medium uppercase tracking-wider text-brand-200">
         Project Health
       </h2>
       <div className="mt-4 flex items-baseline justify-center">
@@ -26,7 +26,7 @@ export function ProjectHealth({ score }: ProjectHealthProps) {
         >
           {roundedScore}
         </span>
-        <span className="ml-2 text-2xl text-indigo-200">/ 100</span>
+        <span className="ml-2 text-2xl text-brand-200">/ 100</span>
       </div>
     </div>
   );
