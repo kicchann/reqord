@@ -2,16 +2,28 @@
 @plugin "@tailwindcss/typography";
 
 @theme {
-  --color-brand-50: #FEF2F2;
-  --color-brand-100: #FEE2E2;
-  --color-brand-200: #FECACA;
-  --color-brand-500: #EF4444;
-  --color-brand-600: #DC2626;
-  --color-brand-700: #B91C1C;
-  --color-brand-800: #991B1B;
-  --color-brand-900: #7F1D1D;
+  /* ロゴ由来のアクセント — ポイント使い専用 */
+  --color-accent: #ff3b2f;
+  --color-accent-hover: #e5342a;
+
+  /* 暖色ニュートラル — ロゴの #f5f2ed/#1a1a1a ベース */
   --color-warm-50: #FAF8F5;
   --color-warm-100: #F5F2ED;
+  --color-warm-200: #E8E4DD;
+  --color-warm-300: #D4CFC7;
+  --color-warm-700: #4A3F35;
+  --color-warm-800: #33291F;
+  --color-warm-900: #1A1A1A;
+
+  /* brand = warm（UIの主色調） */
+  --color-brand-50: #FAF8F5;
+  --color-brand-100: #F5F2ED;
+  --color-brand-200: #E8E4DD;
+  --color-brand-500: #8C7E6F;
+  --color-brand-600: #6B5D4F;
+  --color-brand-700: #4A3F35;
+  --color-brand-800: #33291F;
+  --color-brand-900: #1A1A1A;
 }
 
 /* ページ遷移アニメーション */

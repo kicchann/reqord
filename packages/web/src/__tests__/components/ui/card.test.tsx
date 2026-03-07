@@ -22,7 +22,7 @@ describe("Card", () => {
     const card = screen.getByTestId("card");
     expect(card).toHaveClass("rounded-xl");
     expect(card).toHaveClass("border");
-    expect(card).toHaveClass("border-gray-200");
+    expect(card).toHaveClass("border-warm-200");
     expect(card).toHaveClass("bg-white");
     expect(card).toHaveClass("p-6");
     expect(card).toHaveClass("shadow-sm");
@@ -32,7 +32,7 @@ describe("Card", () => {
     render(<Card variant="hero" data-testid="hero-card">Hero content</Card>);
 
     const card = screen.getByTestId("hero-card");
-    expect(card).toHaveClass("bg-gradient-to-br");
+    expect(card).toHaveClass("bg-warm-100");
   });
 
   it("hero variant does not apply bg-white", () => {

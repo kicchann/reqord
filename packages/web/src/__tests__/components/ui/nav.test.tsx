@@ -52,16 +52,16 @@ describe("Nav", () => {
     render(<Nav />);
 
     const requirementsLink = screen.getByText("Requirements").closest("a");
-    expect(requirementsLink).toHaveClass("bg-brand-50");
-    expect(requirementsLink).toHaveClass("text-brand-700");
+    expect(requirementsLink).toHaveClass("bg-warm-200");
+    expect(requirementsLink).toHaveClass("text-warm-900");
   });
 
   it("applies inactive styles to non-active links", () => {
     render(<Nav />);
 
     const dashboardLink = screen.getByText("Dashboard").closest("a");
-    expect(dashboardLink).toHaveClass("text-gray-600");
-    expect(dashboardLink).not.toHaveClass("bg-brand-50");
+    expect(dashboardLink).toHaveClass("text-warm-700");
+    expect(dashboardLink).not.toHaveClass("bg-warm-200");
   });
 
   it("each nav item has correct href", () => {

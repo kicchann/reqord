@@ -97,7 +97,7 @@ export function RequirementTable({ requirements }: { requirements: Requirement[]
           type="button"
           onClick={() => handleSort(column)}
           className={`inline-flex items-center gap-1 transition-colors ${
-            isActive ? "text-brand-600" : "hover:text-gray-900"
+            isActive ? "text-warm-900 font-semibold" : "hover:text-gray-900"
           }`}
           aria-sort={isActive ? (sortDir === "asc" ? "ascending" : "descending") : undefined}
         >

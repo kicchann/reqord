@@ -68,7 +68,7 @@ describe("DrillDownBreadcrumb", () => {
     expect(onBack).not.toHaveBeenCalled();
   });
 
-  it("back button uses brand hover colors (hover:bg-brand-50 hover:text-brand-700)", () => {
+  it("back button uses warm hover colors", () => {
     const onBack = vi.fn();
 
     const { container } = render(
@@ -76,7 +76,7 @@ describe("DrillDownBreadcrumb", () => {
     );
 
     const button = container.querySelector("button");
-    expect(button).toHaveClass("hover:bg-brand-50");
-    expect(button).toHaveClass("hover:text-brand-700");
+    expect(button).toHaveClass("hover:bg-warm-200/60");
+    expect(button).toHaveClass("hover:text-warm-900");
   });
 });

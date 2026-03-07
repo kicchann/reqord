@@ -7,16 +7,17 @@ type ProjectHealthProps = {
 export function ProjectHealth({ score }: ProjectHealthProps) {
   const roundedScore = Math.round(score);
 
-  let colorClass = "text-red-300";
+  let colorClass = "text-red-600";
   if (roundedScore >= 80) {
-    colorClass = "text-emerald-300";
+    colorClass = "text-emerald-600";
   } else if (roundedScore >= 50) {
-    colorClass = "text-yellow-300";
+    colorClass = "text-yellow-600";
   }
 
   return (
-    <div className="rounded-2xl bg-gradient-to-br from-brand-600 to-brand-700 p-8 text-white shadow-lg">
-      <h2 className="text-sm font-medium uppercase tracking-wider text-brand-200">
+    <div className="relative overflow-hidden rounded-2xl border border-warm-200 bg-warm-100 p-8 shadow-sm">
+      <div className="absolute left-0 top-0 h-full w-1.5 bg-accent" />
+      <h2 className="text-sm font-medium uppercase tracking-wider text-warm-700">
         Project Health
       </h2>
       <div className="mt-4 flex items-baseline justify-center">
@@ -26,7 +27,7 @@ export function ProjectHealth({ score }: ProjectHealthProps) {
         >
           {roundedScore}
         </span>
-        <span className="ml-2 text-2xl text-brand-200">/ 100</span>
+        <span className="ml-2 text-2xl text-warm-500">/ 100</span>
       </div>
     </div>
   );

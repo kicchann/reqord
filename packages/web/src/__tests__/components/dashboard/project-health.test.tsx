@@ -16,7 +16,7 @@ describe("ProjectHealth", () => {
     const scoreElement = screen.getByTestId("health-score");
     expect(scoreElement).toBeInTheDocument();
     expect(scoreElement).toHaveTextContent("85");
-    expect(scoreElement).toHaveClass("text-emerald-300");
+    expect(scoreElement).toHaveClass("text-emerald-600");
   });
 
   it("renders score with yellow color when score >= 50 and < 80", () => {
@@ -24,7 +24,7 @@ describe("ProjectHealth", () => {
 
     const scoreElement = screen.getByTestId("health-score");
     expect(scoreElement).toHaveTextContent("65");
-    expect(scoreElement).toHaveClass("text-yellow-300");
+    expect(scoreElement).toHaveClass("text-yellow-600");
   });
 
   it("renders score with red color when score < 50", () => {
@@ -32,21 +32,21 @@ describe("ProjectHealth", () => {
 
     const scoreElement = screen.getByTestId("health-score");
     expect(scoreElement).toHaveTextContent("30");
-    expect(scoreElement).toHaveClass("text-red-300");
+    expect(scoreElement).toHaveClass("text-red-600");
   });
 
   it("renders score at boundary (score = 80) as emerald", () => {
     render(<ProjectHealth score={80} />);
 
     const scoreElement = screen.getByTestId("health-score");
-    expect(scoreElement).toHaveClass("text-emerald-300");
+    expect(scoreElement).toHaveClass("text-emerald-600");
   });
 
   it("renders score at boundary (score = 50) as yellow", () => {
     render(<ProjectHealth score={50} />);
 
     const scoreElement = screen.getByTestId("health-score");
-    expect(scoreElement).toHaveClass("text-yellow-300");
+    expect(scoreElement).toHaveClass("text-yellow-600");
   });
 
   it("displays '/ 100' label", () => {
@@ -55,10 +55,10 @@ describe("ProjectHealth", () => {
     expect(screen.getByText("/ 100")).toBeInTheDocument();
   });
 
-  it("renders as hero card with brand gradient background", () => {
+  it("renders with warm background and accent bar", () => {
     render(<ProjectHealth score={75} />);
 
-    const container = screen.getByTestId("health-score").closest("div[class*='from-brand']");
+    const container = screen.getByTestId("health-score").closest("div[class*='bg-warm']");
     expect(container).not.toBeNull();
   });
 

@@ -23,7 +23,7 @@ export function DrillDownBreadcrumb({ requirementTitle, onBack }: DrillDownBread
     <div className="mb-4 flex items-center gap-2 text-sm text-gray-600">
       <button
         onClick={onBack}
-        className="flex items-center gap-1 rounded px-3 py-1 hover:bg-brand-50 hover:text-brand-700"
+        className="flex items-center gap-1 rounded px-3 py-1 hover:bg-warm-200/60 hover:text-warm-900"
       >
         ← Back to overview
       </button>

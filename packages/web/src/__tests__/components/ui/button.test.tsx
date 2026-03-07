@@ -11,11 +11,11 @@ describe("Button", () => {
   });
 
   describe("variant", () => {
-    it("renders primary variant with brand-600 background by default", () => {
+    it("renders primary variant with warm-800 background by default", () => {
       render(<Button>Click me</Button>);
 
       const button = screen.getByRole("button", { name: "Click me" });
-      expect(button).toHaveClass("bg-brand-600");
+      expect(button).toHaveClass("bg-warm-800");
       expect(button).toHaveClass("text-white");
     });
 
@@ -24,16 +24,16 @@ describe("Button", () => {
 
       const button = screen.getByRole("button", { name: "Secondary" });
       expect(button).toHaveClass("border");
-      expect(button).toHaveClass("border-gray-300");
+      expect(button).toHaveClass("border-warm-300");
       expect(button).toHaveClass("bg-white");
-      expect(button).toHaveClass("text-gray-700");
+      expect(button).toHaveClass("text-warm-700");
     });
 
     it("renders danger variant with red background", () => {
       render(<Button variant="danger">Delete</Button>);
 
       const button = screen.getByRole("button", { name: "Delete" });
-      expect(button).toHaveClass("bg-red-600");
+      expect(button).toHaveClass("bg-accent");
       expect(button).toHaveClass("text-white");
     });
 
@@ -41,8 +41,8 @@ describe("Button", () => {
       render(<Button variant="ghost">Ghost</Button>);
 
       const button = screen.getByRole("button", { name: "Ghost" });
-      expect(button).toHaveClass("text-gray-600");
-      expect(button).not.toHaveClass("bg-brand-600");
+      expect(button).toHaveClass("text-warm-700");
+      expect(button).not.toHaveClass("bg-warm-800");
       expect(button).not.toHaveClass("bg-white");
     });
   });
