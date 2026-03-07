@@ -1,6 +1,6 @@
 {
   "name": "@reqord/cli",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Git-native requirements management CLI",
   "license": "AGPL-3.0-or-later",
   "repository": {
@@ -11,7 +11,14 @@
   "engines": {
     "node": ">=20.0.0"
   },
-  "keywords": ["reqord", "requirements", "cli", "git", "ai", "traceability"],
+  "keywords": [
+    "reqord",
+    "requirements",
+    "cli",
+    "git",
+    "ai",
+    "traceability"
+  ],
   "publishConfig": {
     "access": "public"
   },

@@ -1,6 +1,6 @@
 {
   "name": "@reqord/web",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Web dashboard for Reqord",
   "license": "AGPL-3.0-or-later",
   "repository": {
@@ -11,7 +11,12 @@
   "engines": {
     "node": ">=20.0.0"
   },
-  "keywords": ["reqord", "requirements", "dashboard", "next.js"],
+  "keywords": [
+    "reqord",
+    "requirements",
+    "dashboard",
+    "next.js"
+  ],
   "publishConfig": {
     "access": "public"
   },

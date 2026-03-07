@@ -1,6 +1,6 @@
 {
   "name": "@reqord/shared",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Zod schemas, types and utilities for Reqord",
   "license": "AGPL-3.0-or-later",
   "repository": {
@@ -11,7 +11,12 @@
   "engines": {
     "node": ">=20.0.0"
   },
-  "keywords": ["reqord", "requirements", "schema", "zod"],
+  "keywords": [
+    "reqord",
+    "requirements",
+    "schema",
+    "zod"
+  ],
   "publishConfig": {
     "access": "public"
   },

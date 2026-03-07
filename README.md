@@ -10,7 +10,7 @@
 
 [![npm](https://img.shields.io/npm/v/@reqord/cli)](https://www.npmjs.com/package/@reqord/cli)
 [![License](https://img.shields.io/badge/license-AGPL--3.0-green)](./LICENSE)
-[![Tests](https://img.shields.io/badge/tests-1237%20passing-brightgreen)](./packages)
+[![Tests](https://img.shields.io/badge/tests-1327%20passing-brightgreen)](./packages)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178c6)](https://www.typescriptlang.org/)
 
 ---
