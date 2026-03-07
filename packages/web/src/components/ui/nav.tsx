@@ -18,8 +18,9 @@ export function Nav() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center gap-8">
-            <Link href="/dashboard" className="text-lg font-bold text-brand-600">
-              Reqord
+            <Link href="/dashboard" className="flex items-center">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/reqord-logo.svg" alt="Reqord" className="h-10" />
             </Link>
             <div className="flex gap-1">
               {NAV_ITEMS.map(({ href, label }) => {

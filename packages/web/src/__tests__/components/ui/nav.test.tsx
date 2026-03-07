@@ -43,9 +43,9 @@ describe("Nav", () => {
   it("renders the Reqord brand link", () => {
     render(<Nav />);
 
-    const brandLink = screen.getByText("Reqord");
-    expect(brandLink).toBeInTheDocument();
-    expect(brandLink.closest("a")).toHaveAttribute("href", "/dashboard");
+    const brandLogo = screen.getByAltText("Reqord");
+    expect(brandLogo).toBeInTheDocument();
+    expect(brandLogo.closest("a")).toHaveAttribute("href", "/dashboard");
   });
 
   it("applies active styles to the current path link", () => {

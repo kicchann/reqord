@@ -1,0 +1,7 @@
+<svg width="220" height="80" viewBox="0 0 220 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="220" height="80" rx="12" fill="#f5f2ed"/>
+  <path d="M30 22 L30 58 M30 22 L41 22 Q48 22 48 31 Q48 40 41 40 L30 40 M41 40 L50 58"
+        stroke="#1a1a1a" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <circle cx="50" cy="58" r="4" fill="#ff3b2f"/>
+  <text x="64" y="48" font-family="Georgia, serif" font-size="21" fill="#1a1a1a" letter-spacing="1.5">reqord</text>
+</svg>
