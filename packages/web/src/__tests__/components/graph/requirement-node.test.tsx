@@ -148,4 +148,49 @@ describe("RequirementNode", () => {
       expect(screen.getByRole("button", { name: /1 spec$/i })).toBeInTheDocument();
     });
   });
+
+  describe("brand color system", () => {
+    it("renders approved status with blue border and background (brand color system)", () => {
+      const { container } = render(
+        <RequirementNode
+          {...baseProps}
+          data={{ ...baseProps.data, status: "approved" }}
+        />
+      );
+
+      const nodeDiv = container.querySelector(".border-blue-300.bg-blue-50");
+      expect(nodeDiv).toBeInTheDocument();
+    });
+
+    it("renders implemented status with emerald border and background (brand color system)", () => {
+      const { container } = render(
+        <RequirementNode
+          {...baseProps}
+          data={{ ...baseProps.data, status: "implemented" }}
+        />
+      );
+
+      const nodeDiv = container.querySelector(".border-emerald-300.bg-emerald-50");
+      expect(nodeDiv).toBeInTheDocument();
+    });
+
+    it("renders with shadow-md for improved visibility", () => {
+      const { container } = render(
+        <RequirementNode {...baseProps} />
+      );
+
+      const nodeDiv = container.querySelector(".shadow-md");
+      expect(nodeDiv).toBeInTheDocument();
+    });
+
+    it("renders handles with softened gray color (!bg-gray-300)", () => {
+      const { container } = render(
+        <RequirementNode {...baseProps} />
+      );
+
+      // Check that no handle has the old !bg-gray-400 class
+      const oldHandles = container.querySelector('[class*="bg-gray-400"]');
+      expect(oldHandles).not.toBeInTheDocument();
+    });
+  });
 });

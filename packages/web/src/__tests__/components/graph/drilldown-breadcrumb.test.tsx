@@ -67,4 +67,16 @@ describe("DrillDownBreadcrumb", () => {
 
     expect(onBack).not.toHaveBeenCalled();
   });
+
+  it("back button uses warm hover colors", () => {
+    const onBack = vi.fn();
+
+    const { container } = render(
+      <DrillDownBreadcrumb requirementTitle="User Login" onBack={onBack} />
+    );
+
+    const button = container.querySelector("button");
+    expect(button).toHaveClass("hover:bg-warm-200/60");
+    expect(button).toHaveClass("hover:text-warm-900");
+  });
 });

@@ -2,6 +2,7 @@
 
 import React, { useMemo } from "react";
 import { ReactFlow, Background, Controls } from "@xyflow/react";
+import "@xyflow/react/dist/style.css";
 import { RequirementNode } from "./requirement-node";
 import { SpecificationNode } from "./specification-node";
 import { IssueNode } from "./issue-node";
@@ -33,7 +34,8 @@ export function DrillDownGraph({ requirement, specifications, tasks }: DrillDown
         edges={edges}
         nodeTypes={nodeTypes}
         fitView
-        minZoom={0.1}
+        fitViewOptions={{ padding: 0.1, maxZoom: 1 }}
+        minZoom={0.2}
         maxZoom={2}
         proOptions={{ hideAttribution: true }}
       >

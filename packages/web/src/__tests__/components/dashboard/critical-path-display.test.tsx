@@ -126,4 +126,65 @@ describe("CriticalPathDisplay", () => {
     );
     expect(listItems).toHaveLength(0);
   });
+
+  it("renders issue number as GitHub link", () => {
+    const items: CriticalPathItem[] = [
+      {
+        issueNumber: 42,
+        title: "Linked task",
+        url: "https://github.com/repo/issues/42",
+        priority: "high",
+        status: "open",
+        estimatedHours: 4,
+        specId: "spec-000001",
+      },
+    ];
+
+    render(<CriticalPathDisplay items={items} />);
+
+    const link = screen.getByRole("link", { name: "#42" });
+    expect(link).toBeInTheDocument();
+    expect(link).toHaveAttribute(
+      "href",
+      "https://github.com/repo/issues/42"
+    );
+  });
+
+  it("applies red badge to P1 priority items", () => {
+    const items: CriticalPathItem[] = [
+      {
+        issueNumber: 100,
+        title: "High priority task",
+        url: "https://github.com/repo/issues/100",
+        priority: "P1",
+        status: "open",
+        estimatedHours: 8,
+        specId: "spec-000001",
+      },
+    ];
+
+    render(<CriticalPathDisplay items={items} />);
+
+    const badge = screen.getByText("P1");
+    expect(badge).toHaveClass("bg-red-100");
+  });
+
+  it("applies orange badge to P2 priority items", () => {
+    const items: CriticalPathItem[] = [
+      {
+        issueNumber: 101,
+        title: "Medium priority task",
+        url: "https://github.com/repo/issues/101",
+        priority: "P2",
+        status: "open",
+        estimatedHours: 8,
+        specId: "spec-000002",
+      },
+    ];
+
+    render(<CriticalPathDisplay items={items} />);
+
+    const badge = screen.getByText("P2");
+    expect(badge).toHaveClass("bg-orange-100");
+  });
 });

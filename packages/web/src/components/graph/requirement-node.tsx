@@ -6,8 +6,8 @@ import { useRouter } from "next/navigation";
 
 const STATUS_COLORS: Record<string, string> = {
   draft: "border-gray-300 bg-gray-50",
-  approved: "border-green-300 bg-green-50",
-  implemented: "border-blue-300 bg-blue-50",
+  approved: "border-blue-300 bg-blue-50",
+  implemented: "border-emerald-300 bg-emerald-50",
   deprecated: "border-red-300 bg-red-50",
 };
 
@@ -43,11 +43,11 @@ function RequirementNodeComponent({ data, id }: NodeProps) {
 
   return (
     <div
-      className={`cursor-pointer rounded-lg border-2 px-3 py-2 shadow-sm ${borderClass}`}
+      className={`cursor-pointer rounded-lg border-2 px-3 py-2 shadow-md ${borderClass}`}
       style={{ width: 220 }}
       onClick={handleBodyClick}
     >
-      <Handle type="target" position={Position.Left} className="!bg-gray-400" />
+      <Handle type="target" position={Position.Left} className="!bg-gray-300" />
       <p className="truncate text-xs font-mono text-gray-500">{id}</p>
       <p className="mt-0.5 truncate text-sm font-medium text-gray-900">
         {nodeData.label}
@@ -61,7 +61,7 @@ function RequirementNodeComponent({ data, id }: NodeProps) {
           📄 {nodeData.specCount} spec{nodeData.specCount > 1 ? "s" : ""}
         </button>
       ) : null}
-      <Handle type="source" position={Position.Right} className="!bg-gray-400" />
+      <Handle type="source" position={Position.Right} className="!bg-gray-300" />
     </div>
   );
 }

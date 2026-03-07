@@ -11,7 +11,7 @@ describe("WarningAlert", () => {
     cleanup();
   });
 
-  it("renders error severity with red border and background", () => {
+  it("renders error severity with red background and rounded corners", () => {
     const warning: Warning = {
       type: "design_verification_error",
       message: "Critical issue detected",
@@ -23,12 +23,12 @@ describe("WarningAlert", () => {
 
     const alert = screen.getByTestId("warning-alert");
     expect(alert).toBeInTheDocument();
-    expect(alert).toHaveClass("border-red-500");
     expect(alert).toHaveClass("bg-red-50");
+    expect(alert).toHaveClass("rounded-lg");
     expect(screen.getByText("Critical issue detected")).toBeInTheDocument();
   });
 
-  it("renders warning severity with yellow border and background", () => {
+  it("renders warning severity with yellow background and rounded corners", () => {
     const warning: Warning = {
       type: "missing_specification",
       message: "Specification is missing",
@@ -39,12 +39,12 @@ describe("WarningAlert", () => {
     render(<WarningAlert warning={warning} />);
 
     const alert = screen.getByTestId("warning-alert");
-    expect(alert).toHaveClass("border-yellow-500");
     expect(alert).toHaveClass("bg-yellow-50");
+    expect(alert).toHaveClass("rounded-lg");
     expect(screen.getByText("Specification is missing")).toBeInTheDocument();
   });
 
-  it("renders info severity with blue border and background", () => {
+  it("renders info severity with blue background and rounded corners", () => {
     const warning: Warning = {
       type: "unapproved_dependency",
       message: "Dependency not approved",
@@ -55,8 +55,8 @@ describe("WarningAlert", () => {
     render(<WarningAlert warning={warning} />);
 
     const alert = screen.getByTestId("warning-alert");
-    expect(alert).toHaveClass("border-blue-500");
     expect(alert).toHaveClass("bg-blue-50");
+    expect(alert).toHaveClass("rounded-lg");
     expect(screen.getByText("Dependency not approved")).toBeInTheDocument();
   });
 

@@ -41,7 +41,7 @@ describe("SpecificationNode", () => {
     expect(screen.getByText("spec-000001")).toBeInTheDocument();
   });
 
-  it("renders draft status with blue background class", () => {
+  it("renders draft status with gray background class (brand color system)", () => {
     const { container } = render(
       <SpecificationNode
         {...defaultNodeProps}
@@ -51,11 +51,11 @@ describe("SpecificationNode", () => {
       />
     );
 
-    const nodeDiv = container.querySelector(".bg-blue-200");
+    const nodeDiv = container.querySelector(".bg-gray-100");
     expect(nodeDiv).toBeInTheDocument();
   });
 
-  it("renders approved status with green background class", () => {
+  it("renders approved status with blue background class (brand color system)", () => {
     const { container } = render(
       <SpecificationNode
         {...defaultNodeProps}
@@ -65,11 +65,11 @@ describe("SpecificationNode", () => {
       />
     );
 
-    const nodeDiv = container.querySelector(".bg-green-200");
+    const nodeDiv = container.querySelector(".bg-blue-100");
     expect(nodeDiv).toBeInTheDocument();
   });
 
-  it("renders implemented status with emerald background class", () => {
+  it("renders implemented status with emerald background class (brand color system)", () => {
     const { container } = render(
       <SpecificationNode
         {...defaultNodeProps}
@@ -79,36 +79,49 @@ describe("SpecificationNode", () => {
       />
     );
 
-    const nodeDiv = container.querySelector(".bg-emerald-300");
+    const nodeDiv = container.querySelector(".bg-emerald-100");
     expect(nodeDiv).toBeInTheDocument();
   });
 
-  it("renders implemented status with emerald background class", () => {
+  it("renders deprecated status with red background class (brand color system)", () => {
     const { container } = render(
       <SpecificationNode
         {...defaultNodeProps}
         id="spec-000004"
-        data={{ label: "spec-000004", status: "implemented" }}
+        data={{ label: "spec-000004", status: "deprecated" }}
         type="specification"
       />
     );
 
-    const nodeDiv = container.querySelector(".bg-emerald-300");
+    const nodeDiv = container.querySelector(".bg-red-100");
     expect(nodeDiv).toBeInTheDocument();
   });
 
-  it("renders deprecated status with red background class", () => {
+  it("renders status badge with semi-transparent white background", () => {
     const { container } = render(
       <SpecificationNode
         {...defaultNodeProps}
-        id="spec-000005"
-        data={{ label: "spec-000005", status: "deprecated" }}
+        id="spec-000001"
+        data={{ label: "My Spec Title", status: "draft" }}
         type="specification"
       />
     );
 
-    const nodeDiv = container.querySelector(".bg-red-200");
-    expect(nodeDiv).toBeInTheDocument();
+    const badge = container.querySelector(".bg-white\\/80");
+    expect(badge).toBeInTheDocument();
+  });
+
+  it("renders label text as title", () => {
+    render(
+      <SpecificationNode
+        {...defaultNodeProps}
+        id="spec-000001"
+        data={{ label: "My Spec Title", status: "draft" }}
+        type="specification"
+      />
+    );
+
+    expect(screen.getByText("My Spec Title")).toBeInTheDocument();
   });
 
   it("renders status badge", () => {

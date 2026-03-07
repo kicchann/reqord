@@ -9,6 +9,13 @@ type CriticalPathDisplayProps = {
 
 const INITIAL_DISPLAY_COUNT = 10;
 
+const PRIORITY_BADGE_CLASSES: Record<string, string> = {
+  P0: "bg-red-100 text-red-800",
+  P1: "bg-red-100 text-red-800",
+  P2: "bg-orange-100 text-orange-800",
+  P3: "bg-gray-100 text-gray-800",
+};
+
 export function CriticalPathDisplay({ items }: CriticalPathDisplayProps) {
   const openItems = items.filter((item) => item.status !== "closed");
   const closedItems = items.filter((item) => item.status === "closed");
@@ -23,10 +30,12 @@ export function CriticalPathDisplay({ items }: CriticalPathDisplayProps) {
         </span>
       </h2>
       {/* Show only open items when they exist; closed items are accessible via the expand button below */}
-      <div className="space-y-3">
+      <div className="space-y-2">
         {(openItems.length > 0
           ? openItems
-          : (showClosed ? closedItems : closedItems.slice(0, INITIAL_DISPLAY_COUNT))
+          : showClosed
+            ? closedItems
+            : closedItems.slice(0, INITIAL_DISPLAY_COUNT)
         ).map((item) => {
           const isCompleted = item.status === "closed";
           const isPending =
@@ -39,24 +48,30 @@ export function CriticalPathDisplay({ items }: CriticalPathDisplayProps) {
             textClass = "font-bold";
           }
 
+          const badgeClass =
+            PRIORITY_BADGE_CLASSES[item.priority] ?? "bg-gray-100 text-gray-800";
+
           return (
             <div
               key={item.issueNumber}
               data-testid="critical-path-item"
-              className={`flex items-start gap-3 rounded-md border border-gray-200 p-3 ${textClass}`}
+              className={`flex items-center gap-3 rounded-md border border-gray-200 px-3 py-2 ${textClass}`}
             >
-              <div className="flex-1">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-gray-900">
-                    #{item.issueNumber}
-                  </span>
-                  <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800">
-                    {item.priority}
-                  </span>
-                </div>
-                <p className="mt-1 text-sm text-gray-700">{item.title}</p>
-                <p className="mt-1 text-xs text-gray-500">{item.status}</p>
-              </div>
+              <a
+                href={item.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm font-medium text-blue-600 hover:underline"
+              >
+                #{item.issueNumber}
+              </a>
+              <span
+                className={`rounded-full px-2 py-0.5 text-xs font-medium ${badgeClass}`}
+              >
+                {item.priority}
+              </span>
+              <span className="flex-1 text-sm text-gray-700">{item.title}</span>
+              <span className="text-xs text-gray-400">{item.status}</span>
             </div>
           );
         })}
