@@ -11,32 +11,40 @@ async function DashboardContent() {
   const data = await getDashboardData();
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
+    <div className="space-y-6 py-2">
       <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
 
-      {/* Project Health */}
-      <ProjectHealth score={data.healthScore} />
+      {/* Overview zone: Project Health + Progress */}
+      <div className="space-y-4">
+        <ProjectHealth score={data.healthScore} />
+        <ProgressSection
+          requirements={data.requirements}
+          specifications={data.specifications}
+          issues={data.issues}
+        />
+      </div>
 
-      {/* Progress Section */}
-      <ProgressSection
-        requirements={data.requirements}
-        specifications={data.specifications}
-        issues={data.issues}
-      />
-
-      {/* Status Cards */}
-      <StatusCards
-        requirements={data.requirements}
-        specifications={data.specifications}
-      />
-
-      {/* Warnings */}
-      {data.warnings.length > 0 && <WarningAlerts warnings={data.warnings} />}
-
-      {/* Critical Path */}
-      {data.criticalPath !== null && (
-        <CriticalPathDisplay items={data.criticalPath} />
+      {/* Action zone: Warnings */}
+      {data.warnings.length > 0 && (
+        <div className="mt-10">
+          <WarningAlerts warnings={data.warnings} />
+        </div>
       )}
+
+      {/* Action zone: Critical Path */}
+      {data.criticalPath !== null && (
+        <div className="mt-10">
+          <CriticalPathDisplay items={data.criticalPath} />
+        </div>
+      )}
+
+      {/* Detail zone: Status Cards */}
+      <div className="mt-10">
+        <StatusCards
+          requirements={data.requirements}
+          specifications={data.specifications}
+        />
+      </div>
     </div>
   );
 }

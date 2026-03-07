@@ -67,4 +67,16 @@ describe("DrillDownBreadcrumb", () => {
 
     expect(onBack).not.toHaveBeenCalled();
   });
+
+  it("back button uses brand hover colors (hover:bg-brand-50 hover:text-brand-700)", () => {
+    const onBack = vi.fn();
+
+    const { container } = render(
+      <DrillDownBreadcrumb requirementTitle="User Login" onBack={onBack} />
+    );
+
+    const button = container.querySelector("button");
+    expect(button).toHaveClass("hover:bg-brand-50");
+    expect(button).toHaveClass("hover:text-brand-700");
+  });
 });

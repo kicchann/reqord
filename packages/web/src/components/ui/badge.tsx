@@ -2,10 +2,10 @@ import React from "react";
 import type { Status, Priority, Complexity } from "@reqord/shared";
 
 const STATUS_STYLES: Record<Status, string> = {
-  draft: "bg-gray-100 text-gray-700",
-  approved: "bg-green-100 text-green-800",
-  implemented: "bg-blue-100 text-blue-800",
-  deprecated: "bg-red-100 text-red-700",
+  draft: "bg-gray-100 text-gray-600 ring-1 ring-inset ring-gray-300",
+  approved: "bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200",
+  implemented: "bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-200",
+  deprecated: "bg-red-50 text-red-700 ring-1 ring-inset ring-red-200",
 };
 
 const STATUS_LABELS: Record<Status, string> = {

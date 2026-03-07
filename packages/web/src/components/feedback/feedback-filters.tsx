@@ -8,11 +8,55 @@ export interface FeedbackFilterState {
   status?: string;
 }
 
-const TYPE_OPTIONS = ["all", "bug", "improvement", "requirement-gap", "spec-mismatch", "security"];
+const TYPE_OPTIONS: { value: string; label: string }[] = [
+  { value: "all", label: "all" },
+  { value: "bug", label: "bug" },
+  { value: "improvement", label: "improvement" },
+  { value: "requirement-gap", label: "Req Gap" },
+  { value: "spec-mismatch", label: "Spec Mismatch" },
+  { value: "security", label: "security" },
+];
+
 const SEVERITY_OPTIONS = ["all", "critical", "high", "medium", "low"];
 const STATUS_OPTIONS = ["all", "open", "closed"];
 
 function SegmentedButtons({
+  label,
+  options,
+  value,
+  onChange,
+}: {
+  label: string;
+  options: { value: string; label: string }[];
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  return (
+    <div className="flex items-center gap-2">
+      <span className="text-xs font-medium text-gray-500 w-16">{label}</span>
+      <div className="flex gap-1">
+        {options.map((opt) => (
+          <button
+            key={opt.value}
+            onClick={() => onChange(opt.value)}
+            aria-label={`${label} ${opt.value}`}
+            aria-pressed={value === opt.value}
+            className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
+              value === opt.value
+                ? "bg-blue-600 text-white"
+                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+            }`}
+            data-testid={`filter-${label.toLowerCase()}-${opt.value}`}
+          >
+            {opt.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function SimpleSegmentedButtons({
   label,
   options,
   value,
@@ -24,27 +68,12 @@ function SegmentedButtons({
   onChange: (v: string) => void;
 }) {
   return (
-    <div className="flex items-center gap-2">
-      <span className="text-xs font-medium text-gray-500 w-16">{label}</span>
-      <div className="flex gap-1">
-        {options.map((opt) => (
-          <button
-            key={opt}
-            onClick={() => onChange(opt)}
-            aria-label={`${label} ${opt}`}
-            aria-pressed={value === opt}
-            className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
-              value === opt
-                ? "bg-blue-600 text-white"
-                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-            }`}
-            data-testid={`filter-${label.toLowerCase()}-${opt}`}
-          >
-            {opt}
-          </button>
-        ))}
-      </div>
-    </div>
+    <SegmentedButtons
+      label={label}
+      options={options.map((o) => ({ value: o, label: o }))}
+      value={value}
+      onChange={onChange}
+    />
   );
 }
 
@@ -65,7 +94,7 @@ export function FeedbackFilters({
           onFilterChange({ ...activeFilters, type: v === "all" ? undefined : v })
         }
       />
-      <SegmentedButtons
+      <SimpleSegmentedButtons
         label="Severity"
         options={SEVERITY_OPTIONS}
         value={activeFilters.severity ?? "all"}
@@ -73,7 +102,7 @@ export function FeedbackFilters({
           onFilterChange({ ...activeFilters, severity: v === "all" ? undefined : v })
         }
       />
-      <SegmentedButtons
+      <SimpleSegmentedButtons
         label="Status"
         options={STATUS_OPTIONS}
         value={activeFilters.status ?? "all"}

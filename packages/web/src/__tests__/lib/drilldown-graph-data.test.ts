@@ -107,7 +107,7 @@ describe("buildDrillDownGraphData", () => {
       expect(result.edges).toHaveLength(2);
     });
 
-    it("positions spec nodes at x=400 with vertical gap of 120", () => {
+    it("positions spec nodes at x=400 with vertical gap of 120 when no tasks", () => {
       const req = makeReq("req-000001");
       const spec1 = makeSpec("spec-000001", "req-000001");
       const spec2 = makeSpec("spec-000002", "req-000001");
@@ -202,7 +202,7 @@ describe("buildDrillDownGraphData", () => {
       });
     });
 
-    it("positions issues based on spec index and task index", () => {
+    it("positions issues without overlap when spec has many tasks", () => {
       const req = makeReq("req-000001");
       const spec1 = makeSpec("spec-000001", "req-000001");
       const spec2 = makeSpec("spec-000002", "req-000001");
@@ -214,9 +214,51 @@ describe("buildDrillDownGraphData", () => {
 
       const issueNodes = result.nodes.filter((n) => n.type === "issue");
       expect(issueNodes).toHaveLength(3);
+      // spec1 issues start at y=0
       expect(issueNodes[0].position).toEqual({ x: 800, y: 0 });
       expect(issueNodes[1].position).toEqual({ x: 800, y: 80 });
-      expect(issueNodes[2].position).toEqual({ x: 800, y: 120 });
+      // spec2 is pushed down so its issues don't overlap with spec1's
+      // spec1 had 2 tasks → occupies 2*80=160px, so spec2 starts at max(120, 160)=160
+      expect(issueNodes[2].position).toEqual({ x: 800, y: 160 });
+    });
+
+    it("pushes spec nodes down when previous spec has many tasks", () => {
+      const req = makeReq("req-000001");
+      const spec1 = makeSpec("spec-000001", "req-000001");
+      const spec2 = makeSpec("spec-000002", "req-000001");
+      const tasks = [
+        makeTask(1, ["spec-000001"]),
+        makeTask(2, ["spec-000001"]),
+        makeTask(3, ["spec-000001"]),
+        makeTask(4, ["spec-000001"]),
+      ];
+
+      const result = buildDrillDownGraphData(req, [spec1, spec2], tasks);
+
+      const specNodes = result.nodes.filter((n) => n.type === "specification");
+      // spec1 has 4 tasks → occupies 4*80=320px, which exceeds default gap of 120
+      // so spec2 is pushed to y=320
+      expect(specNodes[0].position).toEqual({ x: 400, y: 0 });
+      expect(specNodes[1].position).toEqual({ x: 400, y: 320 });
+    });
+
+    it("centers requirement node vertically relative to all specs", () => {
+      const req = makeReq("req-000001");
+      const spec1 = makeSpec("spec-000001", "req-000001");
+      const spec2 = makeSpec("spec-000002", "req-000001");
+      const tasks = [
+        makeTask(1, ["spec-000001"]),
+        makeTask(2, ["spec-000001"]),
+        makeTask(3, ["spec-000001"]),
+        makeTask(4, ["spec-000001"]),
+      ];
+
+      const result = buildDrillDownGraphData(req, [spec1, spec2], tasks);
+
+      const reqNode = result.nodes.find((n) => n.type === "requirement");
+      const specNodes = result.nodes.filter((n) => n.type === "specification");
+      const lastSpecY = specNodes[specNodes.length - 1].position.y; // 320
+      expect(reqNode?.position.y).toBe(lastSpecY / 2); // 160
     });
 
     it("does not create issue nodes when no tasks are linked to spec", () => {

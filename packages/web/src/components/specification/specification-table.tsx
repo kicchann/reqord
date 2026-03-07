@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import Link from "next/link";
 import type { Specification, Status } from "@reqord/shared";
 import { StatusBadge } from "@/components/ui/badge";
@@ -84,16 +84,34 @@ export function SpecificationTable({
   }
 
   function renderSortHeader(column: SortKey, label: string) {
-    const arrow = sortKey === column ? (sortDir === "asc" ? " ↑" : " ↓") : "";
+    const isActive = sortKey === column;
     return (
       <th
         key={column}
-        className="cursor-pointer px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 hover:text-gray-900"
-        onClick={() => handleSort(column)}
+        className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
       >
-        {label}{arrow}
+        <button
+          type="button"
+          onClick={() => handleSort(column)}
+          className={`inline-flex items-center gap-1 transition-colors ${
+            isActive ? "text-brand-600" : "hover:text-gray-900"
+          }`}
+          aria-sort={isActive ? (sortDir === "asc" ? "ascending" : "descending") : undefined}
+        >
+          {label}
+          <span className={`text-[10px] ${isActive ? "opacity-100" : "opacity-30"}`}>
+            {isActive && sortDir === "desc" ? "▼" : "▲"}
+          </span>
+        </button>
       </th>
     );
+  }
+
+  const hasActiveFilters = search || statusFilter !== "all";
+
+  function clearAllFilters() {
+    setSearch("");
+    setStatusFilter("all");
   }
 
   return (
@@ -104,12 +122,14 @@ export function SpecificationTable({
           placeholder="Search by ID, title, or requirement..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
+          aria-label="Search specifications by ID, title, or requirement"
           className="rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
         />
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value as Status | "all")}
-          className="rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm"
+          aria-label="Filter by status"
+          className="rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
         >
           {STATUS_OPTIONS.map((o) => (
             <option key={o.value} value={o.value}>
@@ -124,7 +144,7 @@ export function SpecificationTable({
 
       <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white shadow-sm">
         <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+          <thead className="bg-gray-50 border-b-2 border-gray-200">
             <tr>
               {renderSortHeader("id", "ID")}
               {renderSortHeader("title", "Title")}
@@ -137,14 +157,35 @@ export function SpecificationTable({
           <tbody className="divide-y divide-gray-200">
             {filtered.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-sm text-gray-500">
-                  No specifications found.
+                <td colSpan={6} className="px-4 py-12 text-center">
+                  <div className="text-gray-400">
+                    <svg className="mx-auto h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                    <p className="mt-2 text-sm font-medium text-gray-900">No specifications found</p>
+                    <p className="mt-1 text-sm text-gray-500">Try adjusting your search or filter criteria</p>
+                    {hasActiveFilters && (
+                      <button
+                        type="button"
+                        onClick={clearAllFilters}
+                        className="mt-3 text-sm font-medium text-blue-600 hover:text-blue-800"
+                      >
+                        Clear all filters
+                      </button>
+                    )}
+                  </div>
                 </td>
               </tr>
             ) : (
-              filtered.map((spec) => (
-                <tr key={spec.id} className="hover:bg-gray-50">
-                  <td className="whitespace-nowrap px-4 py-3 text-sm font-mono">
+              filtered.map((spec, index) => (
+                <tr
+                  key={spec.id}
+                  className={`hover:bg-blue-50/50 transition-colors duration-150 ${
+                    index % 2 === 1 ? "bg-gray-50/50" : ""
+                  }`}
+                >
+                  <td className="whitespace-nowrap px-4 py-3.5 text-sm font-mono">
                     <Link
                       href={`/specifications/${spec.id}`}
                       className="text-blue-600 hover:text-blue-800 hover:underline"
@@ -152,7 +193,7 @@ export function SpecificationTable({
                       {spec.id}
                     </Link>
                   </td>
-                  <td className="px-4 py-3 text-sm">
+                  <td className="px-4 py-3.5 text-sm">
                     <Link
                       href={`/specifications/${spec.id}`}
                       className="text-gray-900 hover:text-blue-600"
@@ -160,7 +201,7 @@ export function SpecificationTable({
                       {spec.title || <span className="italic text-gray-400">Untitled</span>}
                     </Link>
                   </td>
-                  <td className="px-4 py-3 text-sm">
+                  <td className="px-4 py-3.5 text-sm">
                     <Link
                       href={`/requirements/${spec.requirementId}`}
                       className="text-blue-600 hover:text-blue-800 hover:underline"
@@ -173,13 +214,13 @@ export function SpecificationTable({
                       </span>
                     </Link>
                   </td>
-                  <td className="whitespace-nowrap px-4 py-3">
+                  <td className="whitespace-nowrap px-4 py-3.5">
                     <StatusBadge status={spec.status} />
                   </td>
-                  <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-500">
+                  <td className="whitespace-nowrap px-4 py-3.5 text-sm text-gray-500">
                     {spec.version}
                   </td>
-                  <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-500">
+                  <td className="whitespace-nowrap px-4 py-3.5 text-sm text-gray-500">
                     {new Date(spec.updatedAt).toLocaleDateString("ja-JP")}
                   </td>
                 </tr>

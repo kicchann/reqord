@@ -1,5 +1,3 @@
-"use client";
-
 import React from "react";
 
 type ProgressBarProps = {
@@ -33,10 +31,10 @@ export function ProgressBar({
           {current}/{total} ({percentage}%)
         </span>
       </div>
-      <div className="h-2 overflow-hidden rounded-full bg-gray-200">
+      <div className="h-3 overflow-hidden rounded-full bg-gray-100">
         <div
           data-testid="progress-bar-fill"
-          className={`h-full ${bgClass} transition-all duration-300`}
+          className={`h-full rounded-full ${bgClass} transition-all duration-500 ease-out`}
           style={{ width: `${percentage}%` }}
         />
       </div>

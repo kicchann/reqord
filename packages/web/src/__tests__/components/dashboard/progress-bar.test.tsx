@@ -84,4 +84,67 @@ describe("ProgressBar", () => {
     const progressBar = screen.getByTestId("progress-bar-fill");
     expect(progressBar).toHaveClass("bg-green-500");
   });
+
+  it("uses h-3 height for the track", () => {
+    render(
+      <ProgressBar
+        label="Test"
+        current={5}
+        total={10}
+        percentage={50}
+        color="blue"
+      />
+    );
+
+    const progressBar = screen.getByTestId("progress-bar-fill");
+    const track = progressBar.parentElement;
+    expect(track).toHaveClass("h-3");
+  });
+
+  it("uses gray-100 background for the track", () => {
+    render(
+      <ProgressBar
+        label="Test"
+        current={5}
+        total={10}
+        percentage={50}
+        color="blue"
+      />
+    );
+
+    const progressBar = screen.getByTestId("progress-bar-fill");
+    const track = progressBar.parentElement;
+    expect(track).toHaveClass("bg-gray-100");
+  });
+
+  it("applies rounded-full to the fill bar", () => {
+    render(
+      <ProgressBar
+        label="Test"
+        current={5}
+        total={10}
+        percentage={50}
+        color="blue"
+      />
+    );
+
+    const progressBar = screen.getByTestId("progress-bar-fill");
+    expect(progressBar).toHaveClass("rounded-full");
+  });
+
+  it("applies duration-500 ease-out transition to the fill bar", () => {
+    render(
+      <ProgressBar
+        label="Test"
+        current={5}
+        total={10}
+        percentage={50}
+        color="blue"
+      />
+    );
+
+    const progressBar = screen.getByTestId("progress-bar-fill");
+    expect(progressBar).toHaveClass("duration-500");
+    expect(progressBar).toHaveClass("ease-out");
+  });
 });

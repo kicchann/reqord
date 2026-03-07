@@ -19,6 +19,8 @@ export function Tabs({ tabs, activeTab, onTabChange }: TabsProps) {
           return (
             <button
               key={tab.id}
+              role="tab"
+              aria-selected={isActive}
               onClick={() => onTabChange(tab.id)}
               className={`
                 whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium

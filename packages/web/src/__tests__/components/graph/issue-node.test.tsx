@@ -46,7 +46,7 @@ describe("IssueNode", () => {
     expect(screen.getByText("Issue #123")).toBeInTheDocument();
   });
 
-  it("renders open status with yellow background class", () => {
+  it("renders open status with amber background class (brand color system)", () => {
     const { container } = render(
       <IssueNode
         {...defaultNodeProps}
@@ -61,11 +61,11 @@ describe("IssueNode", () => {
       />
     );
 
-    const nodeDiv = container.querySelector(".bg-yellow-200");
+    const nodeDiv = container.querySelector(".bg-amber-50");
     expect(nodeDiv).toBeInTheDocument();
   });
 
-  it("renders closed status with green background class", () => {
+  it("renders closed status with emerald background class (brand color system)", () => {
     const { container } = render(
       <IssueNode
         {...defaultNodeProps}
@@ -80,11 +80,11 @@ describe("IssueNode", () => {
       />
     );
 
-    const nodeDiv = container.querySelector(".bg-green-200");
+    const nodeDiv = container.querySelector(".bg-emerald-50");
     expect(nodeDiv).toBeInTheDocument();
   });
 
-  it("renders in_progress status with blue background class", () => {
+  it("renders in_progress status with blue background class (brand color system)", () => {
     const { container } = render(
       <IssueNode
         {...defaultNodeProps}
@@ -99,8 +99,27 @@ describe("IssueNode", () => {
       />
     );
 
-    const nodeDiv = container.querySelector(".bg-blue-200");
+    const nodeDiv = container.querySelector(".bg-blue-50");
     expect(nodeDiv).toBeInTheDocument();
+  });
+
+  it("renders status badge with semi-transparent white background", () => {
+    const { container } = render(
+      <IssueNode
+        {...defaultNodeProps}
+        id="issue-spec-000001-123"
+        data={{
+          label: "Issue #123",
+          status: "open",
+          issueNumber: 123,
+          issueUrl: "https://github.com/test/repo/issues/123",
+        }}
+        type="issue"
+      />
+    );
+
+    const badge = container.querySelector(".bg-white\\/80");
+    expect(badge).toBeInTheDocument();
   });
 
   it("renders status badge", () => {
