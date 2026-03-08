@@ -14,13 +14,27 @@
 4. **Don'tsの外部参照は汎用的に** — 「プロジェクトに導入されている〇〇エージェントや関連スキルを併用すること」
 5. **descriptionはバイリンガル重複しない** — 日本語1文に統一（毎回トークンに影響）
 6. **prescriptiveな推奨を排除** — 事実の表示に徹し、判断はユーザーに委ねる
+7. **SKILL.mdはルーティング+リファレンス表に絞る** — 詳細手順はresources/に分離し、必要時に読み込む
+8. **CLIなしのフォールバックは行わない** — CLIが見つからない場合はインストールを案内する
+9. **並列実行可能な箇所は明示する** — 「並列で実行」と記載してパフォーマンスを最適化
 
-### スキル固有の方針
+### スキル設計パターン
 
-- **contextスキル**: 毎回注入されるため最小化が重要。「データモデル」と「CLIルール」に絞り、CLIリファレンスやプロセス指示は `resources/` に移動
-- **statusスキル**: データの集計・表示に限定。着手順序の推奨やワークフロー案内を含めない
-- **designスキル**: design.mdの生成に集中。コード調査のエージェント委譲指示（L3）はScopeのDon'tsで代替
-- **setupスキル**: 環境の事実確認と証憑記録に限定。「次のステップ」推奨を含めない
+```
+skills/<name>/
+├── SKILL.md                # フロントマター + Scope + 引数解析 + リファレンス表 + エラーハンドリング
+└── resources/
+    ├── <subcommand-1>.md   # サブコマンドの詳細手順
+    └── <subcommand-2>.md   # サブコマンドの詳細手順
+```
+
+### フロントマター方針
+
+| フィールド | 使用基準 |
+|-----------|---------|
+| `allowed-tools` | 読み取り専用スキルで制限。オーケストレーション系は制限しない |
+| `model` | データ集計・表示系は `sonnet`。高度な判断が必要なスキルは指定なし |
+| `disable-model-invocation` | 環境変更を伴うスキル（setup）のみ `true` |
 
 ## 完了済み
 
@@ -50,6 +64,75 @@
 | `status/SKILL.md` | 163行 | 117行 | Scope追加、推奨アクション→準備状況サマリー、コマンド一覧削除 |
 | `setup/SKILL.md` | 279行 | 261行 | description統一、スキル一覧・次のステップ削除 |
 
+### Phase 4: verifyスキルのリファクタリング
+
+| 変更 | 内容 |
+|------|------|
+| スコープ拡張 | spec実装チェック専用 → req/spec/context横断の検証スキルに |
+| validate拡張 | `validate <req-id>`, `validate context`, `validate all` を追加 |
+| done拡張 | Time to Learning（経過日数表示）、振り返りメモ（オプション）を追加 |
+| resources分離 | SKILL.md 551行 → 77行。validate.md / trace.md / done.md / validate-criteria.md に分離 |
+| description | バイリンガル重複を解消、日本語1文に統一 |
+| Scope追加 | Do: 検証・可視化・完了処理 / Don't: 問題の修正や改善提案 |
+| エラーハンドリング | CLI不在時のフォールバック削除 → インストール案内に変更 |
+
+### Phase 5: フロントマター強化
+
+| スキル | 追加フィールド |
+|--------|---------------|
+| `context/SKILL.md` | `allowed-tools: Read, Glob, Bash(reqord:*)`, `model: sonnet` |
+| `status/SKILL.md` | `allowed-tools: Read, Glob, Bash(reqord:*)`, `model: sonnet` |
+| `setup/SKILL.md` | `allowed-tools: Read, Glob, Write, Bash(reqord:*), Bash(gh --version), Bash(gh auth status), Bash(git --version)`, `disable-model-invocation: true` |
+
+### Phase 6: refine + design → edit 統合
+
+| 変更 | 内容 |
+|------|------|
+| `refine/` 削除 | `edit/resources/edit-req.md` に移行 |
+| `design/` 削除 | `edit/resources/edit-spec.md` に移行 |
+| `edit/` 新規作成 | SKILL.md（ルーティング）+ resources/（edit-req, edit-spec, edit-context） |
+| edit-context 新規 | ProjectContext充実化（Explore→改善案→適用） |
+| 参照更新 | CLAUDE.md, README.md, TODO.md, setup, dev, verify, context の旧スキル名を `/reqord:edit` に更新 |
+
+### Phase 7: new スキル新設
+
+| 変更 | 内容 |
+|------|------|
+| `new/` 新規作成 | SKILL.md + resources/（new-req, new-spec） |
+| new-req | req作成→description.md記述→approve の一気通貫 |
+| new-spec | spec作成→edit specへの誘導（design.md生成） |
+| edit→new誘導 | IDが見つからない場合、specが紐づかない場合に `/reqord:new` を案内 |
+| new→edit誘導 | 作成完了後に `/reqord:edit` を案内。spec作成後のdesign.md生成は edit を呼び出し |
+
+### Phase 8: dev スキル → brief スキルへの置換
+
+**方針**: devスキルのL3オーケストレーション（explorer→architect→implementer→reviewer）を削除し、L2のコンテキスト提供に特化した `brief` スキルに置き換える。
+
+**理由**:
+- devのL2固有部分はStep 0-2のコンテキスト注入のみ（全体の約20%）
+- 残り80%はL1エージェントのオーケストレーション（L3の責務）
+- reqordはOSS。実装方法の強制はユーザーの選択を制限する
+- design.mdがあれば任意のTDDスキル/エージェントで実装可能
+
+**briefスキルの設計**:
+
+```
+brief <spec-id>       — spec + req + design.md + SC + feedback + dependencies を一括表示
+brief <issue-number>  — issueに紐づくspec/req + design.md + task状況
+brief <req-id>        — req + 全spec + design.md状況 + feedback
+```
+
+- 純粋にL2。reqordデータを読み集めて全体像を提示するのみ
+- 実装手段には口出ししない
+- `model: sonnet` で十分（データ読み取り・整形のみ）
+- `allowed-tools: Read, Glob, Grep, Bash(reqord:*), Bash(gh:*)` 程度
+
+**reqordの価値チェーン（最終形）**:
+
+```
+new → edit → brief → [実装はL1/L3] → verify → feedback
+```
+
 ### その他
 
 - `dev/SKILL.md`, `dev/implement-phase.md`: reqord-implementer参照を汎用化
@@ -58,16 +141,23 @@
 
 ## 未着手
 
-### スキルのレビュー（残り5件）
+### Phase 9完了: git スキル → context/resources/git-conventions.md への退避
 
-- `dev/SKILL.md` — issueベースのフロー再設計が必要（別課題）
-- `git/SKILL.md` — descriptionバイリンガル重複の修正
-- `feedback/SKILL.md` — descriptionバイリンガル重複の修正
-- `refine/SKILL.md` — descriptionバイリンガル重複の修正
-- `verify/SKILL.md` — descriptionバイリンガル重複の修正
+| 変更 | 内容 |
+|------|------|
+| `git/` 削除 | L3オーケストレーション（git/gh操作）を除去 |
+| `context/resources/git-conventions.md` 新規 | L2固有部分（命名規則・テンプレート）のみ抽出 |
+| `brief` 更新 | Spec詳細モードの出力にGit操作ガイドを追加 |
 
-### devスキルのフロー再設計
+### スキル一覧（最終形）
 
-現状: `spec-id → design.md → 実装` のspec起点フロー
-課題: 実際の開発ではissueが作業単位。`issue → spec/design.mdをコンテキストとして参照 → 実装` が自然
-方針: 別課題として対応
+| スキル | 責務 | レイヤー |
+|--------|------|---------|
+| `setup` | 環境セットアップ・前提条件チェック | L2 |
+| `context` | データモデル・CLIルールの共通知識（自動注入） | L2 |
+| `status` | 進捗ダッシュボード表示 | L2 |
+| `new` | req/specの新規作成 | L2 |
+| `edit` | req/spec/contextの編集・改善 | L2 |
+| `brief` | spec/req/issueの包括的コンテキスト提供 | L2 |
+| `verify` | データ検証・実装確認・完了処理 | L2 |
+| `feedback` | フィードバック運用 | L2 |

@@ -2,6 +2,9 @@
 name: status
 description: Reqordの要件・仕様の実装進捗ダッシュボードを表示する。ステータス別集計、design.md準備状況、未解決フィードバックを一覧表示する。
 argument-hint: "[approved|implemented|all] (デフォルト: approved)"
+allowed-tools: Read, Glob, Bash(reqord:req list *), Bash(reqord:spec list *), Bash(reqord:feedback list *)
+model: sonnet
+disable-model-invocation: true
 ---
 
 ## Scope
@@ -78,7 +81,7 @@ $ARGUMENTSに基づいて詳細表示する対象を決定する。
 | spec-000007 | req-000007 | Web画面 | low | large | 253行 | feedback-review |
 ```
 
-design.md列: 各specのdesign.mdを読み取り行数を表示。「Specification Design Template」のみ、「Phase 3で実装予定」のみ、または10行以下の場合は「テンプレート」と表示。
+design.md列: `.reqord/settings/setting.yaml` の `approvalPrerequisites.designMdCheck` を確認する。`true`（デフォルト）の場合、各specのdesign.mdを読み取り行数を表示する。「Specification Design Template」のみ、「Phase 3で実装予定」のみ、または10行以下の場合は「テンプレート」と表示。`false` の場合、design.md列は `-` と表示する（チェック不要のため）。
 
 ---
 
@@ -108,10 +111,22 @@ Step 1で取得したfeedback一覧から、openかつlinkedToが設定されて
 
 | Status | Spec IDs | 説明 |
 |--------|----------|------|
-| Ready | spec-000003 (high/small) | design.md記述済み、ブロッカーなし |
-| Needs design | spec-000005 (medium/medium) | design.mdがテンプレートのまま |
+| Ready | spec-000003 (high/small) | design.md記述済み（designMdCheck有効時）、ブロッカーなし |
+| Needs design | spec-000005 (medium/medium) | design.mdがテンプレートのまま（designMdCheck有効時のみ表示） |
 | Blocked | spec-000008 (high/medium) | blockedBy: spec-000003 |
 | Feedback pending | spec-000007 (low/large) | feedback-review flagあり |
 ```
 
 依存関係チェック: 各specに紐づくrequirementのdependencies（blockedBy）を確認し、ブロッカーがある場合はテーブルに反映する。
+
+---
+
+## エラーハンドリング
+
+### reqord CLIが見つからない場合
+
+```
+❌ reqord CLIが見つかりません。
+インストール: npm install -g @reqord/cli
+環境チェック: `/reqord:setup --check`
+```

@@ -2,6 +2,15 @@
 name: context
 description: Reqordのデータモデル（Requirement, Specification, ProjectContext, Feedback）とCLI操作ルールの共通知識ベース。
 user-invokable: false
+allowed-tools: Read, Glob, Bash(reqord:context *), Bash(reqord:req list *), Bash(reqord:spec list *)
+model: sonnet
+---
+
+## Scope
+
+- **Do**: 他スキルが参照する共通データモデル・CLI操作ルール・リファレンス提供
+- **Don't**: 直接トリガーされることは想定しない（user-invokable: false）。データの変更操作は各専用スキルで実施
+
 ---
 
 # Reqord共通知識ベース
@@ -16,6 +25,7 @@ user-invokable: false
 
 - **ID形式**: `req-NNNNNN`（6桁ゼロ埋め）
 - **ステータスライフサイクル**: `draft` → `approved` → `implemented` → `deprecated`
+  - `deprecated` への遷移はCLIコマンドで直接実行する。**遷移前に必ず `/reqord:verify trace <req-id>` で影響範囲を確認**し、関連specへの影響を把握してからdeprecateすること
 - **主要フィールド**:
   - `title`: 要件タイトル
   - `status`: 現在のステータス
@@ -35,6 +45,7 @@ user-invokable: false
 
 - **ID形式**: `spec-NNNNNN`（6桁ゼロ埋め）
 - **ステータスライフサイクル**: `draft` → `approved` → `implemented`
+  - Specificationにdeprecatedステータスはない。紐づくRequirementがdeprecatedになった場合、関連Specificationは実質的に無効となる
 - **主要フィールド**:
   - `requirementId`: 紐づくreq-id
   - `title`: 仕様タイトル
@@ -87,6 +98,10 @@ CLIコマンドはバリデーション・バージョン管理・監査証跡�
 | フィードバック操作 | `reqord feedback link/unlink/close/resolve` | 禁止 |
 | Issue同期 | `reqord task sync/sync-all` | 禁止 |
 | design.md書き込み | Writeツールで直接書き込み | 許可（CLIコマンドなし） |
+| plugin-config.yaml書き込み | Writeツールで直接書き込み | 許可（プラグイン固有設定、`/reqord:setup` のみ） |
+
+> **design.mdが直接書き込み可能な理由**: design.mdはCLIバリデーション対象外の自由記述ファイルであり、対応するCLIコマンドが存在しない。一方、description.mdは `reqord req update --description-file` 経由で更新すること（バリデーション・バージョン管理が適用されるため）。
+
 | コンテキスト更新 | `reqord context update` | 禁止 |
 
 ### バージョン管理ルール
@@ -105,10 +120,9 @@ CLIコマンドはバリデーション・バージョン管理・監査証跡�
 |--------|------|
 | `/reqord:setup` | 環境セットアップ・前提条件チェック |
 | `/reqord:status` | 要件・仕様の実装進捗ダッシュボード |
-| `/reqord:refine` | 要件の品質改善（SMARTスコア向上） |
-| `/reqord:design` | 仕様の技術設計書（design.md）作成 |
-| `/reqord:dev` | design.mdに基づくTDD実装 |
-| `/reqord:git` | spec参照付きGit操作（ブランチ・コミット・PR） |
+| `/reqord:new` | req/specの新規作成 |
+| `/reqord:edit` | req/spec/contextの編集・改善 |
+| `/reqord:brief` | spec/req/issueの包括的コンテキスト表示 |
 | `/reqord:verify` | 実装検証・ステータス更新 |
 | `/reqord:feedback` | フィードバック・バグ報告の処理 |
 | `/reqord:context` | このスキル。データモデル・CLI・共通知識 |
@@ -130,3 +144,6 @@ CLIコマンドはバリデーション・バージョン管理・監査証跡�
 | `resources/feedback-workflow.md` | フィードバック3段階進化 | フィードバック処理・リンク時 |
 | `resources/ai-phases.md` | AI支援4フェーズ・HitL境界 | AI詳細化・設計生成・タスク分解時 |
 | `resources/anti-patterns.md` | アンチパターン・チェックリスト | レビュー時、品質確認時 |
+| `resources/git-conventions.md` | ブランチ命名・コミット・PRテンプレート | ブランチ作成・コミット・PR作成時（`/reqord:brief` のGit操作ガイドから参照） |
+| `resources/task-workflow.md` | タスク定義形式・HTMLタグ・CLIコマンド | `reqord task create` を直接CLI実行する時（専用スキルなし、直接参照） |
+| `resources/dialogue-guidelines.md` | 対話設計の原則・テンプレート・アンチパターン | AskUserQuestionでヒアリングを行うスキル実装時 |

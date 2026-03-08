@@ -1,43 +1,30 @@
----
-name: design
-description: Specificationのdesign.md（技術設計書）を生成する。Requirementの内容・ProjectContext・既存コード実装状況を基に6セクション構造の設計書を作成する。spec-idまたはreq-idを指定して使用。
-argument-hint: "[spec-id...|req-id...|--all] (省略時は対話選択、複数指定可)"
----
+# edit spec: design.md生成・更新
 
-## Scope
-
-- **Do**: reqordのデータ（requirement, ProjectContext, 既存コード状況）からdesign.md（6セクション構造の技術設計書）を生成する
-- **Don't**: 既存コードの深掘り調査や実装計画の策定。事前にコードベース調査が必要な場合はexplorerエージェントや関連スキルを、設計の詳細化が必要な場合はarchitectエージェントを併用すること
-
----
-
-# Specification設計書作成
-
-対象: $ARGUMENTS
+Requirementの内容・ProjectContext・既存コード実装状況を基に、6セクション構造の技術設計書（design.md）を生成・更新する。
 
 ---
 
 ## Step 1: 対象Specificationの特定
 
-### $ARGUMENTSが空の場合
+### IDが指定されている場合（spec-id）
+
+- 指定specを対象とする（存在確認を行い、存在しないIDはスキップ）
+
+### IDが指定されている場合（req-id）
+
+- 該当requirementに紐づく全specを対象とする
+- 紐づくspecがない場合は `/reqord:new spec <req-id>` でSpecificationの作成を案内する
+
+### `--all` の場合
+
+- design.mdが未記述の全specを対象とする
+
+### 未指定の場合
 
 1. `reqord spec list` を実行してspecification一覧を取得
 2. 各specのdesign.mdを読み取り、デフォルトテンプレートのままかどうかを判定
    - 判定基準: design.mdに「Phase 3で実装予定」または「Specification Design Template」のみが含まれている場合は「未記述」
 3. 一覧をテーブル形式で表示し、AskUserQuestionで対象を選択してもらう（複数選択可）
-
-### $ARGUMENTSが `--all` の場合
-
-- design.mdが未記述の全specを対象とする
-
-### $ARGUMENTSが `spec-NNNNNN` の場合
-
-- 指定specを対象とする（存在確認を行い、存在しないIDはスキップ）
-
-### $ARGUMENTSが `req-NNNNNN` の場合
-
-- 該当requirementに紐づく全specを対象とする
-- 紐づくspecがない場合はStep 2の分割判断へ進む
 
 ---
 
@@ -45,11 +32,33 @@ argument-hint: "[spec-id...|req-id...|--all] (省略時は対話選択、複数�
 
 ### 情報収集
 
-以下を並列で読み取る:
+以下を**並列で実行**する:
+
+**データ読み取り（並列）:**
 
 - 対象specの紐づくrequirement情報（YAML + description.md）
 - ProjectContext（context.yaml → product.yaml, technical.yaml, structure.yaml, domain/*.md）
 - 関連specのdesign.md（同じrequirementに紐づく実装済みspecがあればパターン参照）
+
+**既存コード調査（上記と並列）:**
+
+**Exploreエージェント**（Agentツール subagent_type=Explore）を起動する。以下のテンプレートの `<変数>` を埋めてエージェントに渡すこと:
+
+```
+以下のSpecificationに関連する既存コードの実装パターン・アーキテクチャを調査してください。
+
+対象:
+- spec-id: <spec-id>
+- title: <spec-title>
+- 紐づくrequirement: <req-id> - <req-title>
+
+調査観点:
+1. 対象specの機能に関連する既存コードの構造・パターン
+2. 類似機能の実装パターン（レイヤー構成、依存注入、エラーハンドリング）
+3. design.mdに反映すべきアーキテクチャ上の制約・慣習
+
+コードは書かず、調査結果のみ報告してください。
+```
 
 ### 分割判断
 
@@ -59,7 +68,7 @@ argument-hint: "[spec-id...|req-id...|--all] (省略時は対話選択、複数�
 - 読み取り/書き込みの方向が異なる独立した機能がある
 - 異なるフレームワークやライブラリに依存する独立した画面がある
 
-分割ルール: 1要件 = 1〜3 spec（最大3件）。分割する場合はユーザー承認を得てから `reqord spec create <req-id>` で追加specを作成する。
+分割ルール: 1要件 = 1〜3 spec（最大3件）。分割する場合はユーザー承認を得てから `/reqord:new spec <req-id>` で追加specを作成する。
 
 ---
 
@@ -132,8 +141,37 @@ ProjectContextのtechnicalファイルに記載のアーキテクチャ・設計
 
 ### バージョンバンプ
 
-design.mdの内容を更新した場合、対応するspecのバージョンを上げる:
+design.mdを生成・更新した場合（初回生成を含む）、対応するspecのバージョンを上げる:
 
 ```bash
 reqord version <spec-id> --patch --summary "design.md更新: <変更概要>"
+```
+
+### Specificationの承認
+
+`.reqord/settings/setting.yaml` を確認し、承認提案の判断を行う:
+
+- `approvalPrerequisites.designMdCheck` が `true` の場合、design.md が記述済みであることを前提条件とする
+- `approvalPrerequisites.designMdCheck` が `false` の場合、design.md の有無にかかわらず approve を提案できる
+
+design.mdの生成・更新が完了し、品質に問題がなければ、approveを提案する:
+
+```
+design.mdの記述が完了しました。approveしますか？
+```
+
+ユーザーが承認した場合:
+
+```bash
+reqord spec approve <spec-id>
+```
+
+`setting.yaml` の `statusTransitionPr.draftToApproved` が `true` の場合、このコマンドは承認PRを作成する。PRがマージされると `approved` ステータスに遷移する。`false` の場合は直接ステータスが遷移する。
+
+### 次のステップ
+
+```
+次の作業:
+- コンテキスト確認: `/reqord:brief <spec-id>`
+- 実装検証（実装後）: `/reqord:verify validate <spec-id>`
 ```
