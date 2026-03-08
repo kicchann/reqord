@@ -1,7 +1,7 @@
 {
   "name": "reqord",
-  "description": "Git-native要件管理ツールReqordを活用した持続的な開発支援プラグイン。要件(Requirement)から仕様(Specification)、実装、検証までのトレーサビリティを維持しながら、設計・TDD実装・コードレビュー・Git操作を一貫して行う。",
-  "version": "0.1.0",
+  "description": "Git-native要件管理ツールReqordの開発支援プラグイン。要件から仕様、実装、検証までのトレーサビリティを維持しながら、要件作成・設計・検証・フィードバック運用を支援する。",
+  "version": "0.2.0",
   "author": {
     "name": "kicchann"
   },
