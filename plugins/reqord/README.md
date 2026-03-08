@@ -29,12 +29,11 @@ claude --plugin-dir ./plugins/reqord
 |---------|------|
 | `/reqord:setup` | 環境セットアップ・前提条件チェック |
 | `/reqord:status` | 要件・仕様の実装進捗ダッシュボード |
-| `/reqord:design` | Specification設計書（design.md）作成 |
-| `/reqord:dev` | design.mdに基づくTDD機能開発 |
-| `/reqord:git` | spec-idベースのGit操作（ブランチ・コミット・PR） |
-| `/reqord:verify` | 実装検証・トレーサビリティ確認・完了処理 |
+| `/reqord:new` | req/specの新規作成 |
+| `/reqord:edit` | req/spec/contextの編集・改善 |
+| `/reqord:brief` | spec/req/issueの包括的コンテキスト表示 |
+| `/reqord:verify` | データ検証・実装確認・トレーサビリティ・完了処理 |
 | `/reqord:feedback` | フィードバック運用（同期・分類・リンク・クローズ） |
-| `/reqord:refine` | 要件詳細化（SMART品質スコア向上） |
 
 ## エージェント
 
@@ -42,7 +41,6 @@ claude --plugin-dir ./plugins/reqord
 |------------|------|
 | `reqord-explorer` | 要件・仕様を踏まえたコード調査 |
 | `reqord-architect` | 要件・仕様に基づく設計 |
-| `reqord-implementer` | 仕様に基づくTDD実装 |
 | `reqord-reviewer` | 要件・仕様に基づくコードレビュー |
 
 ## 前提条件

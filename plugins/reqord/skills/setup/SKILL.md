@@ -1,7 +1,16 @@
 ---
 name: setup
-description: Reqordプラグインの環境セットアップと前提条件チェック。初回利用時に実行し、必要なツールの可用性を確認する。Verify environment prerequisites for the Reqord plugin - CLI tools, GitHub authentication, and project initialization. Run on first use or when troubleshooting.
+description: Reqordプラグインの環境セットアップと前提条件チェック。CLIツール・GitHub認証・プロジェクト初期化状態を確認し、証憑を記録する。
 argument-hint: "[--check] (省略時はフルセットアップ、--checkは確認のみ)"
+allowed-tools: Read, Glob, Write, Bash(reqord:*), Bash(gh --version), Bash(gh auth status), Bash(git --version)
+disable-model-invocation: true
+---
+
+## Scope
+
+- **Do**: CLIツール・GitHub認証・プロジェクト初期化状態の確認、証憑記録
+- **Don't**: ツールのインストール実行（インストール手順の案内のみ）。reqordデータの変更は行わない
+
 ---
 
 > **ユーザー確認必須**: このスキルは環境設定の変更を伴います。自律実行時はセットアップ内容をユーザーに提示し、承認を得てから実行してください。
@@ -39,8 +48,8 @@ git --version           # Git
 | ツール       | 必須度       | 用途                             | 不在時の影響                                        |
 | ------------ | ------------ | -------------------------------- | --------------------------------------------------- |
 | `reqord` CLI | **必須**     | 全スキルのデータ操作             | フォールバック可（直接ファイル読み取り）だが非推奨  |
-| `gh` CLI     | **強く推奨** | feedback sync、issue検索、PR作成 | `/reqord:feedback`、`/reqord:git commit` が使用不可 |
-| `git`        | **必須**     | ブランチ操作、コミット、履歴検索 | `/reqord:git`、`/reqord:verify trace` が使用不可    |
+| `gh` CLI     | **強く推奨** | feedback sync、issue検索、PR作成 | `/reqord:feedback` が使用不可 |
+| `git`        | **必須**     | ブランチ操作、コミット、履歴検索 | `/reqord:verify trace` が使用不可 |
 
 ### 結果表示
 
@@ -67,7 +76,7 @@ git --version           # Git
 ⚠ gh CLI が見つかりません。
 以下の機能が制限されます:
 - /reqord:feedback（GitHub Issue同期）
-- /reqord:git commit（PR作成）
+- PR作成（gh pr create）
 - /reqord:verify trace（PR検索）
 
 インストール: https://cli.github.com/
@@ -96,7 +105,7 @@ gh auth status
 `gh auth login` を実行して認証してください。
 
 認証なしでも以下は使用可能です:
-- /reqord:status, /reqord:design, /reqord:dev, /reqord:refine, /reqord:verify validate
+- /reqord:status, /reqord:edit, /reqord:brief, /reqord:verify validate
 ```
 
 ---
@@ -147,16 +156,16 @@ reqord context show --json
 
 | 参照先                             | 必須度       | 影響するスキル                                  |
 | ---------------------------------- | ------------ | ----------------------------------------------- |
-| `files.product` (product.yaml)     | 推奨         | design, refine                                  |
-| `files.technical` (technical.yaml) | **強く推奨** | design, dev, verify（テストコマンド特定に使用） |
-| `files.structure` (structure.yaml) | 推奨         | design, dev（命名規則・構造ルール）             |
-| `files.domain` (domain/\*.md)      | 任意         | refine（ドメイン知識）                          |
+| `files.product` (product.yaml)     | 推奨         | edit, brief, new                                |
+| `files.technical` (technical.yaml) | **強く推奨** | edit, brief, verify（テストコマンド特定に使用）   |
+| `files.structure` (structure.yaml) | 推奨         | edit, brief（命名規則・構造ルール）               |
+| `files.domain` (domain/\*.md)      | 任意         | edit（ドメイン知識）                             |
 
 ### 未設定のファイルがある場合
 
 ```
 ⚠ ProjectContextの以下のファイルが未設定/未作成です:
-- technical.yaml: 未作成（/reqord:design, /reqord:dev のテスト・ビルドコマンド特定に影響）
+- technical.yaml: 未作成（/reqord:edit, /reqord:brief のテスト・ビルドコマンド特定に影響）
 - domain/*.md: 未設定（任意）
 
 `reqord context update` でProjectContextを更新できます。
@@ -188,16 +197,6 @@ reqord context show --json
 | structure.yaml | ⚠ 未作成 |
 | domain/*.md | - (任意) |
 
-### 利用可能なスキル
-| スキル | Status | 備考 |
-|--------|--------|------|
-| /reqord:status | ✅ | |
-| /reqord:design | ✅ | |
-| /reqord:dev | ✅ | |
-| /reqord:git | ✅ | |
-| /reqord:verify | ✅ | |
-| /reqord:feedback | ⚠ | gh CLI認証が必要 |
-| /reqord:refine | ✅ | |
 ```
 
 ---
@@ -244,13 +243,6 @@ project:
 
 ```
 ✅ セットアップが完了しました。証憑を .reqord/settings/plugin-config.yaml に記録しました。
-
-次のステップ:
-- 進捗確認: /reqord:status
-- 設計書作成: /reqord:design <spec-id>
-- 機能開発: /reqord:dev <spec-id>
-
-全スキル一覧: README.md を参照
 ```
 
 ---

@@ -98,18 +98,20 @@ draft → approved → implemented → deprecated
 | ステータス | 意味 | トリガー |
 |-----------|------|---------|
 | draft | 作成・編集中 | 初期状態 |
-| approved | 承認済み・実装可能 | `reqord req approve` でPR作成 → PRマージで遷移 |
+| approved | 承認済み・実装可能 | `reqord req approve` で遷移（PR要否は `setting.yaml` の `statusTransitionPr` に従う） |
 | implemented | 実装完了 | 実装終了時 |
 | deprecated | 廃止 | 要件が不要になった時 |
 
-> `pending_approval` は廃止済み。`reqord req|spec approve` でPRを作成し、マージで `approved` に遷移する。
+> `pending_approval` は廃止済み。`reqord req|spec approve` で `approved` に遷移する。PR作成の有無は `.reqord/settings/setting.yaml` の `statusTransitionPr` 設定に従う。
 
-### なぜPRベースなのか
+### なぜPRベースなのか（デフォルト設定の場合）
 
 - **既存の習慣を活用**: コードレビューと同じワークフローを要件レビューに適用
 - **CODEOWNERS**: レビュー担当者を自動割り当て
 - **変更差分の可視化**: YAML/Markdown の diff が見える
 - **承認の記録**: PRのマージ履歴が承認の証跡になる
+
+> PR不要に設定した場合でも、`reqord req|spec approve` コマンドは必須。CLIがバリデーション・バージョン管理を処理する。
 
 ### バージョン管理
 

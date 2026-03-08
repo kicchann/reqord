@@ -1,12 +1,21 @@
 ---
 name: context
-description: Reqordデータ（要件・仕様・コンテキスト・フィードバック）の読み方と開発ワークフローの定義。reqord系スキルやエージェントが自動参照する。Common knowledge base for Reqord data models, CLI patterns, and development workflow. Auto-referenced by all reqord skills and agents.
+description: Reqordのデータモデル（Requirement, Specification, ProjectContext, Feedback）とCLI操作ルールの共通知識ベース。
 user-invokable: false
+allowed-tools: Read, Glob, Bash(reqord:context *), Bash(reqord:req list *), Bash(reqord:spec list *)
+model: sonnet
+---
+
+## Scope
+
+- **Do**: 他スキルが参照する共通データモデル・CLI操作ルール・リファレンス提供
+- **Don't**: 直接トリガーされることは想定しない（user-invokable: false）。データの変更操作は各専用スキルで実施
+
 ---
 
 # Reqord共通知識ベース
 
-このスキルは全reqord系スキル・エージェントの共通基盤。データモデル・CLIパターン・ワークフローを定義する。
+このスキルは全reqord系スキル・エージェントの共通基盤。データモデルとCLIルールを定義する。
 
 ---
 
@@ -16,6 +25,7 @@ user-invokable: false
 
 - **ID形式**: `req-NNNNNN`（6桁ゼロ埋め）
 - **ステータスライフサイクル**: `draft` → `approved` → `implemented` → `deprecated`
+  - `deprecated` への遷移はCLIコマンドで直接実行する。**遷移前に必ず `/reqord:verify trace <req-id>` で影響範囲を確認**し、関連specへの影響を把握してからdeprecateすること
 - **主要フィールド**:
   - `title`: 要件タイトル
   - `status`: 現在のステータス
@@ -35,6 +45,7 @@ user-invokable: false
 
 - **ID形式**: `spec-NNNNNN`（6桁ゼロ埋め）
 - **ステータスライフサイクル**: `draft` → `approved` → `implemented`
+  - Specificationにdeprecatedステータスはない。紐づくRequirementがdeprecatedになった場合、関連Specificationは実質的に無効となる
 - **主要フィールド**:
   - `requirementId`: 紐づくreq-id
   - `title`: 仕様タイトル
@@ -79,271 +90,60 @@ CLIコマンドはバリデーション・バージョン管理・監査証跡�
 
 | 操作 | CLIコマンド | 直接編集 |
 |------|-----------|---------|
-| ステータス変更 | `reqord req approve/draft/implement` | ❌ 禁止 |
-| バージョンバンプ | `reqord version <id> --patch\|--major` | ❌ 禁止 |
-| フィールド更新（SC等） | `reqord req update --patch-file` | ❌ 禁止 |
-| description.md更新 | `reqord req update --description-file` | ❌ 禁止 |
-| フラグ除去 | `reqord feedback resolve <id> --issue <N>` | ❌ 禁止 |
-| フィードバック操作 | `reqord feedback link/unlink/close/resolve` | ❌ 禁止 |
-| Issue同期 | `reqord task sync/sync-all` | ❌ 禁止 |
-| design.md書き込み | Writeツールで直接書き込み | ✅ 許可（CLIコマンドなし） |
-| コンテキスト更新 | `reqord context update` | ❌ 禁止 |
+| ステータス変更 | `reqord req approve/draft/implement` | 禁止 |
+| バージョンバンプ | `reqord version <id> --patch\|--major` | 禁止 |
+| フィールド更新（SC等） | `reqord req update --patch-file` | 禁止 |
+| description.md更新 | `reqord req update --description-file` | 禁止 |
+| フラグ除去 | `reqord feedback resolve <id> --issue <N>` | 禁止 |
+| フィードバック操作 | `reqord feedback link/unlink/close/resolve` | 禁止 |
+| Issue同期 | `reqord task sync/sync-all` | 禁止 |
+| design.md書き込み | Writeツールで直接書き込み | 許可（CLIコマンドなし） |
+| plugin-config.yaml書き込み | Writeツールで直接書き込み | 許可（プラグイン固有設定、`/reqord:setup` のみ） |
 
-### `reqord version` の使いどころ
+> **design.mdが直接書き込み可能な理由**: design.mdはCLIバリデーション対象外の自由記述ファイルであり、対応するCLIコマンドが存在しない。一方、description.mdは `reqord req update --description-file` 経由で更新すること（バリデーション・バージョン管理が適用されるため）。
 
-**内容を変更したらバージョンを上げる。** 以下のタイミングで `reqord version` を実行する:
+| コンテキスト更新 | `reqord context update` | 禁止 |
 
-| タイミング | コマンド例 | 説明 |
-|-----------|-----------|------|
-| req/specの内容更新後 | `reqord version req-000001 --patch --summary "SC追加"` | SC・description等の内容変更 |
-| 破壊的変更時 | `reqord version spec-000016 --major --summary "API変更"` | インターフェース・データ構造の変更 |
-| `/reqord:refine` 後 | `reqord version <id> --patch --summary "SMART改善"` | 要件詳細化による更新 |
-| `/reqord:design` 後 | `reqord version <spec-id> --patch --summary "設計更新"` | design.md書き換え時 |
+### バージョン管理ルール
 
-**`--patch`（X.Y+1）**: 内容の修正・改善・追記
-**`--major`（X+1.0）**: 破壊的変更・大幅な構造変更
+**内容を変更したらバージョンを上げる。**
 
-### CLIコマンドが存在しない操作
-
-以下の操作はCLIコマンドが未実装。直接編集が許容されるが、改善が望ましい:
-
-- `tasks.yaml` のフィールド追加・構造変更
-- design.md の書き込み（Writeツール使用）
+- **`--patch`（X.Y+1）**: 内容の修正・改善・追記
+- **`--major`（X+1.0）**: 破壊的変更・大幅な構造変更
+- コマンド: `reqord version <id> --patch --summary "<変更概要>"`
 
 ---
 
-## 3. CLIコマンドパターン集
+## 3. 提供スキル一覧
 
-### 要件操作
+| スキル | 用途 |
+|--------|------|
+| `/reqord:setup` | 環境セットアップ・前提条件チェック |
+| `/reqord:status` | 要件・仕様の実装進捗ダッシュボード |
+| `/reqord:new` | req/specの新規作成 |
+| `/reqord:edit` | req/spec/contextの編集・改善 |
+| `/reqord:brief` | spec/req/issueの包括的コンテキスト表示 |
+| `/reqord:verify` | 実装検証・ステータス更新 |
+| `/reqord:feedback` | フィードバック・バグ報告の処理 |
+| `/reqord:context` | このスキル。データモデル・CLI・共通知識 |
 
-```bash
-reqord req list [--status <status>] [--json]     # 要件一覧
-reqord req show <req-id> [--json]                 # 要件詳細
-reqord req validate <req-id> [--json]             # SMARTバリデーション
-reqord req create <title>                         # 要件作成
-reqord req update <req-id> --patch-file <file>    # パッチ更新
-reqord req approve <req-id>                       # 承認
-reqord req implement <req-id>                     # 実装済みマーク
-reqord req draft <req-id>                         # ドラフトに戻す
-```
-
-### 仕様操作
-
-```bash
-reqord spec list [--requirement <req-id>] [--json]  # 仕様一覧
-reqord spec show <spec-id> [--json]                  # 仕様詳細
-reqord spec create <req-id>                          # 仕様作成
-reqord spec implement <spec-id>                      # 実装済みマーク
-reqord spec approve <spec-id>                        # 承認
-reqord spec draft <spec-id>                          # ドラフトに戻す
-```
-
-### フィードバック操作
-
-```bash
-reqord feedback sync                                                              # GitHub Issue同期
-reqord feedback list [--state open|closed] [--json]                               # 一覧
-reqord feedback show <issue-number> [--json]                                      # 詳細
-reqord feedback link <issue-number> --type <type> --severity <severity> --spec <spec-id>    # specにリンク
-reqord feedback link <issue-number> --type <type> --severity <severity> --req <req-id>      # reqにリンク
-reqord feedback link <issue-number> --type <type> --severity <severity> --created-req       # 新規req作成してリンク
-reqord feedback unlink <issue-number> --spec <spec-id>                            # specからリンク解除
-reqord feedback unlink <issue-number> --req <req-id>                              # reqからリンク解除
-reqord feedback close <issue-number>                                              # クローズ
-reqord feedback resolve <artifact-id> --issue <issue-number>                      # フラグ解消
-```
-
-### コンテキスト操作
-
-```bash
-reqord context show [--json]       # コンテキスト表示
-reqord context init                # コンテキスト初期化
-reqord context update              # コンテキスト更新
-```
-
-### 影響分析
-
-```bash
-reqord impact analyze <req-id|spec-id> [--json]  # 依存関係・影響範囲分析
-```
-
-### Task操作
-
-```bash
-reqord task create <spec-id>            # GitHub Issue生成（タスク分解）
-reqord task fetch [spec-id]             # GitHub Issue情報取得
-reqord task sync <spec-id>              # GitHub Issue同期・進捗計算
-reqord task sync-all                    # 全Specificationの同期
-reqord task validate [spec-id] [--all]  # メタデータ整合性チェック
-```
-
-### バージョン操作
-
-```bash
-reqord version <req-id|spec-id> --patch --summary "<変更概要>"   # パッチバージョンアップ（X.Y+1）
-reqord version <req-id|spec-id> --major --summary "<変更概要>"   # メジャーバージョンアップ（X+1.0）
-```
-
-**重要**: req/specの内容を変更したら必ず `reqord version` を実行すること。`--summary` で変更概要をversionHistoryに記録する。詳細はセクション2「YAML直接編集禁止ルール」を参照。
+プロジェクトのプロセスに応じて、これらを自由に組み合わせて使用する。
 
 ---
 
-## 4. コンテキスト読み込み標準手順
-
-reqordデータを読み込む際の手順:
-
-### Step 1: context.yaml読み取り
-
-```bash
-reqord context show --json
-```
-
-または直接Readツールで `.reqord/context/context.yaml` を読み取り、`files`フィールドから参照先を特定する。
-
-### Step 2: 参照ファイルの読み取り
-
-context.yamlの`files`フィールドが参照するファイルをReadツールで読み取る:
-
-- `files.product.path` → product.yaml
-- `files.technical.structured` → technical.yaml
-- `files.technical.narrative` → technical-narrative.md
-- `files.structure.structured` → structure.yaml
-- `files.structure.narrative` → structure-diagram.md
-- `files.domain` → 配列内の各ファイル
-
-パスはすべて `.reqord/` ディレクトリからの相対パス。
-
-### Step 3: 対象req/specの読み取り
-
-- requirement: `.reqord/requirements/<req-id>.yaml` + `<req-id>/description.md`
-- specification: `.reqord/specifications/<spec-id>.yaml` + `design.md`
-
----
-
-## 5. 読み込み優先順位（トークン節約時）
-
-コンテキストウィンドウの制約がある場合、以下の優先順位で読み込む:
-
-1. **対象req/spec**（必須）- YAML + description.md/design.md
-2. **design.md** - 技術設計書（実装時は必須）
-3. **technical.yaml** - 技術スタック・アーキテクチャ
-4. **structure.yaml** - コード構造・命名規則
-5. **product.yaml** - プロダクトビジョン（設計判断時に参照）
-6. **domain/\*.md** - ドメイン知識（関連する場合のみ）
-
----
-
-## 6. ワークフロー
-
-```
-初回: 環境セットアップ
-  /reqord:setup → 環境チェック・証憑記録
-
-Phase 0: 状況把握
-  /reqord:status → 進捗確認、次に着手すべきspecを特定
-
-Phase 0.5: Specification承認（Human-in-the-loop）
-  /reqord:design <spec-id> → design.md作成
-  reqord spec approve <spec-id> → 承認依頼PR作成
-  [PR承認・マージを待機] → status: approved に遷移
-  ※ 手動でYAMLのstatusを変更してはならない
-
-Phase 1: 計画・開発（specがapprovedであること）
-  /check-branch → /reqord:git branch <spec-id>
-  → /reqord:dev <spec-id> → /test → /lint
-
-Phase 2: コミット・PR
-  /update-claude-md → /reqord:git commit <spec-id>
-
-Phase 3: レビュー・マージ
-  /review-pr → /check-merge → [Human Merge]
-
-Phase 4: 検証・完了
-  /reqord:verify done <spec-id> → /close-issue
-```
-
----
-
-## 7. トレーサビリティ規約
-
-### コミットメッセージ
-
-```
-<type>(<scope>): <summary>
-
-Implements spec-NNNNNN (req-NNNNNN: <requirement-title>)
-```
-
-### PR本文
-
-PR本文には以下を含める:
-
-- **Specification**: spec-id + タイトル
-- **Requirement**: req-id + タイトル
-- **Success Criteria チェックリスト**: 各基準を `- [ ]` 形式で列挙
-
-### ブランチ名
-
-```
-feature/spec-NNNNNN-issues-<N>-<sanitized-title>
-```
-
-issue番号がない場合:
-
-```
-feature/spec-NNNNNN-<sanitized-title>
-```
-
----
-
-## 8. 環境要件
-
-### 必須ツール
-
-| ツール | 必須度 | フォールバック |
-|--------|--------|---------------|
-| `reqord` CLI | 必須 | 直接ファイル読み取り（非推奨） |
-| `git` | 必須 | なし |
-| `gh` CLI（認証済み） | 強く推奨 | feedback/git commit/verify trace が制限される |
-
-### セットアップ証憑
-
-`/reqord:setup` 実行後、`.reqord/settings/plugin-config.yaml` にセットアップ結果が記録される。各スキルは必要に応じてこのファイルを参照し、環境の可用性を確認できる。
-
----
-
-## 9. エラーハンドリング
-
-### `.reqord/` ディレクトリが存在しない場合
-
-```
-このプロジェクトはreqordで初期化されていません。
-`reqord init` を実行してプロジェクトを初期化してください。
-```
-
-### reqord CLIが未インストールの場合
-
-CLIコマンドが失敗した場合は、直接ファイル読み取りにフォールバックする:
-
-1. `.reqord/requirements/<req-id>.yaml` をReadツールで読み取り
-2. `.reqord/specifications/<spec-id>/design.md` をReadツールで読み取り
-3. `.reqord/context/context.yaml` をReadツールで読み取り
-
-### design.mdがテンプレートのままの場合
-
-design.mdに「Specification Design Template」のみが含まれている場合は「未記述」と判定し、`/reqord:design` での設計書作成を案内する。
-
----
-
-## 10. リファレンス（resources/）
+## 4. リファレンス（resources/）
 
 詳細な知見は `resources/` ディレクトリを参照。必要に応じて読み込むこと。
 
 | ファイル | 内容 | 読むタイミング |
 |---------|------|--------------|
+| `resources/cli-reference.md` | CLIコマンド全集・データ読み込み手順 | CLIコマンドの引数やオプションを確認する時 |
 | `resources/philosophy.md` | 設計思想・5原則 | 設計判断時、ツールの位置づけを説明する時 |
 | `resources/quality-framework.md` | SMART + EARS + 粒度ルール | 要件作成・詳細化・バリデーション時 |
 | `resources/traceability.md` | 三層モデル・依存関係・フラグ | 影響分析、依存関係設定、フラグ運用時 |
 | `resources/feedback-workflow.md` | フィードバック3段階進化 | フィードバック処理・リンク時 |
 | `resources/ai-phases.md` | AI支援4フェーズ・HitL境界 | AI詳細化・設計生成・タスク分解時 |
 | `resources/anti-patterns.md` | アンチパターン・チェックリスト | レビュー時、品質確認時 |
+| `resources/git-conventions.md` | ブランチ命名・コミット・PRテンプレート | ブランチ作成・コミット・PR作成時（`/reqord:brief` のGit操作ガイドから参照） |
+| `resources/task-workflow.md` | タスク定義形式・HTMLタグ・CLIコマンド | `reqord task create` を直接CLI実行する時（専用スキルなし、直接参照） |
+| `resources/dialogue-guidelines.md` | 対話設計の原則・テンプレート・アンチパターン | AskUserQuestionでヒアリングを行うスキル実装時 |

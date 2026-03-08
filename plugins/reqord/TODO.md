@@ -4,16 +4,9 @@
 
 ### 要件ブートストラップのスキル不足
 
-**問題**: 要件の作成・初期記述を支援するスキルがない。プラグインのカバー範囲に入る（`/reqord:design`）までに CLI コマンド直叩きが5ステップ必要。
+**問題**: ~~要件の作成・初期記述を支援するスキルがない。~~ → `/reqord:new` スキルで対応済み。
 
-```
-reqord init → reqord context init → reqord req create → (description.md記述) → reqord req approve → reqord spec create
-```
-
-**対応案**:
-- (A) `create` スキルを新設（req作成→refine→approve→spec作成→designの一気通貫）
-- (B) `refine` スキルを拡張して、req未存在時の作成フローを組み込む
-- (C) setup スキルの完了メッセージに導線を追加（最小対応）
+残課題: `reqord init` → `reqord context init` の初期化ステップはsetupスキルでカバーされているが、初期化→new req→new spec→edit specの一気通貫フローの導線が弱い。
 
 ### フィードバック→修正実装ループの不明瞭さ
 
@@ -23,8 +16,8 @@ reqord init → reqord context init → reqord req create → (description.md記
 
 ```
 次のステップ:
-1. design.md確認・更新: /reqord:design spec-NNNNNN
-2. 修正実装: /reqord:dev spec-NNNNNN
+1. design.md確認・更新: /reqord:edit spec-NNNNNN
+2. 修正実装: /reqord:brief spec-NNNNNN
 3. flag解消: reqord feedback resolve <artifact-id> --issue <N>
 4. 再検証: /reqord:verify done spec-NNNNNN
 ```
@@ -49,7 +42,7 @@ reqord init → reqord context init → reqord req create → (description.md記
 
 ### 発見したfeedback issueの自発的消化サイクルがない
 
-**問題**: 上記でissueを起票できたとしても、それを自発的に消化する仕組みがない。現状は人間が `/reqord:feedback` を手動実行→ `/reqord:dev` で修正という流れで、「溜まったfeedbackを定期的に棚卸しして優先度順に消化する」運用が未定義。
+**問題**: 上記でissueを起票できたとしても、それを自発的に消化する仕組みがない。現状は人間が `/reqord:feedback` を手動実行→ `/reqord:brief` で修正という流れで、「溜まったfeedbackを定期的に棚卸しして優先度順に消化する」運用が未定義。
 
 **対応案**:
 - (A) `feedback` スキルに `triage` サブコマンドを追加: 未処理feedback一覧 → severity/type別に優先度付け → 上位N件を自動的にlink→close→修正実装フローに流す
@@ -75,16 +68,10 @@ reqord init → reqord context init → reqord req create → (description.md記
 
 ## Medium Priority
 
-### 中断→再開の手順がない
-
-**問題**: `/reqord:dev` が途中で中断した場合（コンテキスト切れ等）、再実行すると Step 1 からやり直しになる。`plans/spec-NNNNNN-implementation.md` が残っていても活用されない。
-
-**対応案**: dev スキルに `resume` サブコマンドを追加（`/reqord:dev spec-NNNNNN resume`）。実装計画ファイルが存在すれば設計ステップをスキップし、既存の変更差分を確認して実装再開。
-
 ## Low Priority
 
 ### status の推奨アクションから次のスキルへの接続
 
 **問題**: `/reqord:status` が推奨 spec-id を表示した後、ユーザーが spec-id をコピペして次のコマンドを叩く必要がある。自然ではあるが、もう一声欲しい。
 
-**対応案**: AskUserQuestion で「このまま着手しますか？」を提示し、承認されたら `/reqord:git branch` → `/reqord:dev` を続行する導線を追加。
+**対応案**: AskUserQuestion で「このまま着手しますか？」を提示し、承認されたら `/reqord:brief` を続行する導線を追加。
