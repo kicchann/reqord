@@ -209,7 +209,7 @@ approveしますか？（品質を改善したい場合は `/reqord:edit <req-id
 reqord req approve <req-id>
 ```
 
-`.reqord/settings/setting.yaml` の `statusTransitionPr.draftToApproved` が `true` の場合、このコマンドは承認PRを作成する。PRがマージされると `approved` ステータスに遷移する。`false` の場合は直接ステータスが遷移する。
+`.reqord/settings/setting.yaml` の `statusTransitionPr.draftToApproved`（デフォルト: `true`）が `true` の場合、このコマンドは承認PRを作成する。PRがマージされると `approved` ステータスに遷移する。`false` の場合は直接ステータスが遷移する。
 
 ---
 

@@ -156,10 +156,10 @@ reqord context show --json
 
 | 参照先                             | 必須度       | 影響するスキル                                  |
 | ---------------------------------- | ------------ | ----------------------------------------------- |
-| `files.product` (product.yaml)     | 推奨         | design, refine                                  |
-| `files.technical` (technical.yaml) | **強く推奨** | design, brief, verify（テストコマンド特定に使用） |
-| `files.structure` (structure.yaml) | 推奨         | design, brief（命名規則・構造ルール）             |
-| `files.domain` (domain/\*.md)      | 任意         | refine（ドメイン知識）                          |
+| `files.product` (product.yaml)     | 推奨         | edit, brief, new                                |
+| `files.technical` (technical.yaml) | **強く推奨** | edit, brief, verify（テストコマンド特定に使用）   |
+| `files.structure` (structure.yaml) | 推奨         | edit, brief（命名規則・構造ルール）               |
+| `files.domain` (domain/\*.md)      | 任意         | edit（ドメイン知識）                             |
 
 ### 未設定のファイルがある場合
 

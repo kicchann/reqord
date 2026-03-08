@@ -166,7 +166,7 @@ design.mdの記述が完了しました。approveしますか？
 reqord spec approve <spec-id>
 ```
 
-`setting.yaml` の `statusTransitionPr.draftToApproved` が `true` の場合、このコマンドは承認PRを作成する。PRがマージされると `approved` ステータスに遷移する。`false` の場合は直接ステータスが遷移する。
+`setting.yaml` の `statusTransitionPr.draftToApproved`（デフォルト: `true`）が `true` の場合、このコマンドは承認PRを作成する。PRがマージされると `approved` ステータスに遷移する。`false` の場合は直接ステータスが遷移する。
 
 ### 次のステップ
 

@@ -43,7 +43,7 @@ You are an expert code reviewer with deep knowledge of Reqord's requirements-dri
 
 - コミットメッセージにspec-id/req-id参照があるか
 - PR本文にSuccess Criteriaチェックリストがあるか
-- ブランチ名が `feature/spec-NNNNNN-*` 形式か
+- ブランチ名が `<prefix>/spec-NNNNNN-*` 形式か（prefixは `.reqord/settings/setting.yaml` の `branchNaming` 設定に従う）
 
 ## Review Scope
 
